@@ -10,21 +10,29 @@ interface Props {
 
 const { material, showYear = false } = Astro.props;
 
-// Normalize authors to array of names (handles string, string[], or empty)
+// Normalize author (who made/prepared the material)
 const rawAuthors: string[] = Array.isArray(material.author)
   ? material.author
   : material.author
     ? [material.author]
     : [];
 
-// If multiple names (up to 5), show up to 2 and replace the remaining names with '...'
 const maxVisible = 2;
 const hasMoreThanMax = rawAuthors.length > maxVisible;
 const displayedAuthorText = hasMoreThanMax
   ? rawAuthors.slice(0, maxVisible).join('، ') + '...'
   : rawAuthors.join('، ');
-
 const fullAuthorTooltip = rawAuthors.join('، ');
+
+// Normalize addedBy (contributor who added it to the website)
+const rawAddedBy: string[] = Array.isArray(material.addedBy)
+  ? material.addedBy
+  : material.addedBy
+    ? [material.addedBy]
+    : [];
+const displayedAddedByText = rawAddedBy.slice(0, maxVisible).join('، ');
+const fullAddedByTooltip = rawAddedBy.join('، ');
+
 const isPlaylist = material.type === 'playlist' || Boolean(material.playlistId) || Boolean(material.videos);
 const cardHref = isPlaylist ? `/playlist/${material.id}` : material.url;
 const targetAttr = isPlaylist ? '_self' : '_blank';
@@ -38,7 +46,7 @@ const targetAttr = isPlaylist ? '_self' : '_blank';
   <div>
     <!-- Top Metadata Header -->
     <div class="flex items-center justify-between gap-2 mb-2.5">
-      <TypeBadge type={material.type} size="sm" />
+      <TypeBadge type={material.type === 'playlist' ? 'youtube' : material.type} size="sm" />
 
       <div class="flex items-center gap-1.5 relative z-10">
         {showYear && (
@@ -46,11 +54,10 @@ const targetAttr = isPlaylist ? '_self' : '_blank';
             السنة {material.year}
           </span>
         )}
-        {material.isPinned && (
-          <span class="inline-flex items-center gap-1 text-[11px] font-medium px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800/40">
-            مثبّت
-          </span>
-        )}
+        <!-- Archived Badge (Shown dynamically when bookmarked/archived by student) -->
+        <span class="archived-badge hidden items-center gap-1 text-[11px] font-semibold px-2 py-0.5 rounded bg-amber-50 text-amber-700 dark:bg-amber-950/50 dark:text-amber-400 border border-amber-200 dark:border-amber-800/40">
+          محفوظ
+        </span>
         <!-- Bookmark Button -->
         <button
           type="button"
@@ -84,27 +91,35 @@ const targetAttr = isPlaylist ? '_self' : '_blank';
       </p>
     )}
 
-    <!-- Tags & Subject & Author -->
-    <div class="flex flex-wrap items-center gap-1.5">
+    <!-- Tags & Subject & Author / AddedBy -->
+    <div class="flex flex-wrap items-center gap-1.5 text-[11px] font-medium">
       {material.subject && material.moduleId ? (
         <a
           href={`/module/${material.moduleId}/${subjectToSlug(material.subject)}`}
-          class="relative z-10 text-[11px] font-medium text-zinc-700 dark:text-zinc-300 bg-zinc-100 dark:bg-zinc-800/80 hover:bg-emerald-50 hover:text-emerald-700 dark:hover:bg-emerald-950/60 dark:hover:text-emerald-400 px-2 py-0.5 rounded transition-colors"
+          class="relative z-10 text-zinc-700 dark:text-zinc-300 bg-zinc-100 dark:bg-zinc-800/80 hover:bg-emerald-50 hover:text-emerald-700 dark:hover:bg-emerald-950/60 dark:hover:text-emerald-400 px-2 py-0.5 rounded transition-colors"
           title={`تصفح جميع مصادر مادة ${material.subject}`}
         >
           {material.subject}
         </a>
       ) : material.subject ? (
-        <span class="text-[11px] font-medium text-zinc-700 dark:text-zinc-300 bg-zinc-100 dark:bg-zinc-800/80 px-2 py-0.5 rounded">
+        <span class="text-zinc-700 dark:text-zinc-300 bg-zinc-100 dark:bg-zinc-800/80 px-2 py-0.5 rounded">
           {material.subject}
         </span>
       ) : null}
-      {rawAuthors.length > 0 && (
+      {displayedAuthorText && (
         <span
-          class="text-[11px] text-zinc-500 dark:text-zinc-400 font-medium truncate max-w-[210px]"
+          class="text-zinc-600 dark:text-zinc-300 truncate max-w-[170px]"
           title={`إعداد: ${fullAuthorTooltip}`}
         >
           إعداد: {displayedAuthorText}
+        </span>
+      )}
+      {displayedAddedByText && (
+        <span
+          class="text-zinc-400 dark:text-zinc-500 truncate max-w-[150px]"
+          title={`أضافها: ${fullAddedByTooltip}`}
+        >
+          &bull; أضافها: {displayedAddedByText}
         </span>
       )}
     </div>

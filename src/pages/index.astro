@@ -1,12 +1,10 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import SearchBar from '../components/search/SearchBar.astro';
-import ResourceGrid from '../components/materials/ResourceGrid.astro';
 import GroupedResourceList from '../components/materials/GroupedResourceList.astro';
-import { getPinnedMaterials, getAllMaterials } from '../data/materials';
+import { getAllMaterials } from '../data/materials';
 import { getModulesByYear } from '../data/modules';
 
-const pinnedMaterials = getPinnedMaterials();
 const allMaterials = getAllMaterials();
 const recentMaterials = allMaterials.slice(0, 6);
 
@@ -178,23 +176,6 @@ const yearData = [
     </section>
   )}
 
-  <!-- Pinned Central Batch Drives -->
-  {pinnedMaterials.length > 0 && (
-    <section class="mb-10">
-      <div class="flex items-center justify-between mb-4">
-        <div class="flex items-center gap-2">
-          <h2 class="text-base font-bold text-zinc-900 dark:text-zinc-100">
-            الدرايفات والقنوات المركزية للدفعة
-          </h2>
-          <span class="text-xs font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300">
-            High-Yield
-          </span>
-        </div>
-      </div>
-
-      <ResourceGrid materials={pinnedMaterials} showYear={true} />
-    </section>
-  )}
 
   <!-- Grouped Latest Materials -->
   {recentMaterials.length > 0 && (

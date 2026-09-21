@@ -1,0 +1,104 @@
+---
+// src/components/pwa/PwaInstallToast.astro
+---
+
+<script>
+  import { isPwaInstalledOrStandalone, isIosDevice } from '../../utils/pwa';
+
+  function initPwaInstallPrompt(): void {
+    // CRITICAL: If the site is already a PWA or installed, NEVER show this toast
+    if (isPwaInstalledOrStandalone()) {
+      return;
+    }
+    // Service worker is registered automatically by @vite-pwa/astro integration
+
+    let deferredPrompt: any = null;
+
+    // Check if dismissed in this browsing session
+    let isDismissed = false;
+    try {
+      isDismissed = sessionStorage.getItem('asumed_pwa_prompt_dismissed') === 'true';
+    } catch {}
+
+    function showInstallNotification(isIos: boolean = false): void {
+      if (isPwaInstalledOrStandalone() || isDismissed) return;
+
+      const showFn = (window as any).showToast;
+      if (typeof showFn !== 'function') return;
+
+      if (isIos) {
+        showFn({
+          id: 'pwa-install-toast',
+          type: 'pwa',
+          title: 'تثبيت التطبيق على الشاشة الرئيسية',
+          message: 'اضغط على زر المشاركة في متصفح Safari ثم اختر "إضافة إلى الصفحة الرئيسية (+)".',
+          duration: 10000
+        });
+      } else {
+        showFn({
+          id: 'pwa-install-toast',
+          type: 'pwa',
+          title: 'تثبيت التطبيق',
+          message: 'نزّل الموقع كتطبيق خفيف على جهازك لتصفح المصادر بسرعة وبدون شريط المتصفح.',
+          duration: 0, // Keeps it visible until user action
+          action: {
+            label: 'تثبيت الآن',
+            onClick: async () => {
+              if (deferredPrompt) {
+                try {
+                  deferredPrompt.prompt();
+                  const choiceResult = await deferredPrompt.userChoice;
+                  if (choiceResult?.outcome === 'accepted') {
+                    localStorage.setItem('asumed_pwa_installed', 'true');
+                  }
+                } catch (e) {}
+                deferredPrompt = null;
+              }
+            }
+          }
+        });
+      }
+    }
+
+    // Standard PWA install trigger (Chrome, Edge, Android Chrome, Samsung Internet, Opera)
+    window.addEventListener('beforeinstallprompt', (e) => {
+      // Prevent browser default mini-infobar
+      e.preventDefault();
+
+      // Double-check if website is already running in standalone mode
+      if (isPwaInstalledOrStandalone()) {
+        return;
+      }
+
+      deferredPrompt = e;
+
+      // Display toast after a short delay for optimal user experience
+      setTimeout(() => {
+        showInstallNotification(false);
+      }, 2500);
+    });
+
+    // Handle iOS Safari guidance if not already installed as standalone
+    if (isIosDevice() && !isPwaInstalledOrStandalone() && !isDismissed) {
+      setTimeout(() => {
+        if (!isPwaInstalledOrStandalone()) {
+          showInstallNotification(true);
+        }
+      }, 4000);
+    }
+
+    // Listen for app installed event to permanently silence the toast
+    window.addEventListener('appinstalled', () => {
+      try {
+        localStorage.setItem('asumed_pwa_installed', 'true');
+      } catch {}
+      deferredPrompt = null;
+      const toastEl = document.querySelector('[data-toast-id="pwa-install-toast"]');
+      if (toastEl) toastEl.remove();
+    });
+  }
+
+  // Initialize on page load and on view transitions
+  initPwaInstallPrompt();
+  document.addEventListener('astro:after-swap', initPwaInstallPrompt);
+</script>

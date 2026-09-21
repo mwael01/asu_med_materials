@@ -114,7 +114,7 @@ const uncategorized = materials.filter(
           </span>
         </div>
 
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 materials-grid">
           {items.map((item) => (
             <ResourceCard material={item} showYear={showYear} />
           ))}
@@ -131,7 +131,7 @@ const uncategorized = materials.filter(
         </h3>
       </div>
 
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 materials-grid">
         {uncategorized.map((item) => (
           <ResourceCard material={item} showYear={showYear} />
         ))}

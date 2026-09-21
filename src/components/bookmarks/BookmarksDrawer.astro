@@ -92,6 +92,42 @@ import { materialsData } from '../../data/materials';
       }
     }
 
+    function sortGridsByArchived(): void {
+      const ids = getIds();
+      const grids = document.querySelectorAll(
+        '.materials-grid, #grouped-materials-container .grid, #search-results-grid .grid, #year-materials-container .grid, #module-materials-container .grid'
+      );
+
+      grids.forEach((grid) => {
+        const cards = Array.from(grid.querySelectorAll(':scope > [data-material-id]')) as HTMLElement[];
+        if (cards.length <= 1) return;
+
+        cards.forEach((card, index) => {
+          if (!card.hasAttribute('data-initial-order')) {
+            card.setAttribute('data-initial-order', String(index));
+          }
+        });
+
+        const sortedCards = [...cards].sort((a, b) => {
+          const aId = a.getAttribute('data-material-id') || '';
+          const bId = b.getAttribute('data-material-id') || '';
+          const aArchived = ids.includes(aId);
+          const bArchived = ids.includes(bId);
+
+          if (aArchived && !bArchived) return -1;
+          if (!aArchived && bArchived) return 1;
+
+          const aOrder = parseInt(a.getAttribute('data-initial-order') || '0', 10);
+          const bOrder = parseInt(b.getAttribute('data-initial-order') || '0', 10);
+          return aOrder - bOrder;
+        });
+
+        sortedCards.forEach((card) => {
+          grid.appendChild(card);
+        });
+      });
+    }
+
     function renderBookmarks(): void {
       const ids = getIds();
       const allMaterials: any[] = (window as any).__ALL_MATERIALS || [];
@@ -99,20 +135,30 @@ import { materialsData } from '../../data/materials';
 
       if (countBadge) countBadge.textContent = String(bookmarked.length);
 
-      // Update card bookmark buttons
-      document.querySelectorAll('.bookmark-btn').forEach((btn) => {
-        const matId = btn.getAttribute('data-id');
+      // Update card bookmark buttons and archived badges
+      document.querySelectorAll('[data-material-id]').forEach((card) => {
+        const matId = card.getAttribute('data-material-id');
         const isSaved = matId ? ids.includes(matId) : false;
-        const emptyIcon = btn.querySelector('.bookmark-icon-empty');
-        const filledIcon = btn.querySelector('.bookmark-icon-filled');
+        const btn = card.querySelector('.bookmark-btn');
+        const emptyIcon = btn?.querySelector('.bookmark-icon-empty');
+        const filledIcon = btn?.querySelector('.bookmark-icon-filled');
+        const badge = card.querySelector('.archived-badge');
+
         if (isSaved) {
           emptyIcon?.classList.add('hidden');
           filledIcon?.classList.remove('hidden');
+          badge?.classList.remove('hidden');
+          badge?.classList.add('inline-flex');
         } else {
           emptyIcon?.classList.remove('hidden');
           filledIcon?.classList.add('hidden');
+          badge?.classList.add('hidden');
+          badge?.classList.remove('inline-flex');
         }
       });
+
+      // Sort materials in every grid so student archived/saved items appear on top of their sort
+      sortGridsByArchived();
 
       if (!cardsContainer || !emptyState) return;
 
@@ -213,6 +259,15 @@ import { materialsData } from '../../data/materials';
       localStorage.setItem('asumed_bookmarks', JSON.stringify(updated));
       window.dispatchEvent(new CustomEvent('bookmarks-updated'));
       renderBookmarks();
+
+      const showFn = (window as any).showToast;
+      if (typeof showFn === 'function') {
+        if (index >= 0) {
+          showFn({ type: 'info', message: 'تمت إزالة المصدر من المفضلة', duration: 2200 });
+        } else {
+          showFn({ type: 'success', message: 'تمت إضافة المصدر إلى المفضلة', duration: 2200 });
+        }
+      }
     });
 
     window.addEventListener('bookmarks-updated', renderBookmarks);

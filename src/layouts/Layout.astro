@@ -4,6 +4,8 @@ import Navbar from '../components/navigation/Navbar.astro';
 import Footer from '../components/navigation/Footer.astro';
 import BookmarksDrawer from '../components/bookmarks/BookmarksDrawer.astro';
 import MultistageSelector from '../components/selection/MultistageSelector.astro';
+import Toast from '../components/common/Toast.astro';
+import PwaInstallToast from '../components/pwa/PwaInstallToast.astro';
 
 interface Props {
   title?: string;
@@ -77,6 +79,8 @@ const isHomePage = Astro.url.pathname === '/' || Astro.url.pathname === '';
 
     <BookmarksDrawer />
     <MultistageSelector />
+    <Toast />
+    <PwaInstallToast />
     <Footer />
   </body>
 </html>

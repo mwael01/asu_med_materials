@@ -183,6 +183,20 @@ This document details all UI components, their props, intended reuse guidelines,
 - **Purpose**: Accessible button to toggle between Light (default) and Dark theme.
 - **Props**: None.
 
+#### [`Toast.astro`](file:///workspaces/asu_med_materials/src/components/common/Toast.astro)
+- **Location**: `src/components/common/Toast.astro`
+- **Purpose**: Floating toast notification container and global event listener (`window.showToast`).
+- **Features**:
+  - Supports `info`, `success`, `warning`, `error`, and `pwa` notification variants with matched icons.
+  - Action buttons, dismiss button, auto-dismiss timeout, and smooth translation animations.
+
+#### [`PwaInstallToast.astro`](file:///workspaces/asu_med_materials/src/components/pwa/PwaInstallToast.astro)
+- **Location**: `src/components/pwa/PwaInstallToast.astro`
+- **Purpose**: Detects device environment and prompts user to download and install the website as a PWA.
+- **Rules & Guardrails**:
+  - Checks if the website is already running in standalone mode (`display-mode: standalone`, `fullscreen`, iOS standalone, or already installed). If already a PWA, it strictly **never** displays the toast.
+  - Captures `beforeinstallprompt` to trigger native app installation upon clicking "تثبيت الآن".
+
 ---
 
 ### Video Playlists & Embedded Player System

@@ -19,13 +19,21 @@ interface Props {
 
 const { playlist } = Astro.props;
 
-// Authors list normalization
+// Authors list normalization (who prepared the material)
 const rawAuthors = Array.isArray(playlist.author)
   ? playlist.author
   : playlist.author
     ? [playlist.author]
     : [];
 const authorText = rawAuthors.join('، ');
+
+// AddedBy normalization (who added it to the platform)
+const rawAddedBy = Array.isArray(playlist.addedBy)
+  ? playlist.addedBy
+  : playlist.addedBy
+    ? [playlist.addedBy]
+    : [];
+const addedByText = rawAddedBy.join('، ');
 
 // Initial video setup:
 // If has discrete videos, initial video is first video
@@ -79,7 +87,7 @@ const initialEmbedUrl = hasDiscreteVideos
     <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
       <div>
         <div class="flex flex-wrap items-center gap-2 mb-2">
-          <TypeBadge type="playlist" size="sm" />
+          <TypeBadge type="youtube" size="sm" />
           {playlist.subject && (
             <span class="text-xs font-semibold px-2 py-0.5 rounded bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300">
               {playlist.subject}
@@ -100,11 +108,18 @@ const initialEmbedUrl = hasDiscreteVideos
           </p>
         )}
 
-        {authorText && (
-          <p class="text-xs text-zinc-500 dark:text-zinc-400 font-medium">
-            إعداد وإشراف: <span class="text-zinc-800 dark:text-zinc-200 font-semibold">{authorText}</span>
-          </p>
-        )}
+        <div class="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-zinc-500 dark:text-zinc-400 font-medium">
+          {authorText && (
+            <p>
+              إعداد: <span class="text-zinc-800 dark:text-zinc-200 font-semibold">{authorText}</span>
+            </p>
+          )}
+          {addedByText && (
+            <p>
+              أضافها: <span class="text-zinc-800 dark:text-zinc-200 font-semibold">{addedByText}</span>
+            </p>
+          )}
+        </div>
       </div>
 
       <!-- Watch Progress Card -->
@@ -233,30 +248,40 @@ const initialEmbedUrl = hasDiscreteVideos
         {hasDiscreteVideos ? (
           videos.map((vid, idx) => (
             <div
-              class="playlist-video-item group flex items-center justify-between p-2.5 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50/70 dark:bg-zinc-800/40 hover:border-emerald-500/80 transition-all cursor-pointer"
+              class="playlist-video-item group flex items-start justify-between gap-3 p-3 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50/70 dark:bg-zinc-800/40 hover:border-emerald-500/80 transition-all cursor-pointer select-none"
               data-index={idx}
               data-video-id={vid.id}
               data-youtube-id={vid.youtubeId}
               data-title={vid.title}
             >
-              <div class="flex items-center gap-2.5 min-w-0">
-                <span class="video-idx-badge w-6 h-6 rounded-md bg-zinc-200 dark:bg-zinc-700 text-zinc-700 dark:text-zinc-300 font-bold text-xs flex items-center justify-center shrink-0">
+              <!-- Video Title & Number (Clicking opens and plays the video) -->
+              <div class="video-select-trigger flex items-start gap-2.5 min-w-0 flex-1">
+                <span class="video-idx-badge w-6 h-6 rounded-md bg-zinc-200 dark:bg-zinc-700 text-zinc-700 dark:text-zinc-300 font-bold text-xs flex items-center justify-center shrink-0 mt-0.5 transition-colors">
                   {idx + 1}
                 </span>
-                <div class="min-w-0">
-                  <h4 class="video-title text-xs font-bold text-zinc-900 dark:text-zinc-100 group-hover:text-emerald-600 truncate">
+                <div class="min-w-0 flex-1">
+                  <h4
+                    class="video-title text-xs font-bold text-zinc-900 dark:text-zinc-100 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 line-clamp-2 leading-relaxed transition-colors"
+                    title={vid.title}
+                  >
                     {vid.title}
                   </h4>
+                  <div class="now-playing-badge hidden items-center gap-1 text-[10px] font-bold text-emerald-600 dark:text-emerald-400 mt-1">
+                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                    <span>قيد التشغيل</span>
+                  </div>
                 </div>
               </div>
 
-              <!-- Done Checkbox -->
+              <!-- Done Checkbox (Clicking marks complete) -->
               <button
                 type="button"
-                class="video-done-checkbox w-6 h-6 rounded-md border border-zinc-300 dark:border-zinc-600 hover:border-emerald-500 flex items-center justify-center text-white transition-colors shrink-0 cursor-pointer"
+                role="checkbox"
+                aria-checked="false"
+                class="video-done-checkbox w-6 h-6 rounded-md border border-zinc-300 dark:border-zinc-600 hover:border-emerald-500 flex items-center justify-center text-white transition-all shrink-0 cursor-pointer mt-0.5 focus:outline-none focus:ring-2 focus:ring-emerald-500/30"
                 data-video-id={vid.id}
-                title="تحديد كمشاهد"
-                aria-label="تحديد كمشاهد"
+                title="تحديد كمشاهد ومكتمل"
+                aria-label={`تحديد ${vid.title} كمكتمل`}
               >
                 <svg class="w-3.5 h-3.5 hidden checkmark-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
@@ -344,20 +369,29 @@ const initialEmbedUrl = hasDiscreteVideos
       if (progressPercentLabel) progressPercentLabel.textContent = `${percent}%`;
       if (progressCountLabel) progressCountLabel.textContent = `${watchedCount} من ${totalItemsCount} مكتمل`;
 
-      // Update checkboxes UI
+      // Update checkboxes UI and completion text styles
       document.querySelectorAll('.video-done-checkbox, .checkpoint-done-checkbox').forEach((box) => {
         const id = box.getAttribute('data-video-id') || box.getAttribute('data-checkpoint-id');
         const isDone = Boolean(watchedMap[id]);
         const icon = box.querySelector('.checkmark-icon');
+        const parentItem = box.closest('.playlist-video-item, .playlist-checkpoint-item');
+        const titleEl = parentItem?.querySelector('.video-title');
+        box.setAttribute('aria-checked', String(isDone));
 
         if (isDone) {
           box.classList.add('bg-emerald-600', 'border-emerald-600');
           box.classList.remove('border-zinc-300', 'dark:border-zinc-600');
           icon?.classList.remove('hidden');
+          if (titleEl) {
+            titleEl.classList.add('text-zinc-500', 'dark:text-zinc-400', 'line-through');
+          }
         } else {
           box.classList.remove('bg-emerald-600', 'border-emerald-600');
           box.classList.add('border-zinc-300', 'dark:border-zinc-600');
           icon?.classList.add('hidden');
+          if (titleEl) {
+            titleEl.classList.remove('text-zinc-500', 'dark:text-zinc-400', 'line-through');
+          }
         }
       });
 
@@ -403,12 +437,31 @@ const initialEmbedUrl = hasDiscreteVideos
 
       // Highlight active in list
       videoItems.forEach((item, i) => {
+        const badge = item.querySelector('.video-idx-badge');
+        const nowPlaying = item.querySelector('.now-playing-badge');
         if (i === idx) {
-          item.classList.add('border-emerald-500', 'bg-emerald-50/50', 'dark:bg-emerald-950/30');
-          item.classList.remove('border-zinc-200', 'dark:border-zinc-800');
+          item.classList.add('border-emerald-500', 'bg-emerald-50/70', 'dark:bg-emerald-950/40', 'shadow-xs');
+          item.classList.remove('border-zinc-200', 'dark:border-zinc-800', 'bg-zinc-50/70', 'dark:bg-zinc-800/40');
+          if (badge) {
+            badge.classList.add('bg-emerald-600', 'text-white');
+            badge.classList.remove('bg-zinc-200', 'dark:bg-zinc-700', 'text-zinc-700', 'dark:text-zinc-300');
+          }
+          if (nowPlaying) {
+            nowPlaying.classList.remove('hidden');
+            nowPlaying.classList.add('flex');
+          }
+          item.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
         } else {
-          item.classList.remove('border-emerald-500', 'bg-emerald-50/50', 'dark:bg-emerald-950/30');
-          item.classList.add('border-zinc-200', 'dark:border-zinc-800');
+          item.classList.remove('border-emerald-500', 'bg-emerald-50/70', 'dark:bg-emerald-950/40', 'shadow-xs');
+          item.classList.add('border-zinc-200', 'dark:border-zinc-800', 'bg-zinc-50/70', 'dark:bg-zinc-800/40');
+          if (badge) {
+            badge.classList.remove('bg-emerald-600', 'text-white');
+            badge.classList.add('bg-zinc-200', 'dark:bg-zinc-700', 'text-zinc-700', 'dark:text-zinc-300');
+          }
+          if (nowPlaying) {
+            nowPlaying.classList.add('hidden');
+            nowPlaying.classList.remove('flex');
+          }
         }
       });
 

@@ -19,9 +19,9 @@ export const materialsData: MaterialItem[] = [
     category: 'central',
     year: 2,
     moduleId: 'year2-blood',
-    author: ['M. Wael', 'ASU Med Batch Drive'],
+    author: 'ASU Med Batch Drive',
+    addedBy: 'M. Wael',
     tags: ['داتا', 'درايف', 'الترم الاول', 'semester 3', 'blood'],
-    isPinned: true
   },
   {
     id: 'bld-anki-s3',
@@ -32,9 +32,9 @@ export const materialsData: MaterialItem[] = [
     category: 'summaries',
     year: 2,
     moduleId: 'year2-blood',
-    author: ['M. Wael', 'Anki ASU'],
+    author: 'Anki ASU',
+    addedBy: 'M. Wael',
     tags: ['anki', 'decks', 'flashcards', 'أنكي', 'مراجعة'],
-    isPinned: true
   },
   {
     id: 'bld-daily-lectures-practical',
@@ -45,7 +45,8 @@ export const materialsData: MaterialItem[] = [
     category: 'practical',
     year: 2,
     moduleId: 'year2-blood',
-    author: ['M. Wael', 'ASU Med Batch Drive'],
+    author: 'ASU Med Batch Drive',
+    addedBy: 'M. Wael',
     tags: ['daily', 'practical', 'lectures', 'يوم بيوم', 'عملي']
   },
   {
@@ -57,9 +58,9 @@ export const materialsData: MaterialItem[] = [
     category: 'exams',
     year: 2,
     moduleId: 'year2-blood',
-    author: ['M. Wael', 'ASU Med Batch Drive'],
+    author: 'ASU Med Batch Drive',
+    addedBy: 'M. Wael',
     tags: ['comprehensive', 'mcq', 'formatives', 'finals', 'drug list', 'شامل'],
-    isPinned: true
   },
   {
     id: 'bld-year2-central-drives',
@@ -70,7 +71,8 @@ export const materialsData: MaterialItem[] = [
     category: 'central',
     year: 2,
     moduleId: 'year2-blood',
-    author: ['M. Wael', 'ASU Med Batch Drive'],
+    author: 'ASU Med Batch Drive',
+    addedBy: 'M. Wael',
     tags: ['درايفات', 'سنة ثانية', 'year 2', 'archives']
   },
 
@@ -87,7 +89,8 @@ export const materialsData: MaterialItem[] = [
     year: 2,
     moduleId: 'year2-blood',
     subject: 'Anatomy',
-    author: ['M. Wael', 'ASU Moodle'],
+    author: 'ASU Moodle',
+    addedBy: 'M. Wael',
     tags: ['anatomy', 'moodle', 'تشريح', 'مودل']
   },
   {
@@ -100,7 +103,8 @@ export const materialsData: MaterialItem[] = [
     year: 2,
     moduleId: 'year2-blood',
     subject: 'Anatomy',
-    author: ['M. Wael', 'ASU Moodle'],
+    author: 'ASU Moodle',
+    addedBy: 'M. Wael',
     tags: ['anatomy', 'stream', 'تشريح', 'مودل']
   },
   {
@@ -113,7 +117,8 @@ export const materialsData: MaterialItem[] = [
     year: 2,
     moduleId: 'year2-blood',
     subject: 'Anatomy',
-    author: ['M. Wael', 'ASU Moodle'],
+    author: 'ASU Moodle',
+    addedBy: 'M. Wael',
     tags: ['anatomy', 'moodle', 'تشريح', 'مودل']
   },
   {
@@ -126,10 +131,33 @@ export const materialsData: MaterialItem[] = [
     year: 2,
     moduleId: 'year2-blood',
     subject: 'Anatomy',
-    author: ['M. Wael', 'Dr. Wahdan'],
+    author: 'Dr. Wahdan',
+    addedBy: 'M. Wael',
     playlistId: 'PLIZNmuBMEjaMZmwn2FVmG8bYsmVs5n-_v',
+    videos: [
+      { id: "PLIZNmuBMEjaMZmwn2FVmG8bYsmVs5n-_v-1", title: "Support of the channel", youtubeId: "ym373Eez9Q8", url: "https://youtu.be/ym373Eez9Q8" },
+      { id: "PLIZNmuBMEjaMZmwn2FVmG8bYsmVs5n-_v-2", title: "anatomy of spleen 1", youtubeId: "fGheL9cI9is", url: "https://youtu.be/fGheL9cI9is" },
+      { id: "PLIZNmuBMEjaMZmwn2FVmG8bYsmVs5n-_v-3", title: "anatomy of spleen 2", youtubeId: "PXrHRUSBsGE", url: "https://youtu.be/PXrHRUSBsGE" },
+      { id: "PLIZNmuBMEjaMZmwn2FVmG8bYsmVs5n-_v-4", title: "anatomy of spleen 3", youtubeId: "QIeFXC71xhQ", url: "https://youtu.be/QIeFXC71xhQ" },
+      { id: "PLIZNmuBMEjaMZmwn2FVmG8bYsmVs5n-_v-5", title: "anatomy of spleen 4", youtubeId: "iCJibDXuRKY", url: "https://youtu.be/iCJibDXuRKY" },
+      { id: "PLIZNmuBMEjaMZmwn2FVmG8bYsmVs5n-_v-6", title: "Lymphatic drainage of the body 1 ,by Dr. Wahdan", youtubeId: "3EpJ1CedREc", url: "https://youtu.be/3EpJ1CedREc" },
+      { id: "PLIZNmuBMEjaMZmwn2FVmG8bYsmVs5n-_v-7", title: "Lymphatic drainage of the body 2 ,by Dr. Wahdan", youtubeId: "uA_l7cxIzeI", url: "https://youtu.be/uA_l7cxIzeI" },
+      { id: "PLIZNmuBMEjaMZmwn2FVmG8bYsmVs5n-_v-8", title: "Lymphatic drainage of the body  3 ,by Dr. Wahdan", youtubeId: "vxh0ohbK5zQ", url: "https://youtu.be/vxh0ohbK5zQ" },
+      { id: "PLIZNmuBMEjaMZmwn2FVmG8bYsmVs5n-_v-9", title: "Lymphatic drainage of the body  4 ,by Dr. Wahdan", youtubeId: "W7NOVRYmsvo", url: "https://youtu.be/W7NOVRYmsvo" },
+      { id: "PLIZNmuBMEjaMZmwn2FVmG8bYsmVs5n-_v-10", title: "Lymphatic drainage of the body 5 ,by Dr. Wahdan", youtubeId: "j1wCiBRklfo", url: "https://youtu.be/j1wCiBRklfo" },
+      { id: "PLIZNmuBMEjaMZmwn2FVmG8bYsmVs5n-_v-11", title: "Lymphatic drainage of the body  6 ,by Dr. Wahdan", youtubeId: "vFauq_qMblE", url: "https://youtu.be/vFauq_qMblE" },
+      { id: "PLIZNmuBMEjaMZmwn2FVmG8bYsmVs5n-_v-12", title: "Lymphatic drainage of the body  7 ,by Dr. Wahdan", youtubeId: "NErjrnFkfWU", url: "https://youtu.be/NErjrnFkfWU" },
+      { id: "PLIZNmuBMEjaMZmwn2FVmG8bYsmVs5n-_v-13", title: "Lymphatic drainage of the body 8 ,by Dr. Wahdan", youtubeId: "Us-YAtqJLbo", url: "https://youtu.be/Us-YAtqJLbo" },
+      { id: "PLIZNmuBMEjaMZmwn2FVmG8bYsmVs5n-_v-14", title: "Anatomy of lower limb 61 (lymphatic drainage  , part 1), by Dr.Wahdan", youtubeId: "nx7JTcaytI8", url: "https://youtu.be/nx7JTcaytI8" },
+      { id: "PLIZNmuBMEjaMZmwn2FVmG8bYsmVs5n-_v-15", title: "Anatomy of lower limb 61 (lymphatic drainage  , part 1), by Dr.Wahdan", youtubeId: "DQXVIZsSfdA", url: "https://youtu.be/DQXVIZsSfdA" },
+      { id: "PLIZNmuBMEjaMZmwn2FVmG8bYsmVs5n-_v-16", title: "Anatomy of upper limb 63 ( Axilla , part 1 ) , by Dr. Wahdan", youtubeId: "Sqm0bRAus78", url: "https://youtu.be/Sqm0bRAus78" },
+      { id: "PLIZNmuBMEjaMZmwn2FVmG8bYsmVs5n-_v-17", title: "Anatomy of upper limb 64 (  lymphatic drainage of upper limb ) , by Dr. Wahdan", youtubeId: "q-Sjz_Ivspg", url: "https://youtu.be/q-Sjz_Ivspg" },
+      { id: "PLIZNmuBMEjaMZmwn2FVmG8bYsmVs5n-_v-18", title: "ANA. Lymphatics of Thorax Dr. Wahdan 3rd year", youtubeId: "7ebxMNKDe4o", url: "https://youtu.be/7ebxMNKDe4o" },
+      { id: "PLIZNmuBMEjaMZmwn2FVmG8bYsmVs5n-_v-19", title: "Enjoywithmedicine.com", youtubeId: "TmkguVM_IEY", url: "https://youtu.be/TmkguVM_IEY" },
+      { id: "PLIZNmuBMEjaMZmwn2FVmG8bYsmVs5n-_v-20", title: "Enjoywithmedicine.com 2", youtubeId: "DF7eiKfC760", url: "https://youtu.be/DF7eiKfC760" },
+      { id: "PLIZNmuBMEjaMZmwn2FVmG8bYsmVs5n-_v-21", title: "How to study", youtubeId: "ppj_N-F2_RA", url: "https://youtu.be/ppj_N-F2_RA" }
+    ],
     tags: ['anatomy', 'wahdan', 'وهدان', 'تشريح', 'playlist'],
-    isPinned: true
   },
   {
     id: 'bld-anat-sameh',
@@ -141,7 +169,8 @@ export const materialsData: MaterialItem[] = [
     year: 2,
     moduleId: 'year2-blood',
     subject: 'Anatomy',
-    author: ['M. Wael', 'Sameh'],
+    author: 'Sameh',
+    addedBy: 'M. Wael',
     videos: [
       { id: 'sameh-p1', title: 'تشريح الدم - سامح (الجزء 1)', youtubeId: 'CdxBqhfzMFg', url: 'https://youtu.be/CdxBqhfzMFg' },
       { id: 'sameh-p2', title: 'تشريح الدم - سامح (الجزء 2)', youtubeId: 'rrAfcJwypSs', url: 'https://youtu.be/rrAfcJwypSs' }
@@ -158,8 +187,17 @@ export const materialsData: MaterialItem[] = [
     year: 2,
     moduleId: 'year2-blood',
     subject: 'Anatomy',
-    author: ['M. Wael', 'Abdullah'],
+    author: 'Abdullah',
+    addedBy: 'M. Wael',
     playlistId: 'PLuTP8UDoc4g8l22pdJhOUJwTPlLW7JOqQ',
+    videos: [
+      { id: "PLuTP8UDoc4g8l22pdJhOUJwTPlLW7JOqQ-1", title: "Lymph introduction", youtubeId: "Z1iDjdDFV34", url: "https://youtu.be/Z1iDjdDFV34" },
+      { id: "PLuTP8UDoc4g8l22pdJhOUJwTPlLW7JOqQ-2", title: "Thoracic Duct &cisterna chyili", youtubeId: "k-s69iNasK4", url: "https://youtu.be/k-s69iNasK4" },
+      { id: "PLuTP8UDoc4g8l22pdJhOUJwTPlLW7JOqQ-3", title: "Thymus", youtubeId: "6Zx_2x4vLj0", url: "https://youtu.be/6Zx_2x4vLj0" },
+      { id: "PLuTP8UDoc4g8l22pdJhOUJwTPlLW7JOqQ-4", title: "spleen 1 (Intro- surface anatomy)", youtubeId: "CY8IMhl7kKQ", url: "https://youtu.be/CY8IMhl7kKQ" },
+      { id: "PLuTP8UDoc4g8l22pdJhOUJwTPlLW7JOqQ-5", title: "spleen 2 (surfaces- Relation)", youtubeId: "3eqCwQlPMjA", url: "https://youtu.be/3eqCwQlPMjA" },
+      { id: "PLuTP8UDoc4g8l22pdJhOUJwTPlLW7JOqQ-6", title: "Spleen 3", youtubeId: "ZT3AtsLk0K8", url: "https://youtu.be/ZT3AtsLk0K8" }
+    ],
     tags: ['anatomy', 'abdullah', 'عبدالله', 'تشريح', 'playlist']
   },
   {
@@ -172,8 +210,21 @@ export const materialsData: MaterialItem[] = [
     year: 2,
     moduleId: 'year2-blood',
     subject: 'Anatomy',
-    author: ['M. Wael', 'Mohammed'],
+    author: 'Mohammed',
+    addedBy: 'M. Wael',
     playlistId: 'PLOs4vdEd6G8QWPMb8SBYltbYx7NVsIblt',
+    videos: [
+      { id: "PLOs4vdEd6G8QWPMb8SBYltbYx7NVsIblt-1", title: "Introduction To Lymphatic System", youtubeId: "cB0gtKtt1mk", url: "https://youtu.be/cB0gtKtt1mk" },
+      { id: "PLOs4vdEd6G8QWPMb8SBYltbYx7NVsIblt-2", title: "Spleen -Thymus gland-waldeyer's lymphatic ring", youtubeId: "Ma0Cn19vxeg", url: "https://youtu.be/Ma0Cn19vxeg" },
+      { id: "PLOs4vdEd6G8QWPMb8SBYltbYx7NVsIblt-3", title: "Tutorial Anatomy", youtubeId: "Jao-PthPfHc", url: "https://youtu.be/Jao-PthPfHc" },
+      { id: "PLOs4vdEd6G8QWPMb8SBYltbYx7NVsIblt-4", title: "lymphatic organ part 1(Thymus &LN)", youtubeId: "Nw--RzMN3R4", url: "https://youtu.be/Nw--RzMN3R4" },
+      { id: "PLOs4vdEd6G8QWPMb8SBYltbYx7NVsIblt-5", title: "Lymphatic Organ Part 2(Spleen&Tonsils)", youtubeId: "mzg_3_eRV_M", url: "https://youtu.be/mzg_3_eRV_M" },
+      { id: "PLOs4vdEd6G8QWPMb8SBYltbYx7NVsIblt-6", title: "RBCs Platelet and BM", youtubeId: "rRhpnrLdPO8", url: "https://youtu.be/rRhpnrLdPO8" },
+      { id: "PLOs4vdEd6G8QWPMb8SBYltbYx7NVsIblt-7", title: "WBCs", youtubeId: "x2fw4C48NJM", url: "https://youtu.be/x2fw4C48NJM" },
+      { id: "PLOs4vdEd6G8QWPMb8SBYltbYx7NVsIblt-8", title: "Hemoglobin Metabolism", youtubeId: "U-SMW1xAlC4", url: "https://youtu.be/U-SMW1xAlC4" },
+      { id: "PLOs4vdEd6G8QWPMb8SBYltbYx7NVsIblt-9", title: "Hemoglobin Catabolism", youtubeId: "lb_xo7NOoeU", url: "https://youtu.be/lb_xo7NOoeU" },
+      { id: "PLOs4vdEd6G8QWPMb8SBYltbYx7NVsIblt-10", title: "Iron", youtubeId: "V3oqvf0CxsM", url: "https://youtu.be/V3oqvf0CxsM" }
+    ],
     tags: ['anatomy', 'mohammed', 'تشريح', 'playlist']
   },
   {
@@ -186,7 +237,8 @@ export const materialsData: MaterialItem[] = [
     year: 2,
     moduleId: 'year2-blood',
     subject: 'Anatomy',
-    author: ['M. Wael', 'Wageh'],
+    author: 'Wageh',
+    addedBy: 'M. Wael',
     videos: [
       { id: 'wageh-p1', title: 'تشريح الدم - وجيه (الجزء 1)', youtubeId: 'tzkF5C1ja94', url: 'https://youtu.be/tzkF5C1ja94' },
       { id: 'wageh-p2', title: 'تشريح الدم - وجيه (الجزء 2)', youtubeId: 'LxRv6UxQh1c', url: 'https://youtu.be/LxRv6UxQh1c' }
@@ -203,8 +255,19 @@ export const materialsData: MaterialItem[] = [
     year: 2,
     moduleId: 'year2-blood',
     subject: 'Anatomy',
-    author: ['M. Wael', 'Dr. Shareef'],
+    author: 'Dr. Shareef',
+    addedBy: 'M. Wael',
     playlistId: 'PLe2L3M_TgeCg0ozSwFSz3Hv8q9Zyk2nAm',
+    videos: [
+      { id: "PLe2L3M_TgeCg0ozSwFSz3Hv8q9Zyk2nAm-1", title: "Anatomy of lymphatic system (Basis)", youtubeId: "3Mm0hby503A", url: "https://youtu.be/3Mm0hby503A" },
+      { id: "PLe2L3M_TgeCg0ozSwFSz3Hv8q9Zyk2nAm-2", title: "Lymphatic drainage of limbs (Lymph 1)", youtubeId: "QzkqWubzqoo", url: "https://youtu.be/QzkqWubzqoo" },
+      { id: "PLe2L3M_TgeCg0ozSwFSz3Hv8q9Zyk2nAm-3", title: "Lymphatic drainage of head, neck, thorax & abdomen(lymph part 2)", youtubeId: "RzKJF1L2IB4", url: "https://youtu.be/RzKJF1L2IB4" },
+      { id: "PLe2L3M_TgeCg0ozSwFSz3Hv8q9Zyk2nAm-4", title: "Lymphatic  drainage of limbs (live lecture)", youtubeId: "6hS7qkgC5BE", url: "https://youtu.be/6hS7qkgC5BE" },
+      { id: "PLe2L3M_TgeCg0ozSwFSz3Hv8q9Zyk2nAm-5", title: "Lymphatic part 2 (live lecture)", youtubeId: "ccV7gVzwhOw", url: "https://youtu.be/ccV7gVzwhOw" },
+      { id: "PLe2L3M_TgeCg0ozSwFSz3Hv8q9Zyk2nAm-6", title: "Lymphatic drainage of the whole body (Revision lecture)", youtubeId: "1JuCWVsbWZ0", url: "https://youtu.be/1JuCWVsbWZ0" },
+      { id: "PLe2L3M_TgeCg0ozSwFSz3Hv8q9Zyk2nAm-7", title: "Anatomy and histology of the spleen", youtubeId: "1ihjCcMVvGs", url: "https://youtu.be/1ihjCcMVvGs" },
+      { id: "PLe2L3M_TgeCg0ozSwFSz3Hv8q9Zyk2nAm-8", title: "Histology of lymphatic system", youtubeId: "2efJD48_CyU", url: "https://youtu.be/2efJD48_CyU" }
+    ],
     tags: ['anatomy', 'shareef', 'شريف', 'تشريح', 'playlist']
   },
   {
@@ -217,8 +280,30 @@ export const materialsData: MaterialItem[] = [
     year: 2,
     moduleId: 'year2-blood',
     subject: 'Anatomy',
-    author: ['M. Wael', 'Dr. Ahmad Fareed'],
+    author: 'Dr. Ahmad Fareed',
+    addedBy: 'M. Wael',
     playlistId: 'PLs0O24oUQeaCgOmLXzJSqKp7UEzjJwnBr',
+    videos: [
+      { id: "PLs0O24oUQeaCgOmLXzJSqKp7UEzjJwnBr-1", title: "Mediastinal Divisions with Anatomy of Pericardium - Dr. Ahmed Farid", youtubeId: "ODqTnzLuoNs", url: "https://youtu.be/ODqTnzLuoNs" },
+      { id: "PLs0O24oUQeaCgOmLXzJSqKp7UEzjJwnBr-2", title: "External Features of the Heart - Dr. Ahmed Farid", youtubeId: "kuOYI4eebD4", url: "https://youtu.be/kuOYI4eebD4" },
+      { id: "PLs0O24oUQeaCgOmLXzJSqKp7UEzjJwnBr-3", title: "Grooves of the Heart - Dr. Ahmed Farid", youtubeId: "48lR0hWCx24", url: "https://youtu.be/48lR0hWCx24" },
+      { id: "PLs0O24oUQeaCgOmLXzJSqKp7UEzjJwnBr-4", title: "Internal Features of the Heart (Part 1) - The Atria", youtubeId: "KB7XYFwDivc", url: "https://youtu.be/KB7XYFwDivc" },
+      { id: "PLs0O24oUQeaCgOmLXzJSqKp7UEzjJwnBr-5", title: "Internal Features of the Heart (Part 2) - The Ventricles", youtubeId: "eTfXCiii2O8", url: "https://youtu.be/eTfXCiii2O8" },
+      { id: "PLs0O24oUQeaCgOmLXzJSqKp7UEzjJwnBr-6", title: "Internal Features of the Heart (Part 3) - Valves and Septa", youtubeId: "40e6mrV93_4", url: "https://youtu.be/40e6mrV93_4" },
+      { id: "PLs0O24oUQeaCgOmLXzJSqKp7UEzjJwnBr-7", title: "Blood Supply and Nerve Supply of the Heart - Dr. Ahmed Farid", youtubeId: "lK-3DGoaVyk", url: "https://youtu.be/lK-3DGoaVyk" },
+      { id: "PLs0O24oUQeaCgOmLXzJSqKp7UEzjJwnBr-8", title: "Arteries of the Thorax - Dr. Ahmed Farid", youtubeId: "MEQIxqORKoI", url: "https://youtu.be/MEQIxqORKoI" },
+      { id: "PLs0O24oUQeaCgOmLXzJSqKp7UEzjJwnBr-9", title: "Veins of the Thorax - Dr. Ahmed Farid", youtubeId: "BJvQR9Kfcww", url: "https://youtu.be/BJvQR9Kfcww" },
+      { id: "PLs0O24oUQeaCgOmLXzJSqKp7UEzjJwnBr-10", title: "Arteries of the Head and Neck - Dr. Ahmed Farid", youtubeId: "X3tbAke_3Rc", url: "https://youtu.be/X3tbAke_3Rc" },
+      { id: "PLs0O24oUQeaCgOmLXzJSqKp7UEzjJwnBr-11", title: "Veins of the Head and Neck - Dr. Ahmed Farid", youtubeId: "au2NI8EfB2E", url: "https://youtu.be/au2NI8EfB2E" },
+      { id: "PLs0O24oUQeaCgOmLXzJSqKp7UEzjJwnBr-12", title: "Axillary Vessels and Lymph Nodes - Dr. Ahmed Farid", youtubeId: "08NYeo9r5zc", url: "https://youtu.be/08NYeo9r5zc" },
+      { id: "PLs0O24oUQeaCgOmLXzJSqKp7UEzjJwnBr-13", title: "Vessels of the Forearm - Dr. Ahmed Farid", youtubeId: "IVMDDYoR2DU", url: "https://youtu.be/IVMDDYoR2DU" },
+      { id: "PLs0O24oUQeaCgOmLXzJSqKp7UEzjJwnBr-14", title: "Femoral and Obturator Arteries - Dr. Ahmed Farid", youtubeId: "sbq5SbZ55i4", url: "https://youtu.be/sbq5SbZ55i4" },
+      { id: "PLs0O24oUQeaCgOmLXzJSqKp7UEzjJwnBr-15", title: "Popliteal Artery - Dr. Ahmed Farid", youtubeId: "UNS3gyJKul0", url: "https://youtu.be/UNS3gyJKul0" },
+      { id: "PLs0O24oUQeaCgOmLXzJSqKp7UEzjJwnBr-16", title: "Anterior Tibial Artery - Dr. Ahmed Farid", youtubeId: "rNmfo9yETg0", url: "https://youtu.be/rNmfo9yETg0" },
+      { id: "PLs0O24oUQeaCgOmLXzJSqKp7UEzjJwnBr-17", title: "Posterior Tibial Artery and Plantar Arteries - Dr. Ahmed Farid", youtubeId: "IpdUqpq5mSU", url: "https://youtu.be/IpdUqpq5mSU" },
+      { id: "PLs0O24oUQeaCgOmLXzJSqKp7UEzjJwnBr-18", title: "Veins and Lymphatics of the Lower Limb - Dr. Ahmed Farid", youtubeId: "wJI-OHx1UgU", url: "https://youtu.be/wJI-OHx1UgU" },
+      { id: "PLs0O24oUQeaCgOmLXzJSqKp7UEzjJwnBr-19", title: "The Mediastinum (3D) - Dr. Ahmed Farid", youtubeId: "sFI18QD96J8", url: "https://youtu.be/sFI18QD96J8" }
+    ],
     tags: ['anatomy', 'ahmad fareed', 'أحمد فريد', 'تشريح', 'playlist']
   },
   {
@@ -231,7 +316,8 @@ export const materialsData: MaterialItem[] = [
     year: 2,
     moduleId: 'year2-blood',
     subject: 'Anatomy',
-    author: ['M. Wael', 'Dr. Mahmoud Alaa'],
+    author: 'Dr. Mahmoud Alaa',
+    addedBy: 'M. Wael',
     tags: ['anatomy', 'telegram', 'محمود علاء', 'تسجيلات']
   },
 
@@ -248,10 +334,27 @@ export const materialsData: MaterialItem[] = [
     year: 2,
     moduleId: 'year2-blood',
     subject: 'Physiology',
-    author: ['M. Wael', 'Dr. Nagi'],
+    author: 'Dr. Nagi',
+    addedBy: 'M. Wael',
     playlistId: 'PLFkJTdtzWoIaAWbijL3Pw4gVnxDjjPG8U',
+    videos: [
+      { id: "PLFkJTdtzWoIaAWbijL3Pw4gVnxDjjPG8U-1", title: "Dr.Nagi - Live Physiology - Lecture 1 - Blood (1) - Plasma Proteins", youtubeId: "9q1Adxa50io", url: "https://youtu.be/9q1Adxa50io" },
+      { id: "PLFkJTdtzWoIaAWbijL3Pw4gVnxDjjPG8U-2", title: "Dr.Nagi - Live Physiology - Lecture 3 - Blood (2) - RBCs & Hemoglobin", youtubeId: "YO6SJg0-n_s", url: "https://youtu.be/YO6SJg0-n_s" },
+      { id: "PLFkJTdtzWoIaAWbijL3Pw4gVnxDjjPG8U-3", title: "Dr.Nagi - Live Physiology - Lecture 6 - Blood (3) - Anemia", youtubeId: "Zf4j0u_9rrg", url: "https://youtu.be/Zf4j0u_9rrg" },
+      { id: "PLFkJTdtzWoIaAWbijL3Pw4gVnxDjjPG8U-4", title: "Dr.Nagi - Live Physiology - Lecture 27 - Blood (4) - Coagulation & Platelets", youtubeId: "5RQRf27MWxU", url: "https://youtu.be/5RQRf27MWxU" },
+      { id: "PLFkJTdtzWoIaAWbijL3Pw4gVnxDjjPG8U-5", title: "Dr.Nagi - Live Physiology - Lecture 32 - Blood (5) - Blood Coagulation", youtubeId: "d8gQ4ZiJgec", url: "https://youtu.be/d8gQ4ZiJgec" },
+      { id: "PLFkJTdtzWoIaAWbijL3Pw4gVnxDjjPG8U-6", title: "Dr.Nagi - Live Physiology - Lecture 34 - Blood (6) - Part 1 - Anticoagulants", youtubeId: "V-lxNwXW1OE", url: "https://youtu.be/V-lxNwXW1OE" },
+      { id: "PLFkJTdtzWoIaAWbijL3Pw4gVnxDjjPG8U-7", title: "Dr.Nagi - Live Physiology - Lecture 35 - Blood (6) - Part 2 - Hemostasis Disorders", youtubeId: "_Gk_k_lZ5_E", url: "https://youtu.be/_Gk_k_lZ5_E" },
+      { id: "PLFkJTdtzWoIaAWbijL3Pw4gVnxDjjPG8U-8", title: "Dr.Nagi - Live Physiology - Lecture 40 - Blood (7) WBCs & Immunity - Part 1", youtubeId: "tcCNuZp67Ec", url: "https://youtu.be/tcCNuZp67Ec" },
+      { id: "PLFkJTdtzWoIaAWbijL3Pw4gVnxDjjPG8U-9", title: "Dr.Nagi - Live Physiology - Lecture 41 - Blood (7) WBCs & Immunity - Part 2", youtubeId: "VDcCEg6wBJA", url: "https://youtu.be/VDcCEg6wBJA" },
+      { id: "PLFkJTdtzWoIaAWbijL3Pw4gVnxDjjPG8U-10", title: "Dr.Nagi - Live Physiology - Lecture 45 - Blood (8) - Blood groups & Transfusion", youtubeId: "RAkv0YPfVFI", url: "https://youtu.be/RAkv0YPfVFI" },
+      { id: "PLFkJTdtzWoIaAWbijL3Pw4gVnxDjjPG8U-11", title: "Dr.Nagi - Live Physiology - Lecture 64 - Blood (9) - Revision & MCQs (1)", youtubeId: "GW30aodvow0", url: "https://youtu.be/GW30aodvow0" },
+      { id: "PLFkJTdtzWoIaAWbijL3Pw4gVnxDjjPG8U-12", title: "Dr.Nagi - Live Physiology - Lecture 65 - Blood (10) - Revision & MCQs (2)", youtubeId: "00DdkbE-xEg", url: "https://youtu.be/00DdkbE-xEg" },
+      { id: "PLFkJTdtzWoIaAWbijL3Pw4gVnxDjjPG8U-13", title: "Dr.Nagi - Live Physiology - Lecture 66 - Blood (11) - Revision & MCQs 3", youtubeId: "HmYDngfXI3s", url: "https://youtu.be/HmYDngfXI3s" },
+      { id: "PLFkJTdtzWoIaAWbijL3Pw4gVnxDjjPG8U-14", title: "Dr.Nagi - PRACTICAL Physiology - 1st year - BLOOD experiments", youtubeId: "hg4CWxx6_U8", url: "https://youtu.be/hg4CWxx6_U8" },
+      { id: "PLFkJTdtzWoIaAWbijL3Pw4gVnxDjjPG8U-15", title: "Dr.Nagi - How to Solve MCQ Exam Tricks", youtubeId: "ZTLMm2JGzk0", url: "https://youtu.be/ZTLMm2JGzk0" }
+    ],
     tags: ['physiology', 'nagi', 'ناجي', 'فسيولوجي', 'playlist'],
-    isPinned: true
   },
   {
     id: 'bld-phys-fayez',
@@ -263,8 +366,25 @@ export const materialsData: MaterialItem[] = [
     year: 2,
     moduleId: 'year2-blood',
     subject: 'Physiology',
-    author: ['M. Wael', 'Dr. Fayez'],
+    author: 'Dr. Fayez',
+    addedBy: 'M. Wael',
     playlistId: 'PLLShXxg1izojEV9_0S5rXSnMpPvPCu9L4',
+    videos: [
+      { id: "PLLShXxg1izojEV9_0S5rXSnMpPvPCu9L4-1", title: "Blood Introduction new system dr mohamed fayez", youtubeId: "ORaf4XdPF6I", url: "https://youtu.be/ORaf4XdPF6I" },
+      { id: "PLLShXxg1izojEV9_0S5rXSnMpPvPCu9L4-2", title: "Blood new system (Plasma proteins) dr mohamed fayez", youtubeId: "OyNW1nCD2uo", url: "https://youtu.be/OyNW1nCD2uo" },
+      { id: "PLLShXxg1izojEV9_0S5rXSnMpPvPCu9L4-3", title: "Blood Formation,  RBCs new system dr mohamed fayez", youtubeId: "6oktiNl4dbI", url: "https://youtu.be/6oktiNl4dbI" },
+      { id: "PLLShXxg1izojEV9_0S5rXSnMpPvPCu9L4-4", title: "Blood new system (Blood Tests: Osmotic fragility, HV and ESR) dr mohamed fayez", youtubeId: "kIjjxN_RuS8", url: "https://youtu.be/kIjjxN_RuS8" },
+      { id: "PLLShXxg1izojEV9_0S5rXSnMpPvPCu9L4-5", title: "Blood new system (Continuation of Blood tests) dr mohamed fayez", youtubeId: "IO0hztg0l5s", url: "https://youtu.be/IO0hztg0l5s" },
+      { id: "PLLShXxg1izojEV9_0S5rXSnMpPvPCu9L4-6", title: "Blood new system (Erythropoiesis part 1) dr mohamed fayez", youtubeId: "0Edak3eJj5A", url: "https://youtu.be/0Edak3eJj5A" },
+      { id: "PLLShXxg1izojEV9_0S5rXSnMpPvPCu9L4-7", title: "Blood new system (Erythropoiesis part 2) dr mohamed fayez", youtubeId: "T5Wmg506ZsQ", url: "https://youtu.be/T5Wmg506ZsQ" },
+      { id: "PLLShXxg1izojEV9_0S5rXSnMpPvPCu9L4-8", title: "Blood new system (Anemia part 1) dr mohamed fayez", youtubeId: "pZu2cTXupt0", url: "https://youtu.be/pZu2cTXupt0" },
+      { id: "PLLShXxg1izojEV9_0S5rXSnMpPvPCu9L4-9", title: "Blood new system (Anemia part 2) dr mohamed fayez", youtubeId: "QWDq-_cZ-1A", url: "https://youtu.be/QWDq-_cZ-1A" },
+      { id: "PLLShXxg1izojEV9_0S5rXSnMpPvPCu9L4-10", title: "Blood new system (Blood groups and Blood Transfusion) dr mohamed fayez", youtubeId: "ul-m45A9_VU", url: "https://youtu.be/ul-m45A9_VU" },
+      { id: "PLLShXxg1izojEV9_0S5rXSnMpPvPCu9L4-11", title: "Hemostasis First part new system dr mohamed fayez", youtubeId: "zAjAtUIFwUg", url: "https://youtu.be/zAjAtUIFwUg" },
+      { id: "PLLShXxg1izojEV9_0S5rXSnMpPvPCu9L4-12", title: "Hemostasis (Clotting) new system dr mohamed fayez", youtubeId: "FVSbMtLM0nI", url: "https://youtu.be/FVSbMtLM0nI" },
+      { id: "PLLShXxg1izojEV9_0S5rXSnMpPvPCu9L4-13", title: "Anticlotting Mechanism,  Fibrinolytic system,  Hemostasis Disorders new system dr mohamed fayez", youtubeId: "O3vH4PCHZCY", url: "https://youtu.be/O3vH4PCHZCY" },
+      { id: "PLLShXxg1izojEV9_0S5rXSnMpPvPCu9L4-14", title: "WBC Summary Dr Mohamed Fayez", youtubeId: "tFNBbqLxZjY", url: "https://youtu.be/tFNBbqLxZjY" }
+    ],
     tags: ['physiology', 'fayez', 'فايز', 'فسيولوجي', 'playlist']
   },
   {
@@ -277,8 +397,21 @@ export const materialsData: MaterialItem[] = [
     year: 2,
     moduleId: 'year2-blood',
     subject: 'Physiology',
-    author: ['M. Wael', 'Ninja Nerd'],
+    author: 'Ninja Nerd',
+    addedBy: 'M. Wael',
     playlistId: 'PLTF9h-T1TcJh9T57G0nls2uGPzzHKMxxh',
+    videos: [
+      { id: "PLTF9h-T1TcJh9T57G0nls2uGPzzHKMxxh-1", title: "Hematology | Hematocrit", youtubeId: "yF22BfXEO5g", url: "https://youtu.be/yF22BfXEO5g" },
+      { id: "PLTF9h-T1TcJh9T57G0nls2uGPzzHKMxxh-2", title: "Hematology | Erythropoiesis: Red Blood Cell Formation: Part 1", youtubeId: "kcnOXlr-9Ic", url: "https://youtu.be/kcnOXlr-9Ic" },
+      { id: "PLTF9h-T1TcJh9T57G0nls2uGPzzHKMxxh-3", title: "Hematology | Erythropoiesis: Lifespan & Destruction: Part 2", youtubeId: "aIQ9Ex_nFUU", url: "https://youtu.be/aIQ9Ex_nFUU" },
+      { id: "PLTF9h-T1TcJh9T57G0nls2uGPzzHKMxxh-4", title: "Hematology | Types of Anemias", youtubeId: "mOrRJBqm744", url: "https://youtu.be/mOrRJBqm744" },
+      { id: "PLTF9h-T1TcJh9T57G0nls2uGPzzHKMxxh-5", title: "Hematology | Polycythemias", youtubeId: "pWGRT17SazA", url: "https://youtu.be/pWGRT17SazA" },
+      { id: "PLTF9h-T1TcJh9T57G0nls2uGPzzHKMxxh-6", title: "Hematology | Leukopoiesis: White Blood Cell Formation", youtubeId: "nyKxu7Kkguo", url: "https://youtu.be/nyKxu7Kkguo" },
+      { id: "PLTF9h-T1TcJh9T57G0nls2uGPzzHKMxxh-7", title: "Hematology | Hemostasis: Coagulation Cascade", youtubeId: "SGzp9wqeu84", url: "https://youtu.be/SGzp9wqeu84" },
+      { id: "PLTF9h-T1TcJh9T57G0nls2uGPzzHKMxxh-8", title: "Hematology | Blood Typing", youtubeId: "9DnlP6AgQdQ", url: "https://youtu.be/9DnlP6AgQdQ" },
+      { id: "PLTF9h-T1TcJh9T57G0nls2uGPzzHKMxxh-9", title: "CBC | Approach to Anemia", youtubeId: "MRzxsX5YG94", url: "https://youtu.be/MRzxsX5YG94" },
+      { id: "PLTF9h-T1TcJh9T57G0nls2uGPzzHKMxxh-10", title: "تعداد الدم الكامل | نهج لمرض كثرة الحمر", youtubeId: "RTXNNRPMVK8", url: "https://youtu.be/RTXNNRPMVK8" }
+    ],
     tags: ['physiology', 'ninja nerd', 'hematology', 'فسيولوجي', 'playlist']
   },
   {
@@ -291,8 +424,32 @@ export const materialsData: MaterialItem[] = [
     year: 2,
     moduleId: 'year2-blood',
     subject: 'Physiology',
-    author: ['M. Wael', 'Dr. Najeeb'],
+    author: 'Dr. Najeeb',
+    addedBy: 'M. Wael',
     playlistId: 'PLO2O9UjkQxLcuRB-j4ZbYEwCDP9A4tpCo',
+    videos: [
+      { id: "PLO2O9UjkQxLcuRB-j4ZbYEwCDP9A4tpCo-1", title: "Bone Marrow and Hematopoiesis | Blood Cells Formation", youtubeId: "40A5uv8-mGo", url: "https://youtu.be/40A5uv8-mGo" },
+      { id: "PLO2O9UjkQxLcuRB-j4ZbYEwCDP9A4tpCo-2", title: "Leukocytes | White Blood Cells | Immune System", youtubeId: "f6o5sCFpX_0", url: "https://youtu.be/f6o5sCFpX_0" },
+      { id: "PLO2O9UjkQxLcuRB-j4ZbYEwCDP9A4tpCo-3", title: "Coombs Test | Antiglobulin Test | Direct & indirect | Hematology", youtubeId: "ZD0IJiJIW68", url: "https://youtu.be/ZD0IJiJIW68" },
+      { id: "PLO2O9UjkQxLcuRB-j4ZbYEwCDP9A4tpCo-4", title: "Rh Blood Group System | Dr Najeeb", youtubeId: "fwO-k8P67ac", url: "https://youtu.be/fwO-k8P67ac" },
+      { id: "PLO2O9UjkQxLcuRB-j4ZbYEwCDP9A4tpCo-5", title: "ABO Blood Group System | Blood Types & ABO Antigens👨‍⚕️", youtubeId: "wfqnNuYIY78", url: "https://youtu.be/wfqnNuYIY78" },
+      { id: "PLO2O9UjkQxLcuRB-j4ZbYEwCDP9A4tpCo-6", title: "Coagulation Cascade | Part 1/12", youtubeId: "KnqIaGbKtAA", url: "https://youtu.be/KnqIaGbKtAA" },
+      { id: "PLO2O9UjkQxLcuRB-j4ZbYEwCDP9A4tpCo-7", title: "Coagulation Cascade | Part 7/12", youtubeId: "WxIiqGdXqkU", url: "https://youtu.be/WxIiqGdXqkU" },
+      { id: "PLO2O9UjkQxLcuRB-j4ZbYEwCDP9A4tpCo-8", title: "Coagulation Cascade | Part 4/12", youtubeId: "5Zi1ZUOmv2c", url: "https://youtu.be/5Zi1ZUOmv2c" },
+      { id: "PLO2O9UjkQxLcuRB-j4ZbYEwCDP9A4tpCo-9", title: "Coagulation Cascade | Part 6/12", youtubeId: "fZVa1_rYwGs", url: "https://youtu.be/fZVa1_rYwGs" },
+      { id: "PLO2O9UjkQxLcuRB-j4ZbYEwCDP9A4tpCo-10", title: "Coagulation Cascade | Part 2/12", youtubeId: "ZVatjIzMnfU", url: "https://youtu.be/ZVatjIzMnfU" },
+      { id: "PLO2O9UjkQxLcuRB-j4ZbYEwCDP9A4tpCo-11", title: "Coagulation Cascade | Part 8/12", youtubeId: "Hl5sW_lfuxk", url: "https://youtu.be/Hl5sW_lfuxk" },
+      { id: "PLO2O9UjkQxLcuRB-j4ZbYEwCDP9A4tpCo-12", title: "Coagulation Cascade | Part 3/12", youtubeId: "WeR6WbmjOzY", url: "https://youtu.be/WeR6WbmjOzY" },
+      { id: "PLO2O9UjkQxLcuRB-j4ZbYEwCDP9A4tpCo-13", title: "Coagulation Cascade | Part 10/12", youtubeId: "lPV1YTH7pUw", url: "https://youtu.be/lPV1YTH7pUw" },
+      { id: "PLO2O9UjkQxLcuRB-j4ZbYEwCDP9A4tpCo-14", title: "Coagulation Cascade | Part 11/12", youtubeId: "DL1aV3iZl-o", url: "https://youtu.be/DL1aV3iZl-o" },
+      { id: "PLO2O9UjkQxLcuRB-j4ZbYEwCDP9A4tpCo-15", title: "Coagulation Cascade | Part 5/12", youtubeId: "JQFMDsdy3RI", url: "https://youtu.be/JQFMDsdy3RI" },
+      { id: "PLO2O9UjkQxLcuRB-j4ZbYEwCDP9A4tpCo-16", title: "Coagulation Cascade | Part 9/12", youtubeId: "ks52rkxmlww", url: "https://youtu.be/ks52rkxmlww" },
+      { id: "PLO2O9UjkQxLcuRB-j4ZbYEwCDP9A4tpCo-17", title: "Coagulation Cascade | Part 12/12", youtubeId: "-yiXs3WdfR4", url: "https://youtu.be/-yiXs3WdfR4" },
+      { id: "PLO2O9UjkQxLcuRB-j4ZbYEwCDP9A4tpCo-18", title: "RBC Indices | Anemia | Hemoglobin | MCV | MCH | MCHC | RDW", youtubeId: "pY8iRNHDnes", url: "https://youtu.be/pY8iRNHDnes" },
+      { id: "PLO2O9UjkQxLcuRB-j4ZbYEwCDP9A4tpCo-19", title: "Erythroblastosis Fetalis | Pathophysiology 🩺", youtubeId: "Hr-b92KSm1s", url: "https://youtu.be/Hr-b92KSm1s" },
+      { id: "PLO2O9UjkQxLcuRB-j4ZbYEwCDP9A4tpCo-20", title: "Hereditary Spherocytosis | Anemia | RBCs | Pathophysiology 🩺", youtubeId: "kQXT2nLdoGI", url: "https://youtu.be/kQXT2nLdoGI" },
+      { id: "PLO2O9UjkQxLcuRB-j4ZbYEwCDP9A4tpCo-21", title: "ABO Blood Group System | Hematology | Dr Najeeb 👨‍⚕️", youtubeId: "c5ctTp4Vf4g", url: "https://youtu.be/c5ctTp4Vf4g" }
+    ],
     tags: ['physiology', 'najeeb', 'نجيب', 'فسيولوجي', 'playlist']
   },
   {
@@ -305,8 +462,17 @@ export const materialsData: MaterialItem[] = [
     year: 2,
     moduleId: 'year2-blood',
     subject: 'Physiology',
-    author: ['M. Wael', 'Dr. Ahmed'],
+    author: 'Dr. Ahmed',
+    addedBy: 'M. Wael',
     playlistId: 'PLJR3YnsG3vkRi3ZZowNVrwh_hpslIZM3B',
+    videos: [
+      { id: "PLJR3YnsG3vkRi3ZZowNVrwh_hpslIZM3B-1", title: "Easy Physiology | Blood | 1-Hemostasis & Coagulation Cascade", youtubeId: "J6NM1Cwkyrc", url: "https://youtu.be/J6NM1Cwkyrc" },
+      { id: "PLJR3YnsG3vkRi3ZZowNVrwh_hpslIZM3B-2", title: "Easy Physiology | Blood | 2-Anti Coagulants & Fibrinolytic System", youtubeId: "IRwd0ssVMyc", url: "https://youtu.be/IRwd0ssVMyc" },
+      { id: "PLJR3YnsG3vkRi3ZZowNVrwh_hpslIZM3B-3", title: "Easy Physiology | Blood | 3-WBCs & Innate Immunity", youtubeId: "CA9jNaQe2h8", url: "https://youtu.be/CA9jNaQe2h8" },
+      { id: "PLJR3YnsG3vkRi3ZZowNVrwh_hpslIZM3B-4", title: "Easy Physiology | Blood | 4-Cellular & Humoral Immunity", youtubeId: "tfpDZVhOXMg", url: "https://youtu.be/tfpDZVhOXMg" },
+      { id: "PLJR3YnsG3vkRi3ZZowNVrwh_hpslIZM3B-5", title: "Easy Physiology | Blood | Introduction & Plasma Proteins", youtubeId: "Mqas1KsH678", url: "https://youtu.be/Mqas1KsH678" },
+      { id: "PLJR3YnsG3vkRi3ZZowNVrwh_hpslIZM3B-6", title: "Easy Physiology | Blood | Blood Groups & Blood Transfusion", youtubeId: "uZI1fSiwLfw", url: "https://youtu.be/uZI1fSiwLfw" }
+    ],
     tags: ['physiology', 'ahmed', 'أحمد', 'فسيولوجي', 'playlist']
   },
   {
@@ -319,7 +485,8 @@ export const materialsData: MaterialItem[] = [
     year: 2,
     moduleId: 'year2-blood',
     subject: 'Physiology',
-    author: ['M. Wael', 'Dr. Mohammed Elsherif'],
+    author: 'Dr. Mohammed Elsherif',
+    addedBy: 'M. Wael',
     tags: ['physiology', 'telegram', 'محمد الشريف', 'فسيولوجي']
   },
 
@@ -336,8 +503,15 @@ export const materialsData: MaterialItem[] = [
     year: 2,
     moduleId: 'year2-blood',
     subject: 'Histology',
-    author: ['M. Wael', 'Dr. Faten'],
+    author: 'Dr. Faten',
+    addedBy: 'M. Wael',
     playlistId: 'PLlzicty9XavE7Ul7ogZHDUxjlkU-hs1nw',
+    videos: [
+      { id: "PLlzicty9XavE7Ul7ogZHDUxjlkU-hs1nw-1", title: "شرح هستولوجي RBCs", youtubeId: "vF7j7TYQkdA", url: "https://youtu.be/vF7j7TYQkdA" },
+      { id: "PLlzicty9XavE7Ul7ogZHDUxjlkU-hs1nw-2", title: "plt", youtubeId: "9y8UUEbxT7E", url: "https://youtu.be/9y8UUEbxT7E" },
+      { id: "PLlzicty9XavE7Ul7ogZHDUxjlkU-hs1nw-3", title: "WBCs", youtubeId: "ODWaDcr3t1U", url: "https://youtu.be/ODWaDcr3t1U" },
+      { id: "PLlzicty9XavE7Ul7ogZHDUxjlkU-hs1nw-4", title: "hematopoiesis  Dr : faten", youtubeId: "N_NbyhFjuK4", url: "https://youtu.be/N_NbyhFjuK4" }
+    ],
     tags: ['histology', 'faten', 'فاتن', 'هستولوجي', 'playlist']
   },
   {
@@ -350,7 +524,8 @@ export const materialsData: MaterialItem[] = [
     year: 2,
     moduleId: 'year2-blood',
     subject: 'Histology',
-    author: ['M. Wael', 'ASU Moodle'],
+    author: 'ASU Moodle',
+    addedBy: 'M. Wael',
     tags: ['histology', 'moodle', 'هستولوجي', 'مودل']
   },
   {
@@ -363,7 +538,8 @@ export const materialsData: MaterialItem[] = [
     year: 2,
     moduleId: 'year2-blood',
     subject: 'Histology',
-    author: ['M. Wael', 'ASU Moodle'],
+    author: 'ASU Moodle',
+    addedBy: 'M. Wael',
     tags: ['histology', 'moodle', 'هستولوجي', 'مودل']
   },
   {
@@ -376,7 +552,8 @@ export const materialsData: MaterialItem[] = [
     year: 2,
     moduleId: 'year2-blood',
     subject: 'Histology',
-    author: ['M. Wael', 'ASU Moodle'],
+    author: 'ASU Moodle',
+    addedBy: 'M. Wael',
     tags: ['histology', 'moodle', 'هستولوجي', 'مودل']
   },
   {
@@ -389,7 +566,8 @@ export const materialsData: MaterialItem[] = [
     year: 2,
     moduleId: 'year2-blood',
     subject: 'Histology',
-    author: ['M. Wael', 'ASU Moodle'],
+    author: 'ASU Moodle',
+    addedBy: 'M. Wael',
     tags: ['histology', 'moodle', 'هستولوجي', 'مودل']
   },
   {
@@ -402,7 +580,8 @@ export const materialsData: MaterialItem[] = [
     year: 2,
     moduleId: 'year2-blood',
     subject: 'Histology',
-    author: ['M. Wael', 'ASU Moodle'],
+    author: 'ASU Moodle',
+    addedBy: 'M. Wael',
     tags: ['histology', 'moodle', 'هستولوجي', 'مودل']
   },
   {
@@ -415,7 +594,8 @@ export const materialsData: MaterialItem[] = [
     year: 2,
     moduleId: 'year2-blood',
     subject: 'Histology',
-    author: ['M. Wael', 'Dr. Eman Nabil'],
+    author: 'Dr. Eman Nabil',
+    addedBy: 'M. Wael',
     playlistId: 'PLAlbG9dixa2hqxp9o2fMUEJ_6J3NXMIdl',
     tags: ['histology', 'eman nabil', 'إيمان نبيل', 'هستولوجي', 'playlist']
   },
@@ -429,8 +609,19 @@ export const materialsData: MaterialItem[] = [
     year: 2,
     moduleId: 'year2-blood',
     subject: 'Histology',
-    author: ['M. Wael', 'Dr. Shireen'],
+    author: 'Dr. Shireen',
+    addedBy: 'M. Wael',
     playlistId: 'PLzjKJPnFc4jwQGsHZaD9vGxjreVjmIXx5',
+    videos: [
+      { id: "PLzjKJPnFc4jwQGsHZaD9vGxjreVjmIXx5-1", title: "1 blood: RBCs", youtubeId: "-09Kc-Nq5io", url: "https://youtu.be/-09Kc-Nq5io" },
+      { id: "PLzjKJPnFc4jwQGsHZaD9vGxjreVjmIXx5-2", title: "2 blood: WBCs", youtubeId: "SEZ75JG1LSI", url: "https://youtu.be/SEZ75JG1LSI" },
+      { id: "PLzjKJPnFc4jwQGsHZaD9vGxjreVjmIXx5-3", title: "3 blood platelets and bone marrow", youtubeId: "e7UhFsufP64", url: "https://youtu.be/e7UhFsufP64" },
+      { id: "PLzjKJPnFc4jwQGsHZaD9vGxjreVjmIXx5-4", title: "4 HAEMOPOIESIS", youtubeId: "gwx2ytzi_zI", url: "https://youtu.be/gwx2ytzi_zI" },
+      { id: "PLzjKJPnFc4jwQGsHZaD9vGxjreVjmIXx5-5", title: "5 blood clinical cases", youtubeId: "yaSdOGFMqA8", url: "https://youtu.be/yaSdOGFMqA8" },
+      { id: "PLzjKJPnFc4jwQGsHZaD9vGxjreVjmIXx5-6", title: "practical of blood", youtubeId: "42kCeW2UaCY", url: "https://youtu.be/42kCeW2UaCY" },
+      { id: "PLzjKJPnFc4jwQGsHZaD9vGxjreVjmIXx5-7", title: "Revision of blood", youtubeId: "pKALFopJX08", url: "https://youtu.be/pKALFopJX08" },
+      { id: "PLzjKJPnFc4jwQGsHZaD9vGxjreVjmIXx5-8", title: "MCQ blood histology", youtubeId: "JlFYUWv3tYE", url: "https://youtu.be/JlFYUWv3tYE" }
+    ],
     tags: ['histology', 'shireen', 'شيرين', 'مراجعة', 'playlist']
   },
   {
@@ -443,8 +634,17 @@ export const materialsData: MaterialItem[] = [
     year: 2,
     moduleId: 'year2-blood',
     subject: 'Histology',
-    author: ['M. Wael', 'Dr. Shireen'],
+    author: 'Dr. Shireen',
+    addedBy: 'M. Wael',
     playlistId: 'PLzjKJPnFc4jxRwOHbLymNVRxZPCY4QIoe',
+    videos: [
+      { id: "PLzjKJPnFc4jxRwOHbLymNVRxZPCY4QIoe-1", title: "1 lymphatic system: thymus", youtubeId: "RrfOfRWeaoA", url: "https://youtu.be/RrfOfRWeaoA" },
+      { id: "PLzjKJPnFc4jxRwOHbLymNVRxZPCY4QIoe-2", title: "3 tonsils", youtubeId: "U40sGwbpuxA", url: "https://youtu.be/U40sGwbpuxA" },
+      { id: "PLzjKJPnFc4jxRwOHbLymNVRxZPCY4QIoe-3", title: "2 lymph node and spleen", youtubeId: "JFkhBSlEIO4", url: "https://youtu.be/JFkhBSlEIO4" },
+      { id: "PLzjKJPnFc4jxRwOHbLymNVRxZPCY4QIoe-4", title: "practical of lymphatic system", youtubeId: "1qFauhGnwqs", url: "https://youtu.be/1qFauhGnwqs" },
+      { id: "PLzjKJPnFc4jxRwOHbLymNVRxZPCY4QIoe-5", title: "revision of lymphatic system", youtubeId: "YoOQ7k3WOuw", url: "https://youtu.be/YoOQ7k3WOuw" },
+      { id: "PLzjKJPnFc4jxRwOHbLymNVRxZPCY4QIoe-6", title: "MCQ lymphatic tissue histology", youtubeId: "roU5sTvA8SU", url: "https://youtu.be/roU5sTvA8SU" }
+    ],
     tags: ['histology', 'lymph', 'shireen', 'شيرين', 'ليمف', 'playlist']
   },
   {
@@ -457,8 +657,15 @@ export const materialsData: MaterialItem[] = [
     year: 2,
     moduleId: 'year2-blood',
     subject: 'Histology',
-    author: ['M. Wael', 'Dr. Ahmeed Nerd'],
+    author: 'Dr. Ahmeed Nerd',
+    addedBy: 'M. Wael',
     playlistId: 'PL5gt9J3j4ldbOOI2se0e_M_VY_a_ygWG2',
+    videos: [
+      { id: "PL5gt9J3j4ldbOOI2se0e_M_VY_a_ygWG2-1", title: "Nerd Histology - Blood Module  ''Erythrocytes''", youtubeId: "59VHgc4j1Ac", url: "https://youtu.be/59VHgc4j1Ac" },
+      { id: "PL5gt9J3j4ldbOOI2se0e_M_VY_a_ygWG2-2", title: "Nerd Histology - Blood Module '' Bone Marrow \"", youtubeId: "wICJm_dSVGo", url: "https://youtu.be/wICJm_dSVGo" },
+      { id: "PL5gt9J3j4ldbOOI2se0e_M_VY_a_ygWG2-3", title: "Nerd Histology - Blood Module ''Erythropoiesis''", youtubeId: "DMw8nSd4QeI", url: "https://youtu.be/DMw8nSd4QeI" },
+      { id: "PL5gt9J3j4ldbOOI2se0e_M_VY_a_ygWG2-4", title: "Nerd Histology - Blood Module \"WBCs\"", youtubeId: "sfpdIQ5eibg", url: "https://youtu.be/sfpdIQ5eibg" }
+    ],
     tags: ['histology', 'ahmeed nerd', 'هستولوجي', 'playlist']
   },
   {
@@ -471,7 +678,8 @@ export const materialsData: MaterialItem[] = [
     year: 2,
     moduleId: 'year2-blood',
     subject: 'Histology',
-    author: ['M. Wael', 'Dr. Ahmed Zahra'],
+    author: 'Dr. Ahmed Zahra',
+    addedBy: 'M. Wael',
     tags: ['histology', 'telegram', 'أحمد زهرة', 'هستولوجي']
   },
 
@@ -488,8 +696,21 @@ export const materialsData: MaterialItem[] = [
     year: 2,
     moduleId: 'year2-blood',
     subject: 'Biochemistry',
-    author: ['M. Wael', 'Dr. Esawi'],
+    author: 'Dr. Esawi',
+    addedBy: 'M. Wael',
     playlistId: 'PLw03kzQQoHv0zzA3VmasZYxxGhYzfFIpx',
+    videos: [
+      { id: "PLw03kzQQoHv0zzA3VmasZYxxGhYzfFIpx-1", title: "Blood Biochemistry - Hemoglobin Structure and function", youtubeId: "no3bts_89HU", url: "https://youtu.be/no3bts_89HU" },
+      { id: "PLw03kzQQoHv0zzA3VmasZYxxGhYzfFIpx-2", title: "Blood Biochemistry - Heme Metabolism", youtubeId: "4i_gXOJ9iRE", url: "https://youtu.be/4i_gXOJ9iRE" },
+      { id: "PLw03kzQQoHv0zzA3VmasZYxxGhYzfFIpx-3", title: "Blood Biochemistry - Hemoglobinopathies & Hemoglobin Electrophoresis", youtubeId: "6WlLk2dz_Y8", url: "https://youtu.be/6WlLk2dz_Y8" },
+      { id: "PLw03kzQQoHv0zzA3VmasZYxxGhYzfFIpx-4", title: "Blood Biochemistry - Iron Metabolism and Etiology of Iron Deficiency Anemia", youtubeId: "7jHm3HFG8cc", url: "https://youtu.be/7jHm3HFG8cc" },
+      { id: "PLw03kzQQoHv0zzA3VmasZYxxGhYzfFIpx-5", title: "Blood Biochemistry - Glycolysis & 2,3-BPG", youtubeId: "APpvrF9-AFI", url: "https://youtu.be/APpvrF9-AFI" },
+      { id: "PLw03kzQQoHv0zzA3VmasZYxxGhYzfFIpx-6", title: "Blood Biochemistry - Iron Deficiency Anemia vs. Iron Overload", youtubeId: "jZkQUTOBCH8", url: "https://youtu.be/jZkQUTOBCH8" },
+      { id: "PLw03kzQQoHv0zzA3VmasZYxxGhYzfFIpx-7", title: "Blood Biochemistry - Folate and Vitamin B12 Metabolism", youtubeId: "J20n9LIE0Ro", url: "https://youtu.be/J20n9LIE0Ro" },
+      { id: "PLw03kzQQoHv0zzA3VmasZYxxGhYzfFIpx-8", title: "Blood Biochemistry - Hexose Monophosphate (HMP) Shunt", youtubeId: "ai874XziLpo", url: "https://youtu.be/ai874XziLpo" },
+      { id: "PLw03kzQQoHv0zzA3VmasZYxxGhYzfFIpx-9", title: "Blood Biochemistry - WBCs Metabolism", youtubeId: "MM35sMF_zw4", url: "https://youtu.be/MM35sMF_zw4" },
+      { id: "PLw03kzQQoHv0zzA3VmasZYxxGhYzfFIpx-10", title: "Hemolytic Anemia", youtubeId: "XFcidr09mwI", url: "https://youtu.be/XFcidr09mwI" }
+    ],
     tags: ['biochemistry', 'esawi', 'عيسوي', 'بايوكيمستري', 'playlist']
   },
   {
@@ -502,8 +723,52 @@ export const materialsData: MaterialItem[] = [
     year: 2,
     moduleId: 'year2-blood',
     subject: 'Biochemistry',
-    author: ['M. Wael', 'Dr. Ayman'],
+    author: 'Dr. Ayman',
+    addedBy: 'M. Wael',
     playlistId: 'PLmjIY3SPvf2nea96csM-ni6mkdjwQ0g0C',
+    videos: [
+      { id: "PLmjIY3SPvf2nea96csM-ni6mkdjwQ0g0C-1", title: "Dr Ayman Beshir - Integration Of Metabolism 1", youtubeId: "F4jQnbN6ovw", url: "https://youtu.be/F4jQnbN6ovw" },
+      { id: "PLmjIY3SPvf2nea96csM-ni6mkdjwQ0g0C-2", title: "Dr Ayman Beshir - Integration Of Metabolism 2", youtubeId: "F6mrQwZod44", url: "https://youtu.be/F6mrQwZod44" },
+      { id: "PLmjIY3SPvf2nea96csM-ni6mkdjwQ0g0C-3", title: "Dr Ayman Beshir - Diabetes Mellitus", youtubeId: "PDnp9u9QqY0", url: "https://youtu.be/PDnp9u9QqY0" },
+      { id: "PLmjIY3SPvf2nea96csM-ni6mkdjwQ0g0C-4", title: "Dr Ayman Beshir - Complications Of Diabetes", youtubeId: "q_rw99gl24U", url: "https://youtu.be/q_rw99gl24U" },
+      { id: "PLmjIY3SPvf2nea96csM-ni6mkdjwQ0g0C-5", title: "Dr Ayman Beshir - Calcium Regulation", youtubeId: "AZujOSdy_cw", url: "https://youtu.be/AZujOSdy_cw" },
+      { id: "PLmjIY3SPvf2nea96csM-ni6mkdjwQ0g0C-6", title: "Dr Ayman Beshir - Amino Acid Catabolism", youtubeId: "I-DM4AEZL8Q", url: "https://youtu.be/I-DM4AEZL8Q" },
+      { id: "PLmjIY3SPvf2nea96csM-ni6mkdjwQ0g0C-7", title: "Dr Ayman Beshir - Amino Acid Catabolism 2", youtubeId: "v6ijrqmiZt4", url: "https://youtu.be/v6ijrqmiZt4" },
+      { id: "PLmjIY3SPvf2nea96csM-ni6mkdjwQ0g0C-8", title: "Dr Ayman Beshir - Branched AAs Catabolism + Derivatives Of AAs", youtubeId: "AhFU4xE5C34", url: "https://youtu.be/AhFU4xE5C34" },
+      { id: "PLmjIY3SPvf2nea96csM-ni6mkdjwQ0g0C-9", title: "Dr Ayman Beshir - Third Block Revision", youtubeId: "brQbVMoDadY", url: "https://youtu.be/brQbVMoDadY" },
+      { id: "PLmjIY3SPvf2nea96csM-ni6mkdjwQ0g0C-10", title: "Dr Ayman Beshir - Digestion Of Lipids", youtubeId: "Pbs3use2K9A", url: "https://youtu.be/Pbs3use2K9A" },
+      { id: "PLmjIY3SPvf2nea96csM-ni6mkdjwQ0g0C-11", title: "Dr Ayman Beshir - Transport Of Lipids In Blood 1", youtubeId: "e5rna_twXPk", url: "https://youtu.be/e5rna_twXPk" },
+      { id: "PLmjIY3SPvf2nea96csM-ni6mkdjwQ0g0C-12", title: "Dr Ayman Beshir - Transport Of Lipids In Blood 2", youtubeId: "p4pkcr9j-Fc", url: "https://youtu.be/p4pkcr9j-Fc" },
+      { id: "PLmjIY3SPvf2nea96csM-ni6mkdjwQ0g0C-13", title: "Dr Ayman Beshir - Transport Of Lipids In Blood 3", youtubeId: "77niIiPS88Y", url: "https://youtu.be/77niIiPS88Y" },
+      { id: "PLmjIY3SPvf2nea96csM-ni6mkdjwQ0g0C-14", title: "Dr Ayman Beshir - Primary Hyperlipoproteinemia, Hypolipoproteinemia & Fatty Liver", youtubeId: "kuZyVbXnO4Y", url: "https://youtu.be/kuZyVbXnO4Y" },
+      { id: "PLmjIY3SPvf2nea96csM-ni6mkdjwQ0g0C-15", title: "Dr Ayman Beshir - Cholesterol Metabolism", youtubeId: "husGRHrR-s0", url: "https://youtu.be/husGRHrR-s0" },
+      { id: "PLmjIY3SPvf2nea96csM-ni6mkdjwQ0g0C-16", title: "Dr Ayman Beshir - CHO & Protein Digestion", youtubeId: "1Man_UKTRyo", url: "https://youtu.be/1Man_UKTRyo" },
+      { id: "PLmjIY3SPvf2nea96csM-ni6mkdjwQ0g0C-17", title: "Dr Ayman Beshir - HDL Metabolism", youtubeId: "cNnOgEKhcmQ", url: "https://youtu.be/cNnOgEKhcmQ" },
+      { id: "PLmjIY3SPvf2nea96csM-ni6mkdjwQ0g0C-18", title: "Dr Ayman Beshir - Heme Metabolism 1", youtubeId: "7VSEM2tNxqQ", url: "https://youtu.be/7VSEM2tNxqQ" },
+      { id: "PLmjIY3SPvf2nea96csM-ni6mkdjwQ0g0C-19", title: "Dr Ayman Beshir - Heme Metabolism 2", youtubeId: "M2qvLANyHrg", url: "https://youtu.be/M2qvLANyHrg" },
+      { id: "PLmjIY3SPvf2nea96csM-ni6mkdjwQ0g0C-20", title: "Dr Ayman Beshir - Heme Metabolism 3 , Iron Metabolism 1", youtubeId: "oxUE7gA_C74", url: "https://youtu.be/oxUE7gA_C74" },
+      { id: "PLmjIY3SPvf2nea96csM-ni6mkdjwQ0g0C-21", title: "Dr Ayman Beshir - Practical Revision 1", youtubeId: "5wHA50N37CA", url: "https://youtu.be/5wHA50N37CA" },
+      { id: "PLmjIY3SPvf2nea96csM-ni6mkdjwQ0g0C-22", title: "Dr Ayman Beshir - Iron Metabolism 2", youtubeId: "XIZODjoKF0E", url: "https://youtu.be/XIZODjoKF0E" },
+      { id: "PLmjIY3SPvf2nea96csM-ni6mkdjwQ0g0C-23", title: "Dr Ayman Beshir - Glucuronic Acid Pathway, Metabolism Of Xenobiotics 1", youtubeId: "p7_WRaLR_TE", url: "https://youtu.be/p7_WRaLR_TE" },
+      { id: "PLmjIY3SPvf2nea96csM-ni6mkdjwQ0g0C-24", title: "Dr Ayman Beshir - Metabolism Of Xenobiotics 2 , Nutrition 1", youtubeId: "So57NGT5iHg", url: "https://youtu.be/So57NGT5iHg" },
+      { id: "PLmjIY3SPvf2nea96csM-ni6mkdjwQ0g0C-25", title: "Dr Ayman Beshir - Nutrition 2 & Obesity", youtubeId: "cDm8N1dpxMM", url: "https://youtu.be/cDm8N1dpxMM" },
+      { id: "PLmjIY3SPvf2nea96csM-ni6mkdjwQ0g0C-26", title: "Dr Ayman Beshir - One Carbon Units Metabolism & Folic Acid 1", youtubeId: "MFoIkK05tJk", url: "https://youtu.be/MFoIkK05tJk" },
+      { id: "PLmjIY3SPvf2nea96csM-ni6mkdjwQ0g0C-27", title: "Dr Ayman Beshir - Folic acid 2 , Vit B12 & Vit C", youtubeId: "UfIdhiYM-jc", url: "https://youtu.be/UfIdhiYM-jc" },
+      { id: "PLmjIY3SPvf2nea96csM-ni6mkdjwQ0g0C-28", title: "Dr Ayman Beshir - The Rest Of The Vitamins", youtubeId: "VEZqr3tCp0M", url: "https://youtu.be/VEZqr3tCp0M" },
+      { id: "PLmjIY3SPvf2nea96csM-ni6mkdjwQ0g0C-29", title: "Dr Ayman Beshir - Minerals & Free Radicals", youtubeId: "0c3eHrdjwYU", url: "https://youtu.be/0c3eHrdjwYU" },
+      { id: "PLmjIY3SPvf2nea96csM-ni6mkdjwQ0g0C-30", title: "Dr Ayman Beshir - CHO Revision 1", youtubeId: "1LGGl4EuWjQ", url: "https://youtu.be/1LGGl4EuWjQ" },
+      { id: "PLmjIY3SPvf2nea96csM-ni6mkdjwQ0g0C-31", title: "Dr Ayman Beshir - CHO Revision 2", youtubeId: "Eye6_zmY-4A", url: "https://youtu.be/Eye6_zmY-4A" },
+      { id: "PLmjIY3SPvf2nea96csM-ni6mkdjwQ0g0C-32", title: "Dr Ayman Beshir - CHO Revision 3 + AAs Revision 1", youtubeId: "lFIPkzug03o", url: "https://youtu.be/lFIPkzug03o" },
+      { id: "PLmjIY3SPvf2nea96csM-ni6mkdjwQ0g0C-33", title: "Dr Ayman Beshir - Steroid Hormones Synthesis +  AAs Revision 2", youtubeId: "7dvvejX-xlY", url: "https://youtu.be/7dvvejX-xlY" },
+      { id: "PLmjIY3SPvf2nea96csM-ni6mkdjwQ0g0C-34", title: "Dr Ayman Beshir - AAs Revision 3", youtubeId: "cSLj0ezndSI", url: "https://youtu.be/cSLj0ezndSI" },
+      { id: "PLmjIY3SPvf2nea96csM-ni6mkdjwQ0g0C-35", title: "Dr Ayman Beshir - Lipids Revision 1", youtubeId: "xdOmQTFJv2U", url: "https://youtu.be/xdOmQTFJv2U" },
+      { id: "PLmjIY3SPvf2nea96csM-ni6mkdjwQ0g0C-36", title: "Dr Ayman Beshir - Lipids Revision 2", youtubeId: "k6MEKLKg8Rc", url: "https://youtu.be/k6MEKLKg8Rc" },
+      { id: "PLmjIY3SPvf2nea96csM-ni6mkdjwQ0g0C-37", title: "Dr Ayman Beshir - Lipids Revision 3", youtubeId: "j43z08BcuGM", url: "https://youtu.be/j43z08BcuGM" },
+      { id: "PLmjIY3SPvf2nea96csM-ni6mkdjwQ0g0C-38", title: "1 Electron Transport chain", youtubeId: "qe5kILJWQOo", url: "https://youtu.be/qe5kILJWQOo" },
+      { id: "PLmjIY3SPvf2nea96csM-ni6mkdjwQ0g0C-39", title: "2 ETC&Inhibtors", youtubeId: "Vc0IptG0XqU", url: "https://youtu.be/Vc0IptG0XqU" },
+      { id: "PLmjIY3SPvf2nea96csM-ni6mkdjwQ0g0C-40", title: "3 Bioenergetics", youtubeId: "NKTs_fpK7oo", url: "https://youtu.be/NKTs_fpK7oo" },
+      { id: "PLmjIY3SPvf2nea96csM-ni6mkdjwQ0g0C-41", title: "1 Fasting,Well-Fed,Excercise", youtubeId: "U-zbKb6vcIc", url: "https://youtu.be/U-zbKb6vcIc" }
+    ],
     tags: ['biochemistry', 'ayman', 'أيمن', 'بايوكيمستري', 'playlist']
   },
   {
@@ -516,8 +781,14 @@ export const materialsData: MaterialItem[] = [
     year: 2,
     moduleId: 'year2-blood',
     subject: 'Biochemistry',
-    author: ['M. Wael', 'Dr. Walaa'],
+    author: 'Dr. Walaa',
+    addedBy: 'M. Wael',
     playlistId: 'PLXd13HOsAnZy_t0jdd-D6ewRMVSNtalVo',
+    videos: [
+      { id: "PLXd13HOsAnZy_t0jdd-D6ewRMVSNtalVo-1", title: "Heme Metaboilsm ( session1)", youtubeId: "JJ7dPxeq9R8", url: "https://youtu.be/JJ7dPxeq9R8" },
+      { id: "PLXd13HOsAnZy_t0jdd-D6ewRMVSNtalVo-2", title: "Heme Metabolism ( Session 2) Porphrias", youtubeId: "wEOdW1Rr2ms", url: "https://youtu.be/wEOdW1Rr2ms" },
+      { id: "PLXd13HOsAnZy_t0jdd-D6ewRMVSNtalVo-3", title: "Heme degradation", youtubeId: "KO_5BSExJec", url: "https://youtu.be/KO_5BSExJec" }
+    ],
     tags: ['biochemistry', 'walaa', 'ولاء', 'بايوكيمستري', 'playlist']
   },
   {
@@ -530,8 +801,16 @@ export const materialsData: MaterialItem[] = [
     year: 2,
     moduleId: 'year2-blood',
     subject: 'Biochemistry',
-    author: ['M. Wael', 'Dr. Walaa'],
+    author: 'Dr. Walaa',
+    addedBy: 'M. Wael',
     playlistId: 'PLXd13HOsAnZy9bTXaZ7fLI9-kSOUQPfPk',
+    videos: [
+      { id: "PLXd13HOsAnZy9bTXaZ7fLI9-kSOUQPfPk-1", title: "Vitamin D", youtubeId: "PkvmaardQ74", url: "https://youtu.be/PkvmaardQ74" },
+      { id: "PLXd13HOsAnZy9bTXaZ7fLI9-kSOUQPfPk-2", title: "Vitamin A", youtubeId: "NHnZ7DbLSq4", url: "https://youtu.be/NHnZ7DbLSq4" },
+      { id: "PLXd13HOsAnZy9bTXaZ7fLI9-kSOUQPfPk-3", title: "Vit  A  Cont", youtubeId: "ulMCO9x5uBc", url: "https://youtu.be/ulMCO9x5uBc" },
+      { id: "PLXd13HOsAnZy9bTXaZ7fLI9-kSOUQPfPk-4", title: "Vitamin E", youtubeId: "KDRpxRHHDw0", url: "https://youtu.be/KDRpxRHHDw0" },
+      { id: "PLXd13HOsAnZy9bTXaZ7fLI9-kSOUQPfPk-5", title: "Vitamin K", youtubeId: "7U9WmIgtGT0", url: "https://youtu.be/7U9WmIgtGT0" }
+    ],
     tags: ['biochemistry', 'walaa', 'ولاء', 'بايوكيمستري', 'playlist']
   },
   {
@@ -544,7 +823,8 @@ export const materialsData: MaterialItem[] = [
     year: 2,
     moduleId: 'year2-blood',
     subject: 'Biochemistry',
-    author: ['M. Wael', 'Dr. Mohammed'],
+    author: 'Dr. Mohammed',
+    addedBy: 'M. Wael',
     videos: [
       { id: 'mohammed-p1', title: 'بايوكيمستري الدم - د. محمد (الجزء 1)', youtubeId: 'csgUGDeXW7k', url: 'https://youtu.be/csgUGDeXW7k' },
       { id: 'mohammed-p2', title: 'بايوكيمستري الدم - د. محمد (الجزء 2)', youtubeId: 'C3jCs4hvMUA', url: 'https://youtu.be/C3jCs4hvMUA' },
@@ -564,7 +844,8 @@ export const materialsData: MaterialItem[] = [
     year: 2,
     moduleId: 'year2-blood',
     subject: 'Biochemistry',
-    author: ['M. Wael', 'Dr. Marwa Hamdy'],
+    author: 'Dr. Marwa Hamdy',
+    addedBy: 'M. Wael',
     videos: [
       { id: 'marwa-p1', title: 'بايوكيمستري الدم - د. مروة حمدي (الجزء 1)', youtubeId: 'Idy7y9iSKbM', url: 'https://youtu.be/Idy7y9iSKbM' },
       { id: 'marwa-p2', title: 'بايوكيمستري الدم - د. مروة حمدي (الجزء 2)', youtubeId: 'Ggl2T7x8PJs', url: 'https://youtu.be/Ggl2T7x8PJs' },
@@ -587,10 +868,21 @@ export const materialsData: MaterialItem[] = [
     year: 2,
     moduleId: 'year2-blood',
     subject: 'Pharmacology',
-    author: ['M. Wael', 'Dr. Ahmed Nour Eldin'],
+    author: 'Dr. Ahmed Nour Eldin',
+    addedBy: 'M. Wael',
     playlistId: 'PL_7f3u0OA6BM06UfWmzinSeaRNS_xvxNA',
+    videos: [
+      { id: "PL_7f3u0OA6BM06UfWmzinSeaRNS_xvxNA-1", title: "Blood Pharmacology 2018: 1 Overview of hemostasis & Parentral anticoagulants", youtubeId: "TBC5Mhvh1Z8", url: "https://youtu.be/TBC5Mhvh1Z8" },
+      { id: "PL_7f3u0OA6BM06UfWmzinSeaRNS_xvxNA-2", title: "Blood Pharmacology 2018: 2- Oral Anticoagulants", youtubeId: "CxhOFBW_XHM", url: "https://youtu.be/CxhOFBW_XHM" },
+      { id: "PL_7f3u0OA6BM06UfWmzinSeaRNS_xvxNA-3", title: "Blood Pharmacology 2018: 3-  Antiplatelets", youtubeId: "8-nj44RNNjo", url: "https://youtu.be/8-nj44RNNjo" },
+      { id: "PL_7f3u0OA6BM06UfWmzinSeaRNS_xvxNA-4", title: "Blood Pharmacology 2018: 4  Clinical uses of antithrombotics + Fibrinolytics", youtubeId: "MRPBzkuMzzk", url: "https://youtu.be/MRPBzkuMzzk" },
+      { id: "PL_7f3u0OA6BM06UfWmzinSeaRNS_xvxNA-5", title: "Blood Pharmacology 2018: 5- Hemostatic Drugs", youtubeId: "Cvfchi84poo", url: "https://youtu.be/Cvfchi84poo" },
+      { id: "PL_7f3u0OA6BM06UfWmzinSeaRNS_xvxNA-6", title: "6- Drug Therapy Of Dyslipidemia (Old Classic Drugs)", youtubeId: "lC7TTOW4Mc4", url: "https://youtu.be/lC7TTOW4Mc4" },
+      { id: "PL_7f3u0OA6BM06UfWmzinSeaRNS_xvxNA-7", title: "Blood Pharmacology 2018: 7- Drug therapy of anaemia", youtubeId: "VT-sVjFCDCM", url: "https://youtu.be/VT-sVjFCDCM" },
+      { id: "PL_7f3u0OA6BM06UfWmzinSeaRNS_xvxNA-8", title: "Blood Pharmacology 2019: 8- Drug Therapy of Malaria", youtubeId: "cry4rCMnKvY", url: "https://youtu.be/cry4rCMnKvY" },
+      { id: "PL_7f3u0OA6BM06UfWmzinSeaRNS_xvxNA-9", title: "Blood Pharmacology 2019: 9-Concepts in Treatment of Leukemia", youtubeId: "5LlPhENljQg", url: "https://youtu.be/5LlPhENljQg" }
+    ],
     tags: ['pharmacology', 'nour eldin', 'أحمد نور الدين', 'فارما', 'playlist'],
-    isPinned: true
   },
   {
     id: 'bld-pharma-fouda',
@@ -602,7 +894,8 @@ export const materialsData: MaterialItem[] = [
     year: 2,
     moduleId: 'year2-blood',
     subject: 'Pharmacology',
-    author: ['M. Wael', 'Dr. Abdel Motaal Fouda'],
+    author: 'Dr. Abdel Motaal Fouda',
+    addedBy: 'M. Wael',
     tags: ['pharmacology', 'fouda', 'عبد المتعال فودة', 'فارما']
   },
   {
@@ -615,7 +908,8 @@ export const materialsData: MaterialItem[] = [
     year: 2,
     moduleId: 'year2-blood',
     subject: 'Pharmacology',
-    author: ['M. Wael', 'Dr. Tah'],
+    author: 'Dr. Tah',
+    addedBy: 'M. Wael',
     tags: ['pharmacology', 'tah', 'تاح', 'فارما']
   },
   {
@@ -628,7 +922,8 @@ export const materialsData: MaterialItem[] = [
     year: 2,
     moduleId: 'year2-blood',
     subject: 'Pharmacology',
-    author: ['M. Wael', 'Dr. Ahmed Abdel Rahman'],
+    author: 'Dr. Ahmed Abdel Rahman',
+    addedBy: 'M. Wael',
     tags: ['pharmacology', 'abdel rahman', 'أحمد عبد الرحمن', 'فارما']
   },
   {
@@ -641,8 +936,52 @@ export const materialsData: MaterialItem[] = [
     year: 2,
     moduleId: 'year2-blood',
     subject: 'Pharmacology',
-    author: ['M. Wael', 'Dr. El Shaer'],
+    author: 'Dr. El Shaer',
+    addedBy: 'M. Wael',
     playlistId: 'PL0_tN0panMs8W-tpVy4a_eM9QR2DwwvxA',
+    videos: [
+      { id: "PL0_tN0panMs8W-tpVy4a_eM9QR2DwwvxA-1", title: "Pharma Dr M. Al Shaer - Respiratory 1", youtubeId: "1ONRjLkyLPU", url: "https://youtu.be/1ONRjLkyLPU" },
+      { id: "PL0_tN0panMs8W-tpVy4a_eM9QR2DwwvxA-2", title: "Pharma Dr M. Al Shaer - Respiratory 2", youtubeId: "9z72M5cgIKA", url: "https://youtu.be/9z72M5cgIKA" },
+      { id: "PL0_tN0panMs8W-tpVy4a_eM9QR2DwwvxA-3", title: "Pharma Dr M. Al Shaer - Respiratory 3", youtubeId: "s_jbxA8fBko", url: "https://youtu.be/s_jbxA8fBko" },
+      { id: "PL0_tN0panMs8W-tpVy4a_eM9QR2DwwvxA-4", title: "Pharma Dr M. Al Shaer - Respiratory 4", youtubeId: "1s_TyvxmX-c", url: "https://youtu.be/1s_TyvxmX-c" },
+      { id: "PL0_tN0panMs8W-tpVy4a_eM9QR2DwwvxA-5", title: "Pharma Dr M. Al Shaer - Blood - 1", youtubeId: "wXKE2afTsX8", url: "https://youtu.be/wXKE2afTsX8" },
+      { id: "PL0_tN0panMs8W-tpVy4a_eM9QR2DwwvxA-6", title: "Pharma Dr M. Al Shaer - Blood - 2", youtubeId: "stjWvF4DVlc", url: "https://youtu.be/stjWvF4DVlc" },
+      { id: "PL0_tN0panMs8W-tpVy4a_eM9QR2DwwvxA-7", title: "Pharma Dr M. Al Shaer - Blood - 3a", youtubeId: "Fe-v-GxBgoY", url: "https://youtu.be/Fe-v-GxBgoY" },
+      { id: "PL0_tN0panMs8W-tpVy4a_eM9QR2DwwvxA-8", title: "Pharma Dr M. Al Shaer - Blood - 3b", youtubeId: "cexj2cNaBzU", url: "https://youtu.be/cexj2cNaBzU" },
+      { id: "PL0_tN0panMs8W-tpVy4a_eM9QR2DwwvxA-9", title: "Pharma Dr M. Al Shaer - Blood - 4 Leukemia", youtubeId: "QJKrnx3OGjU", url: "https://youtu.be/QJKrnx3OGjU" },
+      { id: "PL0_tN0panMs8W-tpVy4a_eM9QR2DwwvxA-10", title: "Pharma Dr M. Al Shaer - Blood - Revesion", youtubeId: "LHO-6c6oKXM", url: "https://youtu.be/LHO-6c6oKXM" },
+      { id: "PL0_tN0panMs8W-tpVy4a_eM9QR2DwwvxA-11", title: "Pharma Dr M. Al Shaer - CVS - Angina 1", youtubeId: "fIAzH5WqYUA", url: "https://youtu.be/fIAzH5WqYUA" },
+      { id: "PL0_tN0panMs8W-tpVy4a_eM9QR2DwwvxA-12", title: "Pharma Dr M. Al Shaer - CVS - Angina 2", youtubeId: "_MZufS6WQpQ", url: "https://youtu.be/_MZufS6WQpQ" },
+      { id: "PL0_tN0panMs8W-tpVy4a_eM9QR2DwwvxA-13", title: "Pharma Dr M. Al Shaer - CVS - HF1 pt1", youtubeId: "-97jVeQyUJI", url: "https://youtu.be/-97jVeQyUJI" },
+      { id: "PL0_tN0panMs8W-tpVy4a_eM9QR2DwwvxA-14", title: "Pharma Dr M. Al Shaer - CVS - Hf1 pt2", youtubeId: "yjmW7MVOXUE", url: "https://youtu.be/yjmW7MVOXUE" },
+      { id: "PL0_tN0panMs8W-tpVy4a_eM9QR2DwwvxA-15", title: "Pharma Dr M. Al Shaer - CVS - Hf 2", youtubeId: "FPTVZdTtbe4", url: "https://youtu.be/FPTVZdTtbe4" },
+      { id: "PL0_tN0panMs8W-tpVy4a_eM9QR2DwwvxA-16", title: "Pharma Dr M. Al Shaer - CVS - Hf 2 part 2", youtubeId: "qsKL0sPwQgs", url: "https://youtu.be/qsKL0sPwQgs" },
+      { id: "PL0_tN0panMs8W-tpVy4a_eM9QR2DwwvxA-17", title: "Pharma Dr M. Al Shaer - CVS - hypertention", youtubeId: "qnR0zSjQjfY", url: "https://youtu.be/qnR0zSjQjfY" },
+      { id: "PL0_tN0panMs8W-tpVy4a_eM9QR2DwwvxA-18", title: "Pharma Dr M. Al Shaer - CVS - Hypertention part 2", youtubeId: "B1IsR_Xmyac", url: "https://youtu.be/B1IsR_Xmyac" },
+      { id: "PL0_tN0panMs8W-tpVy4a_eM9QR2DwwvxA-19", title: "Pharma Dr M. Al Shaer - CVS - Arrhythmia pt1", youtubeId: "3E7sV5eB4aw", url: "https://youtu.be/3E7sV5eB4aw" },
+      { id: "PL0_tN0panMs8W-tpVy4a_eM9QR2DwwvxA-20", title: "Pharma Dr M. Al Shaer - CVS - Arrhythmia pt2", youtubeId: "2a9ovBQHUjQ", url: "https://youtu.be/2a9ovBQHUjQ" },
+      { id: "PL0_tN0panMs8W-tpVy4a_eM9QR2DwwvxA-21", title: "Pharma Dr M. Al Shaer - Respiratory 1", youtubeId: "1ONRjLkyLPU", url: "https://youtu.be/1ONRjLkyLPU" },
+      { id: "PL0_tN0panMs8W-tpVy4a_eM9QR2DwwvxA-22", title: "Pharma Dr M. Al Shaer - Respiratory 2", youtubeId: "9z72M5cgIKA", url: "https://youtu.be/9z72M5cgIKA" },
+      { id: "PL0_tN0panMs8W-tpVy4a_eM9QR2DwwvxA-23", title: "Pharma Dr M. Al Shaer - Blood - 3a", youtubeId: "Fe-v-GxBgoY", url: "https://youtu.be/Fe-v-GxBgoY" },
+      { id: "PL0_tN0panMs8W-tpVy4a_eM9QR2DwwvxA-24", title: "Pharma Dr M. Al Shaer - Respiratory 3", youtubeId: "s_jbxA8fBko", url: "https://youtu.be/s_jbxA8fBko" },
+      { id: "PL0_tN0panMs8W-tpVy4a_eM9QR2DwwvxA-25", title: "Pharma Dr M. Al Shaer - Respiratory 4", youtubeId: "1s_TyvxmX-c", url: "https://youtu.be/1s_TyvxmX-c" },
+      { id: "PL0_tN0panMs8W-tpVy4a_eM9QR2DwwvxA-26", title: "Pharma Dr M. Al Shaer - CNS - Opioids", youtubeId: "kYneufV4XVo", url: "https://youtu.be/kYneufV4XVo" },
+      { id: "PL0_tN0panMs8W-tpVy4a_eM9QR2DwwvxA-27", title: "Pharma Dr M. Al Shaer - CNS - Psychosis & Depression", youtubeId: "cbK_Odt8Ync", url: "https://youtu.be/cbK_Odt8Ync" },
+      { id: "PL0_tN0panMs8W-tpVy4a_eM9QR2DwwvxA-28", title: "Pharma Dr M. Al Shaer - CNS - Anesthesia", youtubeId: "g_biXQK6GJY", url: "https://youtu.be/g_biXQK6GJY" },
+      { id: "PL0_tN0panMs8W-tpVy4a_eM9QR2DwwvxA-29", title: "Pharma Dr M. Al Shaer - CNS - Epilepsy", youtubeId: "2lfE1Wsp6hM", url: "https://youtu.be/2lfE1Wsp6hM" },
+      { id: "PL0_tN0panMs8W-tpVy4a_eM9QR2DwwvxA-30", title: "Pharma Dr M. Al Shaer - CNS - Parkinsonism", youtubeId: "suteMzzNlTI", url: "https://youtu.be/suteMzzNlTI" },
+      { id: "PL0_tN0panMs8W-tpVy4a_eM9QR2DwwvxA-31", title: "Pharma Dr M. Al Shaer - CNS - 6", youtubeId: "F2blzfQ1dT4", url: "https://youtu.be/F2blzfQ1dT4" },
+      { id: "PL0_tN0panMs8W-tpVy4a_eM9QR2DwwvxA-32", title: "Pharma Dr M. Al Shaer - GIT - 1", youtubeId: "pFR3YSk9YGE", url: "https://youtu.be/pFR3YSk9YGE" },
+      { id: "PL0_tN0panMs8W-tpVy4a_eM9QR2DwwvxA-33", title: "Pharma Dr M. Al Shaer - GIT - 2 PPI", youtubeId: "hY3u0ZCn8fA", url: "https://youtu.be/hY3u0ZCn8fA" },
+      { id: "PL0_tN0panMs8W-tpVy4a_eM9QR2DwwvxA-34", title: "Pharma Dr M. Al Shaer - GIT - 3", youtubeId: "n4QX9L5Ra4c", url: "https://youtu.be/n4QX9L5Ra4c" },
+      { id: "PL0_tN0panMs8W-tpVy4a_eM9QR2DwwvxA-35", title: "Pharma Dr M. Al Shaer - GIT - 4 Vomiting", youtubeId: "lJCOaPA4e4k", url: "https://youtu.be/lJCOaPA4e4k" },
+      { id: "PL0_tN0panMs8W-tpVy4a_eM9QR2DwwvxA-36", title: "Pharma Dr M. Al Shaer - GIT - 5 Peptic Ulcer", youtubeId: "punCVofqxxA", url: "https://youtu.be/punCVofqxxA" },
+      { id: "PL0_tN0panMs8W-tpVy4a_eM9QR2DwwvxA-37", title: "Pharma Dr M. Al Shaer - GIT - 6 Acid related diseases", youtubeId: "R8ZbsO3Avsk", url: "https://youtu.be/R8ZbsO3Avsk" },
+      { id: "PL0_tN0panMs8W-tpVy4a_eM9QR2DwwvxA-38", title: "Pharma Dr M. Al Shaer - GIT - 7", youtubeId: "42aYeJFtLkQ", url: "https://youtu.be/42aYeJFtLkQ" },
+      { id: "PL0_tN0panMs8W-tpVy4a_eM9QR2DwwvxA-39", title: "Pharma Dr M. Al Shaer - GIT - 8 Ameba & GERD & Conistipation", youtubeId: "-2J_2XcJieM", url: "https://youtu.be/-2J_2XcJieM" },
+      { id: "PL0_tN0panMs8W-tpVy4a_eM9QR2DwwvxA-40", title: "Pharma Dr M. Al Shaer - GIT - 9 Liver Disorders and Transplantation", youtubeId: "M03TChN8eo4", url: "https://youtu.be/M03TChN8eo4" },
+      { id: "PL0_tN0panMs8W-tpVy4a_eM9QR2DwwvxA-41", title: "Pharma Dr M. Al Shaer - GIT - 10 Revision Of Acid Diseases - GERD", youtubeId: "Zyj2fXVgIU4", url: "https://youtu.be/Zyj2fXVgIU4" }
+    ],
     tags: ['pharmacology', 'shaer', 'الشاعر', 'فارما', 'playlist']
   },
   {
@@ -655,9 +994,9 @@ export const materialsData: MaterialItem[] = [
     year: 2,
     moduleId: 'year2-blood',
     subject: 'Pharmacology',
-    author: ['M. Wael', 'MG ASU MED'],
+    author: 'MG ASU MED',
+    addedBy: 'M. Wael',
     tags: ['pharma', 'drug list', 'أدوية', 'قائمة الأدوية'],
-    isPinned: true
   },
 
   // ==========================================
@@ -673,7 +1012,8 @@ export const materialsData: MaterialItem[] = [
     year: 2,
     moduleId: 'year2-blood',
     subject: 'Pathology',
-    author: ['M. Wael', 'Dr. Ahmed El-Nemer'],
+    author: 'Dr. Ahmed El-Nemer',
+    addedBy: 'M. Wael',
     tags: ['pathology', 'nemer', 'أحمد النمر', 'باثولوجي']
   },
   {
@@ -686,9 +1026,9 @@ export const materialsData: MaterialItem[] = [
     year: 2,
     moduleId: 'year2-blood',
     subject: 'Pathology',
-    author: ['M. Wael', 'Dr. Sameh Ghazy'],
+    author: 'Dr. Sameh Ghazy',
+    addedBy: 'M. Wael',
     tags: ['pathology', 'sameh ghazy', 'سامح غازي', 'باثولوجي'],
-    isPinned: true
   },
   {
     id: 'bld-patho-khalifa',
@@ -700,7 +1040,8 @@ export const materialsData: MaterialItem[] = [
     year: 2,
     moduleId: 'year2-blood',
     subject: 'Pathology',
-    author: ['M. Wael', 'Dr. Abdel Rahman Khalifa'],
+    author: 'Dr. Abdel Rahman Khalifa',
+    addedBy: 'M. Wael',
     tags: ['pathology', 'khalifa', 'عبد الرحمن خليفة', 'باثولوجي']
   },
   {
@@ -713,8 +1054,19 @@ export const materialsData: MaterialItem[] = [
     year: 2,
     moduleId: 'year2-blood',
     subject: 'Pathology',
-    author: ['M. Wael', 'Dr. Khaled El-Sharkawy'],
+    author: 'Dr. Khaled El-Sharkawy',
+    addedBy: 'M. Wael',
     playlistId: 'PLLmNysLEaLbj-ULVe6IKH8SSD7sF33F5-',
+    videos: [
+      { id: "PLLmNysLEaLbj-ULVe6IKH8SSD7sF33F5--1", title: "Practical pathology of lymphatic system", youtubeId: "M9t2vWpWx8I", url: "https://youtu.be/M9t2vWpWx8I" },
+      { id: "PLLmNysLEaLbj-ULVe6IKH8SSD7sF33F5--2", title: "Hypersensitivity reaction type 3 & 4", youtubeId: "ehM4V1T8SE0", url: "https://youtu.be/ehM4V1T8SE0" },
+      { id: "PLLmNysLEaLbj-ULVe6IKH8SSD7sF33F5--3", title: "Hypersensitivity reactions type 1&2", youtubeId: "IPcSiy5L1DI", url: "https://youtu.be/IPcSiy5L1DI" },
+      { id: "PLLmNysLEaLbj-ULVe6IKH8SSD7sF33F5--4", title: "Lymphadenopathy", youtubeId: "zuxTaUxa8Uw", url: "https://youtu.be/zuxTaUxa8Uw" },
+      { id: "PLLmNysLEaLbj-ULVe6IKH8SSD7sF33F5--5", title: "Hodgkin's  and non Hodgkin's lymphomas", youtubeId: "ZgIOd8o8Jp8", url: "https://youtu.be/ZgIOd8o8Jp8" },
+      { id: "PLLmNysLEaLbj-ULVe6IKH8SSD7sF33F5--6", title: "Autoimmune disorders", youtubeId: "zSobwu7wCj0", url: "https://youtu.be/zSobwu7wCj0" },
+      { id: "PLLmNysLEaLbj-ULVe6IKH8SSD7sF33F5--7", title: "Immune deficiency disorders", youtubeId: "kxe-QrrBdbA", url: "https://youtu.be/kxe-QrrBdbA" },
+      { id: "PLLmNysLEaLbj-ULVe6IKH8SSD7sF33F5--8", title: "Allergy", youtubeId: "_X07NxMpwA4", url: "https://youtu.be/_X07NxMpwA4" }
+    ],
     tags: ['pathology', 'sharkawy', 'خالد الشرقاوي', 'باثولوجي', 'playlist']
   },
 
@@ -731,7 +1083,8 @@ export const materialsData: MaterialItem[] = [
     year: 2,
     moduleId: 'year2-blood',
     subject: 'Parasitology',
-    author: ['M. Wael', 'Dr. Noha Madbouly'],
+    author: 'Dr. Noha Madbouly',
+    addedBy: 'M. Wael',
     tags: ['parasitology', 'madbouly', 'نهى مدبولي', 'بارا']
   },
   {
@@ -744,7 +1097,8 @@ export const materialsData: MaterialItem[] = [
     year: 2,
     moduleId: 'year2-blood',
     subject: 'Parasitology',
-    author: ['M. Wael', 'Dr. El-Tokhy'],
+    author: 'Dr. El-Tokhy',
+    addedBy: 'M. Wael',
     tags: ['parasitology', 'tokhy', 'الطوخي', 'بارا']
   },
   {
@@ -757,8 +1111,21 @@ export const materialsData: MaterialItem[] = [
     year: 2,
     moduleId: 'year2-blood',
     subject: 'Parasitology',
-    author: ['M. Wael', 'Dr. Khaled Habib'],
+    author: 'Dr. Khaled Habib',
+    addedBy: 'M. Wael',
     playlistId: 'PLMnvpkQoftOI',
+    videos: [
+      { id: "PLMnvpkQoftOI-1", title: "Parasitology Blood module part 1 malaria 1", youtubeId: "EUTaJsihEzw", url: "https://youtu.be/EUTaJsihEzw" },
+      { id: "PLMnvpkQoftOI-2", title: "Parasitology Blood module Part 2 Malaria part 2", youtubeId: "guNHjwsUHrM", url: "https://youtu.be/guNHjwsUHrM" },
+      { id: "PLMnvpkQoftOI-3", title: "Parasitology Blood module part 3 mosquitoes", youtubeId: "DwKYaB5NbKs", url: "https://youtu.be/DwKYaB5NbKs" },
+      { id: "PLMnvpkQoftOI-4", title: "Parasitology Blood module part 4 Polymorphic trypansoma", youtubeId: "Iws3cK2QZ0E", url: "https://youtu.be/Iws3cK2QZ0E" },
+      { id: "PLMnvpkQoftOI-5", title: "Parasitology blood module part 5  American Trypansoma", youtubeId: "akTMiYRl_EY", url: "https://youtu.be/akTMiYRl_EY" },
+      { id: "PLMnvpkQoftOI-6", title: "Parasitologyt blood module part  6 Glossina & Triatoma megista", youtubeId: "rlmAEV96aM0", url: "https://youtu.be/rlmAEV96aM0" },
+      { id: "PLMnvpkQoftOI-7", title: "Parasitology Blood module part 7  Visceral leishmania", youtubeId: "8NEBatYO4vo", url: "https://youtu.be/8NEBatYO4vo" },
+      { id: "PLMnvpkQoftOI-8", title: "Parasitology Blood Module Part 8  Toxoplasma part 1", youtubeId: "JUUL-w7LRoQ", url: "https://youtu.be/JUUL-w7LRoQ" },
+      { id: "PLMnvpkQoftOI-9", title: "Parasitology Blood module Part 9 Toxoplasma part 2", youtubeId: "hOz0ljC_8_o", url: "https://youtu.be/hOz0ljC_8_o" },
+      { id: "PLMnvpkQoftOI-10", title: "Parasitology Blood module part 10   Wucheraria bancrofti", youtubeId: "-aA_jbb7C6w", url: "https://youtu.be/-aA_jbb7C6w" }
+    ],
     tags: ['parasitology', 'khaled habib', 'خالد حبيب', 'بارا', 'playlist']
   },
   {
@@ -771,8 +1138,37 @@ export const materialsData: MaterialItem[] = [
     year: 2,
     moduleId: 'year2-blood',
     subject: 'Parasitology',
-    author: ['M. Wael', 'Dr. Ayman Ibrahim'],
+    author: 'Dr. Ayman Ibrahim',
+    addedBy: 'M. Wael',
     playlistId: 'PL0_tN0panMs-zQRtyaMYxsIE9pXPwuTRy',
+    videos: [
+      { id: "PL0_tN0panMs-zQRtyaMYxsIE9pXPwuTRy-1", title: "Parasitology Dr Ayman - Urogenital module - 1", youtubeId: "QZGK1ce963A", url: "https://youtu.be/QZGK1ce963A" },
+      { id: "PL0_tN0panMs-zQRtyaMYxsIE9pXPwuTRy-2", title: "Parasitology Dr Ayman - Urogenital module - 2", youtubeId: "rnTA735X9g8", url: "https://youtu.be/rnTA735X9g8" },
+      { id: "PL0_tN0panMs-zQRtyaMYxsIE9pXPwuTRy-3", title: "Parasitology Dr Ayman - GIT module - 1", youtubeId: "e7OeNyDsxZs", url: "https://youtu.be/e7OeNyDsxZs" },
+      { id: "PL0_tN0panMs-zQRtyaMYxsIE9pXPwuTRy-4", title: "Parasitology Dr Ayman - GIT module - 2", youtubeId: "Ml_9uB0x2Hc", url: "https://youtu.be/Ml_9uB0x2Hc" },
+      { id: "PL0_tN0panMs-zQRtyaMYxsIE9pXPwuTRy-5", title: "Parasitology Dr Ayman - GIT module - 3", youtubeId: "16wyg_xdfTQ", url: "https://youtu.be/16wyg_xdfTQ" },
+      { id: "PL0_tN0panMs-zQRtyaMYxsIE9pXPwuTRy-6", title: "Parasitology Dr Ayman - GIT module - 4", youtubeId: "MsnmEkOmEf4", url: "https://youtu.be/MsnmEkOmEf4" },
+      { id: "PL0_tN0panMs-zQRtyaMYxsIE9pXPwuTRy-7", title: "Parasitology Dr Ayman - GIT module - 5", youtubeId: "LU8R9X2-ocU", url: "https://youtu.be/LU8R9X2-ocU" },
+      { id: "PL0_tN0panMs-zQRtyaMYxsIE9pXPwuTRy-8", title: "Parasitology Dr Ayman - GIT module - 6", youtubeId: "PpLsvYt-btU", url: "https://youtu.be/PpLsvYt-btU" },
+      { id: "PL0_tN0panMs-zQRtyaMYxsIE9pXPwuTRy-9", title: "Parasitology Dr Ayman - GIT module - 7", youtubeId: "a9YXeeJAJvw", url: "https://youtu.be/a9YXeeJAJvw" },
+      { id: "PL0_tN0panMs-zQRtyaMYxsIE9pXPwuTRy-10", title: "Parasitology Dr Ayman - GIT module - 8", youtubeId: "SHFn9xo-5Tc", url: "https://youtu.be/SHFn9xo-5Tc" },
+      { id: "PL0_tN0panMs-zQRtyaMYxsIE9pXPwuTRy-11", title: "Parasitology Dr Ayman - GIT module - 9", youtubeId: "PhotMF81xro", url: "https://youtu.be/PhotMF81xro" },
+      { id: "PL0_tN0panMs-zQRtyaMYxsIE9pXPwuTRy-12", title: "Parasitology Dr Ayman - GIT module - Community para", youtubeId: "wh1-L61K_yE", url: "https://youtu.be/wh1-L61K_yE" },
+      { id: "PL0_tN0panMs-zQRtyaMYxsIE9pXPwuTRy-13", title: "Parasitology Dr Ayman - Blood module - 1", youtubeId: "XH7wdteVrZM", url: "https://youtu.be/XH7wdteVrZM" },
+      { id: "PL0_tN0panMs-zQRtyaMYxsIE9pXPwuTRy-14", title: "Parasitology Dr Ayman - Blood module - 2", youtubeId: "BYR8dZjeRaw", url: "https://youtu.be/BYR8dZjeRaw" },
+      { id: "PL0_tN0panMs-zQRtyaMYxsIE9pXPwuTRy-15", title: "Parasitology Dr Ayman - Blood module - 3", youtubeId: "-ODP2Y8Yv-4", url: "https://youtu.be/-ODP2Y8Yv-4" },
+      { id: "PL0_tN0panMs-zQRtyaMYxsIE9pXPwuTRy-16", title: "Parasitology Dr Ayman - Blood module - 4", youtubeId: "zqXeq4gMa5w", url: "https://youtu.be/zqXeq4gMa5w" },
+      { id: "PL0_tN0panMs-zQRtyaMYxsIE9pXPwuTRy-17", title: "Parasitology Dr Ayman - Blood module - 5", youtubeId: "5x3s3ThlRPk", url: "https://youtu.be/5x3s3ThlRPk" },
+      { id: "PL0_tN0panMs-zQRtyaMYxsIE9pXPwuTRy-18", title: "Parasitology Dr Ayman - Blood module - 6", youtubeId: "sxtR0OS7MpU", url: "https://youtu.be/sxtR0OS7MpU" },
+      { id: "PL0_tN0panMs-zQRtyaMYxsIE9pXPwuTRy-19", title: "Parasitology Dr Ayman - Blood module - practical", youtubeId: "6SGpZa2V9sg", url: "https://youtu.be/6SGpZa2V9sg" },
+      { id: "PL0_tN0panMs-zQRtyaMYxsIE9pXPwuTRy-20", title: "Parasitology Dr Ayman - Infection module - 1", youtubeId: "tJ8OjySQuuQ", url: "https://youtu.be/tJ8OjySQuuQ" },
+      { id: "PL0_tN0panMs-zQRtyaMYxsIE9pXPwuTRy-21", title: "Parasitology Dr Ayman - Infection module - 2", youtubeId: "IeF_0p6c99M", url: "https://youtu.be/IeF_0p6c99M" },
+      { id: "PL0_tN0panMs-zQRtyaMYxsIE9pXPwuTRy-22", title: "Parasitology Dr Ayman - Infection module - 3", youtubeId: "sGZw18Vgb3g", url: "https://youtu.be/sGZw18Vgb3g" },
+      { id: "PL0_tN0panMs-zQRtyaMYxsIE9pXPwuTRy-23", title: "Parasitology Dr Ayman - Infection module - 4", youtubeId: "_VcD9htsJ1U", url: "https://youtu.be/_VcD9htsJ1U" },
+      { id: "PL0_tN0panMs-zQRtyaMYxsIE9pXPwuTRy-24", title: "Parasitology Dr Ayman - Infection module - 5 Management", youtubeId: "h3SP2gullNw", url: "https://youtu.be/h3SP2gullNw" },
+      { id: "PL0_tN0panMs-zQRtyaMYxsIE9pXPwuTRy-25", title: "Parasitology Dr Ayman - Respiratory module  - Paragonimus westermani", youtubeId: "VrV4AoR-yHs", url: "https://youtu.be/VrV4AoR-yHs" },
+      { id: "PL0_tN0panMs-zQRtyaMYxsIE9pXPwuTRy-26", title: "Parasitology Dr Ayman - CNS module", youtubeId: "fnfBJ6jrqiM", url: "https://youtu.be/fnfBJ6jrqiM" }
+    ],
     tags: ['parasitology', 'ayman ibrahim', 'أيمن إبراهيم', 'بارا', 'playlist']
   },
 
@@ -789,9 +1185,9 @@ export const materialsData: MaterialItem[] = [
     year: 2,
     moduleId: 'year2-blood',
     subject: 'Microbiology',
-    author: ['M. Wael', 'Dr. Ahmed Essam'],
+    author: 'Dr. Ahmed Essam',
+    addedBy: 'M. Wael',
     tags: ['microbiology', 'ahmed essam', 'أحمد عصام', 'مايكرو'],
-    isPinned: true
   },
   {
     id: 'bld-micro-kot',
@@ -803,7 +1199,8 @@ export const materialsData: MaterialItem[] = [
     year: 2,
     moduleId: 'year2-blood',
     subject: 'Microbiology',
-    author: ['M. Wael', 'Dr. Hanadi El-Kot'],
+    author: 'Dr. Hanadi El-Kot',
+    addedBy: 'M. Wael',
     tags: ['microbiology', 'hanadi kot', 'هنادي القط', 'مايكرو']
   },
   {
@@ -816,8 +1213,23 @@ export const materialsData: MaterialItem[] = [
     year: 2,
     moduleId: 'year2-blood',
     subject: 'Microbiology',
-    author: ['M. Wael', 'Dr. Mohamed Atef'],
+    author: 'Dr. Mohamed Atef',
+    addedBy: 'M. Wael',
     playlistId: 'PL9tL_1NKaz5eEaPIwMyIqXdkznGeQMaCg',
+    videos: [
+      { id: "PL9tL_1NKaz5eEaPIwMyIqXdkznGeQMaCg-1", title: "Innate immunity", youtubeId: "xcAj1NFYXaU", url: "https://youtu.be/xcAj1NFYXaU" },
+      { id: "PL9tL_1NKaz5eEaPIwMyIqXdkznGeQMaCg-2", title: "Overview of immune system", youtubeId: "zqzBn_vcrM4", url: "https://youtu.be/zqzBn_vcrM4" },
+      { id: "PL9tL_1NKaz5eEaPIwMyIqXdkznGeQMaCg-3", title: "Antigen", youtubeId: "swMgK0xTKZ4", url: "https://youtu.be/swMgK0xTKZ4" },
+      { id: "PL9tL_1NKaz5eEaPIwMyIqXdkznGeQMaCg-4", title: "Cell mediated immunity", youtubeId: "LmWBODY7u_g", url: "https://youtu.be/LmWBODY7u_g" },
+      { id: "PL9tL_1NKaz5eEaPIwMyIqXdkznGeQMaCg-5", title: "Humoral immunity", youtubeId: "qtUNYiUt8DI", url: "https://youtu.be/qtUNYiUt8DI" },
+      { id: "PL9tL_1NKaz5eEaPIwMyIqXdkznGeQMaCg-6", title: "Immunoglobulin", youtubeId: "PvIgf2QB2xY", url: "https://youtu.be/PvIgf2QB2xY" },
+      { id: "PL9tL_1NKaz5eEaPIwMyIqXdkznGeQMaCg-7", title: "Complement", youtubeId: "FtP0rA5wVhE", url: "https://youtu.be/FtP0rA5wVhE" },
+      { id: "PL9tL_1NKaz5eEaPIwMyIqXdkznGeQMaCg-8", title: "Hypersensitivity", youtubeId: "xYI7C_a8aqk", url: "https://youtu.be/xYI7C_a8aqk" },
+      { id: "PL9tL_1NKaz5eEaPIwMyIqXdkznGeQMaCg-9", title: "Tumor Immunology", youtubeId: "Doqf40PjK9Y", url: "https://youtu.be/Doqf40PjK9Y" },
+      { id: "PL9tL_1NKaz5eEaPIwMyIqXdkznGeQMaCg-10", title: "Tolerance & Autoimmune disease", youtubeId: "VvS4R-1YsPM", url: "https://youtu.be/VvS4R-1YsPM" },
+      { id: "PL9tL_1NKaz5eEaPIwMyIqXdkznGeQMaCg-11", title: "Immunodeficiency", youtubeId: "vDJRRF829lY", url: "https://youtu.be/vDJRRF829lY" },
+      { id: "PL9tL_1NKaz5eEaPIwMyIqXdkznGeQMaCg-12", title: "Diagnosis of virus", youtubeId: "gaz4Wg8DGJc", url: "https://youtu.be/gaz4Wg8DGJc" }
+    ],
     tags: ['microbiology', 'atef', 'محمد عاطف', 'مايكرو', 'playlist']
   },
   {
@@ -830,8 +1242,50 @@ export const materialsData: MaterialItem[] = [
     year: 2,
     moduleId: 'year2-blood',
     subject: 'Microbiology',
-    author: ['M. Wael', 'Dr. Mohamed El-Sherif'],
+    author: 'Dr. Mohamed El-Sherif',
+    addedBy: 'M. Wael',
     playlistId: 'PL6HncFuy-vP76l0_g637yq52tbl6gw8cD',
+    videos: [
+      { id: "PL6HncFuy-vP76l0_g637yq52tbl6gw8cD-1", title: "Introduction to Immunology", youtubeId: "NYicBnqwSOE", url: "https://youtu.be/NYicBnqwSOE" },
+      { id: "PL6HncFuy-vP76l0_g637yq52tbl6gw8cD-2", title: "Hapten", youtubeId: "QQzNRoGIoYE", url: "https://youtu.be/QQzNRoGIoYE" },
+      { id: "PL6HncFuy-vP76l0_g637yq52tbl6gw8cD-3", title: "Introduction to Immunology (Updated 2021)", youtubeId: "90teRbG6uOg", url: "https://youtu.be/90teRbG6uOg" },
+      { id: "PL6HncFuy-vP76l0_g637yq52tbl6gw8cD-4", title: "Types of Antigen - Part 1", youtubeId: "T-13_JvoGyE", url: "https://youtu.be/T-13_JvoGyE" },
+      { id: "PL6HncFuy-vP76l0_g637yq52tbl6gw8cD-5", title: "Types of Antigen - Part 2", youtubeId: "SdkVJedifsk", url: "https://youtu.be/SdkVJedifsk" },
+      { id: "PL6HncFuy-vP76l0_g637yq52tbl6gw8cD-6", title: "Types of Antigen - Part 3", youtubeId: "YHfJzCPB_SY", url: "https://youtu.be/YHfJzCPB_SY" },
+      { id: "PL6HncFuy-vP76l0_g637yq52tbl6gw8cD-7", title: "Cells of the immune system", youtubeId: "yPRAWe8YViw", url: "https://youtu.be/yPRAWe8YViw" },
+      { id: "PL6HncFuy-vP76l0_g637yq52tbl6gw8cD-8", title: "Natural Killer Cell", youtubeId: "2T1xUQKN9dA", url: "https://youtu.be/2T1xUQKN9dA" },
+      { id: "PL6HncFuy-vP76l0_g637yq52tbl6gw8cD-9", title: "Major histocompatibility complex (MHC)", youtubeId: "-lVeyYjgvMg", url: "https://youtu.be/-lVeyYjgvMg" },
+      { id: "PL6HncFuy-vP76l0_g637yq52tbl6gw8cD-10", title: "Humoral immune response", youtubeId: "0xggMqvNg-M", url: "https://youtu.be/0xggMqvNg-M" },
+      { id: "PL6HncFuy-vP76l0_g637yq52tbl6gw8cD-11", title: "Cell mediated immune response", youtubeId: "n010QegHpzQ", url: "https://youtu.be/n010QegHpzQ" },
+      { id: "PL6HncFuy-vP76l0_g637yq52tbl6gw8cD-12", title: "MHC in relation to Humoral immunity and Cell mediated immunity - هام جداً لعدم اللخبطه", youtubeId: "0MFfF4MJK3E", url: "https://youtu.be/0MFfF4MJK3E" },
+      { id: "PL6HncFuy-vP76l0_g637yq52tbl6gw8cD-13", title: "General aspects of immunoglobulins", youtubeId: "ynr773S-d8Q", url: "https://youtu.be/ynr773S-d8Q" },
+      { id: "PL6HncFuy-vP76l0_g637yq52tbl6gw8cD-14", title: "Immunoglobulins", youtubeId: "cRzD9cZa37g", url: "https://youtu.be/cRzD9cZa37g" },
+      { id: "PL6HncFuy-vP76l0_g637yq52tbl6gw8cD-15", title: "Theories of Immunoglobulin formation", youtubeId: "FQ2bNQI9xg4", url: "https://youtu.be/FQ2bNQI9xg4" },
+      { id: "PL6HncFuy-vP76l0_g637yq52tbl6gw8cD-16", title: "IgE and it's relation to Type 1 Hypersensitivity", youtubeId: "GbL83I_MIBs", url: "https://youtu.be/GbL83I_MIBs" },
+      { id: "PL6HncFuy-vP76l0_g637yq52tbl6gw8cD-17", title: "Clonal expansion, Clonal deletion and monoclonal antibodies", youtubeId: "bAUhBFRLxEE", url: "https://youtu.be/bAUhBFRLxEE" },
+      { id: "PL6HncFuy-vP76l0_g637yq52tbl6gw8cD-18", title: "Factors affecting the Immune Response", youtubeId: "c9ZTtuDQMo8", url: "https://youtu.be/c9ZTtuDQMo8" },
+      { id: "PL6HncFuy-vP76l0_g637yq52tbl6gw8cD-19", title: "Primary and Secondary Immune Response", youtubeId: "y8egXonZKcA", url: "https://youtu.be/y8egXonZKcA" },
+      { id: "PL6HncFuy-vP76l0_g637yq52tbl6gw8cD-20", title: "General characters of Complement and it's classic pathway", youtubeId: "JFHLfEBx4kY", url: "https://youtu.be/JFHLfEBx4kY" },
+      { id: "PL6HncFuy-vP76l0_g637yq52tbl6gw8cD-21", title: "Complement Alternative pathway", youtubeId: "Q916EKuDjks", url: "https://youtu.be/Q916EKuDjks" },
+      { id: "PL6HncFuy-vP76l0_g637yq52tbl6gw8cD-22", title: "Super Antigen and Antibody dependent cytotoxicity", youtubeId: "LnTifRDFdMg", url: "https://youtu.be/LnTifRDFdMg" },
+      { id: "PL6HncFuy-vP76l0_g637yq52tbl6gw8cD-23", title: "Innate Immunity (natural)", youtubeId: "jEWTkv-oqsY", url: "https://youtu.be/jEWTkv-oqsY" },
+      { id: "PL6HncFuy-vP76l0_g637yq52tbl6gw8cD-24", title: "Adaptive Immunity (acquired)", youtubeId: "9vxRE5RBbCI", url: "https://youtu.be/9vxRE5RBbCI" },
+      { id: "PL6HncFuy-vP76l0_g637yq52tbl6gw8cD-25", title: "Type 1 Hypersensitivity", youtubeId: "24TFCdeI47g", url: "https://youtu.be/24TFCdeI47g" },
+      { id: "PL6HncFuy-vP76l0_g637yq52tbl6gw8cD-26", title: "Type 2 Hypersensitivity", youtubeId: "lTbhiXmW5Go", url: "https://youtu.be/lTbhiXmW5Go" },
+      { id: "PL6HncFuy-vP76l0_g637yq52tbl6gw8cD-27", title: "Type 3 Hypersensitivity", youtubeId: "nxExVst568Y", url: "https://youtu.be/nxExVst568Y" },
+      { id: "PL6HncFuy-vP76l0_g637yq52tbl6gw8cD-28", title: "Type 4 Hypersensitivity", youtubeId: "heyFHgrnxlQ", url: "https://youtu.be/heyFHgrnxlQ" },
+      { id: "PL6HncFuy-vP76l0_g637yq52tbl6gw8cD-29", title: "Hypersensitivity - تفاعل فرط التحسس", youtubeId: "Y6sCU-MCO7s", url: "https://youtu.be/Y6sCU-MCO7s" },
+      { id: "PL6HncFuy-vP76l0_g637yq52tbl6gw8cD-30", title: "Autoimmune disease", youtubeId: "SZ5PRoGSt4E", url: "https://youtu.be/SZ5PRoGSt4E" },
+      { id: "PL6HncFuy-vP76l0_g637yq52tbl6gw8cD-31", title: "Tumor Immunology", youtubeId: "107r8Dhxkis", url: "https://youtu.be/107r8Dhxkis" },
+      { id: "PL6HncFuy-vP76l0_g637yq52tbl6gw8cD-32", title: "Transplantation", youtubeId: "d96EO3YdhEs", url: "https://youtu.be/d96EO3YdhEs" },
+      { id: "PL6HncFuy-vP76l0_g637yq52tbl6gw8cD-33", title: "Cytokines - السيتوكينات لغة التواصل بين الخلايا", youtubeId: "xF3r1yHmwiA", url: "https://youtu.be/xF3r1yHmwiA" },
+      { id: "PL6HncFuy-vP76l0_g637yq52tbl6gw8cD-34", title: "DNA vaccination - تلقيح الحمض النووي", youtubeId: "8xUyBJtiShg", url: "https://youtu.be/8xUyBJtiShg" },
+      { id: "PL6HncFuy-vP76l0_g637yq52tbl6gw8cD-35", title: "Tolerance, Autoimmune Disease, Tumor Immunology & Immunotherapy - مناعة الأورام والمزيد من المواضيع", youtubeId: "9f3N4j5P1iY", url: "https://youtu.be/9f3N4j5P1iY" },
+      { id: "PL6HncFuy-vP76l0_g637yq52tbl6gw8cD-36", title: "Practical (Immunology & Microbiology) Part 1", youtubeId: "w1u5ZW67XU0", url: "https://youtu.be/w1u5ZW67XU0" },
+      { id: "PL6HncFuy-vP76l0_g637yq52tbl6gw8cD-37", title: "Coombs Test, Actinomycosis and Rickettsia", youtubeId: "9zXrX0wAABA", url: "https://youtu.be/9zXrX0wAABA" },
+      { id: "PL6HncFuy-vP76l0_g637yq52tbl6gw8cD-38", title: "General Immunology Revision (محاضرة مجمعة) Part 1", youtubeId: "vRdY_GdGcgQ", url: "https://youtu.be/vRdY_GdGcgQ" },
+      { id: "PL6HncFuy-vP76l0_g637yq52tbl6gw8cD-39", title: "General Immunology Revision (محاضرة مجمعة) Part 2", youtubeId: "P2M0TKzNNjo", url: "https://youtu.be/P2M0TKzNNjo" }
+    ],
     tags: ['microbiology', 'sherif', 'محمد الشريف', 'مايكرو', 'playlist']
   },
   {
@@ -844,8 +1298,15 @@ export const materialsData: MaterialItem[] = [
     year: 2,
     moduleId: 'year2-blood',
     subject: 'Microbiology',
-    author: ['M. Wael', 'Dr. Khaled El-Mofy'],
+    author: 'Dr. Khaled El-Mofy',
+    addedBy: 'M. Wael',
     playlistId: 'PLvwOqR8bEHxCZRe1cJGmdG5Apae45qt5s',
+    videos: [
+      { id: "PLvwOqR8bEHxCZRe1cJGmdG5Apae45qt5s-1", title: "Micro IBL system L1 basic immunity", youtubeId: "3USxcTOL52U", url: "https://youtu.be/3USxcTOL52U" },
+      { id: "PLvwOqR8bEHxCZRe1cJGmdG5Apae45qt5s-2", title: "Micro IBL system L2 (Adaptive Immunity)", youtubeId: "zuxLK8-aHPc", url: "https://youtu.be/zuxLK8-aHPc" },
+      { id: "PLvwOqR8bEHxCZRe1cJGmdG5Apae45qt5s-3", title: "Micro IBL system L8 (immunodeficiency&tumor immunology). Clinical immunity", youtubeId: "V1KOpHoaOx8", url: "https://youtu.be/V1KOpHoaOx8" },
+      { id: "PLvwOqR8bEHxCZRe1cJGmdG5Apae45qt5s-4", title: "(Micro IBL system L11(joint)(transplantation immunology", youtubeId: "cDXLBYmpCl4", url: "https://youtu.be/cDXLBYmpCl4" }
+    ],
     tags: ['microbiology', 'mofy', 'خالد الموفي', 'مايكرو', 'playlist']
   },
   {
@@ -858,8 +1319,19 @@ export const materialsData: MaterialItem[] = [
     year: 2,
     moduleId: 'year2-blood',
     subject: 'Microbiology',
-    author: ['M. Wael', 'Ninja Nerd'],
+    author: 'Ninja Nerd',
+    addedBy: 'M. Wael',
     playlistId: 'PLTF9h-T1TcJj4AOPCxGxOUTH0IVmaH7_8',
+    videos: [
+      { id: "PLTF9h-T1TcJj4AOPCxGxOUTH0IVmaH7_8-1", title: "Immunology | Inflammation: Vascular Events: Part 1", youtubeId: "LArxUakFsFs", url: "https://youtu.be/LArxUakFsFs" },
+      { id: "PLTF9h-T1TcJj4AOPCxGxOUTH0IVmaH7_8-2", title: "Immunology | Inflammation: Cellular Events: Part 2", youtubeId: "yTIZpzoaIT0", url: "https://youtu.be/yTIZpzoaIT0" },
+      { id: "PLTF9h-T1TcJj4AOPCxGxOUTH0IVmaH7_8-3", title: "Immunology | Inflammation: Complement Proteins: Part 3", youtubeId: "80Q-OPDjoE8", url: "https://youtu.be/80Q-OPDjoE8" },
+      { id: "PLTF9h-T1TcJj4AOPCxGxOUTH0IVmaH7_8-4", title: "Immunology | Inflammation: Toll Like Receptors and Interferons: Part 4", youtubeId: "cKSWHMRPOoI", url: "https://youtu.be/cKSWHMRPOoI" },
+      { id: "PLTF9h-T1TcJj4AOPCxGxOUTH0IVmaH7_8-5", title: "Immunology | Adaptive Immunity", youtubeId: "7_hiaCq2rew", url: "https://youtu.be/7_hiaCq2rew" },
+      { id: "PLTF9h-T1TcJj4AOPCxGxOUTH0IVmaH7_8-6", title: "علم المناعة | الجهاز المناعي: نظرة عامة", youtubeId: "qkIfYwnaYqc", url: "https://youtu.be/qkIfYwnaYqc" },
+      { id: "PLTF9h-T1TcJj4AOPCxGxOUTH0IVmaH7_8-7", title: "Immunology | Antibody Structure & Function", youtubeId: "zg61a3BoR8Y", url: "https://youtu.be/zg61a3BoR8Y" },
+      { id: "PLTF9h-T1TcJj4AOPCxGxOUTH0IVmaH7_8-8", title: "Immunology | T- Cell Development", youtubeId: "JeV-HuPq7CI", url: "https://youtu.be/JeV-HuPq7CI" }
+    ],
     tags: ['microbiology', 'immunology', 'ninja nerd', 'مناعة', 'playlist']
   },
 
@@ -876,7 +1348,8 @@ export const materialsData: MaterialItem[] = [
     year: 2,
     moduleId: 'year2-blood',
     subject: 'Clinical',
-    author: ['M. Wael', 'ASU Faculty Stream'],
+    author: 'ASU Faculty Stream',
+    addedBy: 'M. Wael',
     tags: ['clinical', 'bleeding', 'disorders', 'عيادات', 'أمراض دم']
   },
   {
@@ -889,7 +1362,8 @@ export const materialsData: MaterialItem[] = [
     year: 2,
     moduleId: 'year2-blood',
     subject: 'Clinical',
-    author: ['M. Wael', 'ASU Faculty Stream'],
+    author: 'ASU Faculty Stream',
+    addedBy: 'M. Wael',
     tags: ['clinical', 'wbc', 'leukemia', 'disorders', 'عيادات']
   },
 
@@ -906,7 +1380,8 @@ export const materialsData: MaterialItem[] = [
     year: 2,
     moduleId: 'year2-blood',
     subject: 'Physiology',
-    author: ['M. Wael', 'MG ASU MED'],
+    author: 'MG ASU MED',
+    addedBy: 'M. Wael',
     tags: ['questions', 'mcq', 'physiology', 'فسيولوجي', 'أسئلة']
   },
   {
@@ -919,7 +1394,8 @@ export const materialsData: MaterialItem[] = [
     year: 2,
     moduleId: 'year2-blood',
     subject: 'Physiology',
-    author: ['M. Wael', 'MG ASU MED'],
+    author: 'MG ASU MED',
+    addedBy: 'M. Wael',
     tags: ['questions', 'essay', 'physiology', 'مقالي']
   },
   {
@@ -932,7 +1408,8 @@ export const materialsData: MaterialItem[] = [
     year: 2,
     moduleId: 'year2-blood',
     subject: 'Biochemistry',
-    author: ['M. Wael', 'MG ASU MED'],
+    author: 'MG ASU MED',
+    addedBy: 'M. Wael',
     tags: ['questions', 'mcq', 'biochemistry', 'بايوكيمستري', 'أسئلة']
   },
   {
@@ -945,7 +1422,8 @@ export const materialsData: MaterialItem[] = [
     year: 2,
     moduleId: 'year2-blood',
     subject: 'Biochemistry',
-    author: ['M. Wael', 'MG ASU MED'],
+    author: 'MG ASU MED',
+    addedBy: 'M. Wael',
     tags: ['questions', 'essay', 'biochemistry', 'مقالي']
   },
   {
@@ -958,7 +1436,8 @@ export const materialsData: MaterialItem[] = [
     year: 2,
     moduleId: 'year2-blood',
     subject: 'Histology',
-    author: ['M. Wael', 'MG ASU MED'],
+    author: 'MG ASU MED',
+    addedBy: 'M. Wael',
     tags: ['questions', 'mcq', 'histology', 'هستولوجي', 'أسئلة']
   },
   {
@@ -971,7 +1450,8 @@ export const materialsData: MaterialItem[] = [
     year: 2,
     moduleId: 'year2-blood',
     subject: 'Histology',
-    author: ['M. Wael', 'MG ASU MED'],
+    author: 'MG ASU MED',
+    addedBy: 'M. Wael',
     tags: ['questions', 'essay', 'histology', 'مقالي']
   },
   {
@@ -984,7 +1464,8 @@ export const materialsData: MaterialItem[] = [
     year: 2,
     moduleId: 'year2-blood',
     subject: 'Pharmacology',
-    author: ['M. Wael', 'MG ASU MED'],
+    author: 'MG ASU MED',
+    addedBy: 'M. Wael',
     tags: ['questions', 'mcq', 'pharmacology', 'فارما', 'أسئلة']
   },
   {
@@ -997,7 +1478,8 @@ export const materialsData: MaterialItem[] = [
     year: 2,
     moduleId: 'year2-blood',
     subject: 'Pharmacology',
-    author: ['M. Wael', 'MG ASU MED'],
+    author: 'MG ASU MED',
+    addedBy: 'M. Wael',
     tags: ['questions', 'essay', 'pharmacology', 'مقالي']
   },
   {
@@ -1010,7 +1492,8 @@ export const materialsData: MaterialItem[] = [
     year: 2,
     moduleId: 'year2-blood',
     subject: 'Pathology',
-    author: ['M. Wael', 'MG ASU MED'],
+    author: 'MG ASU MED',
+    addedBy: 'M. Wael',
     tags: ['questions', 'mcq', 'pathology', 'باثولوجي', 'أسئلة']
   },
   {
@@ -1023,7 +1506,8 @@ export const materialsData: MaterialItem[] = [
     year: 2,
     moduleId: 'year2-blood',
     subject: 'Pathology',
-    author: ['M. Wael', 'MG ASU MED'],
+    author: 'MG ASU MED',
+    addedBy: 'M. Wael',
     tags: ['questions', 'essay', 'pathology', 'مقالي']
   },
   {
@@ -1036,7 +1520,8 @@ export const materialsData: MaterialItem[] = [
     year: 2,
     moduleId: 'year2-blood',
     subject: 'Parasitology',
-    author: ['M. Wael', 'MG ASU MED'],
+    author: 'MG ASU MED',
+    addedBy: 'M. Wael',
     tags: ['questions', 'mcq', 'parasitology', 'بارا', 'أسئلة']
   },
   {
@@ -1049,7 +1534,8 @@ export const materialsData: MaterialItem[] = [
     year: 2,
     moduleId: 'year2-blood',
     subject: 'Parasitology',
-    author: ['M. Wael', 'MG ASU MED'],
+    author: 'MG ASU MED',
+    addedBy: 'M. Wael',
     tags: ['questions', 'essay', 'parasitology', 'مقالي']
   },
   {
@@ -1062,7 +1548,8 @@ export const materialsData: MaterialItem[] = [
     year: 2,
     moduleId: 'year2-blood',
     subject: 'Microbiology',
-    author: ['M. Wael', 'MG ASU MED'],
+    author: 'MG ASU MED',
+    addedBy: 'M. Wael',
     tags: ['questions', 'mcq', 'microbiology', 'مايكرو', 'أسئلة']
   },
   {
@@ -1075,7 +1562,8 @@ export const materialsData: MaterialItem[] = [
     year: 2,
     moduleId: 'year2-blood',
     subject: 'Microbiology',
-    author: ['M. Wael', 'MG ASU MED'],
+    author: 'MG ASU MED',
+    addedBy: 'M. Wael',
     tags: ['questions', 'essay', 'microbiology', 'مقالي']
   },
   {
@@ -1087,9 +1575,9 @@ export const materialsData: MaterialItem[] = [
     category: 'exams',
     year: 2,
     moduleId: 'year2-blood',
-    author: ['M. Wael', 'ASU Med Batch Drive'],
+    author: 'ASU Med Batch Drive',
+    addedBy: 'M. Wael',
     tags: ['formatives', 'quiz', 'drive', 'فورماتيف', 'كويزات'],
-    isPinned: true
   },
   {
     id: 'bld-q-assessments-final-drive',
@@ -1100,9 +1588,9 @@ export const materialsData: MaterialItem[] = [
     category: 'exams',
     year: 2,
     moduleId: 'year2-blood',
-    author: ['M. Wael', 'ASU Med Batch Drive'],
+    author: 'ASU Med Batch Drive',
+    addedBy: 'M. Wael',
     tags: ['finals', 'assessments', 'exams', 'امتحانات سابقة', 'فاينل'],
-    isPinned: true
   }
 ];
 
@@ -1131,10 +1619,6 @@ export function getAllPlaylists(): MaterialItem[] {
 
 export function getPlaylistById(id: string): MaterialItem | undefined {
   return materialsData.find((item) => item.id === id && (item.type === 'playlist' || !!item.playlistId || !!item.videos));
-}
-
-export function getPinnedMaterials(): MaterialItem[] {
-  return materialsData.filter((item) => item.isPinned);
 }
 
 export function getMaterialById(id: string): MaterialItem | undefined {

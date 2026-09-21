@@ -50,9 +50,9 @@ export interface MaterialItem {
   year: AcademicYear;
   moduleId?: string;
   subject?: string;
-  author?: string | string[]; // Single or multiple names (up to 5)
+  author?: string | string[]; // Creator / Doctor / Teacher who prepared the materials
+  addedBy?: string | string[]; // Contributor / Student who added it to the platform
   tags: string[];
-  isPinned?: boolean;
   createdAt?: string;
   playlistId?: string; // YouTube playlist ID if applicable
   videos?: PlaylistItem[]; // Individual videos for multi-part video series

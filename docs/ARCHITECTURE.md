@@ -121,7 +121,6 @@ export interface MaterialItem {
   subject?: string;       // Medical discipline
   author?: string | string[]; // Creator, doctor, or contributors (up to 5 names)
   tags: string[];         // Search tags
-  isPinned?: boolean;     // Featured on top
   createdAt?: string;     // ISO date
 }
 ```

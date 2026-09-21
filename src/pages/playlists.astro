@@ -75,6 +75,8 @@ const subjects = Array.from(
     {playlists.map((pl) => {
       const authorNames = Array.isArray(pl.author) ? pl.author : pl.author ? [pl.author] : [];
       const authorText = authorNames.join('، ');
+      const addedByNames = Array.isArray(pl.addedBy) ? pl.addedBy : pl.addedBy ? [pl.addedBy] : [];
+      const addedByText = addedByNames.join('، ');
       const subSlug = pl.subject ? subjectToSlug(pl.subject) : '';
 
       return (
@@ -86,7 +88,7 @@ const subjects = Array.from(
           <div>
             <!-- Badges Header -->
             <div class="flex items-center justify-between gap-2 mb-2.5">
-              <TypeBadge type="playlist" size="sm" />
+              <TypeBadge type="youtube" size="sm" />
               <div class="flex items-center gap-1.5">
                 {pl.subject && (
                   <span class="text-[11px] font-semibold px-2 py-0.5 rounded bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400">
@@ -117,10 +119,15 @@ const subjects = Array.from(
               </p>
             )}
 
-            <!-- Attribution -->
-            {authorText && (
-              <div class="text-[11px] text-zinc-500 dark:text-zinc-400 font-medium mb-3">
-                إعداد: <span class="text-zinc-700 dark:text-zinc-300">{authorText}</span>
+            {/* Attribution */}
+            {(authorText || addedByText) && (
+              <div class="text-[11px] text-zinc-500 dark:text-zinc-400 font-medium mb-3 space-y-0.5">
+                {authorText && (
+                  <div>إعداد: <span class="text-zinc-700 dark:text-zinc-300">{authorText}</span></div>
+                )}
+                {addedByText && (
+                  <div>أضافها: <span class="text-zinc-700 dark:text-zinc-300">{addedByText}</span></div>
+                )}
               </div>
             )}
           </div>
