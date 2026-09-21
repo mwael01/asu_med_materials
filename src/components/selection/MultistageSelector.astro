@@ -2,11 +2,11 @@
 import { modulesData } from '../../data/modules';
 
 const years = [
-  { year: 1, titleAr: 'السنة الأولى', titleEn: 'Year 1', desc: 'Foundation, MSK, Blood, CVS' },
-  { year: 2, titleAr: 'السنة الثانية', titleEn: 'Year 2', desc: 'Respiratory, GIT, Endocrine, Renal' },
-  { year: 3, titleAr: 'السنة الثالثة', titleEn: 'Year 3', desc: 'CNS, Special Senses, Repro, Multi-system' },
-  { year: 4, titleAr: 'السنة الرابعة', titleEn: 'Year 4', desc: 'Surgery, Medicine 1, Pediatrics, Community' },
-  { year: 5, titleAr: 'السنة الخامسة', titleEn: 'Year 5', desc: 'OB/GYN, Medicine 2, Specialized Surgery, Forensics' },
+  { year: 1, titleAr: 'السنة الأولى', titleEn: 'Year 1', desc: 'قريباً' },
+  { year: 2, titleAr: 'السنة الثانية', titleEn: 'Year 2', desc: 'Blood & Lymphatic System (MED201)' },
+  { year: 3, titleAr: 'السنة الثالثة', titleEn: 'Year 3', desc: 'قريباً' },
+  { year: 4, titleAr: 'السنة الرابعة', titleEn: 'Year 4', desc: 'قريباً' },
+  { year: 5, titleAr: 'السنة الخامسة', titleEn: 'Year 5', desc: 'قريباً' },
 ];
 ---
 
@@ -183,6 +183,16 @@ const years = [
       // Populate modules
       const allMods: any[] = (window as any).__MODULES_DATA || [];
       const filteredMods = allMods.filter((m) => m.year === year);
+      if (filteredMods.length === 0) {
+        if (modulesContainer) {
+          modulesContainer.innerHTML = `
+            <div class="p-6 text-center text-xs text-zinc-500 dark:text-zinc-400 border border-dashed border-zinc-200 dark:border-zinc-800 rounded-xl">
+              لا توجد موديولات مضافة بعد لهذه السنة. المتاح حالياً موديول الدم (السنة الثانية).
+            </div>
+          `;
+        }
+        return;
+      }
 
       if (modulesContainer) {
         modulesContainer.innerHTML = filteredMods

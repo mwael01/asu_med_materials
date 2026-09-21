@@ -12,19 +12,30 @@ The medical program spans 5 years divided into two primary phases:
 
 ---
 
-## 2. Year-by-Year Module Mapping
+## 2. Currently Active Modules on the Platform
+
+> [!NOTE]
+> Currently, the platform's live database is dedicated exclusively to the **Blood & Lymphatic System (MED201)** of Year 2 (Semester 3). Other modules and subjects have been temporarily removed and will be activated once their respective curated study materials are submitted.
+
+### Active Module: Year 2 — Blood & Lymphatic System (MED201)
+- **Subjects**: Anatomy, Physiology, Histology, Biochemistry, Pharmacology, Pathology, Parasitology, Microbiology, Clinical Lectures.
+- **Resources**: Central Drives, Video Playlists, Audio Revisions, MCQs & Essay Banks, Formatives, and Past Finals.
+
+---
+
+## 3. Full Faculty Curriculum Mapping (Reference)
 
 ### Year 1: Foundation & Early Systems
-- **Foundation Module (MED101)**: Cell biology, molecular biology, general physiology, histology, basic genetics, terminology.
-- **Musculoskeletal System (MED102)**: Locomotor system, anatomy of limbs, bones, joints, muscles, bone pathology.
-- **Blood & Lymphatic System (MED103)**: Hematology, immunology, blood pathology, blood bank basics.
-- **Cardiovascular System 1 (MED104)**: Heart, circulation, blood vessels, basic hemodynamics.
+- **Foundation Module (MED101)**
+- **Musculoskeletal System (MED102)**
+- **Cardiovascular System 1 (MED103)**
 
 ### Year 2: Major Organ Systems
-- **Respiratory System (MED201)**: Pulmonary anatomy, histology, respiration physiology, respiratory pathology, and microbiology.
-- **Gastrointestinal System & Nutrition (MED202)**: GI tract, liver, pancreas, nutrition, GI infections, and pharmacology.
-- **Endocrine & Metabolism (MED203)**: Hormonal regulation, thyroid, pituitary, adrenal, diabetes, metabolic disorders.
-- **Renal & Urinary System (MED204)**: Kidneys, nephron physiology, acid-base balance, urinary tract pathology.
+- **Blood & Lymphatic System (MED201 - Active)**
+- **Respiratory System (MED202)**
+- **Gastrointestinal System & Nutrition (MED203)**
+- **Endocrine & Metabolism (MED204)**
+- **Renal & Urinary System (MED205)**
 
 ### Year 3: Neurosciences, Reproduction & Pre-clinical Integration
 - **Central Nervous System (MED301)**: Neuroanatomy, neurophysiology, neuropathology, neuropharmacology.

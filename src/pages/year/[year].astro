@@ -62,12 +62,20 @@ const yearNames: Record<number, string> = {
       </h2>
     </div>
 
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-      {modules.map((mod) => {
-        const count = getMaterialsByModule(mod.id).length;
-        return <ModuleCard module={mod} resourceCount={count} />;
-      })}
-    </div>
+    {modules.length === 0 ? (
+      <div class="py-8 text-center border border-dashed border-zinc-200 dark:border-zinc-800 rounded-xl p-6 bg-white dark:bg-zinc-900/60">
+        <p class="text-xs text-zinc-500 dark:text-zinc-400">
+          لا توجد موديولات مضافة حالياً في هذه السنة الدراسية، المتاح حالياً موديول الدم (السنة الثانية).
+        </p>
+      </div>
+    ) : (
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        {modules.map((mod) => {
+          const count = getMaterialsByModule(mod.id).length;
+          return <ModuleCard module={mod} resourceCount={count} />;
+        })}
+      </div>
+    )}
   </section>
 
   <!-- Grouped Materials List for This Year -->
