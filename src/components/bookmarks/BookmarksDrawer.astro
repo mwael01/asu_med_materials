@@ -1,0 +1,225 @@
+---
+import { materialsData } from '../../data/materials';
+---
+
+<!-- Bookmarks Slide-over Drawer (RTL Friendly) -->
+<aside
+  id="bookmarks-drawer"
+  class="fixed inset-y-0 left-0 z-50 w-full sm:w-96 bg-white dark:bg-zinc-900 border-r border-zinc-200 dark:border-zinc-800 shadow-2xl transform -translate-x-full transition-transform duration-300 ease-in-out flex flex-col"
+  aria-labelledby="bookmarks-drawer-title"
+  role="dialog"
+  aria-modal="true"
+  aria-hidden="true"
+>
+  <!-- Drawer Header -->
+  <div class="flex items-center justify-between p-4 border-b border-zinc-200 dark:border-zinc-800">
+    <div class="flex items-center gap-2">
+      <svg class="w-5 h-5 text-amber-500 fill-amber-500" viewBox="0 0 24 24">
+        <path d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
+      </svg>
+      <h2 id="bookmarks-drawer-title" class="font-bold text-zinc-900 dark:text-zinc-100 text-base">
+        المصادر المحفوظة
+      </h2>
+      <span id="bookmarks-count-badge" class="text-xs px-2 py-0.5 rounded-full bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 font-bold">
+        0
+      </span>
+    </div>
+
+    <button
+      type="button"
+      id="close-bookmarks-drawer"
+      class="p-1.5 text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
+      aria-label="إغلاق قائمة المحفوظات"
+    >
+      <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+      </svg>
+    </button>
+  </div>
+
+  <!-- Drawer Body: List of bookmarked cards -->
+  <div class="flex-1 overflow-y-auto p-4 space-y-3" id="bookmarks-list-container">
+    <div id="bookmarks-empty-state" class="py-12 text-center">
+      <svg class="w-10 h-10 mx-auto text-zinc-300 dark:text-zinc-700 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17.593 3.322c1.1.128 1.907 1.077 1.907 2.185V21L12 17.25 4.5 21V5.507c0-1.108.806-2.057 1.907-2.185a48.507 48.507 0 0111.186 0z" />
+      </svg>
+      <p class="text-sm font-bold text-zinc-700 dark:text-zinc-300">مفيش مصادر محفوظة لسه</p>
+      <p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 max-w-xs mx-auto">
+        دوس على علامة الـ Bookmark في أي كارت علشان تحفظه هنا وتفتحه بسرعة حتى لو أوفلاين.
+      </p>
+    </div>
+
+    <div id="bookmarks-cards-container" class="space-y-2.5 hidden">
+      <!-- Injected dynamically via client script -->
+    </div>
+  </div>
+
+  <!-- Drawer Footer -->
+  <div class="p-3 border-t border-zinc-200 dark:border-zinc-800 text-center">
+    <p class="text-[11px] text-zinc-400 dark:text-zinc-500">
+      محفوظة محلياً على جهازك • متاحة أوفلاين بدون نت
+    </p>
+  </div>
+</aside>
+
+<!-- Backdrop overlay -->
+<div
+  id="bookmarks-backdrop"
+  class="fixed inset-0 z-40 bg-zinc-900/50 backdrop-blur-xs hidden transition-opacity"
+  aria-hidden="true"
+></div>
+
+<script define:vars={{ rawMaterials: materialsData }}>
+  window.__ALL_MATERIALS = rawMaterials;
+</script>
+
+<script>
+  function initBookmarksDrawer(): void {
+    const drawer = document.getElementById('bookmarks-drawer');
+    const backdrop = document.getElementById('bookmarks-backdrop');
+    const closeBtn = document.getElementById('close-bookmarks-drawer');
+    const openBtns = document.querySelectorAll('.open-bookmarks-trigger');
+    const emptyState = document.getElementById('bookmarks-empty-state');
+    const cardsContainer = document.getElementById('bookmarks-cards-container');
+    const countBadge = document.getElementById('bookmarks-count-badge');
+
+    function getIds(): string[] {
+      try {
+        const raw = localStorage.getItem('asumed_bookmarks');
+        return raw ? JSON.parse(raw) : [];
+      } catch {
+        return [];
+      }
+    }
+
+    function renderBookmarks(): void {
+      const ids = getIds();
+      const allMaterials: any[] = (window as any).__ALL_MATERIALS || [];
+      const bookmarked = allMaterials.filter((m) => ids.includes(m.id));
+
+      if (countBadge) countBadge.textContent = String(bookmarked.length);
+
+      // Update card bookmark buttons
+      document.querySelectorAll('.bookmark-btn').forEach((btn) => {
+        const matId = btn.getAttribute('data-id');
+        const isSaved = matId ? ids.includes(matId) : false;
+        const emptyIcon = btn.querySelector('.bookmark-icon-empty');
+        const filledIcon = btn.querySelector('.bookmark-icon-filled');
+        if (isSaved) {
+          emptyIcon?.classList.add('hidden');
+          filledIcon?.classList.remove('hidden');
+        } else {
+          emptyIcon?.classList.remove('hidden');
+          filledIcon?.classList.add('hidden');
+        }
+      });
+
+      if (!cardsContainer || !emptyState) return;
+
+      if (bookmarked.length === 0) {
+        emptyState.classList.remove('hidden');
+        cardsContainer.classList.add('hidden');
+        cardsContainer.innerHTML = '';
+        return;
+      }
+
+      emptyState.classList.add('hidden');
+      cardsContainer.classList.remove('hidden');
+      cardsContainer.innerHTML = bookmarked
+        .map(
+          (item) => `
+        <div class="p-3 bg-zinc-50 dark:bg-zinc-800/60 border border-zinc-200 dark:border-zinc-700/60 rounded-xl flex items-center justify-between gap-3 text-right">
+          <div class="min-w-0 flex-1">
+            <span class="text-[10px] font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">
+              السنة ${item.year} • ${item.type}
+            </span>
+            <a href="${item.url}" target="_blank" rel="noopener noreferrer" class="block text-xs font-bold text-zinc-900 dark:text-zinc-100 hover:text-emerald-600 truncate mt-0.5">
+              ${item.title}
+            </a>
+          </div>
+          <div class="flex items-center gap-1 shrink-0">
+            <a href="${item.url}" target="_blank" rel="noopener noreferrer" class="p-1.5 text-zinc-500 hover:text-emerald-600 rounded-md hover:bg-zinc-200 dark:hover:bg-zinc-700" title="فتح الرابط">
+              <svg class="w-4 h-4 rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
+              </svg>
+            </a>
+            <button type="button" class="remove-bookmark-btn p-1.5 text-zinc-400 hover:text-rose-500 rounded-md hover:bg-zinc-200 dark:hover:bg-zinc-700" data-id="${item.id}" title="حذف من المحفوظات">
+              <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+        </div>
+      `
+        )
+        .join('');
+
+      cardsContainer.querySelectorAll('.remove-bookmark-btn').forEach((btn) => {
+        btn.addEventListener('click', (e) => {
+          const id = (e.currentTarget as HTMLElement).getAttribute('data-id');
+          if (id) {
+            const current = getIds().filter((x) => x !== id);
+            localStorage.setItem('asumed_bookmarks', JSON.stringify(current));
+            window.dispatchEvent(new CustomEvent('bookmarks-updated'));
+            renderBookmarks();
+          }
+        });
+      });
+    }
+
+    function openDrawer(): void {
+      renderBookmarks();
+      drawer?.classList.remove('-translate-x-full');
+      backdrop?.classList.remove('hidden');
+      drawer?.setAttribute('aria-hidden', 'false');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeDrawer(): void {
+      drawer?.classList.add('-translate-x-full');
+      backdrop?.classList.add('hidden');
+      drawer?.setAttribute('aria-hidden', 'true');
+      document.body.style.overflow = '';
+    }
+
+    openBtns.forEach((btn) => btn.addEventListener('click', openDrawer));
+    closeBtn?.addEventListener('click', closeDrawer);
+    backdrop?.addEventListener('click', closeDrawer);
+
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && !drawer?.classList.contains('-translate-x-full')) {
+        closeDrawer();
+      }
+    });
+
+    // Delegated click listener for card bookmark buttons
+    document.addEventListener('click', (e) => {
+      const target = (e.target as HTMLElement)?.closest('.bookmark-btn') as HTMLElement | null;
+      if (!target) return;
+      e.preventDefault();
+      e.stopPropagation();
+
+      const matId = target.getAttribute('data-id');
+      if (!matId) return;
+
+      const current = getIds();
+      const index = current.indexOf(matId);
+      let updated: string[];
+      if (index >= 0) {
+        updated = current.filter((x) => x !== matId);
+      } else {
+        updated = [...current, matId];
+      }
+      localStorage.setItem('asumed_bookmarks', JSON.stringify(updated));
+      window.dispatchEvent(new CustomEvent('bookmarks-updated'));
+      renderBookmarks();
+    });
+
+    window.addEventListener('bookmarks-updated', renderBookmarks);
+
+    renderBookmarks();
+  }
+
+  initBookmarksDrawer();
+  document.addEventListener('astro:after-swap', initBookmarksDrawer);
+</script>

@@ -1,0 +1,118 @@
+---
+import ThemeToggle from '../common/ThemeToggle.astro';
+
+const currentPath = Astro.url.pathname;
+const isYear = (y: number) => currentPath.startsWith(`/year/${y}`);
+---
+
+<header class="sticky top-0 z-30 w-full border-b border-zinc-200 dark:border-zinc-800 bg-white/95 dark:bg-zinc-950/90 backdrop-blur-md">
+  <div class="max-w-6xl mx-auto px-4 sm:px-6 h-12 flex items-center justify-between gap-4">
+    <!-- Brand Title -->
+    <a href="/?redirect=false" class="inline-flex items-center text-zinc-900 dark:text-zinc-100 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors shrink-0">
+      <span class="font-bold text-xs sm:text-sm tracking-tight">ASU Med Materials</span>
+    </a>
+
+    <!-- Navigation Links (Desktop) -->
+    <nav class="hidden md:flex items-center gap-0.5 text-xs font-medium">
+      <a
+        href="/?redirect=false"
+        class:list={[
+          'px-2.5 py-1 rounded-md transition-colors',
+          currentPath === '/' ? 'text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/50 font-bold' : 'text-zinc-600 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800'
+        ]}
+      >
+        الرئيسية
+      </a>
+      {[1, 2, 3, 4, 5].map((y) => (
+        <a
+          href={`/year/${y}`}
+          class:list={[
+            'px-2 py-1 rounded-md transition-colors',
+            isYear(y) ? 'text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/50 font-bold' : 'text-zinc-600 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800'
+          ]}
+        >
+          السنة {y}
+        </a>
+      ))}
+      <a
+        href="/search"
+        class:list={[
+          'px-2.5 py-1 rounded-md transition-colors',
+          currentPath === '/search' ? 'text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/50 font-bold' : 'text-zinc-600 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800'
+        ]}
+      >
+        البحث
+      </a>
+      <a
+        href="/contribute"
+        class:list={[
+          'px-2.5 py-1 rounded-md transition-colors',
+          currentPath === '/contribute' ? 'text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/50 font-bold' : 'text-zinc-600 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800'
+        ]}
+      >
+        شارك مصدر
+      </a>
+    </nav>
+
+    <!-- Action Tools -->
+    <div class="flex items-center gap-1 sm:gap-1.5">
+      <!-- Quick Change Year Button (triggers MultistageSelector) -->
+      <button
+        type="button"
+        class="trigger-multistage-selector inline-flex items-center gap-1 text-[11px] font-semibold px-2 py-1 rounded-md bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-200 hover:bg-emerald-50 hover:text-emerald-700 dark:hover:bg-emerald-950/40 dark:hover:text-emerald-400 border border-zinc-200 dark:border-zinc-700 transition-colors cursor-pointer"
+        title="تغيير السنة والموديول"
+      >
+        <svg class="w-3 h-3 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" />
+        </svg>
+        <span id="nav-user-year-badge">تغيير السنة</span>
+      </button>
+
+      <!-- Search Link -->
+      <a
+        href="/search"
+        class="p-1.5 text-zinc-600 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-md transition-colors"
+        title="بحث في المواد والمصادر"
+        aria-label="بحث"
+      >
+        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+        </svg>
+      </a>
+
+      <!-- Bookmarks Trigger -->
+      <button
+        type="button"
+        class="open-bookmarks-trigger relative p-1.5 text-zinc-600 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-md transition-colors cursor-pointer"
+        title="المصادر المحفوظة"
+        aria-label="المصادر المحفوظة"
+      >
+        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M17.593 3.322c1.1.128 1.907 1.077 1.907 2.185V21L12 17.25 4.5 21V5.507c0-1.108.806-2.057 1.907-2.185a48.507 48.507 0 0111.186 0z" />
+        </svg>
+      </button>
+
+      <!-- Theme Switcher -->
+      <ThemeToggle />
+    </div>
+  </div>
+</header>
+
+<script>
+  function syncNavYearBadge(): void {
+    const badge = document.getElementById('nav-user-year-badge');
+    if (!badge) return;
+    try {
+      const year = localStorage.getItem('asumed_user_year');
+      if (year) {
+        badge.textContent = `السنة ${year}`;
+      } else {
+        badge.textContent = 'اختر سنتك';
+      }
+    } catch {}
+  }
+
+  syncNavYearBadge();
+  window.addEventListener('user-preferences-updated', syncNavYearBadge);
+  document.addEventListener('astro:after-swap', syncNavYearBadge);
+</script>

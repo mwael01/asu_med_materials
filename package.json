@@ -13,8 +13,11 @@
   },
   "dependencies": {
     "@astrojs/check": "^0.9.10",
+    "@tailwindcss/vite": "^4.3.3",
     "astro": "^7.3.3",
-    "typescript": "^6"
+    "tailwindcss": "^4.3.3",
+    "typescript": "^6",
+    "vercel": "^59.23.2"
   },
   "allowScripts": {
     "esbuild": true

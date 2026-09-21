@@ -1,0 +1,223 @@
+---
+import Layout from '../layouts/Layout.astro';
+import SearchBar from '../components/search/SearchBar.astro';
+import FilterToolbar from '../components/search/FilterToolbar.astro';
+import ResourceGrid from '../components/materials/ResourceGrid.astro';
+import { getAllMaterials } from '../data/materials';
+
+const allMaterials = getAllMaterials();
+---
+
+<Layout
+  title="دليل البحث في المصادر - ASU Med Materials"
+  description="ابحث وتصفح جميع درايفات وورق شرح ومصادر طب عين شمس حسب السنة والمادة ونوع المصدر."
+>
+  <div class="mb-6 text-right">
+    <h1 class="text-2xl font-extrabold text-zinc-900 dark:text-zinc-100 mb-1">
+      دليل البحث الشامل في المصادر
+    </h1>
+    <p class="text-xs text-zinc-500 dark:text-zinc-400 mb-4">
+      ابحث بالكلمات المفتاحية، أسماء المواد (Anatomy, Physiology, etc.)، أكواد الموديولات، أو أنواع المصادر عبر جميع السنوات الخمس.
+    </p>
+
+    <!-- Search Input -->
+    <div class="mb-4">
+      <SearchBar placeholder="اكتب للبحث: مثل anatomy, ecg, pathology, مذكرات، ورق شرح، امتحانات..." autofocus={true} />
+    </div>
+
+    <!-- Filter Rows -->
+    <div class="space-y-2">
+      <!-- Year Selectors -->
+      <div class="flex items-center gap-1.5 overflow-x-auto py-1 no-scrollbar" id="year-filter-row">
+        <span class="text-xs font-bold text-zinc-400 mr-1 shrink-0">السنة:</span>
+        {['all', '1', '2', '3', '4', '5'].map((y) => (
+          <button
+            type="button"
+            data-year={y}
+            class:list={[
+              'year-filter-btn shrink-0 text-xs font-semibold px-3 py-1 rounded-full border transition-all cursor-pointer',
+              y === 'all'
+                ? 'bg-emerald-600 text-white border-emerald-600'
+                : 'bg-white dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400 border-zinc-200 dark:border-zinc-800 hover:border-zinc-300'
+            ]}
+          >
+            {y === 'all' ? 'جميع السنوات' : `السنة ${y}`}
+          </button>
+        ))}
+      </div>
+
+      <!-- Type Filter Chips -->
+      <div class="flex items-center gap-1.5 overflow-x-auto py-1 no-scrollbar">
+        <span class="text-xs font-bold text-zinc-400 mr-1 shrink-0">النوع:</span>
+        <FilterToolbar />
+      </div>
+    </div>
+  </div>
+
+  <!-- Results Count Bar -->
+  <div class="flex items-center justify-between py-2 border-b border-zinc-200 dark:border-zinc-800 mb-4 text-xs text-zinc-500 dark:text-zinc-400">
+    <div>
+      عرض <span id="results-count" class="font-bold text-zinc-900 dark:text-zinc-100">{allMaterials.length}</span> مصادر تعليمية
+    </div>
+    <button
+      type="button"
+      id="reset-filters-btn"
+      class="text-emerald-600 dark:text-emerald-400 hover:underline font-bold hidden cursor-pointer"
+    >
+      إعادة تعيين الفلاتر
+    </button>
+  </div>
+
+  <!-- Materials Grid Container -->
+  <div id="search-results-grid">
+    <ResourceGrid materials={allMaterials} showYear={true} />
+  </div>
+</Layout>
+
+<script define:vars={{ rawMaterials: allMaterials }}>
+  window.__ALL_SEARCH_MATERIALS = rawMaterials;
+</script>
+
+<script>
+  function initSearchPage(): void {
+    const input = document.getElementById('site-search-input') as HTMLInputElement | null;
+    const yearBtns = document.querySelectorAll('.year-filter-btn');
+    const typeChips = document.querySelectorAll('.filter-chip');
+    const cards = document.querySelectorAll('#search-results-grid [data-material-id]');
+    const resultsCount = document.getElementById('results-count');
+    const resetBtn = document.getElementById('reset-filters-btn');
+
+    let currentQuery = '';
+    let currentYear = 'all';
+    let currentType = 'all';
+
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('q')) {
+      currentQuery = params.get('q') || '';
+      if (input) input.value = currentQuery;
+    }
+    if (params.get('year')) {
+      currentYear = params.get('year') || 'all';
+    }
+    if (params.get('type')) {
+      currentType = params.get('type') || 'all';
+    }
+
+    function syncUI(): void {
+      yearBtns.forEach((btn) => {
+        const y = btn.getAttribute('data-year');
+        if (y === currentYear) {
+          btn.classList.add('bg-emerald-600', 'text-white', 'border-emerald-600');
+          btn.classList.remove('bg-white', 'dark:bg-zinc-900', 'text-zinc-600', 'dark:text-zinc-400');
+        } else {
+          btn.classList.remove('bg-emerald-600', 'text-white', 'border-emerald-600');
+          btn.classList.add('bg-white', 'dark:bg-zinc-900', 'text-zinc-600', 'dark:text-zinc-400');
+        }
+      });
+
+      typeChips.forEach((chip) => {
+        const t = chip.getAttribute('data-filter-type');
+        if (t === currentType) {
+          chip.classList.add('bg-zinc-900', 'text-white', 'border-zinc-900', 'dark:bg-zinc-100', 'dark:text-zinc-900');
+          chip.classList.remove('bg-white', 'dark:bg-zinc-900', 'text-zinc-600', 'dark:text-zinc-400');
+        } else {
+          chip.classList.remove('bg-zinc-900', 'text-white', 'border-zinc-900', 'dark:bg-zinc-100', 'dark:text-zinc-900');
+          chip.classList.add('bg-white', 'dark:bg-zinc-900', 'text-zinc-600', 'dark:text-zinc-400');
+        }
+      });
+
+      const isFiltered = Boolean(currentQuery || currentYear !== 'all' || currentType !== 'all');
+      if (resetBtn) {
+        resetBtn.classList.toggle('hidden', !isFiltered);
+      }
+    }
+
+    function applyFilter(): void {
+      const allItems: any[] = (window as any).__ALL_SEARCH_MATERIALS || [];
+      const q = currentQuery.trim().toLowerCase();
+      let matchedCount = 0;
+
+      cards.forEach((cardEl) => {
+        const id = cardEl.getAttribute('data-material-id');
+        const item = allItems.find((x) => x.id === id);
+
+        if (!item) return;
+
+        if (currentYear !== 'all' && String(item.year) !== currentYear) {
+          (cardEl as HTMLElement).style.display = 'none';
+          return;
+        }
+
+        if (currentType !== 'all' && item.type !== currentType) {
+          (cardEl as HTMLElement).style.display = 'none';
+          return;
+        }
+
+        if (q) {
+          const matchTitle = item.title?.toLowerCase().includes(q);
+          const matchDesc = item.description?.toLowerCase().includes(q);
+          const matchSubj = item.subject?.toLowerCase().includes(q);
+          const authorText = Array.isArray(item.author)
+            ? item.author.join(' ').toLowerCase()
+            : (item.author ? item.author.toLowerCase() : '');
+          const matchAuthor = authorText.includes(q);
+          const matchTags = item.tags?.some((t: string) => t.toLowerCase().includes(q));
+
+          if (!matchTitle && !matchDesc && !matchSubj && !matchAuthor && !matchTags) {
+            (cardEl as HTMLElement).style.display = 'none';
+            return;
+          }
+        }
+
+        (cardEl as HTMLElement).style.display = '';
+        matchedCount++;
+      });
+
+      if (resultsCount) {
+        resultsCount.textContent = String(matchedCount);
+      }
+
+      const nextParams = new URLSearchParams();
+      if (currentQuery) nextParams.set('q', currentQuery);
+      if (currentYear !== 'all') nextParams.set('year', currentYear);
+      if (currentType !== 'all') nextParams.set('type', currentType);
+      const queryString = nextParams.toString();
+      const newUrl = queryString ? `${window.location.pathname}?${queryString}` : window.location.pathname;
+      window.history.replaceState({}, '', newUrl);
+
+      syncUI();
+    }
+
+    input?.addEventListener('input', () => {
+      currentQuery = input.value;
+      applyFilter();
+    });
+
+    yearBtns.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        currentYear = btn.getAttribute('data-year') || 'all';
+        applyFilter();
+      });
+    });
+
+    typeChips.forEach((chip) => {
+      chip.addEventListener('click', () => {
+        currentType = chip.getAttribute('data-filter-type') || 'all';
+        applyFilter();
+      });
+    });
+
+    resetBtn?.addEventListener('click', () => {
+      currentQuery = '';
+      currentYear = 'all';
+      currentType = 'all';
+      if (input) input.value = '';
+      applyFilter();
+    });
+
+    applyFilter();
+  }
+
+  initSearchPage();
+  document.addEventListener('astro:after-swap', initSearchPage);
+</script>

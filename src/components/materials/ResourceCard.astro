@@ -1,0 +1,108 @@
+---
+import type { MaterialItem } from '../../types/materials';
+import TypeBadge from './TypeBadge.astro';
+import { subjectToSlug } from '../../utils/slug';
+
+interface Props {
+  material: MaterialItem;
+  showYear?: boolean;
+}
+
+const { material, showYear = false } = Astro.props;
+
+// Normalize authors to array of names (handles string, string[], or empty)
+const rawAuthors: string[] = Array.isArray(material.author)
+  ? material.author
+  : material.author
+    ? [material.author]
+    : [];
+
+// If multiple names (up to 5), show up to 2 and replace the remaining names with '...'
+const maxVisible = 2;
+const hasMoreThanMax = rawAuthors.length > maxVisible;
+const displayedAuthorText = hasMoreThanMax
+  ? rawAuthors.slice(0, maxVisible).join('، ') + '...'
+  : rawAuthors.join('، ');
+
+const fullAuthorTooltip = rawAuthors.join('، ');
+---
+
+<div
+  class="group relative flex flex-col justify-between bg-white dark:bg-zinc-900 border border-zinc-200/80 dark:border-zinc-800 rounded-xl p-4 shadow-2xs hover:shadow-md hover:border-emerald-500/70 dark:hover:shadow-emerald-950/20 active:scale-[0.99] transition-all text-right"
+  data-material-id={material.id}
+>
+  <div>
+    <!-- Top Metadata Header -->
+    <div class="flex items-center justify-between gap-2 mb-2.5">
+      <TypeBadge type={material.type} size="sm" />
+
+      <div class="flex items-center gap-1.5 relative z-10">
+        {showYear && (
+          <span class="text-[11px] font-semibold px-2 py-0.5 rounded bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400">
+            السنة {material.year}
+          </span>
+        )}
+        {material.isPinned && (
+          <span class="inline-flex items-center gap-1 text-[11px] font-medium px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800/40">
+            مثبّت
+          </span>
+        )}
+        <!-- Bookmark Button -->
+        <button
+          type="button"
+          class="bookmark-btn p-1.5 text-zinc-400 hover:text-amber-500 dark:hover:text-amber-400 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors cursor-pointer"
+          data-id={material.id}
+          title="حفظ في المفضلة"
+          aria-label="حفظ في المفضلة"
+        >
+          <svg class="w-4 h-4 bookmark-icon-empty" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M17.593 3.322c1.1.128 1.907 1.077 1.907 2.185V21L12 17.25 4.5 21V5.507c0-1.108.806-2.057 1.907-2.185a48.507 48.507 0 0111.186 0z" />
+          </svg>
+          <svg class="w-4 h-4 bookmark-icon-filled hidden text-amber-500 fill-amber-500" viewBox="0 0 24 24">
+            <path d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Title with Stretched Link -->
+    <h3 class="font-bold text-zinc-900 dark:text-zinc-100 text-sm leading-snug line-clamp-2 mb-1.5 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 group-hover:underline group-active:underline group-focus-visible:underline underline-offset-4 decoration-emerald-500 dark:decoration-emerald-400 transition-colors">
+      <a href={material.url} target="_blank" rel="noopener noreferrer" class="focus:outline-none">
+        <span class="absolute inset-0" aria-hidden="true"></span>
+        {material.title}
+      </a>
+    </h3>
+
+    <!-- Description -->
+    {material.description && (
+      <p class="text-xs text-zinc-600 dark:text-zinc-400 line-clamp-2 mb-3">
+        {material.description}
+      </p>
+    )}
+
+    <!-- Tags & Subject & Author -->
+    <div class="flex flex-wrap items-center gap-1.5">
+      {material.subject && material.moduleId ? (
+        <a
+          href={`/module/${material.moduleId}/${subjectToSlug(material.subject)}`}
+          class="relative z-10 text-[11px] font-medium text-zinc-700 dark:text-zinc-300 bg-zinc-100 dark:bg-zinc-800/80 hover:bg-emerald-50 hover:text-emerald-700 dark:hover:bg-emerald-950/60 dark:hover:text-emerald-400 px-2 py-0.5 rounded transition-colors"
+          title={`تصفح جميع مصادر مادة ${material.subject}`}
+        >
+          {material.subject}
+        </a>
+      ) : material.subject ? (
+        <span class="text-[11px] font-medium text-zinc-700 dark:text-zinc-300 bg-zinc-100 dark:bg-zinc-800/80 px-2 py-0.5 rounded">
+          {material.subject}
+        </span>
+      ) : null}
+      {rawAuthors.length > 0 && (
+        <span
+          class="text-[11px] text-zinc-500 dark:text-zinc-400 font-medium truncate max-w-[210px]"
+          title={`إعداد: ${fullAuthorTooltip}`}
+        >
+          إعداد: {displayedAuthorText}
+        </span>
+      )}
+    </div>
+  </div>
+</div>

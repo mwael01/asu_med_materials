@@ -1,0 +1,126 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import YearSelector from '../../components/materials/YearSelector.astro';
+import ModuleCard from '../../components/materials/ModuleCard.astro';
+import GroupedResourceList from '../../components/materials/GroupedResourceList.astro';
+import FilterToolbar from '../../components/search/FilterToolbar.astro';
+import { getModulesByYear } from '../../data/modules';
+import { getMaterialsByYear, getMaterialsByModule } from '../../data/materials';
+import type { AcademicYear } from '../../types/materials';
+
+export function getStaticPaths() {
+  return [1, 2, 3, 4, 5].map((y) => ({
+    params: { year: String(y) },
+    props: { yearNum: y as AcademicYear }
+  }));
+}
+
+const { yearNum } = Astro.props;
+const modules = getModulesByYear(yearNum);
+const materials = getMaterialsByYear(yearNum);
+
+const yearNames: Record<number, string> = {
+  1: 'السنة الأولى (Year 1)',
+  2: 'السنة الثانية (Year 2)',
+  3: 'السنة الثالثة (Year 3)',
+  4: 'السنة الرابعة (Year 4)',
+  5: 'السنة الخامسة (Year 5)'
+};
+---
+
+<Layout
+  title={`مصادر ${yearNames[yearNum]} - ASU Med Materials`}
+  description={`جميع موديولات ودرايفات وقنوات وورق مذكرات ${yearNames[yearNum]} بكلية الطب جامعة عين شمس.`}
+>
+  <!-- Breadcrumb & Year Tabs -->
+  <div class="mb-6">
+    <div class="flex items-center gap-2 text-xs text-zinc-500 dark:text-zinc-400 mb-2">
+      <a href="/?redirect=false" class="hover:text-emerald-600 dark:hover:text-emerald-400">الرئيسية</a>
+      <span>/</span>
+      <span class="text-zinc-900 dark:text-zinc-100 font-bold">{yearNames[yearNum]}</span>
+    </div>
+
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-zinc-200 dark:border-zinc-800 pb-4">
+      <div>
+        <h1 class="text-2xl font-extrabold text-zinc-900 dark:text-zinc-100">
+          {yearNames[yearNum]}
+        </h1>
+        <p class="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5">
+          {modules.length} موديولات دراسية • {materials.length} مصادر تعليمية معتمدة
+        </p>
+      </div>
+
+      <YearSelector currentYear={yearNum} />
+    </div>
+  </div>
+
+  <!-- Modules Grid -->
+  <section class="mb-10">
+    <div class="flex items-center justify-between mb-3">
+      <h2 class="text-base font-bold text-zinc-900 dark:text-zinc-100">
+        موديولات وبلوكات {yearNames[yearNum]}
+      </h2>
+    </div>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      {modules.map((mod) => {
+        const count = getMaterialsByModule(mod.id).length;
+        return <ModuleCard module={mod} resourceCount={count} />;
+      })}
+    </div>
+  </section>
+
+  <!-- Grouped Materials List for This Year -->
+  <section>
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-6">
+      <h2 class="text-base font-bold text-zinc-900 dark:text-zinc-100">
+        جميع مصادر وورق شرح {yearNames[yearNum]} (مصنفة)
+      </h2>
+      <FilterToolbar />
+    </div>
+
+    <div id="year-materials-container">
+      <GroupedResourceList materials={materials} />
+    </div>
+  </section>
+</Layout>
+
+<script>
+  function initYearPageFilters(): void {
+    const chips = document.querySelectorAll('.filter-chip');
+    const cards = document.querySelectorAll('#year-materials-container [data-material-id]');
+    const sections = document.querySelectorAll('.material-group-section');
+
+    chips.forEach((chip) => {
+      chip.addEventListener('click', () => {
+        const selectedType = chip.getAttribute('data-filter-type');
+
+        chips.forEach((c) => {
+          c.classList.remove('bg-zinc-900', 'text-white', 'border-zinc-900', 'dark:bg-zinc-100', 'dark:text-zinc-900', 'dark:border-zinc-100');
+          c.classList.add('bg-white', 'dark:bg-zinc-900', 'text-zinc-600', 'dark:text-zinc-400', 'border-zinc-200', 'dark:border-zinc-800');
+        });
+        chip.classList.add('bg-zinc-900', 'text-white', 'border-zinc-900', 'dark:bg-zinc-100', 'dark:text-zinc-900', 'dark:border-zinc-100');
+        chip.classList.remove('bg-white', 'dark:bg-zinc-900', 'text-zinc-600', 'dark:text-zinc-400', 'border-zinc-200', 'dark:border-zinc-800');
+
+        cards.forEach((cardEl) => {
+          if (!selectedType || selectedType === 'all') {
+            (cardEl as HTMLElement).style.display = '';
+          } else {
+            const badge = cardEl.querySelector('.inline-flex');
+            const matches = badge?.textContent?.toLowerCase().includes(selectedType) ?? false;
+            (cardEl as HTMLElement).style.display = matches ? '' : 'none';
+          }
+        });
+
+        // Hide empty sections if all cards within it are hidden
+        sections.forEach((sec) => {
+          const visibleCards = sec.querySelectorAll('[data-material-id]:not([style*="display: none"])');
+          (sec as HTMLElement).style.display = visibleCards.length > 0 ? '' : 'none';
+        });
+      });
+    });
+  }
+
+  initYearPageFilters();
+  document.addEventListener('astro:after-swap', initYearPageFilters);
+</script>

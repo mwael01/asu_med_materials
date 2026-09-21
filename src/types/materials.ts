@@ -1,0 +1,62 @@
+export type AcademicYear = 1 | 2 | 3 | 4 | 5;
+
+export type ResourceType =
+  | 'drive'
+  | 'telegram'
+  | 'youtube'
+  | 'whatsapp'
+  | 'book'
+  | 'summary'
+  | 'exam'
+  | 'website'
+  | 'other';
+
+export type MaterialCategory =
+  | 'central'      // درايفات وقنوات الدفعة المركزية
+  | 'lectures'     // محاضرات وشروحات الفيديو
+  | 'practical'    // عملي وسكاشن ومعامل
+  | 'summaries'    // ورق ومذكرات وملخصات
+  | 'exams'        // امتحانات سابقة وريكولات
+  | 'references';  // كتب ومراجع
+
+export interface ModuleInfo {
+  id: string;
+  code: string;
+  title: string;
+  titleAr?: string;
+  year: AcademicYear;
+  semester?: 1 | 2;
+  subjects: string[];
+  description?: string;
+  descriptionAr?: string;
+}
+
+export interface MaterialItem {
+  id: string;
+  title: string;
+  description?: string;
+  url: string;
+  type: ResourceType;
+  category?: MaterialCategory;
+  year: AcademicYear;
+  moduleId?: string;
+  subject?: string;
+  author?: string | string[]; // Single or multiple names (up to 5)
+  tags: string[];
+  isPinned?: boolean;
+  createdAt?: string;
+}
+
+export interface FilterOptions {
+  query?: string;
+  year?: AcademicYear | 'all';
+  type?: ResourceType | 'all';
+  category?: MaterialCategory | 'all';
+  moduleId?: string;
+  subject?: string;
+}
+
+export interface UserPreferences {
+  year?: AcademicYear;
+  moduleId?: string;
+}

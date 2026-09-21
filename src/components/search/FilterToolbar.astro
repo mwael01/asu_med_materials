@@ -1,0 +1,50 @@
+---
+import type { ResourceType } from '../../types/materials';
+
+interface Props {
+  selectedType?: ResourceType | 'all';
+}
+
+const { selectedType = 'all' } = Astro.props;
+
+const filterTypes: { label: string; value: ResourceType | 'all'; icon?: string }[] = [
+  { label: 'الكل', value: 'all' },
+  { label: 'Google Drive', value: 'drive', icon: '/icons/google-drive.svg' },
+  { label: 'Telegram', value: 'telegram', icon: '/icons/telegram.svg' },
+  { label: 'YouTube', value: 'youtube', icon: '/icons/youtube.svg' },
+  { label: 'ورق ومذكرات', value: 'summary', icon: '/icons/summary.svg' },
+  { label: 'امتحانات وريكولات', value: 'exam', icon: '/icons/exam.svg' },
+  { label: 'كتب ومراجع', value: 'book', icon: '/icons/book.svg' },
+  { label: 'WhatsApp', value: 'whatsapp', icon: '/icons/whatsapp.svg' },
+];
+---
+
+<div class="flex items-center gap-1.5 overflow-x-auto py-1 no-scrollbar" id="type-filter-toolbar">
+  {filterTypes.map((item) => {
+    const isSelected = selectedType === item.value;
+    return (
+      <button
+        type="button"
+        data-filter-type={item.value}
+        class:list={[
+          'filter-chip shrink-0 inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg border transition-all cursor-pointer shadow-2xs',
+          isSelected
+            ? 'bg-zinc-900 text-white border-zinc-900 dark:bg-zinc-100 dark:text-zinc-900 dark:border-zinc-100'
+            : 'bg-white dark:bg-zinc-900 text-zinc-700 dark:text-zinc-300 border-zinc-200/80 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700 hover:bg-zinc-50 dark:hover:bg-zinc-800/50'
+        ]}
+      >
+        {item.icon && (
+          <img
+            src={item.icon}
+            alt=""
+            width="14"
+            height="14"
+            class="w-3.5 h-3.5 shrink-0 object-contain"
+            loading="lazy"
+          />
+        )}
+        <span>{item.label}</span>
+      </button>
+    );
+  })}
+</div>

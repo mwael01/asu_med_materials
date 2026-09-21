@@ -1,11 +1,222 @@
 ---
-import Welcome from '../components/Welcome.astro';
 import Layout from '../layouts/Layout.astro';
+import SearchBar from '../components/search/SearchBar.astro';
+import ResourceGrid from '../components/materials/ResourceGrid.astro';
+import GroupedResourceList from '../components/materials/GroupedResourceList.astro';
+import { getPinnedMaterials, getAllMaterials } from '../data/materials';
+import { getModulesByYear } from '../data/modules';
 
-// Welcome to Astro! Wondering what to do next? Check out the Astro documentation at https://docs.astro.build
-// Don't want to use any of this? Delete everything in this file, the `assets`, `components`, and `layouts` directories, and start fresh.
+const pinnedMaterials = getPinnedMaterials();
+const allMaterials = getAllMaterials();
+const recentMaterials = allMaterials.slice(0, 6);
+
+const yearData = [
+  { year: 1, titleAr: 'السنة الأولى', titleEn: 'Year 1', desc: 'Foundation, MSK, Blood, CVS' },
+  { year: 2, titleAr: 'السنة الثانية', titleEn: 'Year 2', desc: 'Respiratory, GIT, Endocrine, Renal' },
+  { year: 3, titleAr: 'السنة الثالثة', titleEn: 'Year 3', desc: 'CNS, Special Senses, Repro, Multi-system' },
+  { year: 4, titleAr: 'السنة الرابعة', titleEn: 'Year 4', desc: 'Surgery, Medicine 1, Pediatrics, Community' },
+  { year: 5, titleAr: 'السنة الخامسة', titleEn: 'Year 5', desc: 'OB/GYN, Medicine 2, Specialized Surgery, Forensics' }
+];
 ---
 
 <Layout>
-	<Welcome />
+  <!-- Welcome & Personalized Banner -->
+  <section class="mb-8">
+    <!-- Active Year Personalized Alert (Shown via client script when user has chosen a year) -->
+    <div
+      id="user-year-welcome-card"
+      class="mb-6 p-4 rounded-2xl bg-emerald-50/80 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/50 hidden flex-col sm:flex-row items-start sm:items-center justify-between gap-3"
+    >
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-emerald-600 text-white flex items-center justify-center font-bold text-base shadow-xs shrink-0">
+          <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" />
+          </svg>
+        </div>
+        <div>
+          <h2 class="text-sm font-bold text-zinc-900 dark:text-zinc-100">
+            مرحباً بك! سنتك الدراسية المختارة: <span id="welcome-year-name" class="text-emerald-700 dark:text-emerald-400 font-extrabold">السنة الأولى</span>
+          </h2>
+          <p class="text-xs text-zinc-600 dark:text-zinc-400 mt-0.5">
+            تم ضبط الموقع على سنتك للوصول المباشر إلى موديولاتك ودرايفاتك.
+          </p>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-2 shrink-0">
+        <a
+          id="welcome-year-link"
+          href="/year/1"
+          class="text-xs font-bold px-3.5 py-1.5 rounded-lg bg-emerald-600 text-white hover:bg-emerald-700 transition-colors shadow-2xs"
+        >
+          فتح موديولات سنتك &larr;
+        </a>
+        <button
+          type="button"
+          class="trigger-multistage-selector text-xs font-semibold px-3 py-1.5 rounded-lg bg-white dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 border border-zinc-200 dark:border-zinc-700 hover:bg-zinc-100 transition-colors cursor-pointer"
+        >
+          تغيير
+        </button>
+      </div>
+    </div>
+
+    <div class="mb-4">
+      <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-zinc-900 dark:text-zinc-50 mb-1.5">
+        منصة مصادر كليّة الطب - جامعة عين شمس
+      </h1>
+      <p class="text-xs sm:text-sm text-zinc-600 dark:text-zinc-400">
+        درايفات الدفعات، قنوات التليجرام، شروحات اليوتيوب، وورق ومذكرات المذاكرة لجميع السنوات الخمس.
+      </p>
+    </div>
+
+    <!-- Quick Search Form -->
+    <form action="/search" method="GET" class="w-full">
+      <SearchBar placeholder="ابحث باسم المادة، الموديول، اسم الدكتور، الدرايف، أو التلخيص..." />
+    </form>
+  </section>
+
+  <!-- Academic Year Quick Navigator -->
+  <section class="mb-10">
+    <div class="flex items-center justify-between mb-3">
+      <div class="flex items-center gap-2">
+        <h2 class="text-base font-bold text-zinc-900 dark:text-zinc-100">
+          السنوات والمراحل الدراسية
+        </h2>
+        <button
+          type="button"
+          class="trigger-multistage-selector text-xs text-emerald-600 hover:underline font-semibold cursor-pointer"
+        >
+          (تحديد سنتك)
+        </button>
+      </div>
+
+      <a href="/search" class="text-xs font-bold text-emerald-600 dark:text-emerald-400 hover:underline">
+        تصفح جميع المواد &larr;
+      </a>
+    </div>
+
+    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+      {yearData.map((y) => {
+        const moduleCount = getModulesByYear(y.year).length;
+        return (
+          <a
+            href={`/year/${y.year}`}
+            class="group bg-white dark:bg-zinc-900 border border-zinc-200/80 dark:border-zinc-800 rounded-xl p-4 transition-all hover:border-emerald-500/70 hover:shadow-sm shadow-2xs flex flex-col justify-between text-right active:scale-[0.99]"
+          >
+            <div>
+              <span class="text-xs font-extrabold text-emerald-600 dark:text-emerald-400">
+                Level {y.year}
+              </span>
+              <h3 class="font-bold text-sm text-zinc-900 dark:text-zinc-100 mt-0.5 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">
+                {y.titleAr}
+              </h3>
+              <p class="text-[11px] text-zinc-500 dark:text-zinc-400 mt-1 line-clamp-2">
+                {y.desc}
+              </p>
+            </div>
+            <div class="mt-3 pt-2 border-t border-zinc-100 dark:border-zinc-800/80 flex items-center justify-between text-[11px] text-zinc-400">
+              <span>{moduleCount} موديولات</span>
+              <svg class="w-3.5 h-3.5 group-hover:-translate-x-0.5 transition-transform rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+              </svg>
+            </div>
+          </a>
+        );
+      })}
+    </div>
+  </section>
+
+  <!-- Ready For Real Data Contribution Banner (shown when materials database is awaiting submissions) -->
+  {allMaterials.length === 0 && (
+    <section class="mb-10 p-6 rounded-2xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 shadow-xs text-center sm:text-right flex flex-col sm:flex-row items-center justify-between gap-4">
+      <div>
+        <div class="inline-flex items-center gap-1.5 text-xs font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/60 px-2.5 py-1 rounded-full mb-2">
+          <span>المنصة جاهزة لاستقبال المصادر الحقيقية 🚀</span>
+        </div>
+        <h2 class="text-base sm:text-lg font-extrabold text-zinc-900 dark:text-zinc-100 mb-1">
+          شارك أول درايف أو مذكرات باسمك لدعم زملائك
+        </h2>
+        <p class="text-xs text-zinc-500 dark:text-zinc-400 max-w-xl leading-relaxed">
+          تقدر دلوقتي تضيف أي درايف للدفعة، ورق شرح، سلايدات، أو قناة تليجرام بسهولة وبدون أي خطوات معقدة عبر صفحة المشاركة.
+        </p>
+      </div>
+
+      <a
+        href="/contribute"
+        class="shrink-0 inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition-all shadow-xs"
+      >
+        <span>مشاركة مصدر جديد</span>
+        <svg class="w-3.5 h-3.5 rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5" />
+        </svg>
+      </a>
+    </section>
+  )}
+
+  <!-- Pinned Central Batch Drives -->
+  {pinnedMaterials.length > 0 && (
+    <section class="mb-10">
+      <div class="flex items-center justify-between mb-4">
+        <div class="flex items-center gap-2">
+          <h2 class="text-base font-bold text-zinc-900 dark:text-zinc-100">
+            الدرايفات والقنوات المركزية للدفعة
+          </h2>
+          <span class="text-xs font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300">
+            High-Yield
+          </span>
+        </div>
+      </div>
+
+      <ResourceGrid materials={pinnedMaterials} showYear={true} />
+    </section>
+  )}
+
+  <!-- Grouped Latest Materials -->
+  {recentMaterials.length > 0 && (
+    <section>
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="text-base font-bold text-zinc-900 dark:text-zinc-100">
+          أحدث المصادر وورق الشرح المضاف
+        </h2>
+        <a href="/search" class="text-xs font-bold text-emerald-600 dark:text-emerald-400 hover:underline">
+          دليل البحث الكامل &larr;
+        </a>
+      </div>
+
+      <GroupedResourceList materials={recentMaterials} showYear={true} />
+    </section>
+  )}
 </Layout>
+
+<script>
+  function syncPersonalizedWelcome(): void {
+    const card = document.getElementById('user-year-welcome-card');
+    const yearName = document.getElementById('welcome-year-name');
+    const yearLink = document.getElementById('welcome-year-link') as HTMLAnchorElement | null;
+
+    try {
+      const yearStr = localStorage.getItem('asumed_user_year');
+      if (yearStr) {
+        const y = parseInt(yearStr, 10);
+        const names: Record<number, string> = {
+          1: 'السنة الأولى (Year 1)',
+          2: 'السنة الثانية (Year 2)',
+          3: 'السنة الثالثة (Year 3)',
+          4: 'السنة الرابعة (Year 4)',
+          5: 'السنة الخامسة (Year 5)'
+        };
+        if (yearName) yearName.textContent = names[y] || `السنة ${y}`;
+        if (yearLink) yearLink.href = `/year/${y}`;
+        card?.classList.remove('hidden');
+        card?.classList.add('flex');
+      } else {
+        card?.classList.add('hidden');
+        card?.classList.remove('flex');
+      }
+    } catch {}
+  }
+
+  syncPersonalizedWelcome();
+  window.addEventListener('user-preferences-updated', syncPersonalizedWelcome);
+  document.addEventListener('astro:after-swap', syncPersonalizedWelcome);
+</script>

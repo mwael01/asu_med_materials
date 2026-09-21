@@ -1,0 +1,37 @@
+---
+import type { AcademicYear } from '../../types/materials';
+
+interface Props {
+  currentYear?: AcademicYear | 'all';
+}
+
+const { currentYear } = Astro.props;
+
+const years: { label: string; year: AcademicYear | 'all'; href: string }[] = [
+  { label: 'جميع المصادر', year: 'all', href: '/search' },
+  { label: 'السنة الأولى', year: 1, href: '/year/1' },
+  { label: 'السنة الثانية', year: 2, href: '/year/2' },
+  { label: 'السنة الثالثة', year: 3, href: '/year/3' },
+  { label: 'السنة الرابعة', year: 4, href: '/year/4' },
+  { label: 'السنة الخامسة', year: 5, href: '/year/5' },
+];
+---
+
+<nav class="flex items-center gap-1.5 overflow-x-auto py-2 no-scrollbar" aria-label="تحديد السنة الدراسية">
+  {years.map((item) => {
+    const isActive = currentYear === item.year;
+    return (
+      <a
+        href={item.href}
+        class:list={[
+          'shrink-0 text-xs font-bold px-3.5 py-1.5 rounded-full transition-all border',
+          isActive
+            ? 'bg-emerald-600 border-emerald-600 text-white shadow-xs'
+            : 'bg-white dark:bg-zinc-900 text-zinc-700 dark:text-zinc-300 border-zinc-200 dark:border-zinc-800 hover:border-emerald-500/50 hover:bg-zinc-50 dark:hover:bg-zinc-800/60'
+        ]}
+      >
+        {item.label}
+      </a>
+    );
+  })}
+</nav>

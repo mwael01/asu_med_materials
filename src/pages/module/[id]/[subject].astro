@@ -1,0 +1,195 @@
+---
+import Layout from '../../../layouts/Layout.astro';
+import GroupedResourceList from '../../../components/materials/GroupedResourceList.astro';
+import FilterToolbar from '../../../components/search/FilterToolbar.astro';
+import SubjectBar from '../../../components/materials/SubjectBar.astro';
+import { modulesData } from '../../../data/modules';
+import { getMaterialsByModule, getMaterialsByModuleAndSubject } from '../../../data/materials';
+import { subjectToSlug } from '../../../utils/slug';
+import type { ModuleInfo } from '../../../types/materials';
+
+export function getStaticPaths() {
+  const paths: Array<{
+    params: { id: string; subject: string };
+    props: { module: ModuleInfo; subjectName: string };
+  }> = [];
+
+  for (const mod of modulesData) {
+    for (const sub of mod.subjects) {
+      paths.push({
+        params: {
+          id: mod.id,
+          subject: subjectToSlug(sub)
+        },
+        props: {
+          module: mod,
+          subjectName: sub
+        }
+      });
+    }
+  }
+
+  return paths;
+}
+
+interface Props {
+  module: ModuleInfo;
+  subjectName: string;
+}
+
+const { module, subjectName } = Astro.props;
+const currentSubjectSlug = subjectToSlug(subjectName);
+
+const allModuleMaterials = getMaterialsByModule(module.id);
+const subjectMaterials = getMaterialsByModuleAndSubject(module.id, subjectName);
+
+// Compute counts per subject
+const materialCounts: Record<string, number> = {};
+for (const sub of module.subjects) {
+  const slug = subjectToSlug(sub);
+  materialCounts[slug] = allModuleMaterials.filter(
+    (m) => m.subject && subjectToSlug(m.subject) === slug
+  ).length;
+}
+---
+
+<Layout
+  title={`${subjectName} - ${module.code}: ${module.titleAr || module.title} - ASU Med Materials`}
+  description={`مصادر ودرايفات ومحاضرات وتلخيصات مادة ${subjectName} ضمن موديول ${module.titleAr || module.title} (${module.code}) بطب عين شمس.`}
+>
+  <!-- Breadcrumb Navigation -->
+  <div class="flex items-center gap-2 text-xs text-zinc-500 dark:text-zinc-400 mb-3 overflow-x-auto whitespace-nowrap">
+    <a href="/?redirect=false" class="hover:text-emerald-600 dark:hover:text-emerald-400">الرئيسية</a>
+    <span>/</span>
+    <a href={`/year/${module.year}`} class="hover:text-emerald-600 dark:hover:text-emerald-400">السنة {module.year}</a>
+    <span>/</span>
+    <a href={`/module/${module.id}`} class="hover:text-emerald-600 dark:hover:text-emerald-400">{module.code}</a>
+    <span>/</span>
+    <span class="text-zinc-900 dark:text-zinc-100 font-bold">{subjectName}</span>
+  </div>
+
+  <!-- Dedicated Subject Header Banner -->
+  <div class="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl p-6 mb-6 text-right">
+    <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
+      <div class="flex items-center gap-2">
+        <span class="text-xs font-bold px-2.5 py-0.5 rounded-md bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300">
+          {module.code}
+        </span>
+        <span class="text-xs font-semibold px-2.5 py-0.5 rounded-md bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400">
+          السنة {module.year}
+        </span>
+      </div>
+
+      <a
+        href={`/module/${module.id}`}
+        class="text-xs text-emerald-600 dark:text-emerald-400 hover:underline font-semibold inline-flex items-center gap-1"
+      >
+        <span>كل مصادر الموديول ({allModuleMaterials.length})</span>
+        <svg class="w-3.5 h-3.5 rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+        </svg>
+      </a>
+    </div>
+
+    <h1 class="text-2xl sm:text-3xl font-extrabold text-zinc-900 dark:text-zinc-100 mb-1">
+      {subjectName}
+    </h1>
+    <h2 class="text-xs sm:text-sm font-medium text-zinc-500 dark:text-zinc-400">
+      مادة مقررة ضمن {module.titleAr || module.title} ({module.title})
+    </h2>
+  </div>
+
+  <!-- Per-Subject Filtration Navigation Bar -->
+  <SubjectBar
+    moduleId={module.id}
+    subjects={module.subjects}
+    activeSubjectSlug={currentSubjectSlug}
+    activeSubjectName={subjectName}
+    totalCount={allModuleMaterials.length}
+    materialCounts={materialCounts}
+  />
+
+  <!-- Subject Materials Section -->
+  <section>
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
+      <div class="flex items-center gap-2">
+        <h2 class="text-base sm:text-lg font-bold text-zinc-900 dark:text-zinc-100">
+          مصادر {subjectName}
+        </h2>
+        <span class="text-xs px-2 py-0.5 rounded-full bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 font-bold">
+          {subjectMaterials.length}
+        </span>
+      </div>
+
+      {subjectMaterials.length > 0 && <FilterToolbar />}
+    </div>
+
+    {subjectMaterials.length > 0 ? (
+      <div id="module-materials-container">
+        <GroupedResourceList materials={subjectMaterials} />
+      </div>
+    ) : (
+      <div class="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl p-8 text-center my-6">
+        <div class="w-12 h-12 mx-auto rounded-full bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 flex items-center justify-center mb-3">
+          <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" />
+          </svg>
+        </div>
+        <h3 class="text-sm font-bold text-zinc-900 dark:text-zinc-100 mb-1">
+          لا توجد مصادر مرفوعة لمادة {subjectName} حتى الآن
+        </h3>
+        <p class="text-xs text-zinc-500 dark:text-zinc-400 mb-4 max-w-sm mx-auto leading-relaxed">
+          لو عندك داتا أو شروحات أو ورق وملخصات لمادة {subjectName}، شاركها باسمك لزملائك الطلاب!
+        </p>
+        <a
+          href="/contribute"
+          class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-emerald-600 text-white hover:bg-emerald-700 text-xs font-bold transition-colors shadow-2xs"
+        >
+          <span>مشاركة مصدر لمادة {subjectName}</span>
+          <svg class="w-3.5 h-3.5 rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5" />
+          </svg>
+        </a>
+      </div>
+    )}
+  </section>
+</Layout>
+
+<script>
+  function initModuleFilters(): void {
+    const chips = document.querySelectorAll('.filter-chip');
+    const cards = document.querySelectorAll('#module-materials-container [data-material-id]');
+    const sections = document.querySelectorAll('.material-group-section');
+
+    chips.forEach((chip) => {
+      chip.addEventListener('click', () => {
+        const selectedType = chip.getAttribute('data-filter-type');
+
+        chips.forEach((c) => {
+          c.classList.remove('bg-zinc-900', 'text-white', 'border-zinc-900', 'dark:bg-zinc-100', 'dark:text-zinc-900', 'dark:border-zinc-100');
+          c.classList.add('bg-white', 'dark:bg-zinc-900', 'text-zinc-600', 'dark:text-zinc-400', 'border-zinc-200', 'dark:border-zinc-800');
+        });
+        chip.classList.add('bg-zinc-900', 'text-white', 'border-zinc-900', 'dark:bg-zinc-100', 'dark:text-zinc-900', 'dark:border-zinc-100');
+        chip.classList.remove('bg-white', 'dark:bg-zinc-900', 'text-zinc-600', 'dark:text-zinc-400', 'border-zinc-200', 'dark:border-zinc-800');
+
+        cards.forEach((cardEl) => {
+          if (!selectedType || selectedType === 'all') {
+            (cardEl as HTMLElement).style.display = '';
+          } else {
+            const badge = cardEl.querySelector('.inline-flex');
+            const matches = badge?.textContent?.toLowerCase().includes(selectedType) ?? false;
+            (cardEl as HTMLElement).style.display = matches ? '' : 'none';
+          }
+        });
+
+        sections.forEach((sec) => {
+          const visibleCards = sec.querySelectorAll('[data-material-id]:not([style*="display: none"])');
+          (sec as HTMLElement).style.display = visibleCards.length > 0 ? '' : 'none';
+        });
+      });
+    });
+  }
+
+  initModuleFilters();
+  document.addEventListener('astro:after-swap', initModuleFilters);
+</script>

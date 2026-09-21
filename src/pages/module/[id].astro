@@ -1,0 +1,140 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import GroupedResourceList from '../../components/materials/GroupedResourceList.astro';
+import FilterToolbar from '../../components/search/FilterToolbar.astro';
+import SubjectBar from '../../components/materials/SubjectBar.astro';
+import { modulesData } from '../../data/modules';
+import { getMaterialsByModule } from '../../data/materials';
+import { subjectToSlug } from '../../utils/slug';
+import type { ModuleInfo } from '../../types/materials';
+
+export function getStaticPaths() {
+  return modulesData.map((mod) => ({
+    params: { id: mod.id },
+    props: { module: mod }
+  }));
+}
+
+interface Props {
+  module: ModuleInfo;
+}
+
+const { module } = Astro.props;
+const moduleMaterials = getMaterialsByModule(module.id);
+
+// Compute counts per subject
+const materialCounts: Record<string, number> = {};
+for (const sub of module.subjects) {
+  const slug = subjectToSlug(sub);
+  materialCounts[slug] = moduleMaterials.filter(
+    (m) => m.subject && subjectToSlug(m.subject) === slug
+  ).length;
+}
+---
+
+<Layout
+  title={`${module.code}: ${module.titleAr || module.title} - ASU Med Materials`}
+  description={`جميع مصادر ودرايفات ومحاضرات وتلخيصات ${module.titleAr || module.title} (${module.code}) بطب عين شمس.`}
+>
+  <!-- Breadcrumb -->
+  <div class="flex items-center gap-2 text-xs text-zinc-500 dark:text-zinc-400 mb-3">
+    <a href="/?redirect=false" class="hover:text-emerald-600 dark:hover:text-emerald-400">الرئيسية</a>
+    <span>/</span>
+    <a href={`/year/${module.year}`} class="hover:text-emerald-600 dark:hover:text-emerald-400">السنة {module.year}</a>
+    <span>/</span>
+    <span class="text-zinc-900 dark:text-zinc-100 font-bold">{module.code}</span>
+  </div>
+
+  <!-- Module Header Banner -->
+  <div class="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl p-6 mb-8 text-right">
+    <div class="flex flex-wrap items-center gap-2 mb-2">
+      <span class="text-xs font-bold px-2.5 py-0.5 rounded-md bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300">
+        {module.code}
+      </span>
+      <span class="text-xs font-semibold px-2.5 py-0.5 rounded-md bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400">
+        السنة {module.year}
+      </span>
+    </div>
+
+    <h1 class="text-2xl sm:text-3xl font-extrabold text-zinc-900 dark:text-zinc-100 mb-1.5">
+      {module.titleAr || module.title}
+    </h1>
+    <h2 class="text-sm font-semibold text-zinc-500 dark:text-zinc-400 mb-3">
+      {module.title}
+    </h2>
+
+    {module.descriptionAr && (
+      <p class="text-xs sm:text-sm text-zinc-600 dark:text-zinc-400 max-w-2xl leading-relaxed">
+        {module.descriptionAr}
+      </p>
+    )}
+  </div>
+
+  <!-- Per-Subject Filtration Navigation Bar -->
+  <SubjectBar
+    moduleId={module.id}
+    subjects={module.subjects}
+    activeSubjectSlug="all"
+    totalCount={moduleMaterials.length}
+    materialCounts={materialCounts}
+  />
+
+  <!-- Module Materials Section -->
+  <section>
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
+      <div class="flex items-center gap-2">
+        <h2 class="text-lg font-bold text-zinc-900 dark:text-zinc-100">
+          مصادر الموديول المصنفة
+        </h2>
+        <span class="text-xs px-2 py-0.5 rounded-full bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 font-bold">
+          {moduleMaterials.length}
+        </span>
+      </div>
+
+      <FilterToolbar />
+    </div>
+
+    <div id="module-materials-container">
+      <GroupedResourceList materials={moduleMaterials} />
+    </div>
+  </section>
+</Layout>
+
+<script>
+  function initModuleFilters(): void {
+    const chips = document.querySelectorAll('.filter-chip');
+    const cards = document.querySelectorAll('#module-materials-container [data-material-id]');
+    const sections = document.querySelectorAll('.material-group-section');
+
+    chips.forEach((chip) => {
+      chip.addEventListener('click', () => {
+        const selectedType = chip.getAttribute('data-filter-type');
+
+        chips.forEach((c) => {
+          c.classList.remove('bg-zinc-900', 'text-white', 'border-zinc-900', 'dark:bg-zinc-100', 'dark:text-zinc-900', 'dark:border-zinc-100');
+          c.classList.add('bg-white', 'dark:bg-zinc-900', 'text-zinc-600', 'dark:text-zinc-400', 'border-zinc-200', 'dark:border-zinc-800');
+        });
+        chip.classList.add('bg-zinc-900', 'text-white', 'border-zinc-900', 'dark:bg-zinc-100', 'dark:text-zinc-900', 'dark:border-zinc-100');
+        chip.classList.remove('bg-white', 'dark:bg-zinc-900', 'text-zinc-600', 'dark:text-zinc-400', 'border-zinc-200', 'dark:border-zinc-800');
+
+        cards.forEach((cardEl) => {
+          if (!selectedType || selectedType === 'all') {
+            (cardEl as HTMLElement).style.display = '';
+          } else {
+            const badge = cardEl.querySelector('.inline-flex');
+            const matches = badge?.textContent?.toLowerCase().includes(selectedType) ?? false;
+            (cardEl as HTMLElement).style.display = matches ? '' : 'none';
+          }
+        });
+
+        sections.forEach((sec) => {
+          const visibleCards = sec.querySelectorAll('[data-material-id]:not([style*="display: none"])');
+          (sec as HTMLElement).style.display = visibleCards.length > 0 ? '' : 'none';
+        });
+      });
+    });
+  }
+
+  initModuleFilters();
+  document.addEventListener('astro:after-swap', initModuleFilters);
+</script>

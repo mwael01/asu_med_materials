@@ -1,0 +1,90 @@
+---
+import { subjectToSlug } from '../../utils/slug';
+
+interface Props {
+  moduleId: string;
+  subjects: string[];
+  activeSubjectSlug?: string;
+  activeSubjectName?: string;
+  totalCount?: number;
+  materialCounts?: Record<string, number>;
+}
+
+const {
+  moduleId,
+  subjects,
+  activeSubjectSlug,
+  activeSubjectName,
+  totalCount,
+  materialCounts
+} = Astro.props;
+
+const isAllActive = !activeSubjectSlug || activeSubjectSlug === 'all';
+---
+
+<div class="mb-6">
+  <div class="flex items-center justify-between gap-2 mb-2 text-right">
+    <div class="flex items-center gap-1.5 text-xs font-bold text-zinc-800 dark:text-zinc-200">
+      <svg class="w-3.5 h-3.5 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" />
+      </svg>
+      <span>المواد الدراسية المقررة:</span>
+    </div>
+    {activeSubjectName && (
+      <span class="text-[11px] text-zinc-500 dark:text-zinc-400">
+        المادة الحالية: <strong class="text-emerald-600 dark:text-emerald-400">{activeSubjectName}</strong>
+      </span>
+    )}
+  </div>
+
+  <div class="flex items-center gap-1.5 overflow-x-auto pb-1 text-xs">
+    <!-- 'All Subjects' Link -->
+    <a
+      href={`/module/${moduleId}`}
+      class:list={[
+        'px-3 py-1.5 rounded-xl whitespace-nowrap transition-all flex items-center gap-1.5 shrink-0 border text-xs font-semibold',
+        isAllActive
+          ? 'bg-emerald-600 text-white border-emerald-600 shadow-2xs'
+          : 'bg-white dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400 border-zinc-200 dark:border-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-800/80 hover:text-zinc-900 dark:hover:text-zinc-100'
+      ]}
+    >
+      <span>جميع المواد</span>
+      {totalCount !== undefined && (
+        <span class:list={[
+          'text-[10px] px-1.5 py-0.5 rounded-full font-bold leading-none',
+          isAllActive ? 'bg-emerald-700 text-white' : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400'
+        ]}>
+          {totalCount}
+        </span>
+      )}
+    </a>
+
+    <!-- Individual Subject Links -->
+    {subjects.map((sub) => {
+      const slug = subjectToSlug(sub);
+      const isActive = activeSubjectSlug === slug;
+      const count = materialCounts ? materialCounts[slug] : undefined;
+      return (
+        <a
+          href={`/module/${moduleId}/${slug}`}
+          class:list={[
+            'px-3 py-1.5 rounded-xl whitespace-nowrap transition-all flex items-center gap-1.5 shrink-0 border text-xs font-semibold',
+            isActive
+              ? 'bg-emerald-600 text-white border-emerald-600 shadow-2xs'
+              : 'bg-white dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400 border-zinc-200 dark:border-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-800/80 hover:text-zinc-900 dark:hover:text-zinc-100'
+          ]}
+        >
+          <span>{sub}</span>
+          {count !== undefined && count > 0 && (
+            <span class:list={[
+              'text-[10px] px-1.5 py-0.5 rounded-full font-bold leading-none',
+              isActive ? 'bg-emerald-700 text-white' : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400'
+            ]}>
+              {count}
+            </span>
+          )}
+        </a>
+      );
+    })}
+  </div>
+</div>

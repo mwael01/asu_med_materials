@@ -1,0 +1,85 @@
+---
+import type { ResourceType } from '../../types/materials';
+
+interface Props {
+  type: ResourceType;
+  size?: 'sm' | 'md';
+}
+
+const { type, size = 'sm' } = Astro.props;
+
+interface TypeConfig {
+  label: string;
+  classes: string;
+  icon: string;
+}
+
+const typeConfigs: Record<ResourceType, TypeConfig> = {
+  drive: {
+    label: 'Google Drive',
+    classes: 'bg-zinc-100/90 dark:bg-zinc-800/80 text-zinc-800 dark:text-zinc-200 border-zinc-200/80 dark:border-zinc-700/80',
+    icon: '/icons/google-drive.svg'
+  },
+  telegram: {
+    label: 'Telegram',
+    classes: 'bg-zinc-100/90 dark:bg-zinc-800/80 text-zinc-800 dark:text-zinc-200 border-zinc-200/80 dark:border-zinc-700/80',
+    icon: '/icons/telegram.svg'
+  },
+  youtube: {
+    label: 'YouTube',
+    classes: 'bg-zinc-100/90 dark:bg-zinc-800/80 text-zinc-800 dark:text-zinc-200 border-zinc-200/80 dark:border-zinc-700/80',
+    icon: '/icons/youtube.svg'
+  },
+  whatsapp: {
+    label: 'WhatsApp',
+    classes: 'bg-zinc-100/90 dark:bg-zinc-800/80 text-zinc-800 dark:text-zinc-200 border-zinc-200/80 dark:border-zinc-700/80',
+    icon: '/icons/whatsapp.svg'
+  },
+  book: {
+    label: 'كتب ومراجع',
+    classes: 'bg-zinc-100/90 dark:bg-zinc-800/80 text-zinc-800 dark:text-zinc-200 border-zinc-200/80 dark:border-zinc-700/80',
+    icon: '/icons/book.svg'
+  },
+  summary: {
+    label: 'ورق ومذكرات',
+    classes: 'bg-zinc-100/90 dark:bg-zinc-800/80 text-zinc-800 dark:text-zinc-200 border-zinc-200/80 dark:border-zinc-700/80',
+    icon: '/icons/summary.svg'
+  },
+  exam: {
+    label: 'امتحانات وريكولات',
+    classes: 'bg-zinc-100/90 dark:bg-zinc-800/80 text-zinc-800 dark:text-zinc-200 border-zinc-200/80 dark:border-zinc-700/80',
+    icon: '/icons/exam.svg'
+  },
+  website: {
+    label: 'موقع',
+    classes: 'bg-zinc-100/90 dark:bg-zinc-800/80 text-zinc-800 dark:text-zinc-200 border-zinc-200/80 dark:border-zinc-700/80',
+    icon: '/icons/website.svg'
+  },
+  other: {
+    label: 'مصدر',
+    classes: 'bg-zinc-100/90 dark:bg-zinc-800/80 text-zinc-800 dark:text-zinc-200 border-zinc-200/80 dark:border-zinc-700/80',
+    icon: '/icons/other.svg'
+  }
+};
+
+const config = typeConfigs[type] ?? typeConfigs.other;
+const isSmall = size === 'sm';
+---
+
+<span
+  class:list={[
+    'inline-flex items-center gap-1.5 font-medium border rounded-md transition-colors',
+    config.classes,
+    isSmall ? 'text-[11px] px-2 py-0.5' : 'text-xs px-2.5 py-1'
+  ]}
+>
+  <img
+    src={config.icon}
+    alt=""
+    width={isSmall ? 14 : 16}
+    height={isSmall ? 14 : 16}
+    class:list={['shrink-0 object-contain', isSmall ? 'w-3.5 h-3.5' : 'w-4 h-4']}
+    loading="lazy"
+  />
+  <span>{config.label}</span>
+</span>
