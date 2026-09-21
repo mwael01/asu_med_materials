@@ -47,11 +47,21 @@ export function isIosDevice(): boolean {
 export function registerServiceWorker(): void {
   if (typeof window === 'undefined' || !('serviceWorker' in navigator)) return;
 
-  window.addEventListener('load', () => {
+  const register = () => {
     navigator.serviceWorker
-      .register('/sw.js')
-      .catch(() => {
-        // Silently fail if offline or unsupported
+      .register('/sw.js', { scope: '/' })
+      .then((reg) => {
+        // Check for service worker updates periodically
+        reg.update();
+      })
+      .catch((err) => {
+        console.warn('Service worker registration failed:', err);
       });
-  });
+  };
+
+  if (document.readyState === 'complete') {
+    register();
+  } else {
+    window.addEventListener('load', register);
+  }
 }

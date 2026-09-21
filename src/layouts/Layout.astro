@@ -82,5 +82,11 @@ const isHomePage = Astro.url.pathname === '/' || Astro.url.pathname === '';
     <Toast />
     <PwaInstallToast />
     <Footer />
+
+    <!-- Service Worker registration for offline PWA capabilities -->
+    <script>
+      import { registerServiceWorker } from '../utils/pwa';
+      registerServiceWorker();
+    </script>
   </body>
 </html>

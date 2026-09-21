@@ -67,13 +67,13 @@ Re-run this script any time the favicon changes.
 
 ## PWA / Offline Architecture
 
-The site uses **`@vite-pwa/astro`** (Workbox `generateSW` strategy) for offline support:
+The site uses a native Service Worker located at [`public/sw.js`](file:///workspaces/asu_med_materials/public/sw.js):
 
-- **Service worker** is auto-generated at build time into `dist/sw.js`.
-- **Precache manifest** covers every HTML page, `_astro/` JS+CSS chunk, and icon — all 51+ pages are available offline after first visit.
-- **Navigation fallback** sends `/` for any uncached HTML request when offline.
-- **`autoUpdate`** strategy: the SW updates silently in the background on new deployments.
-- **Dev mode**: SW is disabled in dev (`devOptions.enabled: false`) to avoid stale-cache issues during development.
+- **Service worker** is placed in `public/sw.js` and automatically copied to `dist/sw.js` upon build.
+- **Registration**: Registered globally in [`src/layouts/Layout.astro`](file:///workspaces/asu_med_materials/src/layouts/Layout.astro) via [`src/utils/pwa.ts`](file:///workspaces/asu_med_materials/src/utils/pwa.ts).
+- **Precache list**: Covers all 51 static routes (years, modules, subjects, playlists, search, contribute) and all brand icons and manifests.
+- **Dynamic Asset Caching**: On install and runtime fetch, all `_astro/*.css` and `_astro/*.js` bundles are automatically discovered and cached using a Cache-First strategy.
+- **Navigation Caching**: Network-First strategy with timeout (2.5s) and automatic multi-path cache fallback (matching canonical path, trailing-slash, and without trailing-slash).
+- **Offline Fallback**: Branded RTL fallback page at [`public/offline.html`](file:///workspaces/asu_med_materials/public/offline.html) and home page fallback.
 
-> **Important**: Never place a hand-written `public/sw.js` — Workbox generates this file at build time and any manual file will be overwritten or conflict.
 
