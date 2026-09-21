@@ -121,117 +121,105 @@ export const materialsData: MaterialItem[] = [
     title: 'شرح تشريح موديول Blood - د. وهدان (Dr. Wahdan)',
     description: 'قائمة تشغيل شرح تشريح الدم والجهاز الليمفاوي كاملة للدكتور وهدان.',
     url: 'https://www.youtube.com/playlist?list=PLIZNmuBMEjaMZmwn2FVmG8bYsmVs5n-_v',
-    type: 'youtube',
+    type: 'playlist',
     category: 'lectures',
     year: 2,
     moduleId: 'year2-blood',
     subject: 'Anatomy',
     author: ['M. Wael', 'Dr. Wahdan'],
-    tags: ['anatomy', 'wahdan', 'وهدان', 'تشريح']
+    playlistId: 'PLIZNmuBMEjaMZmwn2FVmG8bYsmVs5n-_v',
+    tags: ['anatomy', 'wahdan', 'وهدان', 'تشريح', 'playlist'],
+    isPinned: true
   },
   {
-    id: 'bld-anat-sameh-p1',
-    title: 'تشريح الدم - Sameh (Part 1)',
-    description: 'شرح تشريح موديول الدم بالفيديو - الجزء الأول.',
+    id: 'bld-anat-sameh',
+    title: 'تشريح الدم - Sameh (Part 1 & 2)',
+    description: 'سلسلة فيديو شرح تشريح موديول الدم لدكتور سامح (مقسمة لجزئين).',
     url: 'https://youtu.be/CdxBqhfzMFg',
-    type: 'youtube',
+    type: 'playlist',
     category: 'lectures',
     year: 2,
     moduleId: 'year2-blood',
     subject: 'Anatomy',
     author: ['M. Wael', 'Sameh'],
-    tags: ['anatomy', 'sameh', 'تشريح']
-  },
-  {
-    id: 'bld-anat-sameh-p2',
-    title: 'تشريح الدم - Sameh (Part 2)',
-    description: 'شرح تشريح موديول الدم بالفيديو - الجزء الثاني.',
-    url: 'https://youtu.be/rrAfcJwypSs',
-    type: 'youtube',
-    category: 'lectures',
-    year: 2,
-    moduleId: 'year2-blood',
-    subject: 'Anatomy',
-    author: ['M. Wael', 'Sameh'],
-    tags: ['anatomy', 'sameh', 'تشريح']
+    videos: [
+      { id: 'sameh-p1', title: 'تشريح الدم - سامح (الجزء 1)', youtubeId: 'CdxBqhfzMFg', url: 'https://youtu.be/CdxBqhfzMFg' },
+      { id: 'sameh-p2', title: 'تشريح الدم - سامح (الجزء 2)', youtubeId: 'rrAfcJwypSs', url: 'https://youtu.be/rrAfcJwypSs' }
+    ],
+    tags: ['anatomy', 'sameh', 'تشريح', 'playlist']
   },
   {
     id: 'bld-anat-abdullah',
     title: 'تشريح الدم - عبدالله (Abdullah)',
     description: 'قائمة تشغيل شروحات تشريح موديول الدم لدكتور عبدالله.',
     url: 'https://youtube.com/playlist?list=PLuTP8UDoc4g8l22pdJhOUJwTPlLW7JOqQ',
-    type: 'youtube',
+    type: 'playlist',
     category: 'lectures',
     year: 2,
     moduleId: 'year2-blood',
     subject: 'Anatomy',
     author: ['M. Wael', 'Abdullah'],
-    tags: ['anatomy', 'abdullah', 'عبدالله', 'تشريح']
+    playlistId: 'PLuTP8UDoc4g8l22pdJhOUJwTPlLW7JOqQ',
+    tags: ['anatomy', 'abdullah', 'عبدالله', 'تشريح', 'playlist']
   },
   {
     id: 'bld-anat-mohammed',
     title: 'تشريح الدم - محمد (Mohammed)',
     description: 'قائمة تشغيل شروحات تشريح موديول الدم لدكتور محمد.',
     url: 'https://youtube.com/playlist?list=PLOs4vdEd6G8QWPMb8SBYltbYx7NVsIblt',
-    type: 'youtube',
+    type: 'playlist',
     category: 'lectures',
     year: 2,
     moduleId: 'year2-blood',
     subject: 'Anatomy',
     author: ['M. Wael', 'Mohammed'],
-    tags: ['anatomy', 'mohammed', 'تشريح']
+    playlistId: 'PLOs4vdEd6G8QWPMb8SBYltbYx7NVsIblt',
+    tags: ['anatomy', 'mohammed', 'تشريح', 'playlist']
   },
   {
-    id: 'bld-anat-wageh-p1',
-    title: 'تشريح الدم - وجيه (Wageh Part 1)',
-    description: 'فيديو شرح تشريح الدم - الجزء الأول د. وجيه.',
+    id: 'bld-anat-wageh',
+    title: 'تشريح الدم - وجيه (Wageh - Part 1 & 2)',
+    description: 'فيديوهات شرح تشريح موديول الدم للدكتور وجيه (جزئين كاملين).',
     url: 'https://youtu.be/tzkF5C1ja94',
-    type: 'youtube',
+    type: 'playlist',
     category: 'lectures',
     year: 2,
     moduleId: 'year2-blood',
     subject: 'Anatomy',
     author: ['M. Wael', 'Wageh'],
-    tags: ['anatomy', 'wageh', 'وجيه', 'تشريح']
-  },
-  {
-    id: 'bld-anat-wageh-p2',
-    title: 'تشريح الدم - وجيه (Wageh Part 2)',
-    description: 'فيديو شرح تشريح الدم - الجزء الثاني د. وجيه.',
-    url: 'https://youtu.be/LxRv6UxQh1c',
-    type: 'youtube',
-    category: 'lectures',
-    year: 2,
-    moduleId: 'year2-blood',
-    subject: 'Anatomy',
-    author: ['M. Wael', 'Wageh'],
-    tags: ['anatomy', 'wageh', 'وجيه', 'تشريح']
+    videos: [
+      { id: 'wageh-p1', title: 'تشريح الدم - وجيه (الجزء 1)', youtubeId: 'tzkF5C1ja94', url: 'https://youtu.be/tzkF5C1ja94' },
+      { id: 'wageh-p2', title: 'تشريح الدم - وجيه (الجزء 2)', youtubeId: 'LxRv6UxQh1c', url: 'https://youtu.be/LxRv6UxQh1c' }
+    ],
+    tags: ['anatomy', 'wageh', 'وجيه', 'تشريح', 'playlist']
   },
   {
     id: 'bld-anat-shareef',
     title: 'تشريح الدم - د. شريف (Dr. Shareef)',
     description: 'قائمة تشغيل شروحات تشريح موديول الدم للدكتور شريف.',
     url: 'https://youtube.com/playlist?list=PLe2L3M_TgeCg0ozSwFSz3Hv8q9Zyk2nAm',
-    type: 'youtube',
+    type: 'playlist',
     category: 'lectures',
     year: 2,
     moduleId: 'year2-blood',
     subject: 'Anatomy',
     author: ['M. Wael', 'Dr. Shareef'],
-    tags: ['anatomy', 'shareef', 'شريف', 'تشريح']
+    playlistId: 'PLe2L3M_TgeCg0ozSwFSz3Hv8q9Zyk2nAm',
+    tags: ['anatomy', 'shareef', 'شريف', 'تشريح', 'playlist']
   },
   {
     id: 'bld-anat-ahmad-fareed',
     title: 'تشريح الدم - د. أحمد فريد (Dr. Ahmad Fareed)',
     description: 'قائمة تشغيل شروحات تشريح موديول الدم للدكتور أحمد فريد.',
     url: 'https://youtube.com/playlist?list=PLs0O24oUQeaCgOmLXzJSqKp7UEzjJwnBr',
-    type: 'youtube',
+    type: 'playlist',
     category: 'lectures',
     year: 2,
     moduleId: 'year2-blood',
     subject: 'Anatomy',
     author: ['M. Wael', 'Dr. Ahmad Fareed'],
-    tags: ['anatomy', 'ahmad fareed', 'أحمد فريد', 'تشريح']
+    playlistId: 'PLs0O24oUQeaCgOmLXzJSqKp7UEzjJwnBr',
+    tags: ['anatomy', 'ahmad fareed', 'أحمد فريد', 'تشريح', 'playlist']
   },
   {
     id: 'bld-anat-mahmoud-alaa',
@@ -255,13 +243,14 @@ export const materialsData: MaterialItem[] = [
     title: 'فسيولوجي الدم - د. ناجي (Dr. Nagi)',
     description: 'شرح فسيولوجي الدم كامل للدكتور ناجي في قائمة تشغيل يوتيوب.',
     url: 'https://youtube.com/playlist?list=PLFkJTdtzWoIaAWbijL3Pw4gVnxDjjPG8U',
-    type: 'youtube',
+    type: 'playlist',
     category: 'lectures',
     year: 2,
     moduleId: 'year2-blood',
     subject: 'Physiology',
     author: ['M. Wael', 'Dr. Nagi'],
-    tags: ['physiology', 'nagi', 'ناجي', 'فسيولوجي'],
+    playlistId: 'PLFkJTdtzWoIaAWbijL3Pw4gVnxDjjPG8U',
+    tags: ['physiology', 'nagi', 'ناجي', 'فسيولوجي', 'playlist'],
     isPinned: true
   },
   {
@@ -269,52 +258,56 @@ export const materialsData: MaterialItem[] = [
     title: 'فسيولوجي الدم - د. فايز (Dr. Fayez)',
     description: 'شرح فسيولوجي موديول الدم للدكتور فايز.',
     url: 'https://www.youtube.com/playlist?list=PLLShXxg1izojEV9_0S5rXSnMpPvPCu9L4',
-    type: 'youtube',
+    type: 'playlist',
     category: 'lectures',
     year: 2,
     moduleId: 'year2-blood',
     subject: 'Physiology',
     author: ['M. Wael', 'Dr. Fayez'],
-    tags: ['physiology', 'fayez', 'فايز', 'فسيولوجي']
+    playlistId: 'PLLShXxg1izojEV9_0S5rXSnMpPvPCu9L4',
+    tags: ['physiology', 'fayez', 'فايز', 'فسيولوجي', 'playlist']
   },
   {
     id: 'bld-phys-ninja-nerd',
     title: 'فسيولوجي الدم والهيماتولوجي - Ninja Nerd',
     description: 'سلسلة شروحات الهيماتولوجي وفسيولوجيا الدم المصورة الرائعة من قناة نينجا نيرد.',
     url: 'https://www.youtube.com/playlist?list=PLTF9h-T1TcJh9T57G0nls2uGPzzHKMxxh',
-    type: 'youtube',
+    type: 'playlist',
     category: 'lectures',
     year: 2,
     moduleId: 'year2-blood',
     subject: 'Physiology',
     author: ['M. Wael', 'Ninja Nerd'],
-    tags: ['physiology', 'ninja nerd', 'hematology', 'فسيولوجي']
+    playlistId: 'PLTF9h-T1TcJh9T57G0nls2uGPzzHKMxxh',
+    tags: ['physiology', 'ninja nerd', 'hematology', 'فسيولوجي', 'playlist']
   },
   {
     id: 'bld-phys-najeeb',
     title: 'فسيولوجي الدم - د. نجيب (Dr. Najeeb)',
     description: 'محاضرات فسيولوجي الدم التأسيسية المفصلة للدكتور نجيب.',
     url: 'https://www.youtube.com/playlist?list=PLO2O9UjkQxLcuRB-j4ZbYEwCDP9A4tpCo',
-    type: 'youtube',
+    type: 'playlist',
     category: 'lectures',
     year: 2,
     moduleId: 'year2-blood',
     subject: 'Physiology',
     author: ['M. Wael', 'Dr. Najeeb'],
-    tags: ['physiology', 'najeeb', 'نجيب', 'فسيولوجي']
+    playlistId: 'PLO2O9UjkQxLcuRB-j4ZbYEwCDP9A4tpCo',
+    tags: ['physiology', 'najeeb', 'نجيب', 'فسيولوجي', 'playlist']
   },
   {
     id: 'bld-phys-ahmed',
     title: 'فسيولوجي الدم - د. أحمد (Dr. Ahmed)',
     description: 'قائمة تشغيل شرح فسيولوجيا الدم للدكتور أحمد.',
     url: 'https://www.youtube.com/playlist?list=PLJR3YnsG3vkRi3ZZowNVrwh_hpslIZM3B',
-    type: 'youtube',
+    type: 'playlist',
     category: 'lectures',
     year: 2,
     moduleId: 'year2-blood',
     subject: 'Physiology',
     author: ['M. Wael', 'Dr. Ahmed'],
-    tags: ['physiology', 'ahmed', 'أحمد', 'فسيولوجي']
+    playlistId: 'PLJR3YnsG3vkRi3ZZowNVrwh_hpslIZM3B',
+    tags: ['physiology', 'ahmed', 'أحمد', 'فسيولوجي', 'playlist']
   },
   {
     id: 'bld-phys-mohammed-elsherif',
@@ -338,13 +331,14 @@ export const materialsData: MaterialItem[] = [
     title: 'هستولوجي الدم - د. فاتن (Dr. Faten)',
     description: 'كورس هستولوجي الدم والأعضاء الليمفاوية للدكتورة فاتن.',
     url: 'https://youtube.com/playlist?list=PLlzicty9XavE7Ul7ogZHDUxjlkU-hs1nw',
-    type: 'youtube',
+    type: 'playlist',
     category: 'lectures',
     year: 2,
     moduleId: 'year2-blood',
     subject: 'Histology',
     author: ['M. Wael', 'Dr. Faten'],
-    tags: ['histology', 'faten', 'فاتن', 'هستولوجي']
+    playlistId: 'PLlzicty9XavE7Ul7ogZHDUxjlkU-hs1nw',
+    tags: ['histology', 'faten', 'فاتن', 'هستولوجي', 'playlist']
   },
   {
     id: 'bld-histo-moodle-p1',
@@ -416,52 +410,56 @@ export const materialsData: MaterialItem[] = [
     title: 'هستولوجي الدم - د. إيمان نبيل (Dr. Eman Nabil)',
     description: 'شرح موديول هستولوجي الدم للدكتورة إيمان نبيل.',
     url: 'https://youtube.com/playlist?list=PLAlbG9dixa2hqxp9o2fMUEJ_6J3NXMIdl',
-    type: 'youtube',
+    type: 'playlist',
     category: 'lectures',
     year: 2,
     moduleId: 'year2-blood',
     subject: 'Histology',
     author: ['M. Wael', 'Dr. Eman Nabil'],
-    tags: ['histology', 'eman nabil', 'إيمان نبيل', 'هستولوجي']
+    playlistId: 'PLAlbG9dixa2hqxp9o2fMUEJ_6J3NXMIdl',
+    tags: ['histology', 'eman nabil', 'إيمان نبيل', 'هستولوجي', 'playlist']
   },
   {
     id: 'bld-histo-shireen-blood',
     title: 'مراجعة هستولوجي الدم (2.5 ساعة) - د. شيرين',
     description: 'مراجعة مركزة لهستولوجي الدم في ساعتين ونصف للدكتورة شيرين.',
     url: 'https://www.youtube.com/playlist?list=PLzjKJPnFc4jwQGsHZaD9vGxjreVjmIXx5',
-    type: 'youtube',
+    type: 'playlist',
     category: 'summaries',
     year: 2,
     moduleId: 'year2-blood',
     subject: 'Histology',
     author: ['M. Wael', 'Dr. Shireen'],
-    tags: ['histology', 'shireen', 'شيرين', 'مراجعة']
+    playlistId: 'PLzjKJPnFc4jwQGsHZaD9vGxjreVjmIXx5',
+    tags: ['histology', 'shireen', 'شيرين', 'مراجعة', 'playlist']
   },
   {
     id: 'bld-histo-shireen-lymph',
     title: 'مراجعة هستولوجي الجهاز الليمفاوي (1.75 ساعة) - د. شيرين',
     description: 'مراجعة مركزة لهستولوجي الغدد والنسيج الليمفاوي في ساعة و45 دقيقة للدكتورة شيرين.',
     url: 'https://www.youtube.com/playlist?list=PLzjKJPnFc4jxRwOHbLymNVRxZPCY4QIoe',
-    type: 'youtube',
+    type: 'playlist',
     category: 'summaries',
     year: 2,
     moduleId: 'year2-blood',
     subject: 'Histology',
     author: ['M. Wael', 'Dr. Shireen'],
-    tags: ['histology', 'lymph', 'shireen', 'شيرين', 'ليمف']
+    playlistId: 'PLzjKJPnFc4jxRwOHbLymNVRxZPCY4QIoe',
+    tags: ['histology', 'lymph', 'shireen', 'شيرين', 'ليمف', 'playlist']
   },
   {
     id: 'bld-histo-ahmeed-nerd',
     title: 'هستولوجي الدم - د. أحمد نيرد (Dr. Ahmeed Nerd)',
     description: 'شروحات توضيحية لشرائح وخلايا الدم للدكتور أحمد نيرد.',
     url: 'https://www.youtube.com/playlist?list=PL5gt9J3j4ldbOOI2se0e_M_VY_a_ygWG2',
-    type: 'youtube',
+    type: 'playlist',
     category: 'lectures',
     year: 2,
     moduleId: 'year2-blood',
     subject: 'Histology',
     author: ['M. Wael', 'Dr. Ahmeed Nerd'],
-    tags: ['histology', 'ahmeed nerd', 'هستولوجي']
+    playlistId: 'PL5gt9J3j4ldbOOI2se0e_M_VY_a_ygWG2',
+    tags: ['histology', 'ahmeed nerd', 'هستولوجي', 'playlist']
   },
   {
     id: 'bld-histo-ahmed-zahra',
@@ -485,156 +483,95 @@ export const materialsData: MaterialItem[] = [
     title: 'كيمياء حيوية الدم - د. عيسوي (Dr. Esawi)',
     description: 'شرح كيمياء الهيموجلوبين، البورفيريا، والأيض للدكتور عيسوي.',
     url: 'https://www.youtube.com/playlist?list=PLw03kzQQoHv0zzA3VmasZYxxGhYzfFIpx',
-    type: 'youtube',
+    type: 'playlist',
     category: 'lectures',
     year: 2,
     moduleId: 'year2-blood',
     subject: 'Biochemistry',
     author: ['M. Wael', 'Dr. Esawi'],
-    tags: ['biochemistry', 'esawi', 'عيسوي', 'بايوكيمستري']
+    playlistId: 'PLw03kzQQoHv0zzA3VmasZYxxGhYzfFIpx',
+    tags: ['biochemistry', 'esawi', 'عيسوي', 'بايوكيمستري', 'playlist']
   },
   {
     id: 'bld-biochem-ayman',
     title: 'كيمياء حيوية الدم - د. أيمن (Dr. Ayman)',
     description: 'شرح موديول بايوكيمستري الدم للدكتور أيمن.',
     url: 'https://youtube.com/playlist?list=PLmjIY3SPvf2nea96csM-ni6mkdjwQ0g0C',
-    type: 'youtube',
+    type: 'playlist',
     category: 'lectures',
     year: 2,
     moduleId: 'year2-blood',
     subject: 'Biochemistry',
     author: ['M. Wael', 'Dr. Ayman'],
-    tags: ['biochemistry', 'ayman', 'أيمن', 'بايوكيمستري']
+    playlistId: 'PLmjIY3SPvf2nea96csM-ni6mkdjwQ0g0C',
+    tags: ['biochemistry', 'ayman', 'أيمن', 'بايوكيمستري', 'playlist']
   },
   {
     id: 'bld-biochem-walaa-1',
     title: 'كيمياء حيوية الدم - د. ولاء (الجزء الأول)',
     description: 'قائمة تشغيل شرح كيمياء حيوية الدم للدكتورة ولاء - الجزء الأول.',
     url: 'https://www.youtube.com/playlist?list=PLXd13HOsAnZy_t0jdd-D6ewRMVSNtalVo',
-    type: 'youtube',
+    type: 'playlist',
     category: 'lectures',
     year: 2,
     moduleId: 'year2-blood',
     subject: 'Biochemistry',
     author: ['M. Wael', 'Dr. Walaa'],
-    tags: ['biochemistry', 'walaa', 'ولاء', 'بايوكيمستري']
+    playlistId: 'PLXd13HOsAnZy_t0jdd-D6ewRMVSNtalVo',
+    tags: ['biochemistry', 'walaa', 'ولاء', 'بايوكيمستري', 'playlist']
   },
   {
     id: 'bld-biochem-walaa-2',
     title: 'كيمياء حيوية الدم - د. ولاء (الجزء الثاني)',
     description: 'قائمة تشغيل شرح كيمياء حيوية الدم للدكتورة ولاء - الجزء الثاني.',
     url: 'https://www.youtube.com/playlist?list=PLXd13HOsAnZy9bTXaZ7fLI9-kSOUQPfPk',
-    type: 'youtube',
+    type: 'playlist',
     category: 'lectures',
     year: 2,
     moduleId: 'year2-blood',
     subject: 'Biochemistry',
     author: ['M. Wael', 'Dr. Walaa'],
-    tags: ['biochemistry', 'walaa', 'ولاء', 'بايوكيمستري']
+    playlistId: 'PLXd13HOsAnZy9bTXaZ7fLI9-kSOUQPfPk',
+    tags: ['biochemistry', 'walaa', 'ولاء', 'بايوكيمستري', 'playlist']
   },
   {
-    id: 'bld-biochem-mohammed-p1',
-    title: 'كيمياء حيوية الدم - د. محمد (Part 1)',
-    description: 'شرح كيمياء حيوية الدم بالفيديو - الجزء الأول د. محمد.',
+    id: 'bld-biochem-mohammed',
+    title: 'كيمياء حيوية الدم - د. محمد (5 أجزاء)',
+    description: 'سلسلة شروحات كيمياء حيوية موديول الدم للدكتور محمد (مقسمة إلى 5 محاضرات فيديو).',
     url: 'https://youtu.be/csgUGDeXW7k',
-    type: 'youtube',
+    type: 'playlist',
     category: 'lectures',
     year: 2,
     moduleId: 'year2-blood',
     subject: 'Biochemistry',
     author: ['M. Wael', 'Dr. Mohammed'],
-    tags: ['biochemistry', 'mohammed', 'بايوكيمستري']
+    videos: [
+      { id: 'mohammed-p1', title: 'بايوكيمستري الدم - د. محمد (الجزء 1)', youtubeId: 'csgUGDeXW7k', url: 'https://youtu.be/csgUGDeXW7k' },
+      { id: 'mohammed-p2', title: 'بايوكيمستري الدم - د. محمد (الجزء 2)', youtubeId: 'C3jCs4hvMUA', url: 'https://youtu.be/C3jCs4hvMUA' },
+      { id: 'mohammed-p3', title: 'بايوكيمستري الدم - د. محمد (الجزء 3)', youtubeId: '9XEaxRBlV-c', url: 'https://youtu.be/9XEaxRBlV-c' },
+      { id: 'mohammed-p4', title: 'بايوكيمستري الدم - د. محمد (الجزء 4)', youtubeId: 'VRzO7ncnmLM', url: 'https://youtu.be/VRzO7ncnmLM' },
+      { id: 'mohammed-p5', title: 'بايوكيمستري الدم - د. محمد (الجزء 5)', youtubeId: 'I_jxHx4FDRo', url: 'https://youtu.be/I_jxHx4FDRo' }
+    ],
+    tags: ['biochemistry', 'mohammed', 'بايوكيمستري', 'playlist']
   },
   {
-    id: 'bld-biochem-mohammed-p2',
-    title: 'كيمياء حيوية الدم - د. محمد (Part 2)',
-    description: 'شرح كيمياء حيوية الدم بالفيديو - الجزء الثاني د. محمد.',
-    url: 'https://youtu.be/C3jCs4hvMUA',
-    type: 'youtube',
-    category: 'lectures',
-    year: 2,
-    moduleId: 'year2-blood',
-    subject: 'Biochemistry',
-    author: ['M. Wael', 'Dr. Mohammed'],
-    tags: ['biochemistry', 'mohammed', 'بايوكيمستري']
-  },
-  {
-    id: 'bld-biochem-mohammed-p3',
-    title: 'كيمياء حيوية الدم - د. محمد (Part 3)',
-    description: 'شرح كيمياء حيوية الدم بالفيديو - الجزء الثالث د. محمد.',
-    url: 'https://youtu.be/9XEaxRBlV-c',
-    type: 'youtube',
-    category: 'lectures',
-    year: 2,
-    moduleId: 'year2-blood',
-    subject: 'Biochemistry',
-    author: ['M. Wael', 'Dr. Mohammed'],
-    tags: ['biochemistry', 'mohammed', 'بايوكيمستري']
-  },
-  {
-    id: 'bld-biochem-mohammed-p4',
-    title: 'كيمياء حيوية الدم - د. محمد (Part 4)',
-    description: 'شرح كيمياء حيوية الدم بالفيديو - الجزء الرابع د. محمد.',
-    url: 'https://youtu.be/VRzO7ncnmLM',
-    type: 'youtube',
-    category: 'lectures',
-    year: 2,
-    moduleId: 'year2-blood',
-    subject: 'Biochemistry',
-    author: ['M. Wael', 'Dr. Mohammed'],
-    tags: ['biochemistry', 'mohammed', 'بايوكيمستري']
-  },
-  {
-    id: 'bld-biochem-mohammed-p5',
-    title: 'كيمياء حيوية الدم - د. محمد (Part 5)',
-    description: 'شرح كيمياء حيوية الدم بالفيديو - الجزء الخامس د. محمد.',
-    url: 'https://youtu.be/I_jxHx4FDRo',
-    type: 'youtube',
-    category: 'lectures',
-    year: 2,
-    moduleId: 'year2-blood',
-    subject: 'Biochemistry',
-    author: ['M. Wael', 'Dr. Mohammed'],
-    tags: ['biochemistry', 'mohammed', 'بايوكيمستري']
-  },
-  {
-    id: 'bld-biochem-marwa-p1',
-    title: 'كيمياء حيوية الدم - د. مروة حمدي (Part 1)',
-    description: 'شرح بايوكيمستري الدم للدكتورة مروة حمدي - الجزء الأول.',
+    id: 'bld-biochem-marwa',
+    title: 'كيمياء حيوية الدم - د. مروة حمدي (4 أجزاء)',
+    description: 'سلسلة محاضرات بايوكيمستري الدم للدكتورة مروة حمدي (4 أجزاء فيديو متتالية).',
     url: 'https://youtu.be/Idy7y9iSKbM',
-    type: 'youtube',
+    type: 'playlist',
     category: 'lectures',
     year: 2,
     moduleId: 'year2-blood',
     subject: 'Biochemistry',
     author: ['M. Wael', 'Dr. Marwa Hamdy'],
-    tags: ['biochemistry', 'marwa hamdy', 'مروة حمدي', 'بايوكيمستري']
-  },
-  {
-    id: 'bld-biochem-marwa-p2',
-    title: 'كيمياء حيوية الدم - د. مروة حمدي (Part 2)',
-    description: 'شرح بايوكيمستري الدم للدكتورة مروة حمدي - الجزء الثاني.',
-    url: 'https://youtu.be/Ggl2T7x8PJs',
-    type: 'youtube',
-    category: 'lectures',
-    year: 2,
-    moduleId: 'year2-blood',
-    subject: 'Biochemistry',
-    author: ['M. Wael', 'Dr. Marwa Hamdy'],
-    tags: ['biochemistry', 'marwa hamdy', 'مروة حمدي', 'بايوكيمستري']
-  },
-  {
-    id: 'bld-biochem-marwa-p3',
-    title: 'كيمياء حيوية الدم - د. مروة حمدي (Part 3 & 4)',
-    description: 'شرح بايوكيمستري الدم للدكتورة مروة حمدي - الأجزاء التكميلية.',
-    url: 'https://youtu.be/pKtEGea18Io',
-    type: 'youtube',
-    category: 'lectures',
-    year: 2,
-    moduleId: 'year2-blood',
-    subject: 'Biochemistry',
-    author: ['M. Wael', 'Dr. Marwa Hamdy'],
-    tags: ['biochemistry', 'marwa hamdy', 'مروة حمدي', 'بايوكيمستري']
+    videos: [
+      { id: 'marwa-p1', title: 'بايوكيمستري الدم - د. مروة حمدي (الجزء 1)', youtubeId: 'Idy7y9iSKbM', url: 'https://youtu.be/Idy7y9iSKbM' },
+      { id: 'marwa-p2', title: 'بايوكيمستري الدم - د. مروة حمدي (الجزء 2)', youtubeId: 'Ggl2T7x8PJs', url: 'https://youtu.be/Ggl2T7x8PJs' },
+      { id: 'marwa-p3', title: 'بايوكيمستري الدم - د. مروة حمدي (الجزء 3)', youtubeId: 'pKtEGea18Io', url: 'https://youtu.be/pKtEGea18Io' },
+      { id: 'marwa-p4', title: 'بايوكيمستري الدم - د. مروة حمدي (الجزء 4)', youtubeId: 'pKtEGea18Io', url: 'https://youtu.be/pKtEGea18Io' }
+    ],
+    tags: ['biochemistry', 'marwa hamdy', 'مروة حمدي', 'بايوكيمستري', 'playlist']
   },
 
   // ==========================================
@@ -645,13 +582,14 @@ export const materialsData: MaterialItem[] = [
     title: 'فارماكولوجي الدم - د. أحمد نور الدين',
     description: 'شرح أدوية وسيولة الدم والتجلط والأنيميا للدكتور أحمد نور الدين.',
     url: 'https://www.youtube.com/playlist?list=PL_7f3u0OA6BM06UfWmzinSeaRNS_xvxNA',
-    type: 'youtube',
+    type: 'playlist',
     category: 'lectures',
     year: 2,
     moduleId: 'year2-blood',
     subject: 'Pharmacology',
     author: ['M. Wael', 'Dr. Ahmed Nour Eldin'],
-    tags: ['pharmacology', 'nour eldin', 'أحمد نور الدين', 'فارما'],
+    playlistId: 'PL_7f3u0OA6BM06UfWmzinSeaRNS_xvxNA',
+    tags: ['pharmacology', 'nour eldin', 'أحمد نور الدين', 'فارما', 'playlist'],
     isPinned: true
   },
   {
@@ -698,13 +636,14 @@ export const materialsData: MaterialItem[] = [
     title: 'فارماكولوجي الدم - د. الشاعر',
     description: 'قائمة تشغيل شرح فارماكولوجيا الدم للدكتور الشاعر على يوتيوب.',
     url: 'https://www.youtube.com/playlist?list=PL0_tN0panMs8W-tpVy4a_eM9QR2DwwvxA',
-    type: 'youtube',
+    type: 'playlist',
     category: 'lectures',
     year: 2,
     moduleId: 'year2-blood',
     subject: 'Pharmacology',
     author: ['M. Wael', 'Dr. El Shaer'],
-    tags: ['pharmacology', 'shaer', 'الشاعر', 'فارما']
+    playlistId: 'PL0_tN0panMs8W-tpVy4a_eM9QR2DwwvxA',
+    tags: ['pharmacology', 'shaer', 'الشاعر', 'فارما', 'playlist']
   },
   {
     id: 'bld-pharma-drug-list',
@@ -769,13 +708,14 @@ export const materialsData: MaterialItem[] = [
     title: 'باثولوجي الدم - د. خالد الشرقاوي',
     description: 'قائمة تشغيل شرح باثولوجي موديول الدم للدكتور خالد الشرقاوي على يوتيوب.',
     url: 'https://www.youtube.com/playlist?list=PLLmNysLEaLbj-ULVe6IKH8SSD7sF33F5-',
-    type: 'youtube',
+    type: 'playlist',
     category: 'lectures',
     year: 2,
     moduleId: 'year2-blood',
     subject: 'Pathology',
     author: ['M. Wael', 'Dr. Khaled El-Sharkawy'],
-    tags: ['pathology', 'sharkawy', 'خالد الشرقاوي', 'باثولوجي']
+    playlistId: 'PLLmNysLEaLbj-ULVe6IKH8SSD7sF33F5-',
+    tags: ['pathology', 'sharkawy', 'خالد الشرقاوي', 'باثولوجي', 'playlist']
   },
 
   // ==========================================
@@ -812,26 +752,28 @@ export const materialsData: MaterialItem[] = [
     title: 'طفيليات الدم - د. خالد حبيب',
     description: 'قائمة تشغيل شروحات باراسيتولوجي الدم للدكتور خالد حبيب على يوتيوب.',
     url: 'https://youtube.com/playlist?list=PLMnvpkQoftOI&si=um90GKLZ4QTh06wE',
-    type: 'youtube',
+    type: 'playlist',
     category: 'lectures',
     year: 2,
     moduleId: 'year2-blood',
     subject: 'Parasitology',
     author: ['M. Wael', 'Dr. Khaled Habib'],
-    tags: ['parasitology', 'khaled habib', 'خالد حبيب', 'بارا']
+    playlistId: 'PLMnvpkQoftOI',
+    tags: ['parasitology', 'khaled habib', 'خالد حبيب', 'بارا', 'playlist']
   },
   {
     id: 'bld-para-ayman-ibrahim',
     title: 'طفيليات الدم - د. أيمن إبراهيم',
     description: 'قائمة تشغيل شرح طفيليات الدم للدكتور أيمن إبراهيم على يوتيوب.',
     url: 'https://youtube.com/playlist?list=PL0_tN0panMs-zQRtyaMYxsIE9pXPwuTRy',
-    type: 'youtube',
+    type: 'playlist',
     category: 'lectures',
     year: 2,
     moduleId: 'year2-blood',
     subject: 'Parasitology',
     author: ['M. Wael', 'Dr. Ayman Ibrahim'],
-    tags: ['parasitology', 'ayman ibrahim', 'أيمن إبراهيم', 'بارا']
+    playlistId: 'PL0_tN0panMs-zQRtyaMYxsIE9pXPwuTRy',
+    tags: ['parasitology', 'ayman ibrahim', 'أيمن إبراهيم', 'بارا', 'playlist']
   },
 
   // ==========================================
@@ -869,52 +811,56 @@ export const materialsData: MaterialItem[] = [
     title: 'ميكروبيولوجي الدم - د. محمد عاطف',
     description: 'شرح ميكروبيولوجي الدم ومكافحة العدوى للدكتور محمد عاطف على يوتيوب.',
     url: 'https://youtube.com/playlist?list=PL9tL_1NKaz5eEaPIwMyIqXdkznGeQMaCg',
-    type: 'youtube',
+    type: 'playlist',
     category: 'lectures',
     year: 2,
     moduleId: 'year2-blood',
     subject: 'Microbiology',
     author: ['M. Wael', 'Dr. Mohamed Atef'],
-    tags: ['microbiology', 'atef', 'محمد عاطف', 'مايكرو']
+    playlistId: 'PL9tL_1NKaz5eEaPIwMyIqXdkznGeQMaCg',
+    tags: ['microbiology', 'atef', 'محمد عاطف', 'مايكرو', 'playlist']
   },
   {
     id: 'bld-micro-sherif',
     title: 'ميكروبيولوجي الدم - د. محمد الشريف',
     description: 'شرح ميكروبيولوجيا الدم للدكتور محمد الشريف على يوتيوب.',
     url: 'https://www.youtube.com/playlist?list=PL6HncFuy-vP76l0_g637yq52tbl6gw8cD',
-    type: 'youtube',
+    type: 'playlist',
     category: 'lectures',
     year: 2,
     moduleId: 'year2-blood',
     subject: 'Microbiology',
     author: ['M. Wael', 'Dr. Mohamed El-Sherif'],
-    tags: ['microbiology', 'sherif', 'محمد الشريف', 'مايكرو']
+    playlistId: 'PL6HncFuy-vP76l0_g637yq52tbl6gw8cD',
+    tags: ['microbiology', 'sherif', 'محمد الشريف', 'مايكرو', 'playlist']
   },
   {
     id: 'bld-micro-mofy',
     title: 'ميكروبيولوجي الدم - د. خالد الموفي',
     description: 'شرح كورس ميكروبيولوجي الدم للدكتور خالد الموفي على يوتيوب.',
     url: 'https://youtube.com/playlist?list=PLvwOqR8bEHxCZRe1cJGmdG5Apae45qt5s',
-    type: 'youtube',
+    type: 'playlist',
     category: 'lectures',
     year: 2,
     moduleId: 'year2-blood',
     subject: 'Microbiology',
     author: ['M. Wael', 'Dr. Khaled El-Mofy'],
-    tags: ['microbiology', 'mofy', 'خالد الموفي', 'مايكرو']
+    playlistId: 'PLvwOqR8bEHxCZRe1cJGmdG5Apae45qt5s',
+    tags: ['microbiology', 'mofy', 'خالد الموفي', 'مايكرو', 'playlist']
   },
   {
     id: 'bld-micro-ninja-nerd',
     title: 'المناعة وميكروبيولوجيا الدم - Ninja Nerd',
     description: 'شروحات الجهاز المناعي، الخلايا التائية والبائية والأجسام المضادة المصورة من نينجا نيرد.',
     url: 'https://www.youtube.com/playlist?list=PLTF9h-T1TcJj4AOPCxGxOUTH0IVmaH7_8',
-    type: 'youtube',
+    type: 'playlist',
     category: 'lectures',
     year: 2,
     moduleId: 'year2-blood',
     subject: 'Microbiology',
     author: ['M. Wael', 'Ninja Nerd'],
-    tags: ['microbiology', 'immunology', 'ninja nerd', 'مناعة']
+    playlistId: 'PLTF9h-T1TcJj4AOPCxGxOUTH0IVmaH7_8',
+    tags: ['microbiology', 'immunology', 'ninja nerd', 'مناعة', 'playlist']
   },
 
   // ==========================================
@@ -1177,6 +1123,14 @@ export function getMaterialsByModuleAndSubject(moduleId: string, subject: string
   return materialsData.filter(
     (item) => item.moduleId === moduleId && item.subject && subjectToSlug(item.subject) === targetSlug
   );
+}
+
+export function getAllPlaylists(): MaterialItem[] {
+  return materialsData.filter((item) => item.type === 'playlist' || !!item.playlistId || !!item.videos);
+}
+
+export function getPlaylistById(id: string): MaterialItem | undefined {
+  return materialsData.find((item) => item.id === id && (item.type === 'playlist' || !!item.playlistId || !!item.videos));
 }
 
 export function getPinnedMaterials(): MaterialItem[] {

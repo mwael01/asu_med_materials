@@ -17,8 +17,11 @@ export function filterMaterials(
     }
 
     // Filter by Resource Type
-    if (type && type !== 'all' && item.type !== type) {
-      return false;
+    if (type && type !== 'all') {
+      const isYouTubeMatch = type === 'youtube' && (item.type === 'youtube' || item.type === 'playlist');
+      if (!isYouTubeMatch && item.type !== type) {
+        return false;
+      }
     }
 
     // Filter by Module ID

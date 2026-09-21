@@ -148,9 +148,12 @@ const allMaterials = getAllMaterials();
           return;
         }
 
-        if (currentType !== 'all' && item.type !== currentType) {
-          (cardEl as HTMLElement).style.display = 'none';
-          return;
+        if (currentType !== 'all') {
+          const isYouTubeMatch = currentType === 'youtube' && (item.type === 'youtube' || item.type === 'playlist');
+          if (!isYouTubeMatch && item.type !== currentType) {
+            (cardEl as HTMLElement).style.display = 'none';
+            return;
+          }
         }
 
         if (q) {

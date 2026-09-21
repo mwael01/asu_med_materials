@@ -1,0 +1,521 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import TypeBadge from '../../components/materials/TypeBadge.astro';
+import { getAllPlaylists } from '../../data/materials';
+import { subjectToSlug } from '../../utils/slug';
+import type { MaterialItem } from '../../types/materials';
+
+export function getStaticPaths() {
+  const playlists = getAllPlaylists();
+  return playlists.map((item) => ({
+    params: { id: item.id },
+    props: { playlist: item }
+  }));
+}
+
+interface Props {
+  playlist: MaterialItem;
+}
+
+const { playlist } = Astro.props;
+
+// Authors list normalization
+const rawAuthors = Array.isArray(playlist.author)
+  ? playlist.author
+  : playlist.author
+    ? [playlist.author]
+    : [];
+const authorText = rawAuthors.join('، ');
+
+// Initial video setup:
+// If has discrete videos, initial video is first video
+const hasDiscreteVideos = Boolean(playlist.videos && playlist.videos.length > 0);
+const videos = playlist.videos || [];
+
+// Initial embed source:
+// If discrete videos: https://www.youtube-nocookie.com/embed/{firstVideoId}
+// If playlistId: https://www.youtube-nocookie.com/embed/videoseries?list={playlistId}
+const initialEmbedUrl = hasDiscreteVideos
+  ? `https://www.youtube-nocookie.com/embed/${videos[0].youtubeId}?rel=0&enablejsapi=1`
+  : playlist.playlistId
+    ? `https://www.youtube-nocookie.com/embed/videoseries?list=${playlist.playlistId}&rel=0&enablejsapi=1`
+    : playlist.url;
+---
+
+<Layout
+  title={`${playlist.title} - ASU Med Materials`}
+  description={`قائمة تشغيل ${playlist.title}.`}
+>
+  <!-- Breadcrumb -->
+  <nav class="flex items-center gap-2 text-xs text-zinc-500 dark:text-zinc-400 mb-4" aria-label="مسار التنقل">
+    <a href="/?redirect=false" class="hover:text-emerald-600 dark:hover:text-emerald-400">الرئيسية</a>
+    <span>/</span>
+    <a href="/playlists" class="hover:text-emerald-600 dark:hover:text-emerald-400">قوائم التشغيل</a>
+    <span>/</span>
+    {playlist.moduleId && (
+      <>
+        <a href={`/module/${playlist.moduleId}`} class="hover:text-emerald-600 dark:hover:text-emerald-400">
+          موديول الدم
+        </a>
+        <span>/</span>
+      </>
+    )}
+    {playlist.subject && playlist.moduleId && (
+      <>
+        <a
+          href={`/module/${playlist.moduleId}/${subjectToSlug(playlist.subject)}`}
+          class="hover:text-emerald-600 dark:hover:text-emerald-400"
+        >
+          {playlist.subject}
+        </a>
+        <span>/</span>
+      </>
+    )}
+    <span class="text-zinc-900 dark:text-zinc-100 font-bold truncate max-w-[200px] sm:max-w-xs">{playlist.title}</span>
+  </nav>
+
+  <!-- Playlist Header & Progress Banner -->
+  <div class="bg-white dark:bg-zinc-900 border border-zinc-200/90 dark:border-zinc-800 rounded-2xl p-4 sm:p-6 mb-6 text-right shadow-2xs">
+    <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+      <div>
+        <div class="flex flex-wrap items-center gap-2 mb-2">
+          <TypeBadge type="playlist" size="sm" />
+          {playlist.subject && (
+            <span class="text-xs font-semibold px-2 py-0.5 rounded bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300">
+              {playlist.subject}
+            </span>
+          )}
+          <span class="text-xs font-semibold px-2 py-0.5 rounded bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800/40">
+            السنة {playlist.year}
+          </span>
+        </div>
+
+        <h1 class="text-xl sm:text-2xl font-extrabold text-zinc-900 dark:text-zinc-100 mb-1">
+          {playlist.title}
+        </h1>
+
+        {playlist.description && (
+          <p class="text-xs sm:text-sm text-zinc-600 dark:text-zinc-400 max-w-2xl mb-2">
+            {playlist.description}
+          </p>
+        )}
+
+        {authorText && (
+          <p class="text-xs text-zinc-500 dark:text-zinc-400 font-medium">
+            إعداد وإشراف: <span class="text-zinc-800 dark:text-zinc-200 font-semibold">{authorText}</span>
+          </p>
+        )}
+      </div>
+
+      <!-- Watch Progress Card -->
+      <div class="w-full lg:w-72 bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700/60 rounded-xl p-3.5 shrink-0">
+        <div class="flex items-center justify-between text-xs font-bold mb-1.5">
+          <span class="text-zinc-700 dark:text-zinc-300">الإنجاز</span>
+          <span id="progress-percent-label" class="text-emerald-600 dark:text-emerald-400">0%</span>
+        </div>
+
+        <!-- Progress bar track -->
+        <div class="w-full h-2 rounded-full bg-zinc-200 dark:bg-zinc-700 overflow-hidden mb-2">
+          <div
+            id="progress-bar-fill"
+            class="h-full rounded-full bg-emerald-600 transition-all duration-300"
+            style="width: 0%"
+          ></div>
+        </div>
+
+        <div class="flex items-center justify-between text-[11px] text-zinc-500 dark:text-zinc-400">
+          <span id="progress-count-label">0 من {hasDiscreteVideos ? videos.length : 8} مكتمل</span>
+          <button
+            type="button"
+            id="reset-progress-btn"
+            class="hover:text-red-500 dark:hover:text-red-400 transition-colors cursor-pointer underline"
+          >
+            إعادة الضبط
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Player & Playlist Grid -->
+  <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+    <!-- Video Player Section (Left / Center in RTL) -->
+    <div class="lg:col-span-8 space-y-4">
+      <!-- Player Container (Responsive 16:9) -->
+      <div class="relative w-full aspect-video rounded-2xl overflow-hidden bg-black shadow-lg border border-zinc-800">
+        <iframe
+          id="yt-embed-player"
+          src={initialEmbedUrl}
+          title={playlist.title}
+          class="w-full h-full border-0"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+          allowfullscreen
+        ></iframe>
+      </div>
+
+      <!-- Player Controls & Current Playing Bar -->
+      <div class="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-right">
+        <div class="flex items-center gap-2.5">
+          <span class="w-2.5 h-2.5 rounded-full bg-red-600 shrink-0"></span>
+          <h2 id="current-video-title" class="text-sm font-bold text-zinc-900 dark:text-zinc-100 truncate max-w-md">
+            {hasDiscreteVideos ? videos[0].title : playlist.title}
+          </h2>
+        </div>
+
+        <div class="flex items-center gap-2 shrink-0">
+          <!-- Mark Current Video Done Button -->
+          <button
+            type="button"
+            id="toggle-current-done-btn"
+            class="inline-flex items-center gap-1.5 text-xs font-bold px-3.5 py-1.5 rounded-lg bg-emerald-600 text-white hover:bg-emerald-700 active:scale-95 transition-all shadow-2xs cursor-pointer"
+          >
+            <svg class="w-4 h-4 check-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+            </svg>
+            <span id="toggle-done-text">تحديد كمكتمل</span>
+          </button>
+
+          <!-- External YouTube Link -->
+          <a
+            href={playlist.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            class="inline-flex items-center gap-1 text-xs font-medium px-3 py-1.5 rounded-lg border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors"
+            title="فتح في تطبيق YouTube"
+          >
+            <svg class="w-3.5 h-3.5 text-red-600" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+            </svg>
+            <span>يوتيوب</span>
+          </a>
+        </div>
+      </div>
+
+      <!-- Quick Prev / Next Navigation for Multi-part -->
+      {hasDiscreteVideos && videos.length > 1 && (
+        <div class="flex items-center justify-between pt-1">
+          <button
+            type="button"
+            id="prev-video-btn"
+            class="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer transition-colors"
+          >
+            <span>&larr; الفيديو السابق</span>
+          </button>
+          <span class="text-xs text-zinc-400" id="video-stepper-label">1 من {videos.length}</span>
+          <button
+            type="button"
+            id="next-video-btn"
+            class="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer transition-colors"
+          >
+            <span>الفيديو التالي &rarr;</span>
+          </button>
+        </div>
+      )}
+    </div>
+
+    <!-- Playlist / Checkpoints Sidebar (Right in RTL) -->
+    <div class="lg:col-span-4 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl p-4 text-right shadow-2xs">
+      <div class="flex items-center justify-between pb-3 mb-3 border-b border-zinc-100 dark:border-zinc-800">
+        <h3 class="text-sm font-bold text-zinc-900 dark:text-zinc-100">
+          المحاضرات
+        </h3>
+        <button
+          type="button"
+          id="mark-all-done-btn"
+          class="text-xs font-semibold text-emerald-600 dark:text-emerald-400 hover:underline cursor-pointer"
+        >
+          تحديد الكل ✓
+        </button>
+      </div>
+
+      <!-- Items List -->
+      <div class="space-y-2 max-h-[550px] overflow-y-auto pr-1" id="playlist-items-list">
+        {hasDiscreteVideos ? (
+          videos.map((vid, idx) => (
+            <div
+              class="playlist-video-item group flex items-center justify-between p-2.5 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50/70 dark:bg-zinc-800/40 hover:border-emerald-500/80 transition-all cursor-pointer"
+              data-index={idx}
+              data-video-id={vid.id}
+              data-youtube-id={vid.youtubeId}
+              data-title={vid.title}
+            >
+              <div class="flex items-center gap-2.5 min-w-0">
+                <span class="video-idx-badge w-6 h-6 rounded-md bg-zinc-200 dark:bg-zinc-700 text-zinc-700 dark:text-zinc-300 font-bold text-xs flex items-center justify-center shrink-0">
+                  {idx + 1}
+                </span>
+                <div class="min-w-0">
+                  <h4 class="video-title text-xs font-bold text-zinc-900 dark:text-zinc-100 group-hover:text-emerald-600 truncate">
+                    {vid.title}
+                  </h4>
+                </div>
+              </div>
+
+              <!-- Done Checkbox -->
+              <button
+                type="button"
+                class="video-done-checkbox w-6 h-6 rounded-md border border-zinc-300 dark:border-zinc-600 hover:border-emerald-500 flex items-center justify-center text-white transition-colors shrink-0 cursor-pointer"
+                data-video-id={vid.id}
+                title="تحديد كمشاهد"
+                aria-label="تحديد كمشاهد"
+              >
+                <svg class="w-3.5 h-3.5 hidden checkmark-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                </svg>
+              </button>
+            </div>
+          ))
+        ) : (
+          // Pre-populated Checkpoint items for Full Playlists (e.g. Dr. Nagi, Wahdan, Faten)
+          Array.from({ length: 8 }).map((_, idx) => (
+            <div
+              class="playlist-checkpoint-item group flex items-center justify-between p-2.5 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50/70 dark:bg-zinc-800/40 hover:border-emerald-500/80 transition-all cursor-pointer"
+              data-checkpoint-id={`chk-${playlist.id}-${idx + 1}`}
+              data-index={idx}
+            >
+              <div class="flex items-center gap-2.5 min-w-0">
+                <span class="w-6 h-6 rounded-md bg-zinc-200 dark:bg-zinc-700 text-zinc-700 dark:text-zinc-300 font-bold text-xs flex items-center justify-center shrink-0">
+                  {idx + 1}
+                </span>
+                <div>
+                  <h4 class="text-xs font-bold text-zinc-900 dark:text-zinc-100">
+                    محاضرة {idx + 1}
+                  </h4>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                class="checkpoint-done-checkbox w-6 h-6 rounded-md border border-zinc-300 dark:border-zinc-600 hover:border-emerald-500 flex items-center justify-center text-white transition-colors shrink-0 cursor-pointer"
+                data-checkpoint-id={`chk-${playlist.id}-${idx + 1}`}
+                title="تحديد كمشاهد"
+                aria-label="تحديد كمشاهد"
+              >
+                <svg class="w-3.5 h-3.5 hidden checkmark-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                </svg>
+              </button>
+            </div>
+          ))
+        )}
+      </div>
+    </div>
+  </div>
+</Layout>
+
+<script define:vars={{ playlistId: playlist.id, hasDiscreteVideos, totalItemsCount: hasDiscreteVideos ? videos.length : 8 }}>
+  function initPlaylistViewer() {
+    const storageKey = `asumed_playlist_${playlistId}`;
+    let watchedMap = {};
+
+    try {
+      const saved = localStorage.getItem(storageKey);
+      if (saved) watchedMap = JSON.parse(saved);
+    } catch {}
+
+    const playerIframe = document.getElementById('yt-embed-player');
+    const currentTitleEl = document.getElementById('current-video-title');
+    const progressBarFill = document.getElementById('progress-bar-fill');
+    const progressPercentLabel = document.getElementById('progress-percent-label');
+    const progressCountLabel = document.getElementById('progress-count-label');
+    const toggleCurrentDoneBtn = document.getElementById('toggle-current-done-btn');
+    const toggleDoneText = document.getElementById('toggle-done-text');
+    const resetProgressBtn = document.getElementById('reset-progress-btn');
+    const markAllDoneBtn = document.getElementById('mark-all-done-btn');
+    const prevBtn = document.getElementById('prev-video-btn');
+    const nextBtn = document.getElementById('next-video-btn');
+    const stepperLabel = document.getElementById('video-stepper-label');
+
+    let currentIndex = 0;
+    const videoItems = document.querySelectorAll('.playlist-video-item');
+    const checkpointItems = document.querySelectorAll('.playlist-checkpoint-item');
+
+    function saveState() {
+      try {
+        localStorage.setItem(storageKey, JSON.stringify(watchedMap));
+      } catch {}
+      updateProgressUI();
+    }
+
+    function updateProgressUI() {
+      const watchedCount = Object.values(watchedMap).filter(Boolean).length;
+      const percent = Math.round((watchedCount / totalItemsCount) * 100);
+
+      if (progressBarFill) progressBarFill.style.width = `${percent}%`;
+      if (progressPercentLabel) progressPercentLabel.textContent = `${percent}%`;
+      if (progressCountLabel) progressCountLabel.textContent = `${watchedCount} من ${totalItemsCount} مكتمل`;
+
+      // Update checkboxes UI
+      document.querySelectorAll('.video-done-checkbox, .checkpoint-done-checkbox').forEach((box) => {
+        const id = box.getAttribute('data-video-id') || box.getAttribute('data-checkpoint-id');
+        const isDone = Boolean(watchedMap[id]);
+        const icon = box.querySelector('.checkmark-icon');
+
+        if (isDone) {
+          box.classList.add('bg-emerald-600', 'border-emerald-600');
+          box.classList.remove('border-zinc-300', 'dark:border-zinc-600');
+          icon?.classList.remove('hidden');
+        } else {
+          box.classList.remove('bg-emerald-600', 'border-emerald-600');
+          box.classList.add('border-zinc-300', 'dark:border-zinc-600');
+          icon?.classList.add('hidden');
+        }
+      });
+
+      // Update current playing toggle button
+      if (hasDiscreteVideos && videoItems.length > 0) {
+        const currentId = videoItems[currentIndex]?.getAttribute('data-video-id');
+        const isCurrentDone = Boolean(watchedMap[currentId]);
+        if (toggleDoneText) {
+          toggleDoneText.textContent = isCurrentDone ? 'مكتمل ✓' : 'تحديد كمكتمل';
+        }
+        if (toggleCurrentDoneBtn) {
+          if (isCurrentDone) {
+            toggleCurrentDoneBtn.classList.add('bg-emerald-700');
+          } else {
+            toggleCurrentDoneBtn.classList.remove('bg-emerald-700');
+          }
+        }
+      } else {
+        // Full playlist mode
+        const allDone = watchedCount === totalItemsCount;
+        if (toggleDoneText) {
+          toggleDoneText.textContent = allDone ? 'السلسلة مكتملة ✓' : 'تحديد كمكتمل';
+        }
+      }
+    }
+
+    function switchVideo(idx) {
+      if (idx < 0 || idx >= videoItems.length) return;
+      currentIndex = idx;
+      const activeItem = videoItems[idx];
+      const ytId = activeItem.getAttribute('data-youtube-id');
+      const title = activeItem.getAttribute('data-title');
+
+      if (playerIframe && ytId) {
+        playerIframe.src = `https://www.youtube-nocookie.com/embed/${ytId}?autoplay=1&rel=0&enablejsapi=1`;
+      }
+      if (currentTitleEl && title) {
+        currentTitleEl.textContent = title;
+      }
+      if (stepperLabel) {
+        stepperLabel.textContent = `${idx + 1} من ${videoItems.length}`;
+      }
+
+      // Highlight active in list
+      videoItems.forEach((item, i) => {
+        if (i === idx) {
+          item.classList.add('border-emerald-500', 'bg-emerald-50/50', 'dark:bg-emerald-950/30');
+          item.classList.remove('border-zinc-200', 'dark:border-zinc-800');
+        } else {
+          item.classList.remove('border-emerald-500', 'bg-emerald-50/50', 'dark:bg-emerald-950/30');
+          item.classList.add('border-zinc-200', 'dark:border-zinc-800');
+        }
+      });
+
+      if (prevBtn) prevBtn.disabled = idx === 0;
+      if (nextBtn) nextBtn.disabled = idx === videoItems.length - 1;
+
+      updateProgressUI();
+    }
+
+    // Attach click events to video items in multipart
+    videoItems.forEach((item) => {
+      item.addEventListener('click', (e) => {
+        // If clicking directly on checkbox, only toggle checkbox
+        if (e.target.closest('.video-done-checkbox')) return;
+        const idx = parseInt(item.getAttribute('data-index') || '0', 10);
+        switchVideo(idx);
+      });
+    });
+
+    // Checkboxes toggle
+    document.querySelectorAll('.video-done-checkbox').forEach((box) => {
+      box.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const id = box.getAttribute('data-video-id');
+        if (id) {
+          watchedMap[id] = !watchedMap[id];
+          saveState();
+        }
+      });
+    });
+
+    document.querySelectorAll('.checkpoint-done-checkbox').forEach((box) => {
+      box.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const id = box.getAttribute('data-checkpoint-id');
+        if (id) {
+          watchedMap[id] = !watchedMap[id];
+          saveState();
+        }
+      });
+    });
+
+    // Checkpoint item row click
+    checkpointItems.forEach((item) => {
+      item.addEventListener('click', (e) => {
+        if (e.target.closest('.checkpoint-done-checkbox')) return;
+        const id = item.getAttribute('data-checkpoint-id');
+        if (id) {
+          watchedMap[id] = !watchedMap[id];
+          saveState();
+        }
+      });
+    });
+
+    // Toggle current done button
+    toggleCurrentDoneBtn?.addEventListener('click', () => {
+      if (hasDiscreteVideos) {
+        const currentId = videoItems[currentIndex]?.getAttribute('data-video-id');
+        if (currentId) {
+          watchedMap[currentId] = !watchedMap[currentId];
+          saveState();
+        }
+      } else {
+        // Toggle all checkpoints
+        const anyUnchecked = Object.values(watchedMap).filter(Boolean).length < totalItemsCount;
+        for (let i = 1; i <= totalItemsCount; i++) {
+          watchedMap[`chk-${playlistId}-${i}`] = anyUnchecked;
+        }
+        saveState();
+      }
+    });
+
+    // Mark all done
+    markAllDoneBtn?.addEventListener('click', () => {
+      if (hasDiscreteVideos) {
+        videoItems.forEach((item) => {
+          const id = item.getAttribute('data-video-id');
+          if (id) watchedMap[id] = true;
+        });
+      } else {
+        for (let i = 1; i <= totalItemsCount; i++) {
+          watchedMap[`chk-${playlistId}-${i}`] = true;
+        }
+      }
+      saveState();
+    });
+
+    // Reset progress
+    resetProgressBtn?.addEventListener('click', () => {
+      if (confirm('هل تريد بالتأكيد إعادة ضبط سجل المشاهدة لهذه القائمة؟')) {
+        watchedMap = {};
+        saveState();
+      }
+    });
+
+    // Steppers
+    prevBtn?.addEventListener('click', () => switchVideo(currentIndex - 1));
+    nextBtn?.addEventListener('click', () => switchVideo(currentIndex + 1));
+
+    // Initialize first video highlight & progress
+    if (hasDiscreteVideos && videoItems.length > 0) {
+      switchVideo(0);
+    } else {
+      updateProgressUI();
+    }
+  }
+
+  initPlaylistViewer();
+  document.addEventListener('astro:after-swap', initPlaylistViewer);
+</script>

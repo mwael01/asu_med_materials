@@ -4,12 +4,21 @@ export type ResourceType =
   | 'drive'
   | 'telegram'
   | 'youtube'
+  | 'playlist'
   | 'whatsapp'
   | 'book'
   | 'summary'
   | 'exam'
   | 'website'
   | 'other';
+
+export interface PlaylistItem {
+  id: string;
+  title: string;
+  youtubeId?: string;
+  url?: string;
+  duration?: string;
+}
 
 export type MaterialCategory =
   | 'central'      // درايفات وقنوات الدفعة المركزية
@@ -45,6 +54,8 @@ export interface MaterialItem {
   tags: string[];
   isPinned?: boolean;
   createdAt?: string;
+  playlistId?: string; // YouTube playlist ID if applicable
+  videos?: PlaylistItem[]; // Individual videos for multi-part video series
 }
 
 export interface FilterOptions {

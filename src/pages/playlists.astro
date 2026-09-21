@@ -1,0 +1,190 @@
+---
+import Layout from '../layouts/Layout.astro';
+import TypeBadge from '../components/materials/TypeBadge.astro';
+import { getAllPlaylists } from '../data/materials';
+import { subjectToSlug } from '../utils/slug';
+
+const playlists = getAllPlaylists();
+
+// Distinct subjects in playlists
+const subjects = Array.from(
+  new Set(playlists.map((p) => p.subject).filter((s): s is string => Boolean(s)))
+);
+---
+
+<Layout
+  title="قوائم التشغيل والشروحات المرئية - ASU Med Materials"
+  description="جميع سلاسل وقوائم تشغيل موديول الدم لطب عين شمس مع مشغّل فيديو مدمج وإمكانية تتبع المحاضرات المنجزة."
+>
+  <!-- Header -->
+  <div class="mb-8 text-right">
+    <div class="flex items-center gap-2 text-xs text-zinc-500 dark:text-zinc-400 mb-2">
+      <a href="/?redirect=false" class="hover:text-emerald-600 dark:hover:text-emerald-400">الرئيسية</a>
+      <span>/</span>
+      <a href="/module/year2-blood" class="hover:text-emerald-600 dark:hover:text-emerald-400">موديول الدم</a>
+      <span>/</span>
+      <span class="text-zinc-900 dark:text-zinc-100 font-bold">قوائم التشغيل</span>
+    </div>
+
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-zinc-200 dark:border-zinc-800 pb-4">
+      <div>
+        <h1 class="text-2xl font-extrabold text-zinc-900 dark:text-zinc-100">
+          قوائم التشغيل
+        </h1>
+        <p class="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5">
+          شروحات وسلاسل الفيديو لموديول الدم.
+        </p>
+      </div>
+
+      <div class="flex items-center gap-2">
+        <a
+          href="/module/year2-blood"
+          class="text-xs font-semibold px-3 py-1.5 rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-zinc-700 dark:text-zinc-200 hover:bg-zinc-50 transition-colors shadow-2xs"
+        >
+          كل مصادر موديول الدم &larr;
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Subject Filters Bar -->
+  <div class="flex items-center gap-1.5 overflow-x-auto pb-4 mb-6 no-scrollbar" id="subject-filter-pills">
+    <button
+      type="button"
+      data-subject="all"
+      class="sub-pill shrink-0 text-xs font-bold px-3.5 py-1.5 rounded-full bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900 transition-colors cursor-pointer"
+    >
+      جميع المواد ({playlists.length})
+    </button>
+    {subjects.map((sub) => {
+      const count = playlists.filter((p) => p.subject === sub).length;
+      return (
+        <button
+          type="button"
+          data-subject={subjectToSlug(sub)}
+          class="sub-pill shrink-0 text-xs font-semibold px-3.5 py-1.5 rounded-full bg-white dark:bg-zinc-900 text-zinc-600 dark:text-zinc-300 border border-zinc-200 dark:border-zinc-800 hover:border-zinc-300 transition-colors cursor-pointer"
+        >
+          {sub} ({count})
+        </button>
+      );
+    })}
+  </div>
+
+  <!-- Playlists Grid -->
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4" id="playlists-grid">
+    {playlists.map((pl) => {
+      const authorNames = Array.isArray(pl.author) ? pl.author : pl.author ? [pl.author] : [];
+      const authorText = authorNames.join('، ');
+      const subSlug = pl.subject ? subjectToSlug(pl.subject) : '';
+
+      return (
+        <div
+          class="playlist-card group bg-white dark:bg-zinc-900 border border-zinc-200/90 dark:border-zinc-800 rounded-2xl p-4 shadow-2xs hover:shadow-md hover:border-emerald-500/70 transition-all flex flex-col justify-between text-right"
+          data-subject={subSlug}
+          data-playlist-id={pl.id}
+        >
+          <div>
+            <!-- Badges Header -->
+            <div class="flex items-center justify-between gap-2 mb-2.5">
+              <TypeBadge type="playlist" size="sm" />
+              <div class="flex items-center gap-1.5">
+                {pl.subject && (
+                  <span class="text-[11px] font-semibold px-2 py-0.5 rounded bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400">
+                    {pl.subject}
+                  </span>
+                )}
+                <!-- Progress status indicator (filled by client script) -->
+                <span
+                  class="playlist-status-badge hidden text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800/40"
+                  data-badge-id={pl.id}
+                >
+                  مكتمل ✓
+                </span>
+              </div>
+            </div>
+
+            <!-- Title -->
+            <h2 class="font-bold text-sm sm:text-base text-zinc-900 dark:text-zinc-100 leading-snug mb-1.5 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">
+              <a href={`/playlist/${pl.id}`}>
+                {pl.title}
+              </a>
+            </h2>
+
+            <!-- Description -->
+            {pl.description && (
+              <p class="text-xs text-zinc-600 dark:text-zinc-400 line-clamp-2 mb-3">
+                {pl.description}
+              </p>
+            )}
+
+            <!-- Attribution -->
+            {authorText && (
+              <div class="text-[11px] text-zinc-500 dark:text-zinc-400 font-medium mb-3">
+                إعداد: <span class="text-zinc-700 dark:text-zinc-300">{authorText}</span>
+              </div>
+            )}
+          </div>
+
+          <!-- Card Footer -->
+          <div class="pt-3 border-t border-zinc-100 dark:border-zinc-800/80 flex items-center justify-between text-xs font-semibold text-emerald-600 dark:text-emerald-400">
+            <span>عرض القائمة</span>
+            <svg class="w-3.5 h-3.5 rotate-180 group-hover:-translate-x-0.5 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+            </svg>
+          </div>
+        </div>
+      );
+    })}
+  </div>
+</Layout>
+
+<script>
+  function initPlaylistsCatalog() {
+    const pills = document.querySelectorAll('#subject-filter-pills .sub-pill');
+    const cards = document.querySelectorAll('#playlists-grid .playlist-card');
+
+    pills.forEach((pill) => {
+      pill.addEventListener('click', () => {
+        const sub = pill.getAttribute('data-subject');
+
+        pills.forEach((p) => {
+          p.classList.remove('bg-zinc-900', 'text-white', 'dark:bg-zinc-100', 'dark:text-zinc-900');
+          p.classList.add('bg-white', 'dark:bg-zinc-900', 'text-zinc-600', 'dark:text-zinc-300', 'border', 'border-zinc-200', 'dark:border-zinc-800');
+        });
+        pill.classList.add('bg-zinc-900', 'text-white', 'dark:bg-zinc-100', 'dark:text-zinc-900');
+        pill.classList.remove('bg-white', 'dark:bg-zinc-900', 'text-zinc-600', 'dark:text-zinc-300', 'border', 'border-zinc-200', 'dark:border-zinc-800');
+
+        cards.forEach((card) => {
+          const cardSub = card.getAttribute('data-subject');
+          if (sub === 'all' || cardSub === sub) {
+            (card as HTMLElement).style.display = '';
+          } else {
+            (card as HTMLElement).style.display = 'none';
+          }
+        });
+      });
+    });
+
+    // Check watch status in localStorage to display badges
+    cards.forEach((card) => {
+      const plId = card.getAttribute('data-playlist-id');
+      if (!plId) return;
+
+      try {
+        const saved = localStorage.getItem(`asumed_playlist_${plId}`);
+        if (saved) {
+          const watched = JSON.parse(saved);
+          const count = Object.values(watched).filter(Boolean).length;
+          const badge = card.querySelector(`[data-badge-id="${plId}"]`);
+          if (badge && count > 0) {
+            badge.textContent = `تمت مشاهدة ${count}`;
+            badge.classList.remove('hidden');
+          }
+        }
+      } catch {}
+    });
+  }
+
+  initPlaylistsCatalog();
+  document.addEventListener('astro:after-swap', initPlaylistsCatalog);
+</script>

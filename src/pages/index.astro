@@ -73,6 +73,31 @@ const yearData = [
     <form action="/search" method="GET" class="w-full">
       <SearchBar placeholder="ابحث باسم المادة، الموديول، اسم الدكتور، الدرايف، أو التلخيص..." />
     </form>
+
+    <!-- Quick Access Chips -->
+    <div class="flex items-center gap-2 mt-3 overflow-x-auto no-scrollbar">
+      <a
+        href="/playlists"
+        class="inline-flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-xl bg-red-50 text-red-700 dark:bg-red-950/50 dark:text-red-300 border border-red-200 dark:border-red-900/50 hover:bg-red-100 dark:hover:bg-red-900/40 transition-colors shadow-2xs shrink-0"
+      >
+        <svg class="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24">
+          <path d="M8 5v14l11-7z"/>
+        </svg>
+        <span>قوائم التشغيل</span>
+      </a>
+      <a
+        href="/module/year2-blood"
+        class="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-xl bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 border border-zinc-200 dark:border-zinc-700 hover:bg-zinc-200/70 transition-colors shrink-0"
+      >
+        <span>موديول الدم (MED201)</span>
+      </a>
+      <a
+        href="/search?type=drive"
+        class="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-xl bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 border border-zinc-200 dark:border-zinc-700 hover:bg-zinc-200/70 transition-colors shrink-0"
+      >
+        <span>درايفات الدفعة</span>
+      </a>
+    </div>
   </section>
 
   <!-- Academic Year Quick Navigator -->

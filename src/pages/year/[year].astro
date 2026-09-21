@@ -114,8 +114,8 @@ const yearNames: Record<number, string> = {
           if (!selectedType || selectedType === 'all') {
             (cardEl as HTMLElement).style.display = '';
           } else {
-            const badge = cardEl.querySelector('.inline-flex');
-            const matches = badge?.textContent?.toLowerCase().includes(selectedType) ?? false;
+            const cardType = cardEl.getAttribute('data-material-type') || '';
+            const matches = cardType === selectedType || (selectedType === 'youtube' && cardType === 'playlist');
             (cardEl as HTMLElement).style.display = matches ? '' : 'none';
           }
         });

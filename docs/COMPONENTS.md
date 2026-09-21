@@ -161,7 +161,7 @@ This document details all UI components, their props, intended reuse guidelines,
 
 #### [`FilterToolbar.astro`](file:///workspaces/asu_med_materials/src/components/search/FilterToolbar.astro)
 - **Location**: `src/components/search/FilterToolbar.astro`
-- **Purpose**: Horizontal pill filters for resource types.
+- **Purpose**: Horizontal pill filters for resource types. Selecting the **YouTube** filter matches both standalone YouTube videos (`type: 'youtube'`) and structured YouTube playlists (`type: 'playlist'`).
 - **Props**:
   ```typescript
   interface Props {
@@ -182,3 +182,24 @@ This document details all UI components, their props, intended reuse guidelines,
 - **Location**: `src/components/common/ThemeToggle.astro`
 - **Purpose**: Accessible button to toggle between Light (default) and Dark theme.
 - **Props**: None.
+
+---
+
+### Video Playlists & Embedded Player System
+
+#### [`/playlists`](file:///workspaces/asu_med_materials/src/pages/playlists.astro) (Catalog Page)
+- **Location**: `src/pages/playlists.astro`
+- **Purpose**: Central catalog for all structured video playlists and lecture series across disciplines.
+- **Features**:
+  - Filter pills by medical subject (`Anatomy`, `Physiology`, `Histology`, `Biochemistry`, `Pharmacology`, `Pathology`, `Parasitology`, `Microbiology`).
+  - Progress badge showing watched items count reading from `localStorage`.
+  - Quick action buttons to launch the embedded player.
+
+#### [`/playlist/[id]`](file:///workspaces/asu_med_materials/src/pages/playlist/[id].astro) (Dedicated Player Page)
+- **Location**: `src/pages/playlist/[id].astro`
+- **Purpose**: Distraction-free, interactive study player for watching playlists and tracking lecture progress.
+- **Features**:
+  - **Embedded YouTube Player**: 16:9 responsive embed supporting both multi-part video series (`youtube.com/embed/{id}`) and full YouTube playlists (`videoseries?list={playlistId}`).
+  - **Watch Progress Tracking**: Interactive "Mark as Done" (تمت المشاهدة) checkmarks on individual lectures/parts, with real-time percentage progress bar.
+  - **Persistence**: Watch progress persisted in `localStorage` under `asumed_playlist_{id}`.
+  - **Sequential Stepper**: Previous/Next navigation controls for multi-part video collections.
