@@ -43,16 +43,16 @@ const targetAttr = isPlaylist ? '_self' : '_blank';
 ---
 
 <div
-  class="group relative flex flex-col justify-between bg-white dark:bg-zinc-900 border border-zinc-200/80 dark:border-zinc-800 rounded-xl p-4 shadow-2xs hover:shadow-md hover:border-emerald-500/70 dark:hover:shadow-emerald-950/20 active:scale-[0.99] transition-all text-start"
+  class="group relative flex flex-col justify-between bg-white dark:bg-zinc-900 border border-zinc-200/80 dark:border-zinc-800 data-[is-studied='true']:border-emerald-400/60 dark:data-[is-studied='true']:border-emerald-600/50 rounded-xl p-4 shadow-2xs hover:shadow-md hover:border-emerald-500/70 dark:hover:shadow-emerald-950/20 transition-all text-start"
   data-material-id={material.id}
   data-material-type={material.type}
 >
   <div>
-    <!-- Top Metadata Header -->
-    <div class="flex items-center justify-between gap-2 mb-2.5">
+    <!-- Top Metadata Header — z-20 sits above the stretched link (z-0) -->
+    <div class="flex items-center justify-between gap-2 mb-2.5 relative z-20">
       <TypeBadge type={material.type === 'playlist' ? 'youtube' : material.type} size="sm" />
 
-      <div class="flex items-center gap-1.5 relative z-10">
+      <div class="flex items-center gap-2 relative z-30">
         {showYear && (
           <span
             class="text-[11px] font-semibold px-2 py-0.5 rounded bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400"
@@ -62,17 +62,38 @@ const targetAttr = isPlaylist ? '_self' : '_blank';
             Year {material.year}
           </span>
         )}
-        <!-- Archived Badge (Shown dynamically when bookmarked/archived by student) -->
-        <span
-          class="archived-badge hidden items-center gap-1 text-[11px] font-semibold px-2 py-0.5 rounded bg-amber-50 text-amber-700 dark:bg-amber-950/50 dark:text-amber-400 border border-amber-200 dark:border-amber-800/40"
-          data-i18n="card.save"
+        <!-- Done / Studied Checkbox Button -->
+        <button
+          type="button"
+          class="studied-btn relative z-30 p-1.5 -m-1 rounded-lg text-zinc-400 hover:text-emerald-600 dark:hover:text-emerald-400 hover:bg-emerald-50/60 dark:hover:bg-emerald-950/40 active:scale-95 transition-all cursor-pointer flex items-center justify-center focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500"
+          data-id={material.id}
+          role="checkbox"
+          aria-checked="false"
+          data-i18n-attr="title:card.markStudied,aria-label:card.markStudied"
+          title="Mark as studied"
+          aria-label="Mark as studied"
+          onclick="arguments[0].stopPropagation();"
         >
-          Saved
-        </span>
+          <span
+            class="studied-box w-6 h-6 rounded-md border-2 border-zinc-300 dark:border-zinc-600 bg-white dark:bg-zinc-800 flex items-center justify-center transition-all duration-200 shadow-2xs"
+          >
+            <svg
+              class="studied-checkmark w-3.5 h-3.5 text-white hidden pointer-events-none drop-shadow-2xs"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="3"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <polyline points="20 6 9 17 4 12"></polyline>
+            </svg>
+          </span>
+        </button>
         <!-- Bookmark Button -->
         <button
           type="button"
-          class="bookmark-btn p-1.5 text-zinc-400 hover:text-amber-500 dark:hover:text-amber-400 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors cursor-pointer"
+          class="bookmark-btn relative z-30 p-1.5 -m-1 text-zinc-400 hover:text-amber-500 dark:hover:text-amber-400 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors cursor-pointer"
           data-id={material.id}
           data-i18n-attr="title:card.save,aria-label:card.save"
           title="Save to bookmarks"
@@ -88,10 +109,10 @@ const targetAttr = isPlaylist ? '_self' : '_blank';
       </div>
     </div>
 
-    <!-- Title with Stretched Link -->
-    <h3 class="font-bold text-zinc-900 dark:text-zinc-100 text-sm leading-snug line-clamp-2 mb-1.5 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 group-hover:underline group-active:underline group-focus-visible:underline underline-offset-4 decoration-emerald-500 dark:decoration-emerald-400 transition-colors">
+    <!-- Title with Stretched Link (covers entire card) -->
+    <h3 class="font-bold text-zinc-900 dark:text-zinc-100 text-sm leading-snug line-clamp-2 mb-1.5 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 group-hover:underline underline-offset-4 decoration-emerald-500 dark:decoration-emerald-400 transition-colors">
       <a href={cardHref} target={targetAttr} rel={isPlaylist ? undefined : "noopener noreferrer"} class="focus:outline-none">
-        <span class="absolute inset-0" aria-hidden="true"></span>
+        <span class="absolute inset-0 z-0" aria-hidden="true"></span>
         <span
           data-i18n-material-title={material.id}
           data-title-ar={material.title}
@@ -113,11 +134,11 @@ const targetAttr = isPlaylist ? '_self' : '_blank';
     )}
 
     <!-- Tags & Subject & Author / AddedBy -->
-    <div class="flex flex-wrap items-center gap-1.5 text-[11px] font-medium">
+    <div class="flex flex-wrap items-center gap-1.5 text-[11px] font-medium relative z-20">
       {material.subject && material.moduleId ? (
         <a
           href={`/module/${material.moduleId}/${subjectToSlug(material.subject)}`}
-          class="relative z-10 text-zinc-700 dark:text-zinc-300 bg-zinc-100 dark:bg-zinc-800/80 hover:bg-emerald-50 hover:text-emerald-700 dark:hover:bg-emerald-950/60 dark:hover:text-emerald-400 px-2 py-0.5 rounded transition-colors"
+          class="relative z-20 text-zinc-700 dark:text-zinc-300 bg-zinc-100 dark:bg-zinc-800/80 hover:bg-emerald-50 hover:text-emerald-700 dark:hover:bg-emerald-950/60 dark:hover:text-emerald-400 px-2 py-0.5 rounded transition-colors"
           title={material.subject}
         >
           {material.subject}

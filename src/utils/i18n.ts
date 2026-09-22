@@ -123,6 +123,15 @@ export function applyLanguage(lang: SupportedLanguage): void {
     el.textContent = lang === 'ar' ? (arText || enText) : (enText || arText);
   });
 
+  // 3b. Elements with bilingual subject title
+  document.querySelectorAll<HTMLElement>('[data-i18n-subject-en]').forEach((el) => {
+    const enText = el.getAttribute('data-i18n-subject-en') || '';
+    const arText = el.getAttribute('data-i18n-subject-ar') || '';
+    if (enText || arText) {
+      el.textContent = lang === 'ar' ? (arText || enText) : (enText || arText);
+    }
+  });
+
   // 4. Material titles and descriptions
   document.querySelectorAll<HTMLElement>('[data-i18n-material-title]').forEach((el) => {
     const enText = el.getAttribute('data-title-en') || '';

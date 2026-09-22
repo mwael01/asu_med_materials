@@ -1,0 +1,74 @@
+---
+import { subjectToSlug } from '../../utils/slug';
+
+interface Props {
+  moduleId: string;
+  moduleTitle: string;
+  subjects: string[];
+  totalCount?: number;
+  materialCounts?: Record<string, number>;
+}
+
+const {
+  moduleId,
+  moduleTitle,
+  subjects,
+} = Astro.props;
+---
+
+<section
+  class="mb-6"
+  id="subject-selection-section"
+  data-module-id={moduleId}
+  data-module-title={moduleTitle}
+>
+  <div class="flex items-center justify-between mb-2.5 text-start">
+    <h2 class="text-sm font-bold text-zinc-900 dark:text-zinc-100" data-i18n="module.subjectsTitle">
+      Subjects
+    </h2>
+
+    <!-- Active Filter Reset Indicator -->
+    <button
+      type="button"
+      id="reset-subject-filter-btn"
+      class="text-xs font-semibold text-emerald-600 dark:text-emerald-400 hover:underline cursor-pointer hidden"
+    >
+      <span data-i18n="module.allSubjects">Show All Subjects</span> &rarr;
+    </button>
+  </div>
+
+  <!-- Single Scrollable Row of Subject Boxes -->
+  <div
+    class="flex items-center gap-2 overflow-x-auto pb-2 pt-0.5 scroll-smooth no-scrollbar"
+    id="subject-cards-row"
+  >
+    <!-- 'All Subjects' Selection Box -->
+    <button
+      type="button"
+      data-subject-card-slug="all"
+      class="shrink-0 px-4 py-2.5 rounded-xl border text-center transition-all cursor-pointer bg-emerald-50/80 dark:bg-emerald-950/40 border-emerald-500 text-emerald-700 dark:text-emerald-300 shadow-2xs hover:shadow-xs"
+    >
+      <span class="text-xs sm:text-sm font-bold whitespace-nowrap" data-i18n="module.allSubjects">
+        All Subjects
+      </span>
+    </button>
+
+    <!-- Individual Subject Boxes -->
+    {subjects.map((sub) => {
+      const slug = subjectToSlug(sub);
+
+      return (
+        <button
+          type="button"
+          data-subject-card-slug={slug}
+          data-subject-card-name={sub}
+          class="shrink-0 px-4 py-2.5 rounded-xl border border-zinc-200/90 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-zinc-700 dark:text-zinc-300 hover:border-emerald-500/70 hover:text-emerald-600 dark:hover:text-emerald-400 hover:shadow-xs text-center transition-all cursor-pointer"
+        >
+          <span class="text-xs sm:text-sm font-bold whitespace-nowrap">
+            {sub}
+          </span>
+        </button>
+      );
+    })}
+  </div>
+</section>

@@ -1,63 +1,113 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import SearchBar from '../components/search/SearchBar.astro';
-import GroupedResourceList from '../components/materials/GroupedResourceList.astro';
+import ModuleCard from '../components/materials/ModuleCard.astro';
+import ResourceCard from '../components/materials/ResourceCard.astro';
 import { getAllMaterials } from '../data/materials';
-import { getModulesByYear } from '../data/modules';
+import { modulesData } from '../data/modules';
+import { subjectToSlug } from '../utils/slug';
+import type { MaterialItem, ModuleInfo } from '../types/materials';
 
 const allMaterials = getAllMaterials();
-const recentMaterials = allMaterials.slice(0, 6);
+const allModules = modulesData;
 
-const yearData = [
-  { year: 1, titleAr: 'السنة الأولى', titleEn: 'Year 1', desc: 'قريباً' },
-  { year: 2, titleAr: 'السنة الثانية', titleEn: 'Year 2', desc: 'Blood & Lymphatic System (MED201)' },
-  { year: 3, titleAr: 'السنة الثالثة', titleEn: 'Year 3', desc: 'قريباً' },
-  { year: 4, titleAr: 'السنة الرابعة', titleEn: 'Year 4', desc: 'قريباً' },
-  { year: 5, titleAr: 'السنة الخامسة', titleEn: 'Year 5', desc: 'قريباً' }
-];
+// Organize materials into Module > Subject groups for the student's personal library
+interface LibrarySubjectGroup {
+  name: string;
+  nameEn: string;
+  nameAr: string;
+  slug: string;
+  items: MaterialItem[];
+}
+
+interface LibraryModuleGroup {
+  module: ModuleInfo | { id: string; title: string; titleAr: string; year: number };
+  subjectGroups: LibrarySubjectGroup[];
+}
+
+const libraryModules: LibraryModuleGroup[] = [];
+
+for (const mod of allModules) {
+  const modMaterials = allMaterials.filter((m) => m.moduleId === mod.id);
+  if (modMaterials.length === 0) continue;
+
+  const subjectGroups: LibrarySubjectGroup[] = [];
+
+  // 1. Central / batch resources (no subject or category === 'central')
+  const centralItems = modMaterials.filter((m) => !m.subject || m.category === 'central');
+  if (centralItems.length > 0) {
+    subjectGroups.push({
+      name: 'Central & Batch Resources',
+      nameEn: 'Central & Batch Resources',
+      nameAr: 'المصادر المركزية والمشتركة',
+      slug: 'central',
+      items: centralItems
+    });
+  }
+
+  // 2. Subject-specific resources
+  const seenSubjects = new Set<string>();
+  for (const sub of mod.subjects) {
+    const items = modMaterials.filter((m) => m.subject === sub && m.category !== 'central');
+    if (items.length > 0) {
+      seenSubjects.add(sub);
+      subjectGroups.push({
+        name: sub,
+        nameEn: sub,
+        nameAr: sub,
+        slug: subjectToSlug(sub),
+        items
+      });
+    }
+  }
+
+  // Any additional subject items
+  for (const m of modMaterials) {
+    if (m.subject && !seenSubjects.has(m.subject) && m.category !== 'central') {
+      seenSubjects.add(m.subject);
+      const items = modMaterials.filter((item) => item.subject === m.subject && item.category !== 'central');
+      subjectGroups.push({
+        name: m.subject,
+        nameEn: m.subject,
+        nameAr: m.subject,
+        slug: subjectToSlug(m.subject),
+        items
+      });
+    }
+  }
+
+  libraryModules.push({
+    module: mod,
+    subjectGroups
+  });
+}
+
+// Any materials without a registered module
+const generalMaterials = allMaterials.filter((m) => !m.moduleId);
+if (generalMaterials.length > 0) {
+  libraryModules.push({
+    module: {
+      id: 'general',
+      title: 'General Resources',
+      titleAr: 'المصادر العامة',
+      year: 0
+    },
+    subjectGroups: [
+      {
+        name: 'General Resources',
+        nameEn: 'General Resources',
+        nameAr: 'المصادر العامة',
+        slug: 'general',
+        items: generalMaterials
+      }
+    ]
+  });
+}
 ---
 
 <Layout>
-  <!-- Welcome & Personalized Banner -->
+  <!-- Hero & Search Section -->
   <section class="mb-8">
-    <!-- Active Year Personalized Alert (Shown via client script when user has chosen a year) -->
-    <div
-      id="user-year-welcome-card"
-      class="mb-6 p-4 rounded-2xl bg-emerald-50/80 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/50 hidden flex-col sm:flex-row items-start sm:items-center justify-between gap-3"
-    >
-      <div class="flex items-center gap-3">
-        <div class="w-10 h-10 rounded-xl bg-emerald-600 text-white flex items-center justify-center font-bold text-base shadow-xs shrink-0">
-          <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" />
-          </svg>
-        </div>
-        <div>
-          <h2 class="text-sm font-bold text-zinc-900 dark:text-zinc-100">
-            <span data-i18n="home.welcomeTitle">Welcome! Your Selected Year:</span> <span id="welcome-year-name" class="text-emerald-700 dark:text-emerald-400 font-extrabold">Year 1</span>
-          </h2>
-          <p class="text-xs text-zinc-600 dark:text-zinc-400 mt-0.5" data-i18n="home.welcomeDesc">
-            The site is configured to your year for direct access to your modules and drives.
-          </p>
-        </div>
-      </div>
-
-      <div class="flex items-center gap-2 shrink-0">
-        <a
-          id="welcome-year-link"
-          href="/year/1"
-          class="text-xs font-bold px-3.5 py-1.5 rounded-lg bg-emerald-600 text-white hover:bg-emerald-700 transition-colors shadow-2xs"
-        >
-          <span data-i18n="home.openYearModules">Open Year Modules →</span>
-        </a>
-        <button
-          type="button"
-          class="trigger-multistage-selector text-xs font-semibold px-3 py-1.5 rounded-lg bg-white dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 border border-zinc-200 dark:border-zinc-700 hover:bg-zinc-100 transition-colors cursor-pointer"
-        >
-          <span data-i18n="home.change">Change</span>
-        </button>
-      </div>
-    </div>
-
     <div class="mb-4">
       <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-zinc-900 dark:text-zinc-50 mb-1.5" data-i18n="home.heroTitle">
         ASU Faculty of Medicine Materials Hub
@@ -67,149 +117,432 @@ const yearData = [
       </p>
     </div>
 
-    <!-- Quick Search Form -->
+    <!-- Search Form -->
     <form action="/search" method="GET" class="w-full">
-      <SearchBar />
+      <SearchBar size="lg" />
     </form>
-
-    <!-- Quick Access Chips -->
-    <div class="flex items-center gap-2 mt-3 overflow-x-auto no-scrollbar">
-      <a
-        href="/playlists"
-        class="inline-flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-xl bg-red-50 text-red-700 dark:bg-red-950/50 dark:text-red-300 border border-red-200 dark:border-red-900/50 hover:bg-red-100 dark:hover:bg-red-900/40 transition-colors shadow-2xs shrink-0"
-      >
-        <svg class="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24">
-          <path d="M8 5v14l11-7z"/>
-        </svg>
-        <span data-i18n="playlists.title">Playlists</span>
-      </a>
-      <a
-        href="/module/year2-blood"
-        class="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-xl bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 border border-zinc-200 dark:border-zinc-700 hover:bg-zinc-200/70 transition-colors shrink-0"
-      >
-        <span>Blood & Lymphatic System (MED201)</span>
-      </a>
-      <a
-        href="/search?type=drive"
-        class="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-xl bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 border border-zinc-200 dark:border-zinc-700 hover:bg-zinc-200/70 transition-colors shrink-0"
-      >
-        <span data-i18n="categories.central">Central Drives</span>
-      </a>
-    </div>
   </section>
 
-  <!-- Academic Year Quick Navigator -->
-  <section class="mb-10">
-    <div class="flex items-center justify-between mb-3">
+  <!-- Student Modules Section -->
+  <section class="mb-12" id="home-modules-section">
+    <div class="flex items-center justify-between mb-3.5">
       <div class="flex items-center gap-2">
-        <h2 class="text-base font-bold text-zinc-900 dark:text-zinc-100" data-i18n="home.academicYears">
-          Academic Years
+        <h2 class="text-base sm:text-lg font-bold text-zinc-900 dark:text-zinc-100" data-i18n="home.myModules">
+          My Study Modules
         </h2>
         <button
           type="button"
-          class="trigger-multistage-selector text-xs text-emerald-600 hover:underline font-semibold cursor-pointer"
+          class="trigger-multistage-selector text-xs text-emerald-600 dark:text-emerald-400 hover:underline font-semibold cursor-pointer"
         >
-          (<span data-i18n="nav.chooseYear">Choose Year</span>)
+          (<span data-i18n="nav.chooseYear">Change Year</span>)
         </button>
       </div>
 
-      <a href="/search" class="text-xs font-bold text-emerald-600 dark:text-emerald-400 hover:underline">
-        <span data-i18n="home.browseAll">Browse All Materials</span> &rarr;
+      <a id="home-year-modules-link" href="/year/2" class="text-xs font-bold text-emerald-600 dark:text-emerald-400 hover:underline">
+        <span data-i18n="year.modulesTitle">Year Modules</span> &rarr;
       </a>
     </div>
 
-    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
-      {yearData.map((y) => {
-        const moduleCount = getModulesByYear(y.year).length;
-        return (
-          <a
-            href={`/year/${y.year}`}
-            class="group bg-white dark:bg-zinc-900 border border-zinc-200/80 dark:border-zinc-800 rounded-xl p-4 transition-all hover:border-emerald-500/70 hover:shadow-sm shadow-2xs flex flex-col justify-between text-start active:scale-[0.99]"
-          >
-            <div>
-              <span class="text-xs font-extrabold text-emerald-600 dark:text-emerald-400">
-                Level {y.year}
-              </span>
-              <h3
-                class="font-bold text-sm text-zinc-900 dark:text-zinc-100 mt-0.5 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors"
-                data-i18n="nav.year"
-                data-i18n-params={JSON.stringify({ y: y.year })}
-              >
-                {y.titleEn}
-              </h3>
-              <p class="text-[11px] text-zinc-500 dark:text-zinc-400 mt-1 line-clamp-2">
-                {y.desc}
-              </p>
-            </div>
-            <div class="mt-3 pt-2 border-t border-zinc-100 dark:border-zinc-800/80 flex items-center justify-between text-[11px] text-zinc-400">
-              <span data-i18n="year.modulesCount" data-i18n-params={JSON.stringify({ n: moduleCount })}>
-                {moduleCount} Study Modules
-              </span>
-              <svg class="w-3.5 h-3.5 group-hover:translate-x-0.5 rtl:group-hover:-translate-x-0.5 rtl:rotate-180 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-              </svg>
-            </div>
-          </a>
-        );
-      })}
+    <!-- Modules Grid using standard ModuleCard -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4" id="home-modules-grid">
+      {allModules.map((mod) => (
+        <div data-module-year={mod.year} class="home-module-wrapper">
+          <ModuleCard module={mod} resourceCount={allMaterials.filter(m => m.moduleId === mod.id).length} />
+        </div>
+      ))}
+    </div>
+
+    <!-- Fallback when selected year has no registered modules yet -->
+    <div id="no-modules-placeholder" class="hidden py-8 text-center border border-dashed border-zinc-200 dark:border-zinc-800 rounded-xl p-6 bg-white dark:bg-zinc-900/60">
+      <p class="text-xs text-zinc-500 dark:text-zinc-400" data-i18n="home.noModulesFound">
+        No modules added yet for this year. Blood Module (Year 2) is currently available.
+      </p>
+      <button
+        type="button"
+        id="switch-to-year2-btn"
+        class="mt-3 text-xs font-bold px-3.5 py-1.5 rounded-lg bg-emerald-600 text-white hover:bg-emerald-700 transition-colors cursor-pointer shadow-2xs"
+      >
+        Switch to Year 2
+      </button>
     </div>
   </section>
 
-  <!-- Grouped Latest Materials -->
-  {recentMaterials.length > 0 && (
-    <section>
-      <div class="flex items-center justify-between mb-4">
-        <h2 class="text-base font-bold text-zinc-900 dark:text-zinc-100" data-i18n="home.recentMaterials">
-          Recently Added Materials
-        </h2>
-        <a href="/search" class="text-xs font-bold text-emerald-600 dark:text-emerald-400 hover:underline">
-          <span data-i18n="footer.searchCatalog">Search Catalog</span> &rarr;
-        </a>
+  <!-- Student's Personal Study Library Section (Auto-Organized: Module > Subject > Materials) -->
+  <section class="mb-12" id="home-library-section">
+    <!-- Library Header -->
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4 pb-3 border-b border-zinc-200/80 dark:border-zinc-800">
+      <div>
+        <div class="flex items-center gap-2">
+          <div class="w-7 h-7 rounded-lg bg-amber-50 dark:bg-amber-950/40 text-amber-500 flex items-center justify-center">
+            <svg class="w-4 h-4 fill-amber-500" viewBox="0 0 24 24">
+              <path d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
+            </svg>
+          </div>
+          <h2 class="text-base sm:text-lg font-bold text-zinc-900 dark:text-zinc-100" data-i18n="home.myLibrary">
+            My Study Library
+          </h2>
+        </div>
+        <p class="text-xs text-zinc-500 dark:text-zinc-400 mt-1" data-i18n="home.myLibrarySubtitle">
+          Your saved study materials organized automatically by module and subject.
+        </p>
       </div>
 
-      <GroupedResourceList materials={recentMaterials} showYear={true} />
-    </section>
-  )}
+      <div class="flex items-center gap-2 shrink-0">
+        <a href="/search" class="text-xs font-bold text-emerald-600 dark:text-emerald-400 hover:underline">
+          <span data-i18n="home.browseAll">Browse All Materials</span> &rarr;
+        </a>
+      </div>
+    </div>
+
+    <!-- Library Controls & Filter Bar -->
+    <div id="home-library-controls" class="flex flex-wrap items-center justify-between gap-2.5 mb-6 hidden">
+      <!-- Dynamic Module Filter Chips Container -->
+      <div class="flex items-center gap-1.5 overflow-x-auto py-1 no-scrollbar" id="home-library-module-chips">
+        <!-- Injected dynamically: All Modules, Module chips -->
+      </div>
+
+      <!-- Unstudied Only Toggle Button -->
+      <button
+        type="button"
+        id="home-library-unstudied-toggle"
+        class="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg border bg-white dark:bg-zinc-900 text-zinc-700 dark:text-zinc-300 border-zinc-200/80 dark:border-zinc-800 hover:border-zinc-300 transition-all cursor-pointer shadow-2xs"
+      >
+        <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+        <span data-i18n="home.unstudiedOnly">Unstudied Only</span>
+      </button>
+    </div>
+
+    <!-- Empty State: Shown when the student has no saved items -->
+    <div id="home-library-empty" class="hidden py-12 text-center border border-dashed border-zinc-200 dark:border-zinc-800 rounded-2xl p-6 bg-white dark:bg-zinc-900/60">
+      <div class="w-12 h-12 mx-auto rounded-full bg-amber-50 dark:bg-amber-950/40 text-amber-500 flex items-center justify-center mb-2.5">
+        <svg class="w-6 h-6 fill-amber-500" viewBox="0 0 24 24">
+          <path d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
+        </svg>
+      </div>
+      <p class="text-sm font-bold text-zinc-700 dark:text-zinc-300" data-i18n="bookmarks.emptyTitle">
+        No saved resources yet
+      </p>
+      <p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 max-w-sm mx-auto leading-relaxed" data-i18n="bookmarks.emptyDesc">
+        Click the Bookmark icon on any card to save it here for fast offline access.
+      </p>
+      <button
+        type="button"
+        class="trigger-multistage-selector mt-4 inline-flex items-center gap-1 text-xs font-bold px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white transition-colors cursor-pointer shadow-2xs"
+      >
+        <span data-i18n="nav.chooseYear">Browse Modules</span>
+      </button>
+    </div>
+
+    <!-- Empty Notice when Filter yields 0 items -->
+    <div id="home-library-filter-empty" class="hidden py-10 text-center border border-dashed border-zinc-200 dark:border-zinc-800 rounded-2xl p-6 bg-white dark:bg-zinc-900/60">
+      <span class="text-2xl mb-1.5 block">🎉</span>
+      <p class="text-xs font-bold text-zinc-700 dark:text-zinc-300" data-i18n="home.allCompletedFilter">
+        Great job! All saved resources in this filter are completed!
+      </p>
+    </div>
+
+    <!-- Library Content: Hierarchical Structure (Module > Subject > Materials) -->
+    <div id="home-library-content" class="space-y-10 hidden">
+      {libraryModules.map((modGroup) => (
+        <div
+          class="home-library-module-group space-y-6"
+          data-home-module-group={modGroup.module.id}
+          data-home-module-title-en={modGroup.module.title}
+          data-home-module-title-ar={'titleAr' in modGroup.module && modGroup.module.titleAr ? modGroup.module.titleAr : modGroup.module.title}
+        >
+          <!-- Module Header Banner -->
+          <div class="flex items-center gap-2.5 pb-2 border-b-2 border-emerald-500/30">
+            <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
+            <h3
+              class="text-sm sm:text-base font-extrabold text-zinc-900 dark:text-zinc-100"
+              data-i18n-mod-title-en={modGroup.module.title}
+              data-i18n-mod-title-ar={'titleAr' in modGroup.module && modGroup.module.titleAr ? modGroup.module.titleAr : modGroup.module.title}
+            >
+              {modGroup.module.title}
+            </h3>
+          </div>
+
+          <!-- Subject Groups within Module -->
+          <div class="space-y-6">
+            {modGroup.subjectGroups.map((subGroup) => (
+              <div
+                class="home-library-subject-group"
+                data-home-subject-group={subGroup.slug}
+                data-home-subject-name={subGroup.name}
+              >
+                <!-- Subject Header with Hierarchy: Module Name > Subject Name -->
+                <div class="flex items-center justify-between mb-3 pb-1.5 border-b border-zinc-200/80 dark:border-zinc-800">
+                  <div class="flex items-center gap-1.5 text-xs text-zinc-500 dark:text-zinc-400">
+                    <span
+                      class="font-bold text-zinc-800 dark:text-zinc-200"
+                      data-i18n-mod-title-en={modGroup.module.title}
+                      data-i18n-mod-title-ar={'titleAr' in modGroup.module && modGroup.module.titleAr ? modGroup.module.titleAr : modGroup.module.title}
+                    >
+                      {modGroup.module.title}
+                    </span>
+                    <span>&gt;</span>
+                    <h4
+                      class="font-extrabold text-sm text-emerald-600 dark:text-emerald-400"
+                      data-i18n-subject-en={subGroup.nameEn}
+                      data-i18n-subject-ar={subGroup.nameAr}
+                    >
+                      {subGroup.name}
+                    </h4>
+                  </div>
+                </div>
+
+                <!-- Materials Grid using standard ResourceCard -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 materials-grid">
+                  {subGroup.items.map((item) => (
+                    <div
+                      data-home-card-id={item.id}
+                      data-home-card-module={item.moduleId || 'general'}
+                      data-home-card-subject={item.subject || 'central'}
+                      class="home-library-card-item hidden"
+                    >
+                      <ResourceCard material={item} showYear={false} />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      ))}
+    </div>
+  </section>
 </Layout>
 
 <script>
-  function syncPersonalizedWelcome(): void {
-    const card = document.getElementById('user-year-welcome-card');
-    const yearName = document.getElementById('welcome-year-name');
-    const yearLink = document.getElementById('welcome-year-link') as HTMLAnchorElement | null;
+  import {
+    getUserStoredYear,
+    setUserStoredYear,
+    getStoredBookmarkIds,
+    getStoredStudiedIds
+  } from '../utils/storage';
+  import { getCurrentLanguage } from '../utils/i18n';
 
-    try {
-      const yearStr = localStorage.getItem('asumed_user_year');
-      if (yearStr) {
-        const y = parseInt(yearStr, 10);
-        const isAr = document.documentElement.lang === 'ar';
-        const namesAr: Record<number, string> = {
-          1: 'السنة الأولى (Year 1)',
-          2: 'السنة الثانية (Year 2)',
-          3: 'السنة الثالثة (Year 3)',
-          4: 'السنة الرابعة (Year 4)',
-          5: 'السنة الخامسة (Year 5)'
-        };
-        const namesEn: Record<number, string> = {
-          1: 'Year 1',
-          2: 'Year 2',
-          3: 'Year 3',
-          4: 'Year 4',
-          5: 'Year 5'
-        };
-        if (yearName) yearName.textContent = isAr ? (namesAr[y] || `السنة ${y}`) : (namesEn[y] || `Year ${y}`);
-        if (yearLink) yearLink.href = `/year/${y}`;
-        card?.classList.remove('hidden');
-        card?.classList.add('flex');
-      } else {
-        card?.classList.add('hidden');
-        card?.classList.remove('flex');
+  let homePageAbortController: AbortController | null = null;
+
+  function initHomePage(): void {
+    if (homePageAbortController) {
+      homePageAbortController.abort();
+    }
+    homePageAbortController = new AbortController();
+    const { signal } = homePageAbortController;
+
+    // 1. Active Year Sync for Modules
+    const yearModulesLink = document.getElementById('home-year-modules-link') as HTMLAnchorElement | null;
+    const moduleWrappers = document.querySelectorAll<HTMLElement>('.home-module-wrapper');
+    const noModulesPlaceholder = document.getElementById('no-modules-placeholder');
+    const switchToYear2Btn = document.getElementById('switch-to-year2-btn');
+
+    function syncYear(): void {
+      const y = getUserStoredYear() || 2;
+      if (yearModulesLink) yearModulesLink.href = `/year/${y}`;
+
+      let matchCount = 0;
+      moduleWrappers.forEach((el) => {
+        const modYear = parseInt(el.getAttribute('data-module-year') || '0', 10);
+        if (modYear === y) {
+          el.classList.remove('hidden');
+          matchCount++;
+        } else {
+          el.classList.add('hidden');
+        }
+      });
+
+      if (noModulesPlaceholder) {
+        noModulesPlaceholder.classList.toggle('hidden', matchCount > 0);
       }
-    } catch {}
+    }
+
+    switchToYear2Btn?.addEventListener('click', () => {
+      setUserStoredYear(2);
+      syncYear();
+    }, { signal });
+
+    // 2. Personal Study Library on Home Page (Hierarchical: Module > Subject > Materials)
+    const libraryEmpty = document.getElementById('home-library-empty');
+    const libraryContent = document.getElementById('home-library-content');
+    const libraryControls = document.getElementById('home-library-controls');
+    const moduleFilterChipsContainer = document.getElementById('home-library-module-chips');
+    const unstudiedToggleBtn = document.getElementById('home-library-unstudied-toggle');
+    const emptyFilterNotice = document.getElementById('home-library-filter-empty');
+
+    const cardItems = document.querySelectorAll<HTMLElement>('.home-library-card-item');
+    const subjectGroups = document.querySelectorAll<HTMLElement>('.home-library-subject-group');
+    const moduleGroups = document.querySelectorAll<HTMLElement>('.home-library-module-group');
+
+    let activeModuleFilter = 'all'; // 'all' or moduleId
+    let unstudiedOnly = false;
+
+    function renderHomeLibrary(): void {
+      const isAr = getCurrentLanguage() === 'ar';
+      const bookmarks = getStoredBookmarkIds();
+      const studiedIds = getStoredStudiedIds();
+
+      const totalSaved = bookmarks.length;
+
+      if (totalSaved === 0) {
+        libraryEmpty?.classList.remove('hidden');
+        libraryContent?.classList.add('hidden');
+        libraryControls?.classList.add('hidden');
+        emptyFilterNotice?.classList.add('hidden');
+        return;
+      }
+
+      libraryEmpty?.classList.add('hidden');
+      libraryContent?.classList.remove('hidden');
+      libraryControls?.classList.remove('hidden');
+
+      // Identify modules that have saved items
+      const modulesWithSaved = new Map<string, number>();
+      cardItems.forEach((card) => {
+        const id = card.getAttribute('data-home-card-id') || '';
+        const modId = card.getAttribute('data-home-card-module') || 'general';
+        if (bookmarks.includes(id)) {
+          modulesWithSaved.set(modId, (modulesWithSaved.get(modId) || 0) + 1);
+        }
+      });
+
+      // Render module filter chips
+      if (moduleFilterChipsContainer) {
+        let chipsHtml = `
+          <button
+            type="button"
+            data-module-chip="all"
+            class="library-chip shrink-0 inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg border transition-all cursor-pointer shadow-2xs ${
+              activeModuleFilter === 'all'
+                ? 'bg-zinc-900 text-white border-zinc-900 dark:bg-zinc-100 dark:text-zinc-900 dark:border-zinc-100'
+                : 'bg-white dark:bg-zinc-900 text-zinc-700 dark:text-zinc-300 border-zinc-200/80 dark:border-zinc-800 hover:border-zinc-300'
+            }"
+          >
+            <span>${isAr ? 'كل الموديولات' : 'All Modules'}</span>
+          </button>
+        `;
+
+        moduleGroups.forEach((modEl) => {
+          const modId = modEl.getAttribute('data-home-module-group') || '';
+          const count = modulesWithSaved.get(modId) || 0;
+          if (count === 0) return;
+
+          const titleEn = modEl.getAttribute('data-home-module-title-en') || modId;
+          const titleAr = modEl.getAttribute('data-home-module-title-ar') || titleEn;
+          const title = isAr ? titleAr : titleEn;
+          const isSelected = activeModuleFilter === modId;
+
+          chipsHtml += `
+            <button
+              type="button"
+              data-module-chip="${modId}"
+              class="library-chip shrink-0 inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg border transition-all cursor-pointer shadow-2xs ${
+                isSelected
+                  ? 'bg-zinc-900 text-white border-zinc-900 dark:bg-zinc-100 dark:text-zinc-900 dark:border-zinc-100'
+                  : 'bg-white dark:bg-zinc-900 text-zinc-700 dark:text-zinc-300 border-zinc-200/80 dark:border-zinc-800 hover:border-zinc-300'
+              }"
+            >
+              <span>${title}</span>
+            </button>
+          `;
+        });
+
+        moduleFilterChipsContainer.innerHTML = chipsHtml;
+
+        moduleFilterChipsContainer.querySelectorAll('[data-module-chip]').forEach((btn) => {
+          btn.addEventListener('click', (e) => {
+            const mId = (e.currentTarget as HTMLElement).getAttribute('data-module-chip');
+            if (mId) {
+              activeModuleFilter = mId;
+              renderHomeLibrary();
+            }
+          });
+        });
+      }
+
+      // Update Unstudied toggle button styling
+      if (unstudiedToggleBtn) {
+        if (unstudiedOnly) {
+          unstudiedToggleBtn.className =
+            'inline-flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-lg border bg-emerald-600 text-white border-emerald-600 dark:bg-emerald-500 dark:border-emerald-500 shadow-2xs transition-all cursor-pointer';
+        } else {
+          unstudiedToggleBtn.className =
+            'inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg border bg-white dark:bg-zinc-900 text-zinc-700 dark:text-zinc-300 border-zinc-200/80 dark:border-zinc-800 hover:border-zinc-300 transition-all cursor-pointer shadow-2xs';
+        }
+      }
+
+      // Filter individual cards and calculate group counts
+      let totalVisibleCards = 0;
+
+      cardItems.forEach((card) => {
+        const cid = card.getAttribute('data-home-card-id') || '';
+        const cMod = card.getAttribute('data-home-card-module') || 'general';
+        const isSaved = bookmarks.includes(cid);
+        const isStudied = studiedIds.includes(cid);
+
+        const matchesModule = activeModuleFilter === 'all' || cMod === activeModuleFilter;
+        const matchesStudied = !unstudiedOnly || !isStudied;
+
+        const isVisible = isSaved && matchesModule && matchesStudied;
+        card.classList.toggle('hidden', !isVisible);
+
+        if (isVisible) totalVisibleCards++;
+      });
+
+      // Filter subject groups
+      subjectGroups.forEach((subGroup) => {
+        const cardsInSubject = subGroup.querySelectorAll<HTMLElement>('.home-library-card-item');
+        let visibleCount = 0;
+
+        cardsInSubject.forEach((c) => {
+          if (!c.classList.contains('hidden')) {
+            visibleCount++;
+          }
+        });
+
+        subGroup.classList.toggle('hidden', visibleCount === 0);
+      });
+
+      // Filter module groups
+      moduleGroups.forEach((modGroup) => {
+        const subGroupsInMod = modGroup.querySelectorAll<HTMLElement>('.home-library-subject-group');
+        let visibleSubGroups = 0;
+
+        subGroupsInMod.forEach((sg) => {
+          if (!sg.classList.contains('hidden')) {
+            visibleSubGroups++;
+          }
+        });
+
+        modGroup.classList.toggle('hidden', visibleSubGroups === 0);
+      });
+
+      // Show empty notice if filter eliminated all cards
+      if (emptyFilterNotice) {
+        emptyFilterNotice.classList.toggle('hidden', totalVisibleCards > 0);
+      }
+    }
+
+    unstudiedToggleBtn?.addEventListener('click', () => {
+      unstudiedOnly = !unstudiedOnly;
+      renderHomeLibrary();
+    }, { signal });
+
+    syncYear();
+    renderHomeLibrary();
+
+    window.addEventListener('user-preferences-updated', () => {
+      syncYear();
+      renderHomeLibrary();
+    }, { signal });
+    window.addEventListener('bookmarks-updated', renderHomeLibrary, { signal });
+    window.addEventListener('studied-updated', renderHomeLibrary, { signal });
+    window.addEventListener('asumed-language-changed', () => {
+      syncYear();
+      renderHomeLibrary();
+    }, { signal });
   }
 
-  syncPersonalizedWelcome();
-  window.addEventListener('user-preferences-updated', syncPersonalizedWelcome);
-  window.addEventListener('asumed-language-changed', syncPersonalizedWelcome);
-  document.addEventListener('astro:after-swap', syncPersonalizedWelcome);
+  initHomePage();
+  document.addEventListener('astro:after-swap', initHomePage);
 </script>

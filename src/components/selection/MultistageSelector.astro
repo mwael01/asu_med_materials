@@ -1,300 +1,131 @@
 ---
-import { modulesData } from '../../data/modules';
-
 const years = [
-  { year: 1, titleAr: 'السنة الأولى', titleEn: 'Year 1', desc: 'قريباً' },
-  { year: 2, titleAr: 'السنة الثانية', titleEn: 'Year 2', desc: 'Blood & Lymphatic System (MED201)' },
-  { year: 3, titleAr: 'السنة الثالثة', titleEn: 'Year 3', desc: 'قريباً' },
-  { year: 4, titleAr: 'السنة الرابعة', titleEn: 'Year 4', desc: 'قريباً' },
-  { year: 5, titleAr: 'السنة الخامسة', titleEn: 'Year 5', desc: 'قريباً' },
+  { year: 1, labelEn: 'Year 1' },
+  { year: 2, labelEn: 'Year 2' },
+  { year: 3, labelEn: 'Year 3' },
+  { year: 4, labelEn: 'Year 4' },
+  { year: 5, labelEn: 'Year 5' },
 ];
 ---
 
-<!-- Multistage Onboarding & Year Selection Modal -->
+<!-- Year Selection Modal (Single-step) -->
 <div
   id="multistage-modal"
   class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-zinc-900/60 backdrop-blur-xs hidden transition-opacity"
   role="dialog"
   aria-modal="true"
-  aria-labelledby="multistage-title"
+  aria-labelledby="year-selector-title"
 >
-  <div class="relative w-full max-w-lg bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl shadow-2xl p-6 overflow-hidden">
-    <!-- Close / Dismiss Button (if user already had a selection) -->
-    <button
-      type="button"
-      id="close-multistage-btn"
-      class="absolute top-4 left-4 p-2 text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors hidden"
-      data-i18n-attr="aria-label:selector.closeLabel"
-      aria-label="Close selection modal"
-    >
-      <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-      </svg>
-    </button>
+  <div class="relative w-full max-w-sm bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl shadow-2xl p-5 overflow-hidden">
+    <!-- Header -->
+    <div class="flex items-center justify-between mb-3.5">
+      <h2
+        id="year-selector-title"
+        class="text-base font-bold text-zinc-900 dark:text-zinc-100"
+        data-i18n="selector.title"
+      >
+        Choose Academic Year
+      </h2>
 
-    <!-- Progress Indicator -->
-    <div class="flex items-center gap-2 mb-4">
-      <div id="step-indicator-1" class="h-1.5 flex-1 rounded-full bg-emerald-600 transition-colors"></div>
-      <div id="step-indicator-2" class="h-1.5 flex-1 rounded-full bg-zinc-200 dark:bg-zinc-800 transition-colors"></div>
-    </div>
-
-    <!-- Stage 1: Choose Academic Year -->
-    <div id="selection-stage-1" class="space-y-4">
-      <div class="text-start">
-        <span data-i18n="selector.step1Of2" class="text-xs font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">
-          Step 1 of 2
-        </span>
-        <h2 id="multistage-title" data-i18n="selector.step1Title" class="text-xl font-bold text-zinc-900 dark:text-zinc-100 mt-1">
-          Choose Your Academic Year
-        </h2>
-        <p data-i18n="selector.step1Desc" class="text-xs text-zinc-500 dark:text-zinc-400 mt-1">
-          We will remember your selection to show your year modules and materials automatically.
-        </p>
-      </div>
-
-      <div class="grid grid-cols-1 gap-2.5 max-h-80 overflow-y-auto pr-1">
-        {years.map((y) => (
-          <button
-            type="button"
-            data-stage-year={y.year}
-            class="stage-year-btn group flex items-center justify-between p-3.5 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-800/40 hover:bg-emerald-50 dark:hover:bg-emerald-950/30 hover:border-emerald-500 transition-all text-start cursor-pointer"
-          >
-            <div class="flex items-center gap-3">
-              <div class="w-9 h-9 rounded-lg bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 flex items-center justify-center font-bold text-sm">
-                Y{y.year}
-              </div>
-              <div>
-                <h3
-                  class="font-bold text-sm text-zinc-900 dark:text-zinc-100 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors"
-                  data-i18n="nav.year"
-                  data-i18n-params={JSON.stringify({ y: y.year })}
-                >
-                  {y.titleEn}
-                </h3>
-                <p class="text-[11px] text-zinc-500 dark:text-zinc-400 mt-0.5">
-                  {y.desc}
-                </p>
-              </div>
-            </div>
-            <svg class="w-4 h-4 text-zinc-400 group-hover:text-emerald-600 rtl:-rotate-180 rtl:group-hover:-translate-x-1 ltr:group-hover:translate-x-1 transition-all" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-            </svg>
-          </button>
-        ))}
-      </div>
-    </div>
-
-    <!-- Stage 2: Choose Module or browse full year -->
-    <div id="selection-stage-2" class="space-y-4 hidden">
-      <div class="flex items-center justify-between">
-        <button
-          type="button"
-          id="back-to-stage-1-btn"
-          class="inline-flex items-center gap-1 text-xs font-semibold text-zinc-500 hover:text-emerald-600 transition-colors cursor-pointer"
-        >
-          <svg class="w-4 h-4 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
-          </svg>
-          <span data-i18n="selector.backBtn">Back</span>
-        </button>
-        <span data-i18n="selector.step2Of2" class="text-xs font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">
-          Step 2 of 2
-        </span>
-      </div>
-
-      <div class="text-start">
-        <h2 data-i18n="selector.step2Title" class="text-xl font-bold text-zinc-900 dark:text-zinc-100">
-          Choose a Module or Browse Year
-        </h2>
-        <p data-i18n="selector.step2Desc" class="text-xs text-zinc-500 dark:text-zinc-400 mt-1">
-          Click any module to open it directly, or browse all year resources.
-        </p>
-      </div>
-
-      <!-- Container for dynamically rendered modules based on selected year -->
-      <div id="stage-modules-container" class="space-y-2 max-h-72 overflow-y-auto pr-1">
-        <!-- Dynamically injected via script -->
-      </div>
-
-      <!-- Browse entire year button -->
+      <!-- Close Button -->
       <button
         type="button"
-        id="browse-full-year-btn"
-        class="w-full py-2.5 px-4 rounded-xl border border-dashed border-emerald-500 text-emerald-700 dark:text-emerald-400 bg-emerald-50/60 dark:bg-emerald-950/30 hover:bg-emerald-100 text-xs font-bold transition-colors cursor-pointer"
+        id="close-multistage-btn"
+        class="p-1.5 text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors cursor-pointer"
+        data-i18n-attr="aria-label:selector.closeLabel"
+        aria-label="Close"
       >
-        <span data-i18n="selector.browseAllYear">Browse All Year Resources</span>
+        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+        </svg>
       </button>
+    </div>
+
+    <!-- Academic Years List (Single-step) -->
+    <div class="space-y-2">
+      {years.map(({ year, labelEn }) => (
+        <button
+          type="button"
+          data-stage-year={year}
+          class="stage-year-btn group w-full flex items-center justify-between px-3.5 py-3 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50/70 dark:bg-zinc-800/40 hover:bg-emerald-50 dark:hover:bg-emerald-950/30 hover:border-emerald-500/70 transition-all text-start cursor-pointer"
+        >
+          <div class="flex items-center gap-3">
+            <span class="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 flex items-center justify-center font-bold text-xs">
+              Y{year}
+            </span>
+            <span
+              class="font-bold text-sm text-zinc-900 dark:text-zinc-100 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors"
+              data-i18n="nav.year"
+              data-i18n-params={JSON.stringify({ y: year })}
+            >
+              {labelEn}
+            </span>
+          </div>
+
+          <svg class="w-4 h-4 text-zinc-400 group-hover:text-emerald-600 rtl:-rotate-180 rtl:group-hover:-translate-x-0.5 ltr:group-hover:translate-x-0.5 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+          </svg>
+        </button>
+      ))}
     </div>
   </div>
 </div>
 
-<script define:vars={{ allModules: modulesData }}>
-  window.__MODULES_DATA = allModules;
-</script>
-
 <script>
-  function initMultistageSelector(): void {
+  function initYearSelector(): void {
     const modal = document.getElementById('multistage-modal');
-    const stage1 = document.getElementById('selection-stage-1');
-    const stage2 = document.getElementById('selection-stage-2');
-    const ind2 = document.getElementById('step-indicator-2');
     const closeBtn = document.getElementById('close-multistage-btn');
-    const backBtn = document.getElementById('back-to-stage-1-btn');
-    const fullYearBtn = document.getElementById('browse-full-year-btn');
-    const modulesContainer = document.getElementById('stage-modules-container');
     const yearButtons = document.querySelectorAll('.stage-year-btn');
     const triggers = document.querySelectorAll('.trigger-multistage-selector');
-
-    let selectedYear: number | null = null;
-
-    function getStoredYear(): number | null {
-      try {
-        const val = localStorage.getItem('asumed_user_year');
-        return val ? parseInt(val, 10) : null;
-      } catch {
-        return null;
-      }
-    }
 
     function showModal(): void {
       modal?.classList.remove('hidden');
       document.body.style.overflow = 'hidden';
-      const stored = getStoredYear();
-      if (stored && closeBtn) {
-        closeBtn.classList.remove('hidden');
-      }
     }
 
     function hideModal(): void {
       modal?.classList.add('hidden');
       document.body.style.overflow = '';
-      resetToStage1();
     }
-
-    function resetToStage1(): void {
-      stage1?.classList.remove('hidden');
-      stage2?.classList.add('hidden');
-      ind2?.classList.remove('bg-emerald-600');
-      ind2?.classList.add('bg-zinc-200', 'dark:bg-zinc-800');
-    }
-
-    function goToStage2(year: number): void {
-      selectedYear = year;
-      stage1?.classList.add('hidden');
-      stage2?.classList.remove('hidden');
-      ind2?.classList.remove('bg-zinc-200', 'dark:bg-zinc-800');
-      ind2?.classList.add('bg-emerald-600');
-
-      const isAr = document.documentElement.lang === 'ar';
-
-      // Populate modules
-      const allMods: any[] = (window as any).__MODULES_DATA || [];
-      const filteredMods = allMods.filter((m) => m.year === year);
-      if (filteredMods.length === 0) {
-        if (modulesContainer) {
-          modulesContainer.innerHTML = `
-            <div class="p-6 text-center text-xs text-zinc-500 dark:text-zinc-400 border border-dashed border-zinc-200 dark:border-zinc-800 rounded-xl">
-              ${isAr
-                ? 'لا توجد موديولات مضافة بعد لهذه السنة. المتاح حالياً موديول الدم (السنة الثانية).'
-                : 'No modules added for this year yet. Blood Module (Year 2) is currently available.'}
-            </div>
-          `;
-        }
-        return;
-      }
-
-      if (modulesContainer) {
-        modulesContainer.innerHTML = filteredMods
-          .map(
-            (m) => `
-          <button
-            type="button"
-            data-module-id="${m.id}"
-            class="stage-module-option group w-full flex items-center justify-between p-3 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-800/60 hover:border-emerald-500 hover:bg-emerald-50/50 dark:hover:bg-emerald-950/30 transition-all text-start cursor-pointer"
-          >
-            <div class="flex items-center gap-2.5">
-              <span class="text-xs font-bold px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300">
-                ${m.code}
-              </span>
-              <div>
-                <h4 class="text-xs font-bold text-zinc-900 dark:text-zinc-100 group-hover:text-emerald-600">
-                  ${isAr ? (m.titleAr || m.title) : (m.title || m.titleAr)}
-                </h4>
-              </div>
-            </div>
-            <svg class="w-3.5 h-3.5 text-zinc-400 rtl:-rotate-180 rtl:group-hover:-translate-x-1 ltr:group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-            </svg>
-          </button>
-        `
-          )
-          .join('');
-
-        // Attach clicks
-        modulesContainer.querySelectorAll('.stage-module-option').forEach((btn) => {
-          btn.addEventListener('click', () => {
-            const modId = btn.getAttribute('data-module-id');
-            if (selectedYear) {
-              localStorage.setItem('asumed_user_year', String(selectedYear));
-              if (modId) localStorage.setItem('asumed_user_module', modId);
-              window.dispatchEvent(new CustomEvent('user-preferences-updated'));
-              hideModal();
-              if (modId) {
-                window.location.href = `/module/${modId}`;
-              } else {
-                window.location.href = `/year/${selectedYear}`;
-              }
-            }
-          });
-        });
-      }
-    }
-
-    window.addEventListener('asumed-language-changed', () => {
-      if (selectedYear && stage2 && !stage2.classList.contains('hidden')) {
-        goToStage2(selectedYear);
-      }
-    });
 
     yearButtons.forEach((btn) => {
       btn.addEventListener('click', () => {
         const yStr = btn.getAttribute('data-stage-year');
         if (yStr) {
-          const y = parseInt(yStr, 10);
-          goToStage2(y);
+          const year = parseInt(yStr, 10);
+          localStorage.setItem('asumed_user_year', String(year));
+          window.dispatchEvent(new CustomEvent('user-preferences-updated', { detail: { year } }));
+          hideModal();
+          window.location.href = `/year/${year}`;
         }
       });
     });
 
-    backBtn?.addEventListener('click', resetToStage1);
+    closeBtn?.addEventListener('click', hideModal);
 
-    fullYearBtn?.addEventListener('click', () => {
-      if (selectedYear) {
-        localStorage.setItem('asumed_user_year', String(selectedYear));
-        localStorage.removeItem('asumed_user_module');
-        window.dispatchEvent(new CustomEvent('user-preferences-updated'));
+    modal?.addEventListener('click', (e) => {
+      if (e.target === modal) {
         hideModal();
-        window.location.href = `/year/${selectedYear}`;
       }
     });
 
-    closeBtn?.addEventListener('click', hideModal);
+    if (!selectorInitialized) {
+      selectorInitialized = true;
+      window.addEventListener('keydown', (e) => {
+        const m = document.getElementById('user-year-modal');
+        if (e.key === 'Escape' && !m?.classList.contains('hidden')) {
+          m?.classList.add('hidden');
+          document.body.classList.remove('overflow-hidden');
+        }
+      });
+    }
 
     triggers.forEach((btn) => {
-      btn.addEventListener('click', () => {
-        resetToStage1();
-        showModal();
-      });
+      btn.addEventListener('click', showModal);
     });
-
-    // On initial page load: if no year is stored and user is on the homepage "/", prompt them!
-    const isHome = window.location.pathname === '/' || window.location.pathname === '';
-    const storedYear = getStoredYear();
-    if (isHome && !storedYear) {
-      setTimeout(showModal, 400);
-    }
   }
 
-  initMultistageSelector();
-  document.addEventListener('astro:after-swap', initMultistageSelector);
+  let selectorInitialized = false;
+  initYearSelector();
+  document.addEventListener('astro:after-swap', initYearSelector);
 </script>

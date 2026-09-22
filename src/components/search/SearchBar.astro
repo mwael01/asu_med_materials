@@ -3,22 +3,31 @@ interface Props {
   placeholder?: string;
   initialQuery?: string;
   autofocus?: boolean;
+  size?: 'md' | 'lg';
 }
 
 const {
   placeholder = 'Search modules, subjects (e.g. anatomy), professors, or resource types...',
   initialQuery = '',
-  autofocus = false
+  autofocus = false,
+  size = 'md'
 } = Astro.props;
+
+const isLarge = size === 'lg';
 ---
 
 <div class="relative w-full">
-  <div class="absolute inset-y-0 start-0 ps-3.5 flex items-center pointer-events-none text-zinc-400">
-    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+  <!-- Search Icon -->
+  <div class:list={[
+    'absolute inset-y-0 start-0 flex items-center pointer-events-none text-zinc-400 dark:text-zinc-500',
+    isLarge ? 'ps-4' : 'ps-3.5'
+  ]}>
+    <svg class:list={[isLarge ? 'w-5 h-5' : 'w-4 h-4']} fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
       <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
     </svg>
   </div>
 
+  <!-- Search Input -->
   <input
     type="search"
     id="site-search-input"
@@ -27,13 +36,35 @@ const {
     placeholder={placeholder}
     data-i18n-attr="placeholder:home.searchPlaceholder"
     autofocus={autofocus}
-    class="w-full ps-10 pe-12 py-2.5 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl text-sm text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 dark:placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all shadow-2xs text-start"
+    class:list={[
+      'w-full bg-white dark:bg-zinc-900 border text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 dark:placeholder-zinc-500 focus:outline-none transition-all text-start',
+      isLarge
+        ? 'ps-11 pe-24 sm:pe-28 py-3 sm:py-3.5 rounded-2xl text-sm sm:text-base border-zinc-200/90 dark:border-zinc-800 shadow-xs hover:border-zinc-300 dark:hover:border-zinc-700 focus:border-emerald-500 dark:focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10'
+        : 'ps-10 pe-12 py-2.5 rounded-xl text-sm border-zinc-200 dark:border-zinc-800 shadow-2xs focus:border-transparent focus:ring-2 focus:ring-emerald-500'
+    ]}
   />
 
-  <div class="absolute inset-y-0 end-0 pe-3 flex items-center pointer-events-none">
-    <kbd class="hidden sm:inline-block px-1.5 py-0.5 text-[10px] font-semibold text-zinc-400 dark:text-zinc-500 bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded shadow-2xs">
+  <!-- Trailing Actions: Keyboard shortcut & Submit Button (if large) -->
+  <div class:list={[
+    'absolute inset-y-0 end-0 flex items-center',
+    isLarge ? 'pe-2 sm:pe-2.5 gap-1.5' : 'pe-3 pointer-events-none'
+  ]}>
+    <kbd class="hidden sm:inline-block px-1.5 py-0.5 text-[10px] font-semibold text-zinc-400 dark:text-zinc-500 bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded shadow-2xs pointer-events-none">
       /
     </kbd>
+    {isLarge && (
+      <button
+        type="submit"
+        class="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition-colors shadow-2xs cursor-pointer inline-flex items-center gap-1 shrink-0"
+        data-i18n-attr="aria-label:nav.search"
+        aria-label="Search"
+      >
+        <svg class="w-3.5 h-3.5 rtl:rotate-90" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+        </svg>
+        <span class="hidden sm:inline" data-i18n="nav.search">Search</span>
+      </button>
+    )}
   </div>
 </div>
 

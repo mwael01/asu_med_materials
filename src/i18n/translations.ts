@@ -14,20 +14,32 @@ export const translations: Record<SupportedLanguage, TranslationsSchema> = {
       searchTitle: 'بحث في المواد والمصادر',
       savedResourcesTitle: 'المصادر المحفوظة',
       toggleThemeTitle: 'تبديل المظهر',
-      toggleLangTitle: 'Switch to English'
+      toggleLangTitle: 'Switch to English',
+      menu: 'القائمة',
+      academicYears: 'السنوات الدراسية'
     },
     home: {
-      welcomeTitle: 'مرحباً بك! سنتك الدراسية المختارة:',
-      welcomeDesc: 'تم ضبط الموقع على سنتك للوصول المباشر إلى موديولاتك ودرايفاتك.',
-      openYearModules: 'فتح موديولات سنتك ←',
-      change: 'تغيير',
       heroTitle: 'منصة مصادر كليّة الطب - جامعة عين شمس',
       heroSubtitle: 'درايفات الدفعات، قنوات التليجرام، شروحات اليوتيوب، وورق ومذكرات المذاكرة لجميع السنوات الخمس.',
       searchPlaceholder: 'ابحث عن موديول، مادة (مثل anatomy)، دكتور، أو نوع المصدر...',
       academicYears: 'السنوات الدراسية',
       comingSoon: 'قريباً',
       recentMaterials: 'أحدث المصادر المضافة',
-      browseAll: 'استعراض كل المصادر'
+      browseAll: 'استعراض كل المصادر',
+      myModules: 'موديولاتي الدراسية',
+      myLibrary: 'مكتبتي الدراسية',
+      myLibrarySubtitle: 'المصادر والمذكرات المحفوظة الخاصة بك منظمة تلقائياً حسب الموديول والمادة.',
+      unstudiedOnly: 'غير المذاكر فقط',
+      allModules: 'كل الموديولات',
+      completedCount: '{done} من {total} مكتمل',
+      allCompletedFilter: 'أحسنت! كل المصادر المحفوظة في هذا القسم تمت مذاكرتها بنجاح 🎉',
+      newFolder: 'مجلد جديد',
+      createFolder: 'إنشاء مجلد',
+      folderNamePlaceholder: 'اسم المجلد (مثل: مراجعة الفاينل، شروحات الفيديو)...',
+      allSaved: 'كل المحفوظات',
+      deleteFolderConfirm: 'هل أنت متأكد من حذف هذا المجلد؟ (لن تُحذف المصادر نفسها من المحفوظات)',
+      manageFolders: 'تنظيم المجلدات',
+      noModulesFound: 'لا توجد موديولات مضافة لهذه السنة بعد.'
     },
     year: {
       breadcrumbHome: 'الرئيسية',
@@ -50,7 +62,8 @@ export const translations: Record<SupportedLanguage, TranslationsSchema> = {
       semester2: 'الترم الثاني',
       allSubjects: 'جميع المواد',
       subjectsTitle: 'المواد الدراسية',
-      browseModule: 'تصفح الموديول'
+      browseModule: 'تصفح الموديول',
+      activeSubject: 'المادة الحالية:'
     },
     search: {
       title: 'دليل البحث الشامل في المصادر',
@@ -92,7 +105,10 @@ export const translations: Record<SupportedLanguage, TranslationsSchema> = {
       copyLink: 'نسخ الرابط',
       save: 'حفظ',
       openResource: 'فتح المصدر',
-      copiedToast: 'تم نسخ الرابط إلى الحافظة'
+      copiedToast: 'تم نسخ الرابط إلى الحافظة',
+      markStudied: 'تمت المذاكرة',
+      studiedToast: 'تم التحديد كمذاكر',
+      unstudiedToast: 'تم إلغاء التحديد'
     },
     bookmarks: {
       title: 'المصادر المحفوظة',
@@ -101,17 +117,14 @@ export const translations: Record<SupportedLanguage, TranslationsSchema> = {
       footerNote: 'محفوظة محلياً على جهازك • متاحة أوفلاين بدون نت',
       closeLabel: 'إغلاق قائمة المحفوظات',
       openBtn: 'فتح',
-      removeBtn: 'حذف'
+      removeBtn: 'حذف',
+      filterAll: 'الكل',
+      filterUnstudied: 'غير المذاكر',
+      studiedProgress: '{done} من {total} مكتمل',
+      viewInHome: 'عرض في الرئيسية'
     },
     selector: {
-      step1Of2: 'الخطوة 1 من 2',
-      step2Of2: 'الخطوة 2 من 2',
-      step1Title: 'اختر سنتك الدراسية',
-      step1Desc: 'هنحفظ اختيارك علشان تظهر لك موديولات وداتا سنتك تلقائياً.',
-      step2Title: 'اختر موديول أو تصفح السنة',
-      step2Desc: 'اضغط على أي موديول لفتحه مباشرة، أو تصفح داتا السنة كاملة.',
-      browseAllYear: 'تصفح كل داتا ومصادر السنة',
-      backBtn: 'رجوع',
+      title: 'اختر السنة الدراسية',
       closeLabel: 'إغلاق النافذة'
     },
     contribute: {
@@ -220,20 +233,32 @@ export const translations: Record<SupportedLanguage, TranslationsSchema> = {
       searchTitle: 'Search Materials & Subjects',
       savedResourcesTitle: 'Saved Bookmarks',
       toggleThemeTitle: 'Toggle Theme',
-      toggleLangTitle: 'التبديل إلى العربية'
+      toggleLangTitle: 'التبديل إلى العربية',
+      menu: 'Menu',
+      academicYears: 'Academic Years'
     },
     home: {
-      welcomeTitle: 'Welcome! Your Selected Year:',
-      welcomeDesc: 'The site is configured to your year for direct access to your modules and drives.',
-      openYearModules: 'Open Year Modules →',
-      change: 'Change',
       heroTitle: 'ASU Faculty of Medicine Materials Hub',
       heroSubtitle: 'Batch drives, Telegram channels, YouTube lectures, and study notes across all five years.',
       searchPlaceholder: 'Search modules, subjects (e.g. anatomy), professors, or resource types...',
       academicYears: 'Academic Years',
       comingSoon: 'Coming Soon',
       recentMaterials: 'Recently Added Materials',
-      browseAll: 'Browse All Materials'
+      browseAll: 'Browse All Materials',
+      myModules: 'My Study Modules',
+      myLibrary: 'My Study Library',
+      myLibrarySubtitle: 'Your saved study materials organized automatically by module and subject.',
+      unstudiedOnly: 'Unstudied Only',
+      allModules: 'All Modules',
+      completedCount: '{done} of {total} studied',
+      allCompletedFilter: 'Great job! All saved resources in this filter are completed! 🎉',
+      newFolder: 'New Folder',
+      createFolder: 'Create Folder',
+      folderNamePlaceholder: 'Folder name (e.g. Finals Prep, Daily Lectures)...',
+      allSaved: 'All Saved',
+      deleteFolderConfirm: 'Are you sure you want to delete this folder? (Resources will remain in your saved library)',
+      manageFolders: 'Organize Folders',
+      noModulesFound: 'No modules registered for this academic year yet.'
     },
     year: {
       breadcrumbHome: 'Home',
@@ -256,7 +281,8 @@ export const translations: Record<SupportedLanguage, TranslationsSchema> = {
       semester2: 'Semester 2',
       allSubjects: 'All Subjects',
       subjectsTitle: 'Subjects',
-      browseModule: 'Browse Module'
+      browseModule: 'Browse Module',
+      activeSubject: 'Active Subject:'
     },
     search: {
       title: 'Comprehensive Resource Catalog & Search',
@@ -298,7 +324,10 @@ export const translations: Record<SupportedLanguage, TranslationsSchema> = {
       copyLink: 'Copy Link',
       save: 'Save',
       openResource: 'Open Resource',
-      copiedToast: 'Link copied to clipboard'
+      copiedToast: 'Link copied to clipboard',
+      markStudied: 'Mark as studied',
+      studiedToast: 'Marked as studied',
+      unstudiedToast: 'Unmarked as studied'
     },
     bookmarks: {
       title: 'Saved Resources',
@@ -307,17 +336,14 @@ export const translations: Record<SupportedLanguage, TranslationsSchema> = {
       footerNote: 'Saved locally on your device • Available offline',
       closeLabel: 'Close bookmarks drawer',
       openBtn: 'Open',
-      removeBtn: 'Remove'
+      removeBtn: 'Remove',
+      filterAll: 'All',
+      filterUnstudied: 'To Study',
+      studiedProgress: '{done}/{total} studied',
+      viewInHome: 'View in Home'
     },
     selector: {
-      step1Of2: 'Step 1 of 2',
-      step2Of2: 'Step 2 of 2',
-      step1Title: 'Choose Your Academic Year',
-      step1Desc: 'We will remember your selection to show your year modules and materials automatically.',
-      step2Title: 'Choose a Module or Browse Year',
-      step2Desc: 'Click any module to open it directly, or browse all year resources.',
-      browseAllYear: 'Browse All Year Resources',
-      backBtn: 'Back',
+      title: 'Choose Academic Year',
       closeLabel: 'Close selection modal'
     },
     contribute: {

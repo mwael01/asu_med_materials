@@ -1,3 +1,51 @@
 @import "tailwindcss";
 
 @custom-variant dark (&:where(.dark, .dark *));
+
+@keyframes studied-pop {
+  0% {
+    transform: scale(0.8);
+  }
+  45% {
+    transform: scale(1.18);
+  }
+  75% {
+    transform: scale(0.95);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes checkmark-appear {
+  0% {
+    opacity: 0;
+    transform: scale(0.4) rotate(-8deg);
+  }
+  60% {
+    opacity: 1;
+    transform: scale(1.15) rotate(0deg);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) rotate(0deg);
+  }
+}
+
+.animate-studied-pop {
+  animation: studied-pop 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+.animate-checkmark {
+  animation: checkmark-appear 0.22s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+/* Studied Checkbox hover feedback */
+.studied-btn:hover .studied-box:not(.is-checked) {
+  border-color: #10b981;
+  background-color: rgba(16, 185, 129, 0.08);
+}
+.dark .studied-btn:hover .studied-box:not(.is-checked) {
+  border-color: #34d399;
+  background-color: rgba(16, 185, 129, 0.15);
+}

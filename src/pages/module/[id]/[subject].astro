@@ -54,8 +54,8 @@ for (const sub of module.subjects) {
 ---
 
 <Layout
-  title={`${subjectName} - ${module.code}: ${module.title} - ASU Med Materials`}
-  description={`Study materials, lectures, and summaries for ${subjectName} in ${module.title} (${module.code}) at ASU Faculty of Medicine.`}
+  title={`${subjectName} - ${module.title} - ASU Med Materials`}
+  description={`Study materials, lectures, and summaries for ${subjectName} in ${module.title} at ASU Faculty of Medicine.`}
 >
   <!-- Breadcrumb Navigation -->
   <div class="flex items-center gap-2 text-xs text-zinc-500 dark:text-zinc-400 mb-3 overflow-x-auto whitespace-nowrap">
@@ -63,7 +63,12 @@ for (const sub of module.subjects) {
     <span>/</span>
     <a href={`/year/${module.year}`} class="hover:text-emerald-600 dark:hover:text-emerald-400" data-i18n="nav.year" data-i18n-params={JSON.stringify({ y: module.year })}>Year {module.year}</a>
     <span>/</span>
-    <a href={`/module/${module.id}`} class="hover:text-emerald-600 dark:hover:text-emerald-400">{module.code}</a>
+    <a
+      href={`/module/${module.id}`}
+      class="hover:text-emerald-600 dark:hover:text-emerald-400"
+      data-i18n-mod-title-en={module.title}
+      data-i18n-mod-title-ar={module.titleAr || module.title}
+    >{module.title}</a>
     <span>/</span>
     <span class="text-zinc-900 dark:text-zinc-100 font-bold">{subjectName}</span>
   </div>
@@ -72,9 +77,6 @@ for (const sub of module.subjects) {
   <div class="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl p-6 mb-6 text-start">
     <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
       <div class="flex items-center gap-2">
-        <span class="text-xs font-bold px-2.5 py-0.5 rounded-md bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300">
-          {module.code}
-        </span>
         <span class="text-xs font-semibold px-2.5 py-0.5 rounded-md bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400" data-i18n="nav.year" data-i18n-params={JSON.stringify({ y: module.year })}>
           Year {module.year}
         </span>
@@ -94,8 +96,12 @@ for (const sub of module.subjects) {
     <h1 class="text-2xl sm:text-3xl font-extrabold text-zinc-900 dark:text-zinc-100 mb-1">
       {subjectName}
     </h1>
-    <h2 class="text-xs sm:text-sm font-medium text-zinc-500 dark:text-zinc-400">
-      {module.code} • {module.title}
+    <h2
+      class="text-xs sm:text-sm font-medium text-zinc-500 dark:text-zinc-400"
+      data-i18n-mod-title-en={module.title}
+      data-i18n-mod-title-ar={module.titleAr || module.title}
+    >
+      {module.title}
     </h2>
   </div>
 

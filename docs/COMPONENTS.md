@@ -20,10 +20,8 @@ This document details all UI components, their props, intended reuse guidelines,
 
 #### [`MultistageSelector.astro`](file:///workspaces/asu_med_materials/src/components/selection/MultistageSelector.astro)
 - **Location**: `src/components/selection/MultistageSelector.astro`
-- **Purpose**: Two-stage prompt modal for student onboarding and quick year switching.
-  - **Stage 1**: Choose Academic Year (السنة الأولى إلى الخامسة).
-  - **Stage 2**: Choose current module or view entire year.
-- **Persistence**: Saves choices to `localStorage` (`asumed_user_year`, `asumed_user_module`) and emits `user-preferences-updated`.
+- **Purpose**: Single-step modal for quick academic year selection (Years 1 to 5).
+- **Persistence**: Saves choices to `localStorage` (`asumed_user_year`) and emits `user-preferences-updated`.
 - **Props**: None (global client script).
 
 ---
@@ -32,8 +30,19 @@ This document details all UI components, their props, intended reuse guidelines,
 
 #### [`Navbar.astro`](file:///workspaces/asu_med_materials/src/components/navigation/Navbar.astro)
 - **Location**: `src/components/navigation/Navbar.astro`
-- **Purpose**: Compact top navigation bar (`h-12`) with clean text brand title (`ASU Med Materials`), academic year links, search shortcut, year indicator badge (`#nav-user-year-badge`), language switcher (`LanguageToggle.astro`), bookmark drawer trigger, and theme switch.
+- **Purpose**: Compact top navigation bar (`h-12`) with clean text brand title (`ASU Med Materials`), desktop nav links, featured Contribute CTA with special emerald-teal gradient and glowing animations (`.contribute-glow-btn`), year indicator badge (`#nav-user-year-badge`), search shortcut, bookmark drawer trigger, language switcher (`LanguageToggle.astro`), theme switcher (`ThemeToggle.astro`), and mobile burger menu trigger (`#mobile-menu-trigger`).
 - **Props**: None.
+
+#### [`MobileMenu.astro`](file:///workspaces/asu_med_materials/src/components/navigation/MobileMenu.astro)
+- **Location**: `src/components/navigation/MobileMenu.astro`
+- **Purpose**: Responsive slide-down navigation menu for small devices (< md), ensuring all pages and elements remain directly accessible. Features a prominent glowing Contribute button, 5-column Academic Years quick switcher grid (Years 1 to 5), core page links (Home, Playlists, Search, Contributors), and quick action shortcuts (Change Year, Saved Bookmarks).
+- **Props**:
+  ```typescript
+  interface Props {
+    currentPath: string;
+  }
+  ```
+
 
 #### [`LanguageToggle.astro`](file:///workspaces/asu_med_materials/src/components/common/LanguageToggle.astro)
 - **Location**: `src/components/common/LanguageToggle.astro`
@@ -70,9 +79,10 @@ This document details all UI components, their props, intended reuse guidelines,
 - **Location**: `src/components/materials/ResourceCard.astro`
 - **Purpose**: Fast, minimalist card that functions as a single clickable link opening the resource in a new tab.
 - **Interactivity**:
-  - Uses an accessible stretched-link pattern (`<a href={material.url}><span class="absolute inset-0"></span>...</a>`) so clicking anywhere on the card opens the resource in a new tab.
-  - Title shows a visible underline on hover and active click (`group-hover:underline group-active:underline underline-offset-4 decoration-emerald-500`) with subtle tactile click feedback (`active:scale-[0.99]`).
-  - Includes a dedicated bookmark toggle button (`.bookmark-btn`) with `z-10` in the top bar to save materials to offline local bookmarks without triggering the external link.
+  - Uses an accessible body-scoped link pattern (`<div class="relative group/body"><a href={material.url}><span class="absolute inset-0"></span>...</a></div>`) strictly bounded to the title and description, guaranteeing that the top action header and footer tags are completely separated from the link hit target.
+  - Title shows a visible underline on hover and active click (`group-hover/body:underline underline-offset-4 decoration-emerald-500`) with smooth transition feedback.
+  - Dedicated bookmark toggle button (`.bookmark-btn`) with inline `arguments[0].stopPropagation()` and capture-phase event listeners to save materials to offline local bookmarks without triggering card navigation.
+  - Dedicated studied / done checkbox toggle button (`.studied-btn`) with inline `arguments[0].stopPropagation()`, prominent `w-6 h-6` checkbox, emerald theme styling, spring pop micro-animation (`.animate-studied-pop`, `.animate-checkmark`), and instant `localStorage` persistence (`asumed_studied_materials`) with memory fallback. Uses capture-phase click and pointerdown interception to eliminate any card link interference.
 - **Author Attribution ("إعداد")**:
   - Displays `author` supporting single or multiple names (array up to 5 names).
   - Displays first 2 names and appends `...` if more names exist to preserve card responsiveness and avoid line wrapping.
@@ -138,6 +148,20 @@ This document details all UI components, their props, intended reuse guidelines,
   }
   ```
 
+#### [`SubjectSelectionCards.astro`](file:///workspaces/asu_med_materials/src/components/materials/SubjectSelectionCards.astro)
+- **Location**: `src/components/materials/SubjectSelectionCards.astro`
+- **Purpose**: Single scrollable row of clean subject selection boxes on the module page for instant client-side subject filtration.
+- **Props**:
+  ```typescript
+  interface Props {
+    moduleId: string;
+    moduleTitle: string;
+    subjects: string[];
+    totalCount?: number;
+    materialCounts?: Record<string, number>;
+  }
+  ```
+
 #### [`YearSelector.astro`](file:///workspaces/asu_med_materials/src/components/materials/YearSelector.astro)
 - **Location**: `src/components/materials/YearSelector.astro`
 - **Purpose**: Fast switcher bar between Academic Years 1 to 5.
@@ -154,13 +178,14 @@ This document details all UI components, their props, intended reuse guidelines,
 
 #### [`SearchBar.astro`](file:///workspaces/asu_med_materials/src/components/search/SearchBar.astro)
 - **Location**: `src/components/search/SearchBar.astro`
-- **Purpose**: RTL search input with debounce and keyboard shortcut (`/` to focus).
+- **Purpose**: RTL search input with debounce, search submit button, and keyboard shortcut (`/` to focus).
 - **Props**:
   ```typescript
   interface Props {
     placeholder?: string;
     initialQuery?: string;
     autofocus?: boolean;
+    size?: 'default' | 'lg';
   }
   ```
 
@@ -180,7 +205,12 @@ This document details all UI components, their props, intended reuse guidelines,
 
 #### [`BookmarksDrawer.astro`](file:///workspaces/asu_med_materials/src/components/bookmarks/BookmarksDrawer.astro)
 - **Location**: `src/components/bookmarks/BookmarksDrawer.astro`
-- **Purpose**: RTL slide-over drawer showing the student's saved bookmarks stored in `localStorage`.
+- **Purpose**: RTL slide-over Smart Drawer displaying the student's saved bookmarks organized by automatic academic hierarchy (`Module > Subject > Materials`).
+- **Features**:
+  - **Automatic Smart Grouping**: Materials are grouped by Module, and subdivided into clean Subject groups without bloated count pills.
+  - **Quick Filters**: Instant toggle between `All` and `To Study` (unstudied only) to keep exam prep focused.
+  - **Inline Studied Checkbox**: Interactive `w-6 h-6` checkbox matching the website theme for toggling completion directly inside the drawer.
+  - **Home Page Shortcut**: Quick jump link to the student's Home Page Library.
 - **Props**: None.
 
 #### [`ThemeToggle.astro`](file:///workspaces/asu_med_materials/src/components/common/ThemeToggle.astro)
@@ -204,14 +234,6 @@ This document details all UI components, their props, intended reuse guidelines,
 ---
 
 ### Video Playlists & Embedded Player System
-
-#### [`/playlists`](file:///workspaces/asu_med_materials/src/pages/playlists.astro) (Catalog Page)
-- **Location**: `src/pages/playlists.astro`
-- **Purpose**: Central catalog for all structured video playlists and lecture series across disciplines.
-- **Features**:
-  - Filter pills by medical subject (`Anatomy`, `Physiology`, `Histology`, `Biochemistry`, `Pharmacology`, `Pathology`, `Parasitology`, `Microbiology`).
-  - Progress badge showing watched items count reading from `localStorage`.
-  - Quick action buttons to launch the embedded player.
 
 #### [`/playlist/[id]`](file:///workspaces/asu_med_materials/src/pages/playlist/[id].astro) (Dedicated Player Page)
 - **Location**: `src/pages/playlist/[id].astro`
@@ -281,4 +303,13 @@ Data lives in [`src/data/contributors.json`](file:///workspaces/asu_med_material
     rank: number;
   }
   ```
+
+---
+
+### Home Page Student Hub (`src/pages/index.astro`)
+The homepage reuses canonical shared components directly rather than bespoke card implementations:
+- **Welcome & Focus Banner**: Minimalist alert matching the original design displaying active year, direct link to year modules, and change year trigger.
+- **Personal Study Library**: Reuses [`ResourceCard.astro`](file:///workspaces/asu_med_materials/src/components/materials/ResourceCard.astro) inside responsive subject grids structured by automatic academic hierarchy (`Module > Subject > Materials`). Includes dynamic module filter chips and an unstudied-only toggle. Removes all manual folder dialogs, count boxes, and extraneous pills for a clean, unified presentation.
+
+
 

@@ -13,14 +13,8 @@ const { module } = Astro.props;
   href={`/module/${module.id}`}
   class="group block bg-white dark:bg-zinc-900 border border-zinc-200/80 dark:border-zinc-800 rounded-xl p-5 transition-all hover:border-emerald-500/70 shadow-2xs hover:shadow-sm dark:hover:shadow-emerald-950/20 active:scale-[0.99] text-start"
 >
-  <div class="flex items-center justify-between gap-2 mb-2">
-    <span class="text-xs font-bold px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 dark:bg-emerald-950/70 dark:text-emerald-300">
-      {module.code}
-    </span>
-  </div>
-
   <h3
-    class="text-sm font-bold text-zinc-900 dark:text-zinc-100 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 group-hover:underline group-active:underline group-focus-visible:underline underline-offset-4 decoration-emerald-500 dark:decoration-emerald-400 transition-colors mb-1"
+    class="text-sm font-bold text-zinc-900 dark:text-zinc-100 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 group-hover:underline group-active:underline group-focus-visible:underline underline-offset-4 decoration-emerald-500 dark:decoration-emerald-400 transition-colors mb-2"
     data-i18n-mod-title-en={module.title}
     data-i18n-mod-title-ar={module.titleAr || module.title}
   >

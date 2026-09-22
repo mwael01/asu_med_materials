@@ -14,12 +14,10 @@ export interface TranslationsSchema {
     savedResourcesTitle: string;
     toggleThemeTitle: string;
     toggleLangTitle: string;
+    menu: string;
+    academicYears: string;
   };
   home: {
-    welcomeTitle: string; // "Welcome! Your selected year:" / "مرحباً بك! سنتك الدراسية المختارة:"
-    welcomeDesc: string;
-    openYearModules: string;
-    change: string;
     heroTitle: string;
     heroSubtitle: string;
     searchPlaceholder: string;
@@ -27,6 +25,20 @@ export interface TranslationsSchema {
     comingSoon: string;
     recentMaterials: string;
     browseAll: string;
+    myModules: string;
+    myLibrary: string;
+    myLibrarySubtitle: string;
+    unstudiedOnly: string;
+    allModules: string;
+    completedCount: string;
+    allCompletedFilter: string;
+    newFolder: string;
+    createFolder: string;
+    folderNamePlaceholder: string;
+    allSaved: string;
+    deleteFolderConfirm: string;
+    manageFolders: string;
+    noModulesFound: string;
   };
   year: {
     breadcrumbHome: string;
@@ -44,6 +56,7 @@ export interface TranslationsSchema {
     allSubjects: string;
     subjectsTitle: string;
     browseModule: string;
+    activeSubject: string;
   };
   search: {
     title: string;
@@ -86,6 +99,9 @@ export interface TranslationsSchema {
     save: string;
     openResource: string;
     copiedToast: string;
+    markStudied: string;
+    studiedToast: string;
+    unstudiedToast: string;
   };
   bookmarks: {
     title: string;
@@ -95,16 +111,13 @@ export interface TranslationsSchema {
     closeLabel: string;
     openBtn: string;
     removeBtn: string;
+    filterAll: string;
+    filterUnstudied: string;
+    studiedProgress: string;
+    viewInHome: string;
   };
   selector: {
-    step1Of2: string;
-    step2Of2: string;
-    step1Title: string;
-    step1Desc: string;
-    step2Title: string;
-    step2Desc: string;
-    browseAllYear: string;
-    backBtn: string;
+    title: string;
     closeLabel: string;
   };
   contribute: {

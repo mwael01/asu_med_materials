@@ -51,7 +51,7 @@ asu_med_materials/
 │   ├── layouts/                 # Base page layouts
 │   │   └── Layout.astro         # Shell with RTL/LTR, SEO, PWA, i18n, and Theme setup
 │   ├── pages/                   # File-based routing
-│   │   ├── index.astro          # Landing dashboard & personalized year card
+│   │   ├── index.astro          # Personalized student dashboard: active modules & organized library folders
 │   │   ├── year/[year].astro    # Year-specific overview & grouped materials
 │   │   ├── module/[id].astro    # Dedicated module resources page
 │   │   ├── module/[id]/[subject].astro # Dedicated module subject page
@@ -71,7 +71,7 @@ asu_med_materials/
 │       ├── filter.ts            # Search and filter matching logic
 │       ├── i18n.ts              # Language manager, DOM translation binding & reactivity
 │       ├── slug.ts              # URL slugification for subjects and routes
-│       └── storage.ts           # Bookmarks & user year preferences in localStorage
+│       └── storage.ts           # Bookmarks, user folders, and academic preferences in localStorage
 ├── astro.config.mjs             # Astro build configuration
 ├── package.json
 ├── tsconfig.json
@@ -140,47 +140,53 @@ export interface MaterialItem {
 
 ## 4. Client-Side Features & State Management
 
-1. **Multistage Onboarding, Auto-Redirection & Year Preference**:
+1. **Student Personal Hub & Year Preferences**:
    - Stored in `localStorage` under `asumed_user_year` and `asumed_user_module`.
-   - **Auto-Redirection**: Returning students visiting `/` are automatically and immediately redirected to their chosen academic year (`/year/${savedYear}`).
-   - **Bypass Flag (`?redirect=false`)**: Users who wish to access the home page directly can pass `?redirect=false` (or `?noredirect=true`). Navbar and breadcrumbs "الرئيسية" links automatically include `/?redirect=false` to prevent redirect loops.
-   - On first visit to the homepage (when no year is set), [`MultistageSelector.astro`](file:///workspaces/asu_med_materials/src/components/selection/MultistageSelector.astro) prompts the student to select their Academic Year, followed by their current module or all modules.
-   - The user's selection immediately personalizes the homepage banner and navbar indicator, and can be changed anytime via the "تغيير السنة" button.
+   - The home page serves as the student's personal study space: presenting active modules for their year and an automatically organized **Personal Study Library** (`Module > Subject > Materials`).
+   - Students can change their active year anytime via the "تغيير السنة" multistage modal.
+   - Emits `user-preferences-updated` when modified, dynamically synchronizing modules grid and navbar indicators.
 
-2. **Default Light Theme & Tailwind v4 Custom Dark Variant**:
+2. **Personal Study Library & Smart Hierarchy**:
+   - Stored in `localStorage` under `asumed_bookmarks` alongside studied items in `asumed_studied_materials`.
+   - Materials are automatically structured by **Module > Subject > Materials** without tedious manual folder creation.
+   - Features real-time completion progress tracking (`X/Y studied`), dynamic module filter chips, and an "Unstudied Only" quick toggle to streamline exam prep.
+   - Dispatches `bookmarks-updated` and `studied-updated` custom events for instantaneous reactive rendering across the page and the Smart Drawer.
+
+3. **Default Light Theme & Tailwind v4 Custom Dark Variant**:
    - In Tailwind CSS v4, manual class-based dark mode requires `@custom-variant dark (&:where(.dark, .dark *));` in [`src/styles/global.css`](file:///workspaces/asu_med_materials/src/styles/global.css) to override the default system `@media (prefers-color-scheme: dark)`.
    - Zero flash of unstyled theme (FOUC) handled via an inline `<script>` in [`Layout.astro`](file:///workspaces/asu_med_materials/src/layouts/Layout.astro).
    - Defaults to white/light mode. Dark mode is only activated if `localStorage.getItem('theme') === 'dark'`.
 
-3. **Bookmarks System**:
+4. **Bookmarks System**:
    - Users can bookmark frequently accessed drives, channels, and playlists.
    - Saved in client `localStorage` under `asumed_bookmarks`.
    - Accessible from the top navbar drawer even when offline.
 
-4. **Instant Search & Filtering**:
+5. **Instant Search & Filtering**:
    - Client-side in-memory search using normalized text scoring over title, subject, tags, and author.
    - Live URL query parameters (`?q=...&type=...&year=...`) for shareable search states.
 
-5. **Direct GitHub Issues API Integration (Vercel Serverless Function)**:
+6. **Direct GitHub Issues API Integration (Vercel Serverless Function)**:
    - Implemented via [`api/submit-material.js`](file:///workspaces/asu_med_materials/api/submit-material.js) as a native Vercel Serverless Function at `POST /api/submit-material`.
    - In development, serviced via Vite connect middleware in [`astro.config.mjs`](file:///workspaces/asu_med_materials/astro.config.mjs).
    - In production on Vercel, executes securely using the `GITHUB_TOKEN` environment variable to create issues on `mwael01/asu_med_materials` directly via GitHub REST API.
    - The contribute page ([`src/pages/contribute.astro`](file:///workspaces/asu_med_materials/src/pages/contribute.astro)) provides a clean, single-purpose form without manual PR cards or external GitHub issues links, giving students instant on-page confirmation and status feedback.
 
-6. **Per-Subject Filtration & Dedicated Subject Pages**:
+7. **Per-Subject Filtration & Dedicated Subject Pages**:
    - Every module features a [`SubjectBar.astro`](file:///workspaces/asu_med_materials/src/components/materials/SubjectBar.astro) navigation bar showing all academic subjects for that module.
    - Each subject has a dedicated static URL route (`/module/[id]/[subject]`, e.g. `/module/year1-foundation/medical-biochemistry`) with dedicated title, SEO, custom breadcrumbs, and empty states.
    - Material cards link directly to their corresponding subject page via clickable subject badges.
 
-7. **Multi-Language Support (Client-Side In-Place Toggle)**:
+8. **Multi-Language Support (Client-Side In-Place Toggle)**:
    - **Language Toggle**: Topbar button with a globe icon and language indicator badge (`AR` / `EN`) switching instantly between English (default for new visitors) and Arabic (100% preserved verbatim without alteration).
    - **Zero URL Deviation**: Retains all static URLs identical across languages without redirects or duplicate route generation.
    - **Zero Flash of Unstyled Text / Direction**: Synchronous inline `<script is:inline>` in `<head>` sets `lang` and `dir="ltr"` / `dir="rtl"` immediately from `localStorage.getItem('asumed_lang')` before layout rendering.
-   - **Declarative HTML Binding**: Static markup uses `data-i18n="key"`, `data-i18n-attr="attr:key"`, `data-i18n-material-title`, and `data-i18n-material-desc` attributes. The helper `applyLanguage()` in [`src/utils/i18n.ts`](file:///workspaces/asu_med_materials/src/utils/i18n.ts) translates elements instantly in-place.
+   - **Declarative HTML Binding**: Static markup uses `data-i18n="key"`, `data-i18n-attr="attr:key"`, `data-i18n-mod-title-en`/`ar`, `data-i18n-subject-en`/`ar`, `data-i18n-material-title`, and `data-i18n-material-desc` attributes. The helper `applyLanguage()` in [`src/utils/i18n.ts`](file:///workspaces/asu_med_materials/src/utils/i18n.ts) translates elements instantly in-place.
    - **Material Titles & Descriptions**: Centralized translations dictionary in [`src/i18n/materialsTranslations.ts`](file:///workspaces/asu_med_materials/src/i18n/materialsTranslations.ts) maps central drives, question banks, day-by-day folders, and lecture series into natural English titles and descriptions, with pattern-matching fallbacks for batches and subjects.
    - **Bilingual Search Matching**: The client-side catalog search in [`src/pages/search.astro`](file:///workspaces/asu_med_materials/src/pages/search.astro) indexes both Arabic and English titles and descriptions simultaneously, matching queries seamlessly in either language.
    - **Full Core Component Coverage**: All forms (Detailed submit, Quick Dump bulk linker), toast notifications, contributor popup cards, and playlist video players dynamically respond to language switching while maintaining strict logical CSS (`rtl:`, `text-start`).
    - **Reactive Custom Event**: Dispatches `asumed-language-changed` on `window` whenever the language is switched, allowing client scripts (dynamic search counter, bookmarks drawer, multistage modal, video playlist stepper) to update text immediately.
+   - **Event Listener Lifecycle Safeguards**: All client scripts in persistent components and pages (`index.astro`, `BookmarksDrawer.astro`, `MultistageSelector.astro`, `MobileMenu.astro`) utilize global listener guards or `AbortController` cleanup to completely prevent listener duplication across ViewTransitions (`astro:after-swap`).
    - **Dictionary Architecture**: Centralized dictionary in [`src/i18n/translations.ts`](file:///workspaces/asu_med_materials/src/i18n/translations.ts) typed with [`src/types/i18n.ts`](file:///workspaces/asu_med_materials/src/types/i18n.ts), covering all site navigation, academic years, modules, subjects, categories, badges, toasts, forms, and controls.
 
 ---

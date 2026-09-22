@@ -76,7 +76,7 @@ const { modules } = Astro.props;
           >
             <option value="general" data-i18n="contribute.moduleGeneral">General / All Modules</option>
             {modules.map((m) => (
-              <option value={m.code} data-year={m.year}>{m.code} - {m.title}</option>
+              <option value={m.title} data-year={m.year}>{m.title}</option>
             ))}
           </select>
         </div>

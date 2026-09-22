@@ -1,6 +1,7 @@
 ---
 import ThemeToggle from '../common/ThemeToggle.astro';
 import LanguageToggle from '../common/LanguageToggle.astro';
+import MobileMenu from './MobileMenu.astro';
 
 const currentPath = Astro.url.pathname;
 const isYear = (y: number) => currentPath.startsWith(`/year/${y}`);
@@ -9,14 +10,14 @@ const isYear = (y: number) => currentPath.startsWith(`/year/${y}`);
 <header class="sticky top-0 z-30 w-full border-b border-zinc-200 dark:border-zinc-800 bg-white/95 dark:bg-zinc-950/90 backdrop-blur-md">
   <div class="max-w-6xl mx-auto px-4 sm:px-6 h-12 flex items-center justify-between gap-4">
     <!-- Brand Title -->
-    <a href="/?redirect=false" class="inline-flex items-center text-zinc-900 dark:text-zinc-100 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors shrink-0">
+    <a href="/" class="inline-flex items-center text-zinc-900 dark:text-zinc-100 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors shrink-0">
       <span class="font-bold text-xs sm:text-sm tracking-tight">ASU Med Materials</span>
     </a>
 
     <!-- Navigation Links (Desktop) -->
     <nav class="hidden md:flex items-center gap-0.5 text-xs font-medium">
       <a
-        href="/?redirect=false"
+        href="/"
         data-i18n="nav.home"
         class:list={[
           'px-2.5 py-1 rounded-md transition-colors',
@@ -39,26 +40,6 @@ const isYear = (y: number) => currentPath.startsWith(`/year/${y}`);
         </a>
       ))}
       <a
-        href="/search"
-        data-i18n="nav.search"
-        class:list={[
-          'px-2.5 py-1 rounded-md transition-colors',
-          currentPath === '/search' ? 'text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/50 font-bold' : 'text-zinc-600 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800'
-        ]}
-      >
-        Search
-      </a>
-      <a
-        href="/contribute"
-        data-i18n="nav.contribute"
-        class:list={[
-          'px-2.5 py-1 rounded-md transition-colors',
-          currentPath === '/contribute' ? 'text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/50 font-bold' : 'text-zinc-600 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800'
-        ]}
-      >
-        Contribute
-      </a>
-      <a
         href="/contributors"
         data-i18n="nav.contributors"
         class:list={[
@@ -67,6 +48,15 @@ const isYear = (y: number) => currentPath.startsWith(`/year/${y}`);
         ]}
       >
         Contributors
+      </a>
+      <a
+        href="/contribute"
+        class="inline-flex items-center gap-1.5 px-3 py-1 ml-1 rtl:ml-0 rtl:mr-1 rounded-lg text-xs font-semibold bg-emerald-600 hover:bg-emerald-700 active:scale-[0.98] text-white transition-all shadow-2xs"
+      >
+        <svg class="w-3.5 h-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+        </svg>
+        <span data-i18n="nav.contribute">Contribute</span>
       </a>
     </nav>
 
@@ -82,7 +72,7 @@ const isYear = (y: number) => currentPath.startsWith(`/year/${y}`);
         <svg class="w-3.5 h-3.5 text-zinc-400 dark:text-zinc-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
           <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" />
         </svg>
-        <span id="nav-user-year-badge" class="text-xs font-semibold">Change Year</span>
+        <span id="nav-user-year-badge" class="text-xs font-semibold hidden sm:inline">Change Year</span>
       </button>
 
       <!-- Search Link -->
@@ -116,8 +106,30 @@ const isYear = (y: number) => currentPath.startsWith(`/year/${y}`);
 
       <!-- Theme Switcher -->
       <ThemeToggle />
+
+      <!-- Mobile Burger Menu Trigger -->
+      <button
+        type="button"
+        id="mobile-menu-trigger"
+        class="md:hidden p-1.5 text-zinc-600 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-md transition-colors cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500"
+        data-i18n-attr="aria-label:nav.menu,title:nav.menu"
+        aria-label="Navigation Menu"
+        title="Navigation Menu"
+        aria-expanded="false"
+        aria-controls="mobile-nav-panel"
+      >
+        <svg id="burger-menu-icon" class="w-5 h-5 transition-transform duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+        </svg>
+        <svg id="burger-close-icon" class="w-5 h-5 hidden transition-transform duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
     </div>
   </div>
+
+  <!-- Mobile Navigation Dropdown Menu -->
+  <MobileMenu currentPath={currentPath} />
 </header>
 
 <script>

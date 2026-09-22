@@ -1,65 +1,101 @@
 ---
 import { materialsData } from '../../data/materials';
+import { modulesData } from '../../data/modules';
 ---
 
-<!-- Bookmarks Slide-over Drawer (RTL Friendly) -->
+<!-- Smart Bookmarks Slide-over Drawer (RTL Friendly) -->
 <aside
   id="bookmarks-drawer"
-  class="fixed inset-y-0 left-0 z-50 w-full sm:w-96 bg-white dark:bg-zinc-900 border-r border-zinc-200 dark:border-zinc-800 shadow-2xl transform -translate-x-full transition-transform duration-300 ease-in-out flex flex-col"
+  class="fixed inset-y-0 left-0 z-50 w-full sm:w-[420px] bg-white dark:bg-zinc-900 border-r border-zinc-200 dark:border-zinc-800 shadow-2xl transform -translate-x-full transition-transform duration-300 ease-in-out flex flex-col"
   aria-labelledby="bookmarks-drawer-title"
   role="dialog"
   aria-modal="true"
   aria-hidden="true"
 >
   <!-- Drawer Header -->
-  <div class="flex items-center justify-between p-4 border-b border-zinc-200 dark:border-zinc-800">
-    <div class="flex items-center gap-2">
-      <svg class="w-5 h-5 text-amber-500 fill-amber-500" viewBox="0 0 24 24">
-        <path d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
-      </svg>
-      <h2 id="bookmarks-drawer-title" data-i18n="bookmarks.title" class="font-bold text-zinc-900 dark:text-zinc-100 text-base">
-        Saved Resources
-      </h2>
-      <span id="bookmarks-count-badge" class="text-xs px-2 py-0.5 rounded-full bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 font-bold">
-        0
-      </span>
+  <div class="p-4 border-b border-zinc-200 dark:border-zinc-800 space-y-3">
+    <div class="flex items-center justify-between">
+      <div class="flex items-center gap-2">
+        <div class="w-8 h-8 rounded-lg bg-amber-50 dark:bg-amber-950/40 text-amber-500 flex items-center justify-center">
+          <svg class="w-4 h-4 fill-amber-500" viewBox="0 0 24 24">
+            <path d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
+          </svg>
+        </div>
+        <div>
+          <h2 id="bookmarks-drawer-title" data-i18n="bookmarks.title" class="font-bold text-zinc-900 dark:text-zinc-100 text-sm sm:text-base">
+            Saved Resources
+          </h2>
+        </div>
+      </div>
+
+      <button
+        type="button"
+        id="close-bookmarks-drawer"
+        class="p-1.5 text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors cursor-pointer"
+        data-i18n-attr="aria-label:bookmarks.closeLabel"
+        aria-label="Close bookmarks drawer"
+      >
+        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
     </div>
 
-    <button
-      type="button"
-      id="close-bookmarks-drawer"
-      class="p-1.5 text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
-      data-i18n-attr="aria-label:bookmarks.closeLabel"
-      aria-label="Close bookmarks drawer"
-    >
-      <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-      </svg>
-    </button>
+    <!-- Quick Filter Tabs (All vs Unstudied / To Study) -->
+    <div id="drawer-filters-row" class="flex items-center gap-1.5 overflow-x-auto py-0.5 no-scrollbar hidden">
+      <button
+        type="button"
+        id="drawer-filter-all"
+        class="drawer-filter-btn text-xs font-semibold px-3 py-1.5 rounded-lg border transition-all cursor-pointer bg-zinc-900 text-white border-zinc-900 dark:bg-zinc-100 dark:text-zinc-900 dark:border-zinc-100 shadow-2xs"
+      >
+        <span data-i18n="bookmarks.filterAll">All</span>
+      </button>
+      <button
+        type="button"
+        id="drawer-filter-unstudied"
+        class="drawer-filter-btn text-xs font-semibold px-3 py-1.5 rounded-lg border transition-all cursor-pointer bg-white dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400 border-zinc-200 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700"
+      >
+        <span data-i18n="bookmarks.filterUnstudied">To Study</span>
+      </button>
+    </div>
   </div>
 
-  <!-- Drawer Body: List of bookmarked cards -->
-  <div class="flex-1 overflow-y-auto p-4 space-y-3" id="bookmarks-list-container">
-    <div id="bookmarks-empty-state" class="py-12 text-center">
-      <svg class="w-10 h-10 mx-auto text-zinc-300 dark:text-zinc-700 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17.593 3.322c1.1.128 1.907 1.077 1.907 2.185V21L12 17.25 4.5 21V5.507c0-1.108.806-2.057 1.907-2.185a48.507 48.507 0 0111.186 0z" />
-      </svg>
-      <p class="text-sm font-bold text-zinc-700 dark:text-zinc-300" data-i18n="bookmarks.emptyTitle">No saved resources yet</p>
-      <p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 max-w-xs mx-auto" data-i18n="bookmarks.emptyDesc">
+  <!-- Drawer Body: Smart Hierarchical List (Module > Subject > Materials) -->
+  <div class="flex-1 overflow-y-auto p-4 space-y-4" id="bookmarks-list-container">
+    <!-- Empty State -->
+    <div id="bookmarks-empty-state" class="py-14 text-center">
+      <div class="w-12 h-12 mx-auto rounded-full bg-zinc-100 dark:bg-zinc-800 text-zinc-400 flex items-center justify-center mb-3">
+        <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M17.593 3.322c1.1.128 1.907 1.077 1.907 2.185V21L12 17.25 4.5 21V5.507c0-1.108.806-2.057 1.907-2.185a48.507 48.507 0 0111.186 0z" />
+        </svg>
+      </div>
+      <p class="text-sm font-bold text-zinc-700 dark:text-zinc-300" data-i18n="bookmarks.emptyTitle">
+        No saved resources yet
+      </p>
+      <p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1.5 max-w-xs mx-auto leading-relaxed" data-i18n="bookmarks.emptyDesc">
         Click the Bookmark icon on any card to save it here for fast offline access.
       </p>
     </div>
 
-    <div id="bookmarks-cards-container" class="space-y-2.5 hidden">
-      <!-- Injected dynamically via client script -->
+    <!-- Smart Hierarchical Container: Injected dynamically via client script -->
+    <div id="bookmarks-hierarchy-container" class="space-y-5 hidden">
+      <!-- Injected: Module blocks > Subject blocks > Material cards -->
     </div>
   </div>
 
   <!-- Drawer Footer -->
-  <div class="p-3 border-t border-zinc-200 dark:border-zinc-800 text-center">
+  <div class="p-3.5 border-t border-zinc-200 dark:border-zinc-800 text-center space-y-1 bg-zinc-50/50 dark:bg-zinc-900/50">
     <p class="text-[11px] text-zinc-400 dark:text-zinc-500" data-i18n="bookmarks.footerNote">
       Saved locally on your device • Available offline
     </p>
+    <a
+      href="/#home-library-section"
+      id="drawer-view-home-link"
+      class="inline-flex items-center gap-1 text-xs font-bold text-emerald-600 dark:text-emerald-400 hover:underline"
+    >
+      <span data-i18n="bookmarks.viewInHome">View in Home</span>
+      <span class="rtl:rotate-180">&rarr;</span>
+    </a>
   </div>
 </aside>
 
@@ -70,13 +106,19 @@ import { materialsData } from '../../data/materials';
   aria-hidden="true"
 ></div>
 
-<script define:vars={{ rawMaterials: materialsData }}>
+<script define:vars={{ rawMaterials: materialsData, rawModules: modulesData }}>
   window.__ALL_MATERIALS = rawMaterials;
+  window.__ALL_MODULES = rawModules;
 </script>
 
 <script>
   import { getMaterialEnglishTitle } from '../../i18n/materialsTranslations';
-  import { t } from '../../utils/i18n';
+  import { getStoredBookmarkIds, saveBookmarkIds, getStoredStudiedIds, toggleItemStudied } from '../../utils/storage';
+  import { updateStudiedCardUI } from '../../utils/studied';
+  import { getCurrentLanguage, t } from '../../utils/i18n';
+  import type { MaterialItem, ModuleInfo } from '../../types/materials';
+
+  let drawerGlobalListenersAttached = false;
 
   function initBookmarksDrawer(): void {
     const drawer = document.getElementById('bookmarks-drawer');
@@ -84,20 +126,127 @@ import { materialsData } from '../../data/materials';
     const closeBtn = document.getElementById('close-bookmarks-drawer');
     const openBtns = document.querySelectorAll('.open-bookmarks-trigger');
     const emptyState = document.getElementById('bookmarks-empty-state');
-    const cardsContainer = document.getElementById('bookmarks-cards-container');
-    const countBadge = document.getElementById('bookmarks-count-badge');
+    const hierarchyContainer = document.getElementById('bookmarks-hierarchy-container');
+    const filtersRow = document.getElementById('drawer-filters-row');
+    const filterAllBtn = document.getElementById('drawer-filter-all');
+    const filterUnstudiedBtn = document.getElementById('drawer-filter-unstudied');
+    const viewHomeLink = document.getElementById('drawer-view-home-link');
 
-    function getIds(): string[] {
-      try {
-        const raw = localStorage.getItem('asumed_bookmarks');
-        return raw ? JSON.parse(raw) : [];
-      } catch {
-        return [];
+    let activeFilterMode: 'all' | 'unstudied' = 'all';
+
+    function openDrawer(): void {
+      if (!drawer || !backdrop) return;
+      renderSmartBookmarks();
+      drawer.classList.remove('-translate-x-full');
+      backdrop.classList.remove('hidden');
+      document.body.style.overflow = 'hidden';
+      drawer.setAttribute('aria-hidden', 'false');
+    }
+
+    function closeDrawer(): void {
+      if (!drawer || !backdrop) return;
+      drawer.classList.add('-translate-x-full');
+      backdrop.classList.add('hidden');
+      document.body.style.overflow = '';
+      drawer.setAttribute('aria-hidden', 'true');
+    }
+
+    openBtns.forEach((btn) => btn.addEventListener('click', openDrawer));
+    closeBtn?.addEventListener('click', closeDrawer);
+    backdrop?.addEventListener('click', closeDrawer);
+
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && !drawer?.classList.contains('-translate-x-full')) {
+        closeDrawer();
+      }
+    });
+
+    viewHomeLink?.addEventListener('click', () => {
+      closeDrawer();
+    });
+
+    filterAllBtn?.addEventListener('click', () => {
+      activeFilterMode = 'all';
+      updateFilterButtonsUI();
+      renderSmartBookmarks();
+    });
+
+    filterUnstudiedBtn?.addEventListener('click', () => {
+      activeFilterMode = 'unstudied';
+      updateFilterButtonsUI();
+      renderSmartBookmarks();
+    });
+
+    function updateFilterButtonsUI(): void {
+      if (!filterAllBtn || !filterUnstudiedBtn) return;
+      if (activeFilterMode === 'all') {
+        filterAllBtn.className =
+          'drawer-filter-btn text-xs font-semibold px-2.5 py-1 rounded-lg border transition-all cursor-pointer bg-zinc-900 text-white border-zinc-900 dark:bg-zinc-100 dark:text-zinc-900 dark:border-zinc-100 shadow-2xs';
+        filterUnstudiedBtn.className =
+          'drawer-filter-btn text-xs font-semibold px-2.5 py-1 rounded-lg border transition-all cursor-pointer bg-white dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400 border-zinc-200 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700';
+      } else {
+        filterUnstudiedBtn.className =
+          'drawer-filter-btn text-xs font-semibold px-2.5 py-1 rounded-lg border transition-all cursor-pointer bg-zinc-900 text-white border-zinc-900 dark:bg-zinc-100 dark:text-zinc-900 dark:border-zinc-100 shadow-2xs';
+        filterAllBtn.className =
+          'drawer-filter-btn text-xs font-semibold px-2.5 py-1 rounded-lg border transition-all cursor-pointer bg-white dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400 border-zinc-200 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700';
       }
     }
 
+    if (!drawerGlobalListenersAttached) {
+      drawerGlobalListenersAttached = true;
+
+      // Capture-phase listener for card bookmark buttons
+      document.addEventListener(
+        'click',
+        (e) => {
+          const target = (e.target as HTMLElement)?.closest('.bookmark-btn') as HTMLElement | null;
+          if (!target) return;
+          e.preventDefault();
+          e.stopPropagation();
+          e.stopImmediatePropagation();
+
+          const matId = target.getAttribute('data-id');
+          if (!matId) return;
+
+          const current = getStoredBookmarkIds();
+          const index = current.indexOf(matId);
+          let updated: string[];
+          if (index >= 0) {
+            updated = current.filter((x) => x !== matId);
+          } else {
+            updated = [...current, matId];
+          }
+          saveBookmarkIds(updated);
+          renderSmartBookmarks();
+
+          const showFn = (window as any).showToast;
+          if (typeof showFn === 'function') {
+            const isAr = getCurrentLanguage() === 'ar';
+            showFn({
+              type: index >= 0 ? 'info' : 'success',
+              message: index >= 0
+                ? (isAr ? 'تمت إزالة المصدر من المحفوظات' : 'Removed from saved library')
+                : (isAr ? 'تم حفظ المصدر في مكتبتك' : 'Saved to your study library'),
+              duration: 2000
+            });
+          }
+        },
+        true
+      );
+
+      window.addEventListener('bookmarks-updated', () => {
+        renderSmartBookmarks();
+      });
+      window.addEventListener('studied-updated', () => {
+        renderSmartBookmarks();
+      });
+      window.addEventListener('asumed-language-changed', () => {
+        renderSmartBookmarks();
+      });
+    }
+
     function sortGridsByArchived(): void {
-      const ids = getIds();
+      const ids = getStoredBookmarkIds();
       const grids = document.querySelectorAll(
         '.materials-grid, #grouped-materials-container .grid, #search-results-grid .grid, #year-materials-container .grid, #module-materials-container .grid'
       );
@@ -132,165 +281,259 @@ import { materialsData } from '../../data/materials';
       });
     }
 
-    function renderBookmarks(): void {
-      const ids = getIds();
-      const allMaterials: any[] = (window as any).__ALL_MATERIALS || [];
+    function renderSmartBookmarks(): void {
+      const ids = getStoredBookmarkIds();
+      const studiedIds = getStoredStudiedIds();
+      const allMaterials: MaterialItem[] = (window as any).__ALL_MATERIALS || [];
+      const allModules: ModuleInfo[] = (window as any).__ALL_MODULES || [];
+      const isAr = getCurrentLanguage() === 'ar';
+
       const bookmarked = allMaterials.filter((m) => ids.includes(m.id));
+      const unstudiedBookmarked = bookmarked.filter((m) => !studiedIds.includes(m.id));
 
-      if (countBadge) countBadge.textContent = String(bookmarked.length);
-
-      // Update card bookmark buttons and archived badges
+      // Update card bookmark buttons in current document
       document.querySelectorAll('[data-material-id]').forEach((card) => {
         const matId = card.getAttribute('data-material-id');
         const isSaved = matId ? ids.includes(matId) : false;
         const btn = card.querySelector('.bookmark-btn');
         const emptyIcon = btn?.querySelector('.bookmark-icon-empty');
         const filledIcon = btn?.querySelector('.bookmark-icon-filled');
-        const badge = card.querySelector('.archived-badge');
 
         if (isSaved) {
           emptyIcon?.classList.add('hidden');
           filledIcon?.classList.remove('hidden');
-          badge?.classList.remove('hidden');
-          badge?.classList.add('inline-flex');
         } else {
           emptyIcon?.classList.remove('hidden');
           filledIcon?.classList.add('hidden');
-          badge?.classList.add('hidden');
-          badge?.classList.remove('inline-flex');
         }
       });
 
-      // Sort materials in every grid so student archived/saved items appear on top of their sort
+      // Sort materials in pages
       sortGridsByArchived();
 
-      if (!cardsContainer || !emptyState) return;
+      if (!hierarchyContainer || !emptyState) return;
 
       if (bookmarked.length === 0) {
         emptyState.classList.remove('hidden');
-        cardsContainer.classList.add('hidden');
-        cardsContainer.innerHTML = '';
+        hierarchyContainer.classList.add('hidden');
+        filtersRow?.classList.add('hidden');
+        hierarchyContainer.innerHTML = '';
         return;
       }
 
       emptyState.classList.add('hidden');
-      cardsContainer.classList.remove('hidden');
-      const isAr = document.documentElement.lang === 'ar';
-      cardsContainer.innerHTML = bookmarked
-        .map((item) => {
-          const typeLabel = t(`types.${item.type}`, isAr ? 'ar' : 'en');
-          const titleText = isAr ? item.title : (item.titleEn || getMaterialEnglishTitle(item.id, item.title));
-          return `
-        <div class="p-3 bg-zinc-50 dark:bg-zinc-800/60 border border-zinc-200 dark:border-zinc-700/60 rounded-xl flex items-center justify-between gap-3 text-start">
-          <div class="min-w-0 flex-1">
-            <span class="text-[10px] font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">
-              ${isAr ? `السنة ${item.year}` : `Year ${item.year}`} • ${typeLabel}
-            </span>
-            <a href="${item.url}" target="_blank" rel="noopener noreferrer" class="block text-xs font-bold text-zinc-900 dark:text-zinc-100 hover:text-emerald-600 truncate mt-0.5">
-              ${titleText}
-            </a>
-          </div>
-          <div class="flex items-center gap-1 shrink-0">
-            <a href="${item.url}" target="_blank" rel="noopener noreferrer" class="p-1.5 text-zinc-500 hover:text-emerald-600 rounded-md hover:bg-zinc-200 dark:hover:bg-zinc-700" title="${isAr ? 'فتح الرابط' : 'Open Resource'}">
-              <svg class="w-4 h-4 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
-              </svg>
-            </a>
-            <button type="button" class="remove-bookmark-btn p-1.5 text-zinc-400 hover:text-rose-500 rounded-md hover:bg-zinc-200 dark:hover:bg-zinc-700 cursor-pointer" data-id="${item.id}" title="${isAr ? 'حذف من المحفوظات' : 'Remove Bookmark'}">
-              <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
-          </div>
-        </div>
-      `;
-        })
-        .join('');
+      hierarchyContainer.classList.remove('hidden');
+      filtersRow?.classList.remove('hidden');
 
-      cardsContainer.querySelectorAll('.remove-bookmark-btn').forEach((btn) => {
+      // Filter based on activeFilterMode
+      const displayMaterials = activeFilterMode === 'unstudied' ? unstudiedBookmarked : bookmarked;
+
+      if (displayMaterials.length === 0 && activeFilterMode === 'unstudied') {
+        hierarchyContainer.innerHTML = `
+          <div class="py-10 text-center border border-dashed border-zinc-200 dark:border-zinc-800 rounded-xl p-5 bg-zinc-50/60 dark:bg-zinc-800/30">
+            <span class="text-2xl mb-1.5 block">🎉</span>
+            <p class="text-xs font-bold text-zinc-700 dark:text-zinc-300">
+              ${isAr ? 'أحسنت! كل المحفوظات تمت مذاكرتها' : 'All saved resources are studied!'}
+            </p>
+            <p class="text-[11px] text-zinc-400 mt-1">
+              ${isAr ? 'اضغط على "الكل" لعرض جميع مصادرك المحفوظة.' : 'Switch to "All" to view all your saved resources.'}
+            </p>
+          </div>
+        `;
+        return;
+      }
+
+      // Group display materials by Module -> Subject
+      const modulesMap = new Map<string, { moduleTitle: string; subjectsMap: Map<string, MaterialItem[]> }>();
+
+      displayMaterials.forEach((item) => {
+        const mod = item.moduleId ? allModules.find((m) => m.id === item.moduleId) : null;
+        const modKey = item.moduleId || 'general';
+        const modTitle = mod
+          ? (isAr ? mod.titleAr || mod.title : mod.title)
+          : (isAr ? 'مصادر عامة' : 'General Resources');
+
+        if (!modulesMap.has(modKey)) {
+          modulesMap.set(modKey, { moduleTitle: modTitle, subjectsMap: new Map() });
+        }
+
+        const subjectsMap = modulesMap.get(modKey)!.subjectsMap;
+        const subKey = item.category === 'central' || !item.subject
+          ? (isAr ? 'المصادر المركزية والمشتركة' : 'Central & Batch Resources')
+          : item.subject;
+
+        if (!subjectsMap.has(subKey)) {
+          subjectsMap.set(subKey, []);
+        }
+        subjectsMap.get(subKey)!.push(item);
+      });
+
+      let hierarchyHtml = '';
+
+      modulesMap.forEach(({ moduleTitle, subjectsMap }) => {
+        hierarchyHtml += `
+          <div class="space-y-3">
+            <!-- Module Title Banner -->
+            <div class="flex items-center gap-2 pb-1.5 border-b border-zinc-200 dark:border-zinc-800">
+              <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+              <h3 class="text-xs font-extrabold uppercase tracking-wide text-zinc-800 dark:text-zinc-200">
+                ${moduleTitle}
+              </h3>
+            </div>
+            
+            <div class="space-y-3">
+        `;
+
+        subjectsMap.forEach((items, subjectName) => {
+          hierarchyHtml += `
+            <div class="space-y-1.5">
+              <!-- Subject Header -->
+              <div class="text-[11px] px-1 font-bold text-zinc-700 dark:text-zinc-300">
+                ${subjectName}
+              </div>
+
+              <!-- Subject Items List -->
+              <div class="space-y-1.5">
+          `;
+
+          items.forEach((item) => {
+            const isStudied = studiedIds.includes(item.id);
+            const titleText = isAr ? item.title : (item.titleEn || getMaterialEnglishTitle(item.id, item.title));
+            const typeLabel = t(`types.${item.type}`, isAr ? 'ar' : 'en');
+            const targetUrl = item.type === 'playlist' || item.playlistId ? `/playlist/${item.id}` : item.url;
+            const targetAttr = item.type === 'playlist' || item.playlistId ? '_self' : '_blank';
+
+            hierarchyHtml += `
+              <div class="p-2.5 bg-zinc-50/80 dark:bg-zinc-800/50 hover:bg-zinc-100/90 dark:hover:bg-zinc-800 border border-zinc-200/80 dark:border-zinc-700/60 rounded-xl flex items-center justify-between gap-2.5 transition-all text-start group">
+                <!-- Checkbox Button for Done Status -->
+                <button
+                  type="button"
+                  class="drawer-studied-btn shrink-0 w-6 h-6 rounded-md border-2 flex items-center justify-center active:scale-90 transition-all cursor-pointer ${
+                    isStudied
+                      ? 'border-emerald-600 bg-emerald-600 dark:border-emerald-500 dark:bg-emerald-500 text-white shadow-2xs'
+                      : 'border-zinc-300 dark:border-zinc-600 bg-white dark:bg-zinc-800 hover:border-emerald-500'
+                  }"
+                  data-drawer-studied-id="${item.id}"
+                  title="${isStudied ? (isAr ? 'تمت المذاكرة' : 'Marked as studied') : (isAr ? 'تحديد كمذاكر' : 'Mark as studied')}"
+                  aria-label="Toggle studied status"
+                >
+                  <svg class="w-3.5 h-3.5 ${isStudied ? '' : 'hidden'}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="20 6 9 17 4 12"></polyline>
+                  </svg>
+                </button>
+
+                <!-- Resource Link and Meta -->
+                <div class="min-w-0 flex-1">
+                  <a
+                    href="${targetUrl}"
+                    target="${targetAttr}"
+                    rel="${targetAttr === '_blank' ? 'noopener noreferrer' : ''}"
+                    class="block text-xs font-bold text-zinc-900 dark:text-zinc-100 hover:text-emerald-600 dark:hover:text-emerald-400 truncate leading-snug"
+                    title="${titleText}"
+                  >
+                    ${titleText}
+                  </a>
+                  <div class="flex items-center gap-1.5 text-[10px] text-zinc-400 dark:text-zinc-500 mt-0.5">
+                    <span>${typeLabel}</span>
+                    <span>&bull;</span>
+                    <span>${isAr ? `السنة ${item.year}` : `Year ${item.year}`}</span>
+                  </div>
+                </div>
+
+                <!-- Right Actions: Open and Remove -->
+                <div class="flex items-center gap-1 shrink-0">
+                  <a
+                    href="${targetUrl}"
+                    target="${targetAttr}"
+                    rel="${targetAttr === '_blank' ? 'noopener noreferrer' : ''}"
+                    class="p-1.5 text-zinc-400 hover:text-emerald-600 dark:hover:text-emerald-400 rounded-lg hover:bg-zinc-200/80 dark:hover:bg-zinc-700 transition-colors"
+                    title="${isAr ? 'فتح الرابط' : 'Open resource'}"
+                  >
+                    <svg class="w-3.5 h-3.5 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
+                    </svg>
+                  </a>
+                  <button
+                    type="button"
+                    class="drawer-remove-btn p-1.5 text-zinc-400 hover:text-rose-500 rounded-lg hover:bg-zinc-200/80 dark:hover:bg-zinc-700 transition-colors cursor-pointer"
+                    data-drawer-remove-id="${item.id}"
+                    title="${isAr ? 'حذف من المحفوظات' : 'Remove from saved'}"
+                  >
+                    <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                </div>
+              </div>
+            `;
+          });
+
+          hierarchyHtml += `
+              </div>
+            </div>
+          `;
+        });
+
+        hierarchyHtml += `
+            </div>
+          </div>
+        `;
+      });
+
+      hierarchyContainer.innerHTML = hierarchyHtml;
+
+      // Attach listener for Done / Studied toggle buttons inside drawer
+      hierarchyContainer.querySelectorAll<HTMLButtonElement>('[data-drawer-studied-id]').forEach((btn) => {
         btn.addEventListener('click', (e) => {
-          const id = (e.currentTarget as HTMLElement).getAttribute('data-id');
-          if (id) {
-            const current = getIds().filter((x) => x !== id);
-            localStorage.setItem('asumed_bookmarks', JSON.stringify(current));
-            window.dispatchEvent(new CustomEvent('bookmarks-updated'));
-            renderBookmarks();
+          e.preventDefault();
+          e.stopPropagation();
+          e.stopImmediatePropagation();
+          const matId = btn.getAttribute('data-drawer-studied-id');
+          if (!matId) return;
+
+          const isNowStudied = toggleItemStudied(matId);
+          updateStudiedCardUI(matId);
+          renderSmartBookmarks();
+
+          const showFn = (window as any).showToast;
+          if (typeof showFn === 'function') {
+            showFn({
+              type: isNowStudied ? 'success' : 'info',
+              message: isNowStudied
+                ? (isAr ? 'تم التحديد كمذاكر ✓' : 'Marked as studied ✓')
+                : (isAr ? 'تم إلغاء التحديد' : 'Unmarked as studied'),
+              duration: 2000
+            });
+          }
+        });
+      });
+
+      // Attach listener for Remove Bookmark buttons inside drawer
+      hierarchyContainer.querySelectorAll<HTMLButtonElement>('[data-drawer-remove-id]').forEach((btn) => {
+        btn.addEventListener('click', (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          e.stopImmediatePropagation();
+          const matId = btn.getAttribute('data-drawer-remove-id');
+          if (!matId) return;
+
+          const current = getStoredBookmarkIds().filter((id) => id !== matId);
+          saveBookmarkIds(current);
+          renderSmartBookmarks();
+
+          const showFn = (window as any).showToast;
+          if (typeof showFn === 'function') {
+            showFn({
+              type: 'info',
+              message: isAr ? 'تمت إزالة المصدر من المحفوظات' : 'Removed from saved library',
+              duration: 2000
+            });
           }
         });
       });
     }
 
-    window.addEventListener('asumed-language-changed', renderBookmarks);
-
-    function openDrawer(): void {
-      renderBookmarks();
-      drawer?.classList.remove('-translate-x-full');
-      backdrop?.classList.remove('hidden');
-      drawer?.setAttribute('aria-hidden', 'false');
-      document.body.style.overflow = 'hidden';
-    }
-
-    function closeDrawer(): void {
-      drawer?.classList.add('-translate-x-full');
-      backdrop?.classList.add('hidden');
-      drawer?.setAttribute('aria-hidden', 'true');
-      document.body.style.overflow = '';
-    }
-
-    openBtns.forEach((btn) => btn.addEventListener('click', openDrawer));
-    closeBtn?.addEventListener('click', closeDrawer);
-    backdrop?.addEventListener('click', closeDrawer);
-
-    window.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape' && !drawer?.classList.contains('-translate-x-full')) {
-        closeDrawer();
-      }
-    });
-
-    // Delegated click listener for card bookmark buttons
-    document.addEventListener('click', (e) => {
-      const target = (e.target as HTMLElement)?.closest('.bookmark-btn') as HTMLElement | null;
-      if (!target) return;
-      e.preventDefault();
-      e.stopPropagation();
-
-      const matId = target.getAttribute('data-id');
-      if (!matId) return;
-
-      const current = getIds();
-      const index = current.indexOf(matId);
-      let updated: string[];
-      if (index >= 0) {
-        updated = current.filter((x) => x !== matId);
-      } else {
-        updated = [...current, matId];
-      }
-      localStorage.setItem('asumed_bookmarks', JSON.stringify(updated));
-      window.dispatchEvent(new CustomEvent('bookmarks-updated'));
-      renderBookmarks();
-
-      const showFn = (window as any).showToast;
-      if (typeof showFn === 'function') {
-        const isAr = document.documentElement.lang === 'ar';
-        if (index >= 0) {
-          showFn({
-            type: 'info',
-            message: isAr ? 'تمت إزالة المصدر من المفضلة' : 'Removed from bookmarks',
-            duration: 2200
-          });
-        } else {
-          showFn({
-            type: 'success',
-            message: isAr ? 'تمت إضافة المصدر إلى المفضلة' : 'Added to bookmarks',
-            duration: 2200
-          });
-        }
-      }
-    });
-
-    window.addEventListener('bookmarks-updated', renderBookmarks);
-
-    renderBookmarks();
+    renderSmartBookmarks();
   }
 
   initBookmarksDrawer();

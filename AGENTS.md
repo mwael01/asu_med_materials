@@ -21,3 +21,5 @@ this is the asumedmaterials website, the all in one place for medicine students 
 - dont use icons in place of bigger images, you can use icons from the icon library for small buttons
 - keep the ui unified and make sure it is responsive on any screen size
 - you may create helper scripts (in `scripts/`) to automate tasks like fetching playlist details and data processing; document their usage and keep them reusable for future AI agent runs
+- never add unnecesesary icons, countboxes, ui pills, or other unuseful text that only bloats the ui
+- 

@@ -16,8 +16,6 @@ const {
   title = 'ASU Med Materials - All-in-one Medical Study Hub',
   description = 'Batch drives, Telegram channels, YouTube lectures, and study notes for Ain Shams University Faculty of Medicine.'
 } = Astro.props;
-
-const isHomePage = Astro.url.pathname === '/' || Astro.url.pathname === '';
 ---
 
 <!doctype html>
@@ -43,26 +41,6 @@ const isHomePage = Astro.url.pathname === '/' || Astro.url.pathname === '';
       })();
     </script>
 
-    <!-- Auto-redirect students to their chosen year if visiting the homepage directly -->
-    {isHomePage && (
-      <script is:inline>
-        (function () {
-          try {
-            var params = new URLSearchParams(window.location.search);
-            var redirectFlag = params.get('redirect');
-            var noRedirectFlag = params.get('noredirect');
-            // If user explicitly asks to view homepage via ?redirect=false or ?noredirect=true
-            if (redirectFlag === 'false' || redirectFlag === '0' || noRedirectFlag === 'true' || noRedirectFlag === '1') {
-              return;
-            }
-            var savedYear = localStorage.getItem('asumed_user_year');
-            if (savedYear && ['1', '2', '3', '4', '5'].indexOf(savedYear) !== -1) {
-              window.location.replace('/year/' + savedYear);
-            }
-          } catch (e) {}
-        })();
-      </script>
-    )}
 
     <!-- Default to White/Light Theme (Only activate dark if explicitly set to 'dark') -->
     <script is:inline>
@@ -94,14 +72,19 @@ const isHomePage = Astro.url.pathname === '/' || Astro.url.pathname === '';
     <PwaInstallToast />
     <Footer />
 
-    <!-- Service Worker registration & i18n client synchronization -->
+    <!-- Service Worker registration, studied materials, & i18n client synchronization -->
     <script>
       import { registerServiceWorker } from '../utils/pwa';
       import { initLanguageClient } from '../utils/i18n';
+      import { initStudiedMaterials } from '../utils/studied';
 
       initLanguageClient();
+      initStudiedMaterials();
       registerServiceWorker();
-      document.addEventListener('astro:after-swap', initLanguageClient);
+      document.addEventListener('astro:after-swap', () => {
+        initLanguageClient();
+        initStudiedMaterials();
+      });
     </script>
   </body>
 </html>
