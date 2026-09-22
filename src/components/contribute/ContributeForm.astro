@@ -1,0 +1,315 @@
+---
+import type { ModuleInfo } from '../../types/materials';
+
+interface Props {
+  modules: ModuleInfo[];
+}
+
+const { modules } = Astro.props;
+---
+
+<div class="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl p-5 sm:p-6 shadow-xs text-start">
+  <!-- Form Container -->
+  <div id="contrib-form-container">
+    <form id="unified-contribute-form" class="space-y-4">
+      <!-- 1. Links / Messages Input -->
+      <div>
+        <div class="flex items-center justify-between mb-1">
+          <label for="contrib-content" class="text-xs font-bold text-zinc-700 dark:text-zinc-300">
+            <span data-i18n="contribute.contentLabel">Resource Links or Content</span> <span class="text-emerald-600">*</span>
+          </label>
+          <span
+            id="contrib-link-count"
+            class="hidden text-[11px] font-semibold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/60 px-2 py-0.5 rounded-md border border-emerald-200 dark:border-emerald-800/40"
+          ></span>
+        </div>
+        <textarea
+          id="contrib-content"
+          rows="4"
+          required
+          placeholder="Paste links (Google Drive, Telegram, YouTube) or paste full WhatsApp messages..."
+          data-i18n-attr="placeholder:contribute.contentPlaceholder"
+          class="w-full px-3.5 py-2.5 text-xs bg-zinc-50 dark:bg-zinc-800/60 border border-zinc-200 dark:border-zinc-700 rounded-xl text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent font-sans leading-relaxed transition-all resize-y"
+        ></textarea>
+      </div>
+
+      <!-- 2. Title or Notes (Optional) -->
+      <div>
+        <label for="contrib-title" class="block text-xs font-bold text-zinc-700 dark:text-zinc-300 mb-1">
+          <span data-i18n="contribute.titleLabel">Title or Notes</span> <span class="text-[10px] text-zinc-400 font-normal" data-i18n="contribute.optional">(Optional)</span>
+        </label>
+        <input
+          type="text"
+          id="contrib-title"
+          placeholder="e.g. Dr. Shireen notes, Batch Drive, Question Bank..."
+          data-i18n-attr="placeholder:contribute.titlePlaceholder"
+          class="w-full px-3.5 py-2 text-xs bg-zinc-50 dark:bg-zinc-800/60 border border-zinc-200 dark:border-zinc-700 rounded-xl text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all"
+        />
+      </div>
+
+      <!-- 3. Classification Row: Year & Module -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div>
+          <label for="contrib-year" class="block text-xs font-bold text-zinc-700 dark:text-zinc-300 mb-1" data-i18n="contribute.yearLabel">
+            Academic Year
+          </label>
+          <select
+            id="contrib-year"
+            class="w-full px-3 py-2 text-xs bg-zinc-50 dark:bg-zinc-800/60 border border-zinc-200 dark:border-zinc-700 rounded-xl text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-emerald-500 cursor-pointer"
+          >
+            <option value="general" data-i18n="contribute.yearGeneral">General / Unspecified</option>
+            <option value="1" data-i18n="nav.year" data-i18n-params={JSON.stringify({ y: 1 })}>Year 1</option>
+            <option value="2" data-i18n="nav.year" data-i18n-params={JSON.stringify({ y: 2 })}>Year 2</option>
+            <option value="3" data-i18n="nav.year" data-i18n-params={JSON.stringify({ y: 3 })}>Year 3</option>
+            <option value="4" data-i18n="nav.year" data-i18n-params={JSON.stringify({ y: 4 })}>Year 4</option>
+            <option value="5" data-i18n="nav.year" data-i18n-params={JSON.stringify({ y: 5 })}>Year 5</option>
+          </select>
+        </div>
+
+        <div>
+          <label for="contrib-module" class="block text-xs font-bold text-zinc-700 dark:text-zinc-300 mb-1" data-i18n="contribute.moduleLabel">
+            Module
+          </label>
+          <select
+            id="contrib-module"
+            class="w-full px-3 py-2 text-xs bg-zinc-50 dark:bg-zinc-800/60 border border-zinc-200 dark:border-zinc-700 rounded-xl text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-emerald-500 cursor-pointer"
+          >
+            <option value="general" data-i18n="contribute.moduleGeneral">General / All Modules</option>
+            {modules.map((m) => (
+              <option value={m.code} data-year={m.year}>{m.code} - {m.title}</option>
+            ))}
+          </select>
+        </div>
+      </div>
+
+      <!-- 4. Contributor Attribution (Optional) -->
+      <div>
+        <label for="contrib-author" class="block text-xs font-bold text-zinc-700 dark:text-zinc-300 mb-1">
+          <span data-i18n="contribute.contributorLabel">Contributor Name</span> <span class="text-[10px] text-zinc-400 font-normal" data-i18n="contribute.optional">(Optional)</span>
+        </label>
+        <input
+          type="text"
+          id="contrib-author"
+          placeholder="Your name for attribution (or leave blank)"
+          data-i18n-attr="placeholder:contribute.contributorPlaceholder"
+          class="w-full px-3.5 py-2 text-xs bg-zinc-50 dark:bg-zinc-800/60 border border-zinc-200 dark:border-zinc-700 rounded-xl text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all"
+        />
+      </div>
+
+      <!-- Error Box -->
+      <div id="contrib-error-box" class="hidden p-3 rounded-xl text-xs bg-rose-50 dark:bg-rose-950/50 text-rose-800 dark:text-rose-300 border border-rose-200 dark:border-rose-800/40"></div>
+
+      <!-- Submit Action -->
+      <div class="pt-1">
+        <button
+          type="submit"
+          id="contrib-submit-btn"
+          class="w-full py-2.5 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 active:scale-[0.99] text-white text-xs font-bold transition-all shadow-xs flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          <svg class="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5" />
+          </svg>
+          <span id="contrib-btn-text" data-i18n="contribute.submitBtn">Submit Materials</span>
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Dedicated Success Card (Replaces form upon completion) -->
+  <div id="contrib-success-card" class="hidden text-center py-6 px-4 space-y-3">
+    <div class="w-12 h-12 rounded-full bg-emerald-100 dark:bg-emerald-950/80 text-emerald-600 dark:text-emerald-400 mx-auto flex items-center justify-center">
+      <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+      </svg>
+    </div>
+    <h3 class="text-sm font-extrabold text-zinc-900 dark:text-zinc-100" data-i18n="contribute.successTitle">
+      Materials Submitted Successfully!
+    </h3>
+    <p class="text-xs text-zinc-500 dark:text-zinc-400 max-w-sm mx-auto leading-relaxed" data-i18n="contribute.successDesc">
+      Thank you for contributing! Your submission will be reviewed and cataloged shortly.
+    </p>
+    <div id="contrib-success-issue-link" class="pt-1"></div>
+    <div class="pt-2">
+      <button
+        type="button"
+        id="contrib-reset-btn"
+        class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-zinc-800 dark:text-zinc-200 text-xs font-bold transition-all cursor-pointer"
+      >
+        <span data-i18n="contribute.submitAnother">Submit More Materials</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+  import { extractUrls, submitMaterial } from '../../utils/submission';
+  import { t, getCurrentLanguage } from '../../utils/i18n';
+  import type { MaterialSubmission } from '../../types/submission';
+
+  function initContributeForm(): void {
+    const form = document.getElementById('unified-contribute-form') as HTMLFormElement | null;
+    const formContainer = document.getElementById('contrib-form-container');
+    const successCard = document.getElementById('contrib-success-card');
+    const contentEl = document.getElementById('contrib-content') as HTMLTextAreaElement | null;
+    const titleEl = document.getElementById('contrib-title') as HTMLInputElement | null;
+    const yearEl = document.getElementById('contrib-year') as HTMLSelectElement | null;
+    const moduleEl = document.getElementById('contrib-module') as HTMLSelectElement | null;
+    const authorEl = document.getElementById('contrib-author') as HTMLInputElement | null;
+    const linkCountBadge = document.getElementById('contrib-link-count');
+    const submitBtn = document.getElementById('contrib-submit-btn') as HTMLButtonElement | null;
+    const btnText = document.getElementById('contrib-btn-text');
+    const errorBox = document.getElementById('contrib-error-box');
+    const resetBtn = document.getElementById('contrib-reset-btn');
+    const successLinkEl = document.getElementById('contrib-success-issue-link');
+
+    if (!form || !contentEl) return;
+
+    // Filter module dropdown options based on chosen year
+    function filterModules(): void {
+      if (!yearEl || !moduleEl) return;
+      const selectedYear = yearEl.value;
+      const options = moduleEl.querySelectorAll<HTMLOptionElement>('option');
+      let firstValid: HTMLOptionElement | null = null;
+
+      options.forEach((opt) => {
+        if (opt.value === 'general') {
+          opt.hidden = false;
+          return;
+        }
+        const optYear = opt.getAttribute('data-year');
+        if (selectedYear === 'general' || optYear === selectedYear) {
+          opt.hidden = false;
+          if (!firstValid) firstValid = opt;
+        } else {
+          opt.hidden = true;
+          if (moduleEl.value === opt.value) {
+            moduleEl.value = 'general';
+          }
+        }
+      });
+    }
+
+    yearEl?.addEventListener('change', filterModules);
+
+    // Realtime URL detection counter
+    function updateLinkCount(): void {
+      if (!contentEl || !linkCountBadge) return;
+      const urls = extractUrls(contentEl.value);
+      if (urls.length > 0) {
+        const lang = getCurrentLanguage();
+        linkCountBadge.textContent = t('contribute.detectedLinks', lang, { n: urls.length });
+        linkCountBadge.classList.remove('hidden');
+      } else {
+        linkCountBadge.classList.add('hidden');
+      }
+    }
+
+    contentEl.addEventListener('input', updateLinkCount);
+    window.addEventListener('asumed-language-changed', updateLinkCount);
+
+    // Form submission
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      if (!contentEl) return;
+
+      const content = contentEl.value.trim();
+      const lang = getCurrentLanguage();
+
+      if (!content) {
+        if (errorBox) {
+          errorBox.textContent = t('contribute.emptyError', lang);
+          errorBox.classList.remove('hidden');
+        }
+        contentEl.focus();
+        return;
+      }
+
+      if (errorBox) errorBox.classList.add('hidden');
+      if (submitBtn) submitBtn.disabled = true;
+      if (btnText) btnText.textContent = t('contribute.sendingBtn', lang);
+
+      const urls = extractUrls(content);
+      const title = titleEl?.value.trim() || '';
+      const year = yearEl?.value || 'general';
+      const moduleId = moduleEl?.value || 'general';
+      const contributor = authorEl?.value.trim() || '';
+
+      let payload: MaterialSubmission;
+
+      if (urls.length === 1 && content === urls[0]) {
+        // Direct single link submission
+        payload = {
+          mode: 'single',
+          url: urls[0],
+          title: title || undefined,
+          year: year !== 'general' ? (Number(year) as any) : 'general',
+          moduleId: moduleId !== 'general' ? moduleId : undefined,
+          addedBy: contributor || undefined
+        };
+      } else {
+        // Multi-link / WhatsApp text dump
+        payload = {
+          mode: 'dump',
+          content,
+          contributor: contributor || undefined,
+          year: year !== 'general' ? (Number(year) as any) : 'general',
+          moduleId: moduleId !== 'general' ? moduleId : undefined,
+          notes: title || undefined
+        };
+      }
+
+      try {
+        const result = await submitMaterial(payload);
+
+        if (result.success) {
+          formContainer?.classList.add('hidden');
+          successCard?.classList.remove('hidden');
+
+          if (successLinkEl) {
+            if (result.issueUrl) {
+              const isEn = getCurrentLanguage() === 'en';
+              const label = isEn
+                ? `Preview submission on GitHub #${result.issueNumber} &rarr;`
+                : `معاينة التذكرة على GitHub #${result.issueNumber} &larr;`;
+              successLinkEl.innerHTML = `<a href="${result.issueUrl}" target="_blank" rel="noopener noreferrer" class="text-xs font-bold text-emerald-600 dark:text-emerald-400 hover:underline inline-flex items-center gap-1">${label}</a>`;
+            } else {
+              successLinkEl.innerHTML = '';
+            }
+          }
+        } else {
+          if (errorBox) {
+            const isEn = getCurrentLanguage() === 'en';
+            const serverMsg = isEn ? 'Unable to submit to server.' : 'تعذر الاتصال بالخادم.';
+            const fallbackLink = result.fallbackUrl
+              ? `<a href="${result.fallbackUrl}" target="_blank" rel="noopener noreferrer" class="block font-bold underline mt-1.5 text-emerald-700 dark:text-emerald-300">${isEn ? 'Open ticket on GitHub directly &rarr;' : 'فتح التذكرة على GitHub مباشرة لحفظ بياناتك &larr;'}</a>`
+              : '';
+            errorBox.innerHTML = `<span>${result.error || serverMsg}</span>${fallbackLink}`;
+            errorBox.classList.remove('hidden');
+          }
+        }
+      } catch {
+        if (errorBox) {
+          const isEn = getCurrentLanguage() === 'en';
+          errorBox.textContent = isEn ? 'An unexpected error occurred. Please try again.' : 'حدث خطأ غير متوقع. يرجى المحاولة مرة أخرى.';
+          errorBox.classList.remove('hidden');
+        }
+      } finally {
+        if (submitBtn) submitBtn.disabled = false;
+        if (btnText) btnText.textContent = t('contribute.submitBtn', getCurrentLanguage());
+      }
+    });
+
+    // Reset to submit another
+    resetBtn?.addEventListener('click', () => {
+      form.reset();
+      if (linkCountBadge) linkCountBadge.classList.add('hidden');
+      if (errorBox) errorBox.classList.add('hidden');
+      successCard?.classList.add('hidden');
+      formContainer?.classList.remove('hidden');
+      contentEl.focus();
+    });
+  }
+
+  initContributeForm();
+  document.addEventListener('astro:after-swap', initContributeForm);
+</script>

@@ -226,30 +226,17 @@ This document details all UI components, their props, intended reuse guidelines,
 
 ### Contribution & Materials Sharing
 
-#### [`QuickDumpForm.astro`](file:///workspaces/asu_med_materials/src/components/contribute/QuickDumpForm.astro)
-- **Location**: `src/components/contribute/QuickDumpForm.astro`
-- **Purpose**: Permissive, zero-friction material sharing component enabling students to dump forwarded WhatsApp messages, multiple URLs, notes, and text blocks directly.
+#### [`ContributeForm.astro`](file:///workspaces/asu_med_materials/src/components/contribute/ContributeForm.astro)
+- **Location**: `src/components/contribute/ContributeForm.astro`
+- **Purpose**: Unified, zero-friction material sharing component supporting both single resource links and bulk/WhatsApp dumps in a single streamlined interface.
 - **Features**:
-  - Live client-side URL detection badge (`🔗 تم رصد X رابط`).
-  - Interactive "تجربة بنموذج رسالة" button to pre-fill a realistic batch message.
-  - Non-mandatory contributor attribution field (supports anonymous contributions).
-  - Optional academic year and module selectors.
+  - Live client-side URL detection badge showing count of recognized links in real time.
+  - Multi-line smart input accepting single URLs, multiple links, or complete WhatsApp messages.
+  - Optional title/notes and contributor attribution inputs.
+  - Dynamic module dropdown filtering based on selected academic year.
+  - Automatic submission mode selection (`single` for individual link submissions, `dump` for bulk text/multiple links).
   - Submits payload to `/api/submit-material` with fallback to direct GitHub issue creation if serverless tokens are unconfigured.
-- **Props**:
-  ```typescript
-  interface Props {
-    modules: ModuleInfo[];
-  }
-  ```
-
-#### [`DetailedSubmitForm.astro`](file:///workspaces/asu_med_materials/src/components/contribute/DetailedSubmitForm.astro)
-- **Location**: `src/components/contribute/DetailedSubmitForm.astro`
-- **Purpose**: Permissive individual source submission form for users who wish to specify metadata for a single resource.
-- **Features**:
-  - URL input with automatic protocol prefixing (`https://`).
-  - Optional title, description, and author attribution fields.
-  - Academic year, module, and resource type selectors.
-  - Direct feedback box with issue URL and fallback links.
+  - Interactive success card replacing the form upon completion with issue link preview.
 - **Props**:
   ```typescript
   interface Props {

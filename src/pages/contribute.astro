@@ -1,122 +1,30 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import { modulesData } from '../data/modules';
-import QuickDumpForm from '../components/contribute/QuickDumpForm.astro';
-import DetailedSubmitForm from '../components/contribute/DetailedSubmitForm.astro';
+import ContributeForm from '../components/contribute/ContributeForm.astro';
 ---
 
 <Layout
-  title="Share Your Resources & Notes - ASU Med Materials"
+  title="Share Study Materials - ASU Med Materials"
   description="Share batch drives, lecture notes, and study collections to support your colleagues at Ain Shams University Faculty of Medicine."
 >
-  <div class="max-w-xl mx-auto py-3 text-start">
+  <div class="max-w-xl mx-auto py-4 text-start">
     <!-- Breadcrumb & Header -->
     <div class="mb-5">
       <div class="flex items-center gap-1.5 text-xs text-zinc-500 dark:text-zinc-400 mb-2">
         <a href="/?redirect=false" data-i18n="nav.home" class="hover:text-emerald-600 dark:hover:text-emerald-400">Home</a>
         <span>/</span>
-        <span class="text-zinc-900 dark:text-zinc-100 font-bold" data-i18n="contribute.breadcrumbContribute">Contribute Material</span>
+        <span class="text-zinc-900 dark:text-zinc-100 font-bold" data-i18n="contribute.breadcrumbContribute">Contribute</span>
       </div>
       <h1 class="text-xl sm:text-2xl font-extrabold text-zinc-900 dark:text-zinc-100 mb-1" data-i18n="contribute.title">
-        Share Your Resources & Notes
+        Share Study Materials
       </h1>
       <p class="text-xs text-zinc-500 dark:text-zinc-400 leading-relaxed" data-i18n="contribute.subtitle">
-        Share batch drives, lecture notes, or paste WhatsApp collections directly and we will organize them.
+        Share drives, lecture playlists, or study notes to support fellow medical students.
       </p>
     </div>
 
-    <!-- Recognition & Credit Note -->
-    <div class="mb-5 p-3 rounded-xl bg-emerald-50/80 dark:bg-emerald-950/40 border border-emerald-200/80 dark:border-emerald-800/60 flex items-center gap-2.5 text-xs">
-      <span class="text-emerald-600 dark:text-emerald-400 text-sm">🌟</span>
-      <p class="text-zinc-700 dark:text-zinc-300 leading-normal">
-        <strong data-i18n="contribute.creditStrong">Author Attribution:</strong>{' '}
-        <span data-i18n="contribute.creditDesc">Any resource or collection you share will cite your name for preparation and contribution in appreciation of your efforts.</span>
-      </p>
-    </div>
-
-    <!-- Mode Switcher Tabs -->
-    <div class="mb-4 flex p-1 bg-zinc-100 dark:bg-zinc-800/80 rounded-xl border border-zinc-200 dark:border-zinc-700/60">
-      <button
-        type="button"
-        id="tab-btn-dump"
-        class="flex-1 py-1.5 px-3 text-xs font-bold rounded-lg transition-all flex items-center justify-center gap-1 cursor-pointer bg-white dark:bg-zinc-900 text-emerald-700 dark:text-emerald-400 shadow-xs"
-        aria-selected="true"
-      >
-        <span data-i18n="contribute.tabDump">⚡ Quick Dump (WhatsApp)</span>
-      </button>
-      <button
-        type="button"
-        id="tab-btn-detailed"
-        class="flex-1 py-1.5 px-3 text-xs font-medium rounded-lg transition-all flex items-center justify-center gap-1 cursor-pointer text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200"
-        aria-selected="false"
-      >
-        <span data-i18n="contribute.tabDetailed">📝 Specific Link</span>
-      </button>
-    </div>
-
-    <!-- Tab 1: Quick Dump (Active) -->
-    <div id="tab-panel-dump" class="transition-opacity duration-200">
-      <QuickDumpForm modules={modulesData} />
-    </div>
-
-    <!-- Tab 2: Detailed Form -->
-    <div id="tab-panel-detailed" class="hidden transition-opacity duration-200">
-      <DetailedSubmitForm modules={modulesData} />
-    </div>
-
-    <!-- Minimalist Bottom Guidelines -->
-    <div class="mt-6 pt-4 border-t border-zinc-200/60 dark:border-zinc-800/60 text-[11px] text-zinc-500 dark:text-zinc-400 flex flex-wrap items-center justify-between gap-2">
-      <div class="flex items-center gap-1.5">
-        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-        <span>روابط مجانية ومفتوحة لجميع الطلاب</span>
-      </div>
-      <div class="flex items-center gap-1.5">
-        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-        <span>تنسيق ومراجعة قبل النشر في الموديولات</span>
-      </div>
-    </div>
+    <!-- Unified Form -->
+    <ContributeForm modules={modulesData} />
   </div>
 </Layout>
-
-<script>
-  function initContributeTabs(): void {
-    const tabDump = document.getElementById('tab-btn-dump');
-    const tabDetailed = document.getElementById('tab-btn-detailed');
-    const panelDump = document.getElementById('tab-panel-dump');
-    const panelDetailed = document.getElementById('tab-panel-detailed');
-
-    if (!tabDump || !tabDetailed || !panelDump || !panelDetailed) return;
-
-    function selectTab(tab: 'dump' | 'detailed'): void {
-      if (tab === 'dump') {
-        tabDump?.classList.remove('text-zinc-600', 'dark:text-zinc-400', 'font-medium');
-        tabDump?.classList.add('bg-white', 'dark:bg-zinc-900', 'text-emerald-700', 'dark:text-emerald-400', 'font-bold', 'shadow-xs');
-        tabDump?.setAttribute('aria-selected', 'true');
-
-        tabDetailed?.classList.remove('bg-white', 'dark:bg-zinc-900', 'text-emerald-700', 'dark:text-emerald-400', 'font-bold', 'shadow-xs');
-        tabDetailed?.classList.add('text-zinc-600', 'dark:text-zinc-400', 'font-medium');
-        tabDetailed?.setAttribute('aria-selected', 'false');
-
-        panelDump?.classList.remove('hidden');
-        panelDetailed?.classList.add('hidden');
-      } else {
-        tabDetailed?.classList.remove('text-zinc-600', 'dark:text-zinc-400', 'font-medium');
-        tabDetailed?.classList.add('bg-white', 'dark:bg-zinc-900', 'text-emerald-700', 'dark:text-emerald-400', 'font-bold', 'shadow-xs');
-        tabDetailed?.setAttribute('aria-selected', 'true');
-
-        tabDump?.classList.remove('bg-white', 'dark:bg-zinc-900', 'text-emerald-700', 'dark:text-emerald-400', 'font-bold', 'shadow-xs');
-        tabDump?.classList.add('text-zinc-600', 'dark:text-zinc-400', 'font-medium');
-        tabDump?.setAttribute('aria-selected', 'false');
-
-        panelDetailed?.classList.remove('hidden');
-        panelDump?.classList.add('hidden');
-      }
-    }
-
-    tabDump.addEventListener('click', () => selectTab('dump'));
-    tabDetailed.addEventListener('click', () => selectTab('detailed'));
-  }
-
-  initContributeTabs();
-  document.addEventListener('astro:after-swap', initContributeTabs);
-</script>
