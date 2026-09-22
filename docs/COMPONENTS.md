@@ -20,8 +20,11 @@ This document details all UI components, their props, intended reuse guidelines,
 
 #### [`MultistageSelector.astro`](file:///workspaces/asu_med_materials/src/components/selection/MultistageSelector.astro)
 - **Location**: `src/components/selection/MultistageSelector.astro`
-- **Purpose**: Single-step modal for quick academic year selection (Years 1 to 5).
-- **Persistence**: Saves choices to `localStorage` (`asumed_user_year`) and emits `user-preferences-updated`.
+- **Purpose**: Single-step modal for quick academic year selection (Years 1 to 5) with module description preview.
+- **Style**: Based on legacy multistage design (commit a207a03) - grid layout with year badge, title, and description.
+- **Persistence**: Saves choices to `localStorage` (`asumed_user_year`) and emits `user-preferences-updated`. Tracks first visit with `asumed_has_visited` flag.
+- **First-Visit Onboarding**: Automatically opens on first page load if no year is stored, prompting the student to select their academic year immediately.
+- **Module Preview**: Each year shows a description (e.g., "Blood & Lymphatic System" for Year 2, "قريباً" for others).
 - **Props**: None (global client script).
 
 ---

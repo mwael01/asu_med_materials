@@ -5,6 +5,7 @@ const STUDIED_STORAGE_KEY = 'asumed_studied_materials';
 const USER_YEAR_KEY = 'asumed_user_year';
 const USER_MODULE_KEY = 'asumed_user_module';
 const USER_FOLDERS_KEY = 'asumed_folders';
+const HAS_VISITED_KEY = 'asumed_has_visited';
 
 // Bookmarks management
 export function getStoredBookmarkIds(): string[] {
@@ -258,3 +259,21 @@ export function setMaterialFolders(materialId: string, targetFolderIds: string[]
   }
 }
 
+// First visit detection
+export function getHasVisited(): boolean {
+  if (typeof window === 'undefined') return false;
+  try {
+    return localStorage.getItem(HAS_VISITED_KEY) === 'true';
+  } catch {
+    return false;
+  }
+}
+
+export function setHasVisited(): void {
+  if (typeof window === 'undefined') return;
+  try {
+    localStorage.setItem(HAS_VISITED_KEY, 'true');
+  } catch (err) {
+    console.error('Failed to save visited flag to localStorage', err);
+  }
+}
