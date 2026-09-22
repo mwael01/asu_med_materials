@@ -1,0 +1,297 @@
+---
+import type { ModuleInfo } from '../../types/materials';
+
+interface Props {
+  modules: ModuleInfo[];
+}
+
+const { modules } = Astro.props;
+---
+
+<div class="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl p-5 shadow-xs">
+  <div class="mb-4">
+    <h2 class="text-sm font-bold text-zinc-900 dark:text-zinc-100 mb-1">
+      إضافة مصدر دراسي محدد
+    </h2>
+    <p class="text-xs text-zinc-500 dark:text-zinc-400 leading-relaxed">
+      إذا كان لديك رابط محدد وترغب في تصنيفه بدقة، املأ البيانات وسنقوم بإدراجه بالموقع.
+    </p>
+  </div>
+
+  <form id="detailed-submission-form" class="space-y-3.5 text-right">
+    <!-- Resource URL (Main field) -->
+    <div>
+      <label for="detail-url" class="block text-xs font-bold text-zinc-700 dark:text-zinc-300 mb-1">
+        رابط المصدر أو الدرايف (URL) <span class="text-emerald-600">*</span>
+      </label>
+      <input
+        type="text"
+        id="detail-url"
+        placeholder="https://drive.google.com/... أو https://t.me/... أو youtube.com/..."
+        required
+        class="w-full px-3 py-2 text-xs bg-zinc-50 dark:bg-zinc-800/60 border border-zinc-200 dark:border-zinc-700 rounded-xl text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-left font-mono"
+      />
+    </div>
+
+    <!-- Title (Optional / Recommended) -->
+    <div>
+      <label for="detail-title" class="block text-xs font-bold text-zinc-700 dark:text-zinc-300 mb-1">
+        عنوان المصدر <span class="text-[10px] text-zinc-400 font-normal">(اختياري - مثلاً: مذكرات الهيستولوجي أو بنك أسئلة)</span>
+      </label>
+      <input
+        type="text"
+        id="detail-title"
+        placeholder="مثال: مذكرات د. شيرين في موديول Blood أو درايف الدفعة"
+        class="w-full px-3 py-2 text-xs bg-zinc-50 dark:bg-zinc-800/60 border border-zinc-200 dark:border-zinc-700 rounded-xl text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+      />
+    </div>
+
+    <!-- Contributor and Prepared-by -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+      <div>
+        <label for="detail-authors" class="block text-xs font-bold text-zinc-700 dark:text-zinc-300 mb-1">
+          إعداد <span class="text-[10px] text-zinc-400 font-normal">(الدكتور / المحاضر / مؤلف المذكرة)</span>
+        </label>
+        <input
+          type="text"
+          id="detail-authors"
+          placeholder="مثال: د. شيرين، د. ناجي"
+          class="w-full px-3 py-2 text-xs bg-zinc-50 dark:bg-zinc-800/60 border border-zinc-200 dark:border-zinc-700 rounded-xl text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+        />
+      </div>
+
+      <div>
+        <label for="detail-contributor" class="block text-xs font-bold text-zinc-700 dark:text-zinc-300 mb-1">
+          أضافها <span class="text-[10px] text-zinc-400 font-normal">(اسمك أو فريق عملك للشكر والتوثيق)</span>
+        </label>
+        <input
+          type="text"
+          id="detail-contributor"
+          placeholder="اسمك لحفظ حقك في المشاركة"
+          class="w-full px-3 py-2 text-xs bg-zinc-50 dark:bg-zinc-800/60 border border-zinc-200 dark:border-zinc-700 rounded-xl text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+        />
+      </div>
+    </div>
+
+    <!-- Metadata Classification: Year, Module, Type -->
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+      <div>
+        <label for="detail-year" class="block text-xs font-bold text-zinc-700 dark:text-zinc-300 mb-1">
+          السنة الدراسية
+        </label>
+        <select
+          id="detail-year"
+          class="w-full px-3 py-2 text-xs bg-zinc-50 dark:bg-zinc-800/60 border border-zinc-200 dark:border-zinc-700 rounded-xl text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+        >
+          <option value="general">عام / غير محدد</option>
+          <option value="1">السنة الأولى</option>
+          <option value="2">السنة الثانية</option>
+          <option value="3">السنة الثالثة</option>
+          <option value="4">السنة الرابعة</option>
+          <option value="5">السنة الخامسة</option>
+        </select>
+      </div>
+
+      <div>
+        <label for="detail-module" class="block text-xs font-bold text-zinc-700 dark:text-zinc-300 mb-1">
+          الموديول
+        </label>
+        <select
+          id="detail-module"
+          class="w-full px-3 py-2 text-xs bg-zinc-50 dark:bg-zinc-800/60 border border-zinc-200 dark:border-zinc-700 rounded-xl text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+        >
+          <option value="general">عام / كل السنة</option>
+          {modules.map((m) => (
+            <option value={m.code}>{m.code} - {m.titleAr || m.title}</option>
+          ))}
+        </select>
+      </div>
+
+      <div>
+        <label for="detail-type" class="block text-xs font-bold text-zinc-700 dark:text-zinc-300 mb-1">
+          نوع المصدر
+        </label>
+        <select
+          id="detail-type"
+          class="w-full px-3 py-2 text-xs bg-zinc-50 dark:bg-zinc-800/60 border border-zinc-200 dark:border-zinc-700 rounded-xl text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+        >
+          <option value="drive">Google Drive</option>
+          <option value="telegram">Telegram</option>
+          <option value="youtube">YouTube (قائمة أو فيديو)</option>
+          <option value="summary">ورق ومذكرات وملخصات</option>
+          <option value="exam">امتحانات وريكولات</option>
+          <option value="book">كتب ومراجع</option>
+          <option value="whatsapp">جروب WhatsApp</option>
+          <option value="other">أخرى</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Optional Notes -->
+    <div>
+      <label for="detail-description" class="block text-xs font-bold text-zinc-700 dark:text-zinc-300 mb-1">
+        وصف أو ملاحظات إضافية <span class="text-[10px] text-zinc-400 font-normal">(اختياري)</span>
+      </label>
+      <input
+        type="text"
+        id="detail-description"
+        placeholder="أي تفاصيل تساعد زملاءك (مثلاً: يشمل سلايدات 2024 وتفريغات الكلية)"
+        class="w-full px-3 py-2 text-xs bg-zinc-50 dark:bg-zinc-800/60 border border-zinc-200 dark:border-zinc-700 rounded-xl text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+      />
+    </div>
+
+    <!-- Live Status Feedback Box -->
+    <div id="detail-status-box" class="hidden p-3.5 rounded-xl text-xs transition-all space-y-2"></div>
+
+    <div class="pt-2">
+      <button
+        type="button"
+        id="detail-submit-btn"
+        class="w-full py-2.5 px-4 rounded-xl bg-emerald-600 text-white hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed font-bold text-xs transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-xs"
+      >
+        <span id="detail-spinner" class="hidden">
+          <svg class="w-4 h-4 animate-spin text-white" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          </svg>
+        </span>
+        <span id="detail-btn-text">إرسال المصدر</span>
+        <svg id="detail-btn-icon" class="w-3.5 h-3.5 rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5" />
+        </svg>
+      </button>
+    </div>
+  </form>
+</div>
+
+<script>
+  function initDetailedForm(): void {
+    const form = document.getElementById('detailed-submission-form');
+    if (!form) return;
+
+    const urlInput = document.getElementById('detail-url') as HTMLInputElement | null;
+    const titleInput = document.getElementById('detail-title') as HTMLInputElement | null;
+    const authorsInput = document.getElementById('detail-authors') as HTMLInputElement | null;
+    const contributorInput = document.getElementById('detail-contributor') as HTMLInputElement | null;
+    const yearSelect = document.getElementById('detail-year') as HTMLSelectElement | null;
+    const moduleSelect = document.getElementById('detail-module') as HTMLSelectElement | null;
+    const typeSelect = document.getElementById('detail-type') as HTMLSelectElement | null;
+    const descInput = document.getElementById('detail-description') as HTMLInputElement | null;
+    const submitBtn = document.getElementById('detail-submit-btn') as HTMLButtonElement | null;
+    const btnText = document.getElementById('detail-btn-text');
+    const spinner = document.getElementById('detail-spinner');
+    const btnIcon = document.getElementById('detail-btn-icon');
+    const statusBox = document.getElementById('detail-status-box');
+
+    function showStatus(type: 'loading' | 'success' | 'error', message: string, actionHtml = ''): void {
+      if (!statusBox) return;
+      statusBox.classList.remove('hidden');
+
+      if (type === 'success') {
+        statusBox.className = 'p-3.5 rounded-xl text-xs bg-emerald-50 text-emerald-800 border border-emerald-200 dark:bg-emerald-950/50 dark:text-emerald-300 dark:border-emerald-800/40 space-y-2';
+      } else if (type === 'error') {
+        statusBox.className = 'p-3.5 rounded-xl text-xs bg-rose-50 text-rose-800 border border-rose-200 dark:bg-rose-950/50 dark:text-rose-300 dark:border-rose-800/40 space-y-2';
+      } else {
+        statusBox.className = 'p-3.5 rounded-xl text-xs bg-zinc-100 text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300 border border-zinc-200 dark:border-zinc-700 space-y-2';
+      }
+
+      statusBox.innerHTML = `<div>${message}</div>${actionHtml}`;
+      statusBox.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+
+    submitBtn?.addEventListener('click', async () => {
+      let url = urlInput?.value.trim() || '';
+      const title = titleInput?.value.trim() || '';
+
+      if (!url && !title) {
+        alert('من فضلك اكتب رابط المصدر أو عنوانه');
+        urlInput?.focus();
+        return;
+      }
+
+      // Auto-prefix https if user typed www. or just domain
+      if (url && !/^https?:\/\//i.test(url)) {
+        url = `https://${url}`;
+      }
+
+      const authors = authorsInput?.value.trim() || '';
+      const contributor = contributorInput?.value.trim() || '';
+      const year = yearSelect?.value || 'general';
+      const moduleId = moduleSelect?.value || 'general';
+      const type = typeSelect?.value || 'drive';
+      const description = descInput?.value.trim() || '';
+
+      // Set Loading State
+      if (submitBtn) submitBtn.disabled = true;
+      spinner?.classList.remove('hidden');
+      btnIcon?.classList.add('hidden');
+      if (btnText) btnText.textContent = 'جاري إرسال المصدر...';
+      showStatus('loading', 'جاري إرسال المصدر إلى مستودع المنصة...');
+
+      try {
+        const response = await fetch('/api/submit-material', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            mode: 'single',
+            title: title || url,
+            url,
+            type,
+            year,
+            moduleId,
+            authors,
+            addedBy: contributor,
+            description
+          })
+        });
+
+        const result = await response.json();
+
+        if (response.ok && result.success) {
+          const issueLink = result.issueUrl
+            ? `<div class="pt-1"><a href="${result.issueUrl}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1 font-bold underline hover:opacity-80">معاينة التذكرة على GitHub #${result.issueNumber} &larr;</a></div>`
+            : '';
+          showStatus(
+            'success',
+            '✓ تم استلام المصدر بنجاح! سيتم مراجعته وتنسيقه وإدراجه بالموقع. شكراً جزيلاً لمساهمتك!',
+            issueLink
+          );
+
+          // Reset inputs
+          if (titleInput) titleInput.value = '';
+          if (urlInput) urlInput.value = '';
+          if (descInput) descInput.value = '';
+        } else {
+          const fallbackUrl = result.fallbackUrl || `https://github.com/mwael01/asu_med_materials/issues/new?title=${encodeURIComponent(`[إضافة مصدر]: ${title || url}`)}&body=${encodeURIComponent(url)}`;
+          const fallbackBtn = `
+            <div class="pt-1 flex flex-wrap items-center gap-2">
+              <a href="${fallbackUrl}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1 font-bold underline text-xs">
+                فتح التذكرة على GitHub مباشرة لحفظ مصادرك &larr;
+              </a>
+            </div>
+          `;
+          const errorMsg = result.error || 'تعذر الإرسال التلقائي عبر الخادم حالياً.';
+          showStatus('error', `⚠️ ${errorMsg}`, fallbackBtn);
+        }
+      } catch (err: any) {
+        const fallbackUrl = `https://github.com/mwael01/asu_med_materials/issues/new?title=${encodeURIComponent(`[إضافة مصدر]: ${title || url}`)}&body=${encodeURIComponent(url)}`;
+        const fallbackBtn = `
+          <div class="pt-1 flex flex-wrap items-center gap-2">
+            <a href="${fallbackUrl}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1 font-bold underline text-xs">
+              فتح التذكرة على GitHub مباشرة &larr;
+            </a>
+          </div>
+        `;
+        showStatus('error', '⚠️ تعذر الاتصال بالخادم. يرجى فتح التذكرة يدوياً.', fallbackBtn);
+      } finally {
+        if (submitBtn) submitBtn.disabled = false;
+        spinner?.classList.add('hidden');
+        btnIcon?.classList.remove('hidden');
+        if (btnText) btnText.textContent = 'إرسال المصدر';
+      }
+    });
+  }
+
+  initDetailedForm();
+  document.addEventListener('astro:after-swap', initDetailedForm);
+</script>

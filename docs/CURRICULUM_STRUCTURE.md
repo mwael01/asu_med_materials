@@ -63,3 +63,10 @@ In addition to modular resources, students require cross-cutting materials:
 - **General Drives**: Comprehensive batch drives containing multi-year archives.
 - **Student Activity & Channels**: Official ASU batch channels, exam coordination, student union announcements.
 - **Medical Skills & USMLE / IFOM Prep**: Question banks, First Aid references, clinical examination video guides.
+
+---
+
+# General Instructions
+
+- Investigate and purify the provided data before adding them to the website
+- Make sure no duplicate materials in the website for the same year and module

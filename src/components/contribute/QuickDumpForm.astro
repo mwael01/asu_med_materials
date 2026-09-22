@@ -1,0 +1,289 @@
+---
+import type { ModuleInfo } from '../../types/materials';
+
+interface Props {
+  modules: ModuleInfo[];
+}
+
+const { modules } = Astro.props;
+---
+
+<div class="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl p-5 shadow-xs">
+  <div class="mb-4">
+    <div class="flex items-center justify-between gap-2 mb-1">
+      <h2 class="text-sm font-bold text-zinc-900 dark:text-zinc-100 flex items-center gap-1.5">
+        <span>تفريغ سريع للمصادر والروابط</span>
+        <span class="text-[10px] bg-emerald-100 dark:bg-emerald-950/80 text-emerald-700 dark:text-emerald-400 font-medium px-2 py-0.5 rounded-full">
+          الأسهل والأسرع
+        </span>
+      </h2>
+      <button
+        type="button"
+        id="quick-dump-sample-btn"
+        class="text-[11px] text-emerald-600 dark:text-emerald-400 hover:underline cursor-pointer"
+      >
+        تجربة بنموذج رسالة
+      </button>
+    </div>
+    <p class="text-xs text-zinc-500 dark:text-zinc-400 leading-relaxed">
+      الصق رسالة الواتساب، أو أي مجموعة روابط وملاحظات مجمعة في نص واحد كما هي، وسنتولى مراجعتها وتنسيقها وإضافتها للموقع.
+    </p>
+  </div>
+
+  <form id="quick-dump-form" class="space-y-3.5 text-right">
+    <!-- Main Content Area -->
+    <div>
+      <div class="flex items-center justify-between mb-1">
+        <label for="dump-content" class="block text-xs font-bold text-zinc-700 dark:text-zinc-300">
+          نص الرسالة أو الروابط والملاحظات <span class="text-emerald-600">*</span>
+        </label>
+        <div id="dump-url-count" class="text-[11px] text-zinc-400 dark:text-zinc-500 transition-colors">
+          0 رابط مكتشف
+        </div>
+      </div>
+      <textarea
+        id="dump-content"
+        rows="7"
+        placeholder="الصق هنا رسالة الواتساب، أو رابطاً مع وصف بسيط، أو قائمة روابط درايفات ومذكرات وتليجرام مجمعة...
+مثال:
+تجميعة موديول البلد:
+درايف المحاضرات: https://drive.google.com/...
+قناة أسئلة الباثولوجي: https://t.me/...
+شرح د. ناجي فسيولوجي يوتيوب: https://..."
+        required
+        class="w-full px-3.5 py-2.5 text-xs bg-zinc-50 dark:bg-zinc-800/60 border border-zinc-200 dark:border-zinc-700 rounded-xl text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 resize-y leading-relaxed font-sans"
+      ></textarea>
+    </div>
+
+    <!-- Optional Contributor Name -->
+    <div>
+      <label for="dump-contributor" class="block text-xs font-bold text-zinc-700 dark:text-zinc-300 mb-1">
+        اسمك أو اسم فريق العمل <span class="text-[10px] text-zinc-400 font-normal">(اختياري - لتوثيق الإعداد وشكركم)</span>
+      </label>
+      <input
+        type="text"
+        id="dump-contributor"
+        placeholder="مثال: أحمد سامح، سارة محمد (أو اتركه فارغاً إذا كنت تفضل فاعل خير)"
+        class="w-full px-3 py-2 text-xs bg-zinc-50 dark:bg-zinc-800/60 border border-zinc-200 dark:border-zinc-700 rounded-xl text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+      />
+    </div>
+
+    <!-- Optional Classification (Year & Module) -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+      <div>
+        <label for="dump-year" class="block text-xs font-bold text-zinc-700 dark:text-zinc-300 mb-1">
+          السنة الدراسية <span class="text-[10px] text-zinc-400 font-normal">(اختياري)</span>
+        </label>
+        <select
+          id="dump-year"
+          class="w-full px-3 py-2 text-xs bg-zinc-50 dark:bg-zinc-800/60 border border-zinc-200 dark:border-zinc-700 rounded-xl text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+        >
+          <option value="general">غير محدد / مواد متنوعة</option>
+          <option value="1">السنة الأولى</option>
+          <option value="2">السنة الثانية</option>
+          <option value="3">السنة الثالثة</option>
+          <option value="4">السنة الرابعة</option>
+          <option value="5">السنة الخامسة</option>
+        </select>
+      </div>
+
+      <div>
+        <label for="dump-module" class="block text-xs font-bold text-zinc-700 dark:text-zinc-300 mb-1">
+          الموديول المستهدف <span class="text-[10px] text-zinc-400 font-normal">(اختياري)</span>
+        </label>
+        <select
+          id="dump-module"
+          class="w-full px-3 py-2 text-xs bg-zinc-50 dark:bg-zinc-800/60 border border-zinc-200 dark:border-zinc-700 rounded-xl text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+        >
+          <option value="general">عام / كل السنة / غير محدد</option>
+          {modules.map((m) => (
+            <option value={m.code}>{m.code} - {m.titleAr || m.title}</option>
+          ))}
+        </select>
+      </div>
+    </div>
+
+    <!-- Live Status Feedback Box -->
+    <div id="dump-status-box" class="hidden p-3.5 rounded-xl text-xs transition-all space-y-2"></div>
+
+    <!-- Submit Button -->
+    <div class="pt-2">
+      <button
+        type="button"
+        id="dump-submit-btn"
+        class="w-full py-2.5 px-4 rounded-xl bg-emerald-600 text-white hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed font-bold text-xs transition-all flex items-center justify-center gap-2 cursor-pointer shadow-xs"
+      >
+        <span id="dump-spinner" class="hidden">
+          <svg class="w-4 h-4 animate-spin text-white" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          </svg>
+        </span>
+        <span id="dump-btn-text">إرسال وتفريغ المصادر</span>
+        <svg id="dump-btn-icon" class="w-3.5 h-3.5 rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5" />
+        </svg>
+      </button>
+    </div>
+  </form>
+</div>
+
+<script>
+  function initQuickDumpForm(): void {
+    const form = document.getElementById('quick-dump-form');
+    if (!form) return;
+
+    const contentInput = document.getElementById('dump-content') as HTMLTextAreaElement | null;
+    const contributorInput = document.getElementById('dump-contributor') as HTMLInputElement | null;
+    const yearSelect = document.getElementById('dump-year') as HTMLSelectElement | null;
+    const moduleSelect = document.getElementById('dump-module') as HTMLSelectElement | null;
+    const submitBtn = document.getElementById('dump-submit-btn') as HTMLButtonElement | null;
+    const btnText = document.getElementById('dump-btn-text');
+    const spinner = document.getElementById('dump-spinner');
+    const btnIcon = document.getElementById('dump-btn-icon');
+    const statusBox = document.getElementById('dump-status-box');
+    const urlCountBadge = document.getElementById('dump-url-count');
+    const sampleBtn = document.getElementById('quick-dump-sample-btn');
+
+    // Live URL counter in textarea
+    function updateUrlCount(): void {
+      if (!contentInput || !urlCountBadge) return;
+      const text = contentInput.value;
+      const urlRegex = /(?:https?:\/\/|www\.|(?:t\.me|drive\.google\.com|youtube\.com|youtu\.be|mega\.nz|notion\.site|notion\.so)\/)[^\s<>"'{}|\\^`\[\]]+/gi;
+      const matches = text.match(urlRegex) || [];
+      const count = matches.length;
+
+      if (count > 0) {
+        urlCountBadge.textContent = `🔗 تم رصد ${count} رابط`;
+        urlCountBadge.className = 'text-[11px] font-bold text-emerald-600 dark:text-emerald-400 transition-colors';
+      } else {
+        urlCountBadge.textContent = '0 رابط مكتشف';
+        urlCountBadge.className = 'text-[11px] text-zinc-400 dark:text-zinc-500 transition-colors';
+      }
+    }
+
+    contentInput?.addEventListener('input', updateUrlCount);
+
+    // Sample message filler
+    sampleBtn?.addEventListener('click', () => {
+      if (!contentInput) return;
+      contentInput.value = `السلام عليكم يا شباب دي تجميعة مصادر مهمة لموديول الدم:
+1. درايف مذكرات وسلايدات المحاضرات:
+https://drive.google.com/drive/folders/sample_blood_materials
+
+2. تسجيلات وشرح الفسيولوجي د. ناجي:
+https://youtube.com/playlist?list=sample_physio_playlist
+
+3. قناة تليجرام بنوك أسئلة وريكولات الباثولوجي:
+https://t.me/sample_asu_patho_questions
+
+4. ورق د. شيرين هيستولوجي موجود في المكتبة وملخص pdf:
+https://drive.google.com/file/d/sample_histo_pdf/view`;
+
+      if (contributorInput && !contributorInput.value) {
+        contributorInput.value = 'أحمد سامح، مروان كمال';
+      }
+      if (yearSelect) yearSelect.value = '2';
+      if (moduleSelect) moduleSelect.value = 'MED201';
+
+      updateUrlCount();
+      contentInput.focus();
+    });
+
+    function showStatus(type: 'loading' | 'success' | 'error', message: string, actionHtml = ''): void {
+      if (!statusBox) return;
+      statusBox.classList.remove('hidden');
+
+      if (type === 'success') {
+        statusBox.className = 'p-3.5 rounded-xl text-xs bg-emerald-50 text-emerald-800 border border-emerald-200 dark:bg-emerald-950/50 dark:text-emerald-300 dark:border-emerald-800/40 space-y-2';
+      } else if (type === 'error') {
+        statusBox.className = 'p-3.5 rounded-xl text-xs bg-rose-50 text-rose-800 border border-rose-200 dark:bg-rose-950/50 dark:text-rose-300 dark:border-rose-800/40 space-y-2';
+      } else {
+        statusBox.className = 'p-3.5 rounded-xl text-xs bg-zinc-100 text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300 border border-zinc-200 dark:border-zinc-700 space-y-2';
+      }
+
+      statusBox.innerHTML = `<div>${message}</div>${actionHtml}`;
+      statusBox.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+
+    submitBtn?.addEventListener('click', async () => {
+      const content = contentInput?.value.trim() || '';
+      if (!content) {
+        alert('من فضلك الصق رسالة الواتساب أو الروابط أولاً قبل الإرسال.');
+        contentInput?.focus();
+        return;
+      }
+
+      const contributor = contributorInput?.value.trim() || '';
+      const year = yearSelect?.value || 'general';
+      const moduleId = moduleSelect?.value || 'general';
+
+      // Set Loading State
+      if (submitBtn) submitBtn.disabled = true;
+      spinner?.classList.remove('hidden');
+      btnIcon?.classList.add('hidden');
+      if (btnText) btnText.textContent = 'جاري تفريغ وإرسال المصادر...';
+      showStatus('loading', 'جاري إرسال المصادر مباشرة إلى مستودع المنصة...');
+
+      try {
+        const response = await fetch('/api/submit-material', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            mode: 'dump',
+            content,
+            contributor,
+            year,
+            moduleId
+          })
+        });
+
+        const result = await response.json();
+
+        if (response.ok && result.success) {
+          const issueLink = result.issueUrl
+            ? `<div class="pt-1"><a href="${result.issueUrl}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1 font-bold underline hover:opacity-80">معاينة التذكرة على GitHub #${result.issueNumber} &larr;</a></div>`
+            : '';
+          showStatus(
+            'success',
+            '✓ تم استلام وتفريغ المصادر بنجاح! سيقوم المشرف بمراجعتها وتنسيقها وإدراجها بالموقع قريباً. شكراً جزيلاً لدعمك لزملائك!',
+            issueLink
+          );
+
+          // Reset inputs
+          if (contentInput) contentInput.value = '';
+          updateUrlCount();
+        } else {
+          const fallbackUrl = result.fallbackUrl || `https://github.com/mwael01/asu_med_materials/issues/new?title=${encodeURIComponent('[تفريغ مصادر]: رسالة مجمعة')}&body=${encodeURIComponent(content)}`;
+          const fallbackBtn = `
+            <div class="pt-1 flex flex-wrap items-center gap-2">
+              <a href="${fallbackUrl}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1 font-bold underline text-xs">
+                فتح التذكرة على GitHub مباشرة لحفظ مصادرك &larr;
+              </a>
+            </div>
+          `;
+          const errorMsg = result.error || 'تعذر الإرسال التلقائي عبر الخادم حالياً.';
+          showStatus('error', `⚠️ ${errorMsg}`, fallbackBtn);
+        }
+      } catch (err: any) {
+        const fallbackUrl = `https://github.com/mwael01/asu_med_materials/issues/new?title=${encodeURIComponent('[تفريغ مصادر]: رسالة مجمعة')}&body=${encodeURIComponent(content)}`;
+        const fallbackBtn = `
+          <div class="pt-1 flex flex-wrap items-center gap-2">
+            <a href="${fallbackUrl}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1 font-bold underline text-xs">
+              فتح التذكرة على GitHub مباشرة &larr;
+            </a>
+          </div>
+        `;
+        showStatus('error', '⚠️ تعذر الاتصال بالخادم. يرجى فتح التذكرة يدوياً لحفظ البيانات.', fallbackBtn);
+      } finally {
+        if (submitBtn) submitBtn.disabled = false;
+        spinner?.classList.add('hidden');
+        btnIcon?.classList.remove('hidden');
+        if (btnText) btnText.textContent = 'إرسال وتفريغ المصادر';
+      }
+    });
+  }
+
+  initQuickDumpForm();
+  document.addEventListener('astro:after-swap', initQuickDumpForm);
+</script>

@@ -36,6 +36,30 @@ node scripts/sync-all-playlists.js
 
 ---
 
+## 3. Materials Dump Parser
+
+- **Location**: [`scripts/parse-materials-dump.js`](file:///workspaces/asu_med_materials/scripts/parse-materials-dump.js)
+- **Purpose**: Parses raw WhatsApp messages, multi-link text blocks, or GitHub issues and extracts structured draft `MaterialItem` objects ready to copy-paste into `src/data/materials.ts`.
+- **Capabilities**:
+  - Automatically identifies URLs (Google Drive, Telegram channels, YouTube playlists/videos, WhatsApp groups, PDF downloads).
+  - Extracts title and context around each link from preceding or inline text.
+  - Generates unique slugs and tags.
+  - Can fetch GitHub issues directly using `--issue <issue_number>` to extract raw dumped content and contributor metadata.
+
+### Usage:
+```bash
+# Parse a raw text or WhatsApp message string:
+node scripts/parse-materials-dump.js "درايف المحاضرات https://drive.google.com/... وقناة التليجرام https://t.me/..."
+
+# Parse from a text file:
+node scripts/parse-materials-dump.js --file ./message.txt --module year2-blood --year 2
+
+# Parse directly from a GitHub issue:
+node scripts/parse-materials-dump.js --issue 15
+```
+
+---
+
 ## Instructions for AI Agents
 - When adding new YouTube playlists or series to `src/data/materials.ts`, you may use these scripts to populate detailed video lectures automatically instead of manually typing each video ID.
 - Maintain error handling and rate-limiting timeouts between YouTube fetches to prevent network bans.

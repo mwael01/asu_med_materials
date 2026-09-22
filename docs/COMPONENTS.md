@@ -195,7 +195,6 @@ This document details all UI components, their props, intended reuse guidelines,
 - **Purpose**: Detects device environment and prompts user to download and install the website as a PWA.
 - **Rules & Guardrails**:
   - Checks if the website is already running in standalone mode (`display-mode: standalone`, `fullscreen`, iOS standalone, or already installed). If already a PWA, it strictly **never** displays the toast.
-  - Captures `beforeinstallprompt` to trigger native app installation upon clicking "تثبيت الآن".
 
 ---
 
@@ -217,3 +216,39 @@ This document details all UI components, their props, intended reuse guidelines,
   - **Watch Progress Tracking**: Interactive "Mark as Done" (تمت المشاهدة) checkmarks on individual lectures/parts, with real-time percentage progress bar.
   - **Persistence**: Watch progress persisted in `localStorage` under `asumed_playlist_{id}`.
   - **Sequential Stepper**: Previous/Next navigation controls for multi-part video collections.
+
+---
+
+### Contribution & Materials Sharing
+
+#### [`QuickDumpForm.astro`](file:///workspaces/asu_med_materials/src/components/contribute/QuickDumpForm.astro)
+- **Location**: `src/components/contribute/QuickDumpForm.astro`
+- **Purpose**: Permissive, zero-friction material sharing component enabling students to dump forwarded WhatsApp messages, multiple URLs, notes, and text blocks directly.
+- **Features**:
+  - Live client-side URL detection badge (`🔗 تم رصد X رابط`).
+  - Interactive "تجربة بنموذج رسالة" button to pre-fill a realistic batch message.
+  - Non-mandatory contributor attribution field (supports anonymous contributions).
+  - Optional academic year and module selectors.
+  - Submits payload to `/api/submit-material` with fallback to direct GitHub issue creation if serverless tokens are unconfigured.
+- **Props**:
+  ```typescript
+  interface Props {
+    modules: ModuleInfo[];
+  }
+  ```
+
+#### [`DetailedSubmitForm.astro`](file:///workspaces/asu_med_materials/src/components/contribute/DetailedSubmitForm.astro)
+- **Location**: `src/components/contribute/DetailedSubmitForm.astro`
+- **Purpose**: Permissive individual source submission form for users who wish to specify metadata for a single resource.
+- **Features**:
+  - URL input with automatic protocol prefixing (`https://`).
+  - Optional title, description, and author attribution fields.
+  - Academic year, module, and resource type selectors.
+  - Direct feedback box with issue URL and fallback links.
+- **Props**:
+  ```typescript
+  interface Props {
+    modules: ModuleInfo[];
+  }
+  ```
+
