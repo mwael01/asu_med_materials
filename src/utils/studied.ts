@@ -3,7 +3,8 @@ import { getCurrentLanguage } from './i18n';
 
 /**
  * Updates checkbox UI state for all materials cards, playlist headers, and drawer items in the current DOM.
- * If animateId is provided, triggers the spring micro-animation on that card's checkbox.
+ * If animateId is provided, ONLY updates that specific button and triggers the spring micro-animation.
+ * If animateId is not provided, updates all buttons without animations (initial load, events).
  */
 export function updateStudiedCardUI(animateId?: string): void {
   if (typeof document === 'undefined') return;
@@ -21,84 +22,122 @@ export function updateStudiedCardUI(animateId?: string): void {
     }
   });
 
-  // 2. Update all studied checkbox buttons directly across cards, playlists, and headers
-  document.querySelectorAll<HTMLButtonElement>('.studied-btn, [data-studied-btn]').forEach((btn) => {
-    const matId = btn.getAttribute('data-id');
-    if (!matId) return;
-    const isStudied = studiedIds.includes(matId);
-
-    btn.setAttribute('aria-checked', isStudied ? 'true' : 'false');
-    const box = btn.querySelector<HTMLElement>('.studied-box');
-    const checkmark = btn.querySelector<HTMLElement>('.studied-checkmark');
-
-    if (isStudied) {
-      btn.classList.add('is-studied');
-      if (box) {
-        box.classList.add(
-          'is-checked',
-          'border-emerald-600',
-          'bg-emerald-600',
-          'dark:border-emerald-500',
-          'dark:bg-emerald-500',
-          'text-white',
-          'shadow-xs'
-        );
-        box.classList.remove('border-zinc-300', 'dark:border-zinc-600', 'bg-white', 'dark:bg-zinc-800');
-
-        if (animateId && matId === animateId) {
-          box.classList.remove('animate-studied-pop');
-          void box.offsetWidth; // Force DOM reflow to restart CSS animation
-          box.classList.add('animate-studied-pop');
-        }
-      }
-
-      if (checkmark) {
-        checkmark.classList.remove('hidden');
-
-        if (animateId && matId === animateId) {
-          checkmark.classList.remove('animate-checkmark');
-          void checkmark.offsetWidth; // Force DOM reflow
-          checkmark.classList.add('animate-checkmark');
-        }
-      }
-    } else {
-      btn.classList.remove('is-studied');
-      if (box) {
-        box.classList.remove(
-          'is-checked',
-          'animate-studied-pop',
-          'border-emerald-600',
-          'bg-emerald-600',
-          'dark:border-emerald-500',
-          'dark:bg-emerald-500',
-          'text-white',
-          'shadow-xs'
-        );
-        box.classList.add('border-zinc-300', 'dark:border-zinc-600', 'bg-white', 'dark:bg-zinc-800');
-      }
-
-      if (checkmark) {
-        checkmark.classList.remove('animate-checkmark');
-        checkmark.classList.add('hidden');
-      }
+  // 2. Update studied checkbox buttons
+  if (animateId) {
+    // When animateId is provided, ONLY update that specific button to avoid triggering transitions on other cards
+    const btn = document.querySelector<HTMLButtonElement>(`.studied-btn[data-id="${CSS.escape(animateId)}"], [data-studied-btn][data-id="${CSS.escape(animateId)}"]`);
+    if (btn) {
+      updateSingleStudiedButton(btn, animateId, true, true);
     }
-  });
+  } else {
+    // No animateId: update all buttons without animations (initial load, studied-updated event, astro:after-swap)
+    document.querySelectorAll<HTMLButtonElement>('.studied-btn, [data-studied-btn]').forEach((btn) => {
+      const matId = btn.getAttribute('data-id');
+      if (!matId) return;
+      const isStudied = studiedIds.includes(matId);
+      updateSingleStudiedButton(btn, matId, isStudied, false);
+    });
+  }
 
   // 3. Update drawer studied buttons if present
-  document.querySelectorAll<HTMLButtonElement>('.drawer-studied-btn').forEach((btn) => {
-    const matId = btn.getAttribute('data-drawer-studied-id');
-    if (!matId) return;
-    const isStudied = studiedIds.includes(matId);
-    if (isStudied) {
-      btn.classList.add('is-checked', 'border-emerald-600', 'bg-emerald-600', 'dark:border-emerald-500', 'dark:bg-emerald-500', 'text-white');
-      btn.classList.remove('border-zinc-300', 'dark:border-zinc-600', 'bg-white', 'dark:bg-zinc-800', 'text-transparent');
-      btn.querySelector('svg')?.classList.remove('hidden');
-    } else {
-      btn.classList.remove('is-checked', 'border-emerald-600', 'bg-emerald-600', 'dark:border-emerald-500', 'dark:bg-emerald-500', 'text-white');
-      btn.classList.add('border-zinc-300', 'dark:border-zinc-600', 'bg-white', 'dark:bg-zinc-800', 'text-transparent');
-      btn.querySelector('svg')?.classList.add('hidden');
+  if (animateId) {
+    // When animateId is provided, only update the specific drawer button
+    const btn = document.querySelector<HTMLButtonElement>(`.drawer-studied-btn[data-drawer-studied-id="${CSS.escape(animateId)}"]`);
+    if (btn) {
+      updateSingleDrawerStudiedButton(btn, animateId, true);
     }
-  });
+  } else {
+    // No animateId: update all drawer buttons
+    document.querySelectorAll<HTMLButtonElement>('.drawer-studied-btn').forEach((btn) => {
+      const matId = btn.getAttribute('data-drawer-studied-id');
+      if (!matId) return;
+      const isStudied = studiedIds.includes(matId);
+      updateSingleDrawerStudiedButton(btn, matId, isStudied);
+    });
+  }
+}
+
+/**
+ * Updates a single studied button's UI state
+ * @param btn - The button element to update
+ * @param matId - The material ID
+ * @param isStudied - Whether the material is studied
+ * @param animate - Whether to trigger the animation
+ */
+function updateSingleStudiedButton(btn: HTMLButtonElement, matId: string, isStudied: boolean, animate: boolean): void {
+  btn.setAttribute('aria-checked', isStudied ? 'true' : 'false');
+  const box = btn.querySelector<HTMLElement>('.studied-box');
+  const checkmark = btn.querySelector<HTMLElement>('.studied-checkmark');
+
+  if (isStudied) {
+    btn.classList.add('is-studied');
+    if (box) {
+      box.classList.add(
+        'is-checked',
+        'border-emerald-600',
+        'bg-emerald-600',
+        'dark:border-emerald-500',
+        'dark:bg-emerald-500',
+        'text-white',
+        'shadow-xs'
+      );
+      box.classList.remove('border-zinc-300', 'dark:border-zinc-600', 'bg-white', 'dark:bg-zinc-800');
+
+      if (animate) {
+        box.classList.remove('animate-studied-pop');
+        void box.offsetWidth; // Force DOM reflow to restart CSS animation
+        box.classList.add('animate-studied-pop');
+      }
+    }
+
+    if (checkmark) {
+      checkmark.classList.remove('hidden');
+
+      if (animate) {
+        checkmark.classList.remove('animate-checkmark');
+        void checkmark.offsetWidth; // Force DOM reflow
+        checkmark.classList.add('animate-checkmark');
+      }
+    }
+  } else {
+    btn.classList.remove('is-studied');
+    if (box) {
+      box.classList.remove(
+        'is-checked',
+        'animate-studied-pop',
+        'border-emerald-600',
+        'bg-emerald-600',
+        'dark:border-emerald-500',
+        'dark:bg-emerald-500',
+        'text-white',
+        'shadow-xs'
+      );
+      box.classList.add('border-zinc-300', 'dark:border-zinc-600', 'bg-white', 'dark:bg-zinc-800');
+    }
+
+    if (checkmark) {
+      checkmark.classList.remove('animate-checkmark');
+      checkmark.classList.add('hidden');
+    }
+  }
+}
+
+/**
+ * Updates a single drawer studied button's UI state
+ * @param btn - The button element to update
+ * @param matId - The material ID
+ * @param isStudied - Whether the material is studied
+ */
+function updateSingleDrawerStudiedButton(btn: HTMLButtonElement, matId: string, isStudied: boolean): void {
+  if (isStudied) {
+    btn.classList.add('is-checked', 'border-emerald-600', 'bg-emerald-600', 'dark:border-emerald-500', 'dark:bg-emerald-500', 'text-white');
+    btn.classList.remove('border-zinc-300', 'dark:border-zinc-600', 'bg-white', 'dark:bg-zinc-800', 'text-transparent');
+    btn.querySelector('svg')?.classList.remove('hidden');
+  } else {
+    btn.classList.remove('is-checked', 'border-emerald-600', 'bg-emerald-600', 'dark:border-emerald-500', 'dark:bg-emerald-500', 'text-white');
+    btn.classList.add('border-zinc-300', 'dark:border-zinc-600', 'bg-white', 'dark:bg-zinc-800', 'text-transparent');
+    btn.querySelector('svg')?.classList.add('hidden');
+  }
 }
 
 /**
