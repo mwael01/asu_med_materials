@@ -19,7 +19,7 @@ The medical program spans 5 years divided into two primary phases:
 
 ### Active Module: Year 2 — Blood & Lymphatic System (MED201)
 - **Subjects**: Anatomy, Physiology, Histology, Biochemistry, Pharmacology, Pathology, Parasitology, Microbiology, Clinical Lectures.
-- **Resources**: Central Drives, Video Playlists, Audio Revisions, MCQs & Essay Banks, Formatives, and Past Finals.
+- **Resources**: Central Drives (including Semester 3 Drive & Batch Lectures Drive), Video Playlists & Embedded Players, Telegram Lecture Recordings, Audio Revisions, MCQs & Essay Banks, Formatives, Telegram Bots (@ASUMedZonebot, @ASUbooksbot), and Past Finals.
 
 ---
 

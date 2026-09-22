@@ -75,6 +75,71 @@ export const materialsData: MaterialItem[] = [
     addedBy: 'M. Wael',
     tags: ['درايفات', 'سنة ثانية', 'year 2', 'archives']
   },
+  {
+    id: 'bld-batch-lectures-drive',
+    title: 'درايف محاضرات وسكاشن موديول Blood (تسجيلات وملفات PDF)',
+    description: 'الدرايف المخصص من الدفعة لرفع ملفات الـ PDFs وتسجيلات المحاضرات والسكاشن العملية لموديول الدم أولاً بأول.',
+    url: 'https://drive.google.com/drive/folders/1CXOMHWZ2uljfTBZndttZRf7nWWD-f2eS',
+    type: 'drive',
+    category: 'central',
+    year: 2,
+    moduleId: 'year2-blood',
+    author: 'ASU Med Batch Drive',
+    addedBy: 'فاعل خير',
+    tags: ['drive', 'lectures', 'sections', 'pdfs', 'محاضرات', 'سكاشن', 'blood']
+  },
+  {
+    id: 'bld-batch-lectures-telegram',
+    title: 'قناة تليجرام محاضرات وسكاشن موديول Blood',
+    description: 'القناة الرسمية على تليجرام لرفع تسجيلات وريكوردات المحاضرات والسكاشن اليومية لموديول الدم.',
+    url: 'https://t.me/+HZtd9fQ6wg43NzJk',
+    type: 'telegram',
+    category: 'central',
+    year: 2,
+    moduleId: 'year2-blood',
+    author: 'ASU Med Batch',
+    addedBy: 'فاعل خير',
+    tags: ['telegram', 'lectures', 'sections', 'تليجرام', 'محاضرات', 'سكاشن']
+  },
+  {
+    id: 'bld-bot-asumedzone',
+    title: 'بوت ASU Med Zone (@ASUMedZonebot)',
+    description: 'بوت تليجرام التفاعلي لطلاب طب عين شمس للوصول السريع إلى مصادر وداتا وشروحات موديول الدم ومختلف الموديولات والفرق.',
+    url: 'https://t.me/ASUMedZonebot',
+    type: 'telegram',
+    category: 'central',
+    year: 2,
+    moduleId: 'year2-blood',
+    author: 'ASU Med Zone',
+    addedBy: 'Mohamed Waleed',
+    tags: ['bot', 'telegram', 'asumedzone', 'بوت', 'تليجرام', 'داتا']
+  },
+  {
+    id: 'bld-bot-asubooks',
+    title: 'بوت ASU Books (@ASUbooksbot)',
+    description: 'بوت تليجرام المخصص لمصادر وكتب ومراجع ومذكرات طب عين شمس وموديول الدم.',
+    url: 'https://t.me/ASUbooksbot',
+    type: 'telegram',
+    category: 'references',
+    year: 2,
+    moduleId: 'year2-blood',
+    author: 'ASU Books',
+    addedBy: 'Mohamed Waleed',
+    tags: ['bot', 'telegram', 'books', 'بوت', 'كتب', 'مراجع', 'تليجرام']
+  },
+  {
+    id: 'bld-youtube-rahma-ayman',
+    title: 'قناة د. رحمة أيمن - شروحات موديول Blood',
+    description: 'القناة الرسمية للدكتورة رحمة أيمن لنشر شروحات ومحاضرات موديول الدم لطلاب الفرقة الثانية طب عين شمس.',
+    url: 'https://www.youtube.com/@rahma_ayman_2008',
+    type: 'youtube',
+    category: 'lectures',
+    year: 2,
+    moduleId: 'year2-blood',
+    author: 'Dr. Rahma Ayman',
+    addedBy: 'أميرة الشعراوي',
+    tags: ['youtube', 'rahma ayman', 'رحمة أيمن', 'قناة', 'شرح']
+  },
 
   // ==========================================
   // 2. Anatomy
@@ -489,6 +554,20 @@ export const materialsData: MaterialItem[] = [
     addedBy: 'M. Wael',
     tags: ['physiology', 'telegram', 'محمد الشريف', 'فسيولوجي']
   },
+  {
+    id: 'bld-lec-w1d2-physio',
+    title: 'محاضرة فسيولوجي الدم (الأسبوع 1 - اليوم 2)',
+    description: 'تسجيل محاضرة الفسيولوجي الرسمية لموديول الدم من الكلية (الأسبوع الأول - اليوم الثاني) عبر تليجرام الدفعة.',
+    url: 'https://t.me/c/3987936983/178',
+    type: 'telegram',
+    category: 'lectures',
+    year: 2,
+    moduleId: 'year2-blood',
+    subject: 'Physiology',
+    author: 'ASU Med Faculty',
+    addedBy: 'فاعل خير',
+    tags: ['physiology', 'lecture', 'week 1', 'day 2', 'فسيولوجي', 'محاضرة']
+  },
 
   // ==========================================
   // 4. Histology
@@ -836,23 +915,164 @@ export const materialsData: MaterialItem[] = [
   },
   {
     id: 'bld-biochem-marwa',
-    title: 'كيمياء حيوية الدم - د. مروة حمدي (4 أجزاء)',
-    description: 'سلسلة محاضرات بايوكيمستري الدم للدكتورة مروة حمدي (4 أجزاء فيديو متتالية).',
-    url: 'https://youtu.be/Idy7y9iSKbM',
+    title: 'كيمياء حيوية الدم ومراجعات - د. مروة حمدي',
+    description: 'قائمة تشغيل مراجعات وشروحات كيمياء حيوية موديول الدم للدكتورة مروة حمدي (Hb & Globin synthesis، Heme، Iron metabolism، وFolic acid).',
+    url: 'https://www.youtube.com/playlist?list=PLQiJ4rqPLWt0',
     type: 'playlist',
     category: 'lectures',
     year: 2,
     moduleId: 'year2-blood',
     subject: 'Biochemistry',
     author: 'Dr. Marwa Hamdy',
-    addedBy: 'M. Wael',
+    addedBy: ['M. Wael', 'أميرة الشعراوي'],
+    playlistId: 'PLQiJ4rqPLWt0',
     videos: [
-      { id: 'marwa-p1', title: 'بايوكيمستري الدم - د. مروة حمدي (الجزء 1)', youtubeId: 'Idy7y9iSKbM', url: 'https://youtu.be/Idy7y9iSKbM' },
-      { id: 'marwa-p2', title: 'بايوكيمستري الدم - د. مروة حمدي (الجزء 2)', youtubeId: 'Ggl2T7x8PJs', url: 'https://youtu.be/Ggl2T7x8PJs' },
-      { id: 'marwa-p3', title: 'بايوكيمستري الدم - د. مروة حمدي (الجزء 3)', youtubeId: 'pKtEGea18Io', url: 'https://youtu.be/pKtEGea18Io' },
-      { id: 'marwa-p4', title: 'بايوكيمستري الدم - د. مروة حمدي (الجزء 4)', youtubeId: 'pKtEGea18Io', url: 'https://youtu.be/pKtEGea18Io' }
+      { id: 'PLQiJ4rqPLWt0-1', title: 'Bio . Blood.Rev 1 . Hb. globin , systhyesis, hemoglobinpathies', youtubeId: 'Idy7y9iSKbM', url: 'https://youtu.be/Idy7y9iSKbM' },
+      { id: 'PLQiJ4rqPLWt0-2', title: 'Bio Blood 🩸Rev 2 … Heme synthesis', youtubeId: 'Ggl2T7x8PJs', url: 'https://youtu.be/Ggl2T7x8PJs' },
+      { id: 'PLQiJ4rqPLWt0-3', title: 'Bio.Dr.Marwa.Hamdy.Blood Module. Revision3. Iron Metabolism', youtubeId: 'pKtEGea18Io', url: 'https://youtu.be/pKtEGea18Io' },
+      { id: 'PLQiJ4rqPLWt0-4', title: 'Bio.DR.MARWA.HAMDY. Revision 4🩸Blood folic acid vitamin k… Second Y', youtubeId: 'iht8ApIZp7A', url: 'https://youtu.be/iht8ApIZp7A' }
     ],
-    tags: ['biochemistry', 'marwa hamdy', 'مروة حمدي', 'بايوكيمستري', 'playlist']
+    tags: ['biochemistry', 'marwa hamdy', 'مروة حمدي', 'بايوكيمستري', 'playlist', 'مراجعة']
+  },
+  {
+    id: 'bld-biochem-marwa-telegram-series',
+    title: 'تسجيلات وشروحات بايوكيمستري الدم - د. مروة حمدي (Medical Team Telegram)',
+    description: 'كورس وتسجيلات الدكتورة مروة حمدي في كيمياء حيوية الدم عبر تليجرام (Hb structure 1-5, Heme synthesis, Iron metabolism, HMP, Glycolysis, Folic acid & B12, WBCs metabolism).',
+    url: 'https://t.me/MedicalTeamMT/4792',
+    type: 'telegram',
+    category: 'lectures',
+    year: 2,
+    moduleId: 'year2-blood',
+    subject: 'Biochemistry',
+    author: 'Dr. Marwa Hamdy',
+    addedBy: 'أميرة الشعراوي',
+    tags: ['biochemistry', 'marwa hamdy', 'مروة حمدي', 'بايوكيمستري', 'telegram', 'تسجيلات']
+  },
+  {
+    id: 'bld-biochem-marwa-heme-synthesis-tg',
+    title: 'تسجيل Heme synthesis - بايو الدم - د. مروة حمدي',
+    description: 'تسجيل شرح تصنيع الهيم (Heme synthesis) للدكتورة مروة حمدي على تليجرام.',
+    url: 'https://t.me/MedicalTeamMT/4797',
+    type: 'telegram',
+    category: 'lectures',
+    year: 2,
+    moduleId: 'year2-blood',
+    subject: 'Biochemistry',
+    author: 'Dr. Marwa Hamdy',
+    addedBy: 'أميرة الشعراوي',
+    tags: ['biochemistry', 'heme synthesis', 'marwa hamdy', 'مروة حمدي']
+  },
+  {
+    id: 'bld-biochem-marwa-iron-metabolism-tg',
+    title: 'تسجيل Iron metabolism - بايو الدم - د. مروة حمدي',
+    description: 'تسجيل شرح أيض وتمثيل الحديد (Iron metabolism) للدكتورة مروة حمدي على تليجرام.',
+    url: 'https://t.me/MedicalTeamMT/4798',
+    type: 'telegram',
+    category: 'lectures',
+    year: 2,
+    moduleId: 'year2-blood',
+    subject: 'Biochemistry',
+    author: 'Dr. Marwa Hamdy',
+    addedBy: 'أميرة الشعراوي',
+    tags: ['biochemistry', 'iron metabolism', 'marwa hamdy', 'مروة حمدي']
+  },
+  {
+    id: 'bld-biochem-marwa-hmp-tg',
+    title: 'تسجيل مسار HMP pathway - بايو الدم - د. مروة حمدي',
+    description: 'تسجيل شرح مسار HMP shunt للدكتورة مروة حمدي على تليجرام.',
+    url: 'https://t.me/MedicalTeamMT/4799',
+    type: 'telegram',
+    category: 'lectures',
+    year: 2,
+    moduleId: 'year2-blood',
+    subject: 'Biochemistry',
+    author: 'Dr. Marwa Hamdy',
+    addedBy: 'أميرة الشعراوي',
+    tags: ['biochemistry', 'hmp', 'marwa hamdy', 'مروة حمدي']
+  },
+  {
+    id: 'bld-biochem-marwa-glycolysis-tg',
+    title: 'تسجيل Glycolysis - بايو الدم - د. مروة حمدي',
+    description: 'تسجيل شرح تحلل الجلوكوز (Glycolysis) للدكتورة مروة حمدي على تليجرام.',
+    url: 'https://t.me/MedicalTeamMT/4800',
+    type: 'telegram',
+    category: 'lectures',
+    year: 2,
+    moduleId: 'year2-blood',
+    subject: 'Biochemistry',
+    author: 'Dr. Marwa Hamdy',
+    addedBy: 'أميرة الشعراوي',
+    tags: ['biochemistry', 'glycolysis', 'marwa hamdy', 'مروة حمدي']
+  },
+  {
+    id: 'bld-biochem-marwa-folic-b12-tg',
+    title: 'تسجيل Folic acid & Vit B12 - بايو الدم - د. مروة حمدي',
+    description: 'تسجيل شرح حمض الفوليك وفيتامين B12 للدكتورة مروة حمدي على تليجرام.',
+    url: 'https://t.me/MedicalTeamMT/4802',
+    type: 'telegram',
+    category: 'lectures',
+    year: 2,
+    moduleId: 'year2-blood',
+    subject: 'Biochemistry',
+    author: 'Dr. Marwa Hamdy',
+    addedBy: 'أميرة الشعراوي',
+    tags: ['biochemistry', 'folic acid', 'vitamin b12', 'marwa hamdy', 'مروة حمدي']
+  },
+  {
+    id: 'bld-biochem-marwa-wbcs-tg',
+    title: 'تسجيل WBCs metabolism - بايو الدم - د. مروة حمدي',
+    description: 'تسجيل شرح أيض خلايا الدم البيضاء (WBCs metabolism) للدكتورة مروة حمدي على تليجرام.',
+    url: 'https://t.me/MedicalTeamMT/4803',
+    type: 'telegram',
+    category: 'lectures',
+    year: 2,
+    moduleId: 'year2-blood',
+    subject: 'Biochemistry',
+    author: 'Dr. Marwa Hamdy',
+    addedBy: 'أميرة الشعراوي',
+    tags: ['biochemistry', 'wbcs', 'marwa hamdy', 'مروة حمدي']
+  },
+  {
+    id: 'bld-biochem-marwa-telegram-revision',
+    title: 'تسجيلات مراجعة بايوكيمستري الدم (تليجرام) - د. مروة حمدي',
+    description: 'تسجيلات مراجعة موديول الدم (Hb & Globin, Heme, Iron metabolism) على تليجرام للدكتورة مروة حمدي.',
+    url: 'https://t.me/MedicalTeamMT/4805',
+    type: 'telegram',
+    category: 'summaries',
+    year: 2,
+    moduleId: 'year2-blood',
+    subject: 'Biochemistry',
+    author: 'Dr. Marwa Hamdy',
+    addedBy: 'أميرة الشعراوي',
+    tags: ['biochemistry', 'revision', 'marwa hamdy', 'مروة حمدي', 'مراجعة']
+  },
+  {
+    id: 'bld-lec-w1d2-bio-1',
+    title: 'محاضرة بايوكيمستري 1 (الأسبوع 1 - اليوم 2)',
+    description: 'تسجيل المحاضرة الأولى في مادة الكيمياء الحيوية لموديول الدم من الكلية (الأسبوع الأول - اليوم الثاني) عبر تليجرام الدفعة.',
+    url: 'https://t.me/c/3987936983/149',
+    type: 'telegram',
+    category: 'lectures',
+    year: 2,
+    moduleId: 'year2-blood',
+    subject: 'Biochemistry',
+    author: 'ASU Med Faculty',
+    addedBy: 'فاعل خير',
+    tags: ['biochemistry', 'lecture', 'week 1', 'day 2', 'بايوكيمستري', 'محاضرة']
+  },
+  {
+    id: 'bld-lec-w1d2-bio-2',
+    title: 'محاضرة بايوكيمستري 2 (الأسبوع 1 - اليوم 2)',
+    description: 'تسجيل المحاضرة الثانية في مادة الكيمياء الحيوية لموديول الدم من الكلية (الأسبوع الأول - اليوم الثاني) عبر تليجرام الدفعة.',
+    url: 'https://t.me/c/3987936983/185',
+    type: 'telegram',
+    category: 'lectures',
+    year: 2,
+    moduleId: 'year2-blood',
+    subject: 'Biochemistry',
+    author: 'ASU Med Faculty',
+    addedBy: 'فاعل خير',
+    tags: ['biochemistry', 'lecture', 'week 1', 'day 2', 'بايوكيمستري', 'محاضرة']
   },
 
   // ==========================================
@@ -997,6 +1217,20 @@ export const materialsData: MaterialItem[] = [
     author: 'MG ASU MED',
     addedBy: 'M. Wael',
     tags: ['pharma', 'drug list', 'أدوية', 'قائمة الأدوية'],
+  },
+  {
+    id: 'bld-pharma-shorbagy-lec01',
+    title: 'فارماكولوجي الدم - د. الشوربجي (المحاضرة الأولى: علاج أنيميا نقص الحديد)',
+    description: 'المحاضرة التجريبية الأولى من كورس الفارماكولوجي لموديول الدم لدكتور الشوربجي (Dr El Shorbagy - Pharma Blood Module Lec 01 - TTT of Iron Deficiency Anemia).',
+    url: 'https://youtu.be/j8W-_lm4puY',
+    type: 'youtube',
+    category: 'lectures',
+    year: 2,
+    moduleId: 'year2-blood',
+    subject: 'Pharmacology',
+    author: 'Dr. El-Shorbagy',
+    addedBy: 'أميرة الشعراوي',
+    tags: ['pharmacology', 'shorbagy', 'الشوربجي', 'فارما', 'anemia', 'محاضرة تجريبية']
   },
 
   // ==========================================
@@ -1333,6 +1567,20 @@ export const materialsData: MaterialItem[] = [
       { id: "PLTF9h-T1TcJj4AOPCxGxOUTH0IVmaH7_8-8", title: "Immunology | T- Cell Development", youtubeId: "JeV-HuPq7CI", url: "https://youtu.be/JeV-HuPq7CI" }
     ],
     tags: ['microbiology', 'immunology', 'ninja nerd', 'مناعة', 'playlist']
+  },
+  {
+    id: 'bld-micro-kareem-emad-lec01',
+    title: 'ميكروبيولوجي الدم - د. كريم عماد (المحاضرة الأولى: Parvo B19)',
+    description: 'المحاضرة الأولى من كورس الميكروبيولوجي لموديول الدم لدكتور كريم عماد (Lecture 1 "Parvo B19" : Dr Karim Emad).',
+    url: 'https://youtu.be/4IpHvWfmIk0',
+    type: 'youtube',
+    category: 'lectures',
+    year: 2,
+    moduleId: 'year2-blood',
+    subject: 'Microbiology',
+    author: 'Dr. Karim Emad',
+    addedBy: 'أميرة الشعراوي',
+    tags: ['microbiology', 'kareem emad', 'كريم عماد', 'مايكرو', 'parvo b19', 'محاضرة تجريبية']
   },
 
   // ==========================================

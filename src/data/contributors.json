@@ -35,7 +35,7 @@
       "bio": "مشرف المحتوى ومراجعة المصادر.",
       "order": 3,
       "photo": "/contributors/mohamed-walid-mohamed.jpg",
-      "matchNames": ["Mohamed Walid"],
+      "matchNames": ["Mohamed Walid", "Mohamed Waleed"],
       "contacts": {
         "whatsapp": [
           { "label": "واتساب", "value": "+20 10 17819182", "href": "https://wa.me/201017819182" }
@@ -57,5 +57,12 @@
       }
     }
   ],
-  "contributorProfiles": []
+  "contributorProfiles": [
+    {
+      "id": "amira-sharawy",
+      "name": "أميرة الشعراوي",
+      "note": "مساهمة في جمع ومشاركة مواد موديول الدم.",
+      "matchNames": ["أميرة الشعراوي", "Amira Sharawy", "amira._.sharawy", "@amira._.sharawy"]
+    }
+  ]
 }
