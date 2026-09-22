@@ -197,7 +197,7 @@ export const materialsData: MaterialItem[] = [
     moduleId: 'year2-blood',
     subject: 'Anatomy',
     author: 'Dr. Wahdan',
-    addedBy: 'M. Wael',
+    addedBy: ['M. Wael', 'Mohamed Waleed'],
     playlistId: 'PLIZNmuBMEjaMZmwn2FVmG8bYsmVs5n-_v',
     videos: [
       { id: "PLIZNmuBMEjaMZmwn2FVmG8bYsmVs5n-_v-1", title: "Support of the channel", youtubeId: "ym373Eez9Q8", url: "https://youtu.be/ym373Eez9Q8" },
@@ -241,6 +241,25 @@ export const materialsData: MaterialItem[] = [
       { id: 'sameh-p2', title: 'تشريح الدم - سامح (الجزء 2)', youtubeId: 'rrAfcJwypSs', url: 'https://youtu.be/rrAfcJwypSs' }
     ],
     tags: ['anatomy', 'sameh', 'تشريح', 'playlist']
+  },
+  {
+    id: 'bld-anat-mohamed-adel',
+    title: 'تشريح الدم والأعضاء الليمفاوية - د. محمد عادل',
+    description: 'سلسلة شروحات تشريح الطحال والعقد الليمفاوية والقناة الصدرية للدكتور محمد عادل.',
+    url: 'https://youtu.be/1LWyhHbIe5Y',
+    type: 'playlist',
+    category: 'lectures',
+    year: 2,
+    moduleId: 'year2-blood',
+    subject: 'Anatomy',
+    author: 'Dr. Mohamed Adel',
+    addedBy: 'Mohamed Waleed',
+    videos: [
+      { id: 'adel-p1', title: 'تشريح Thoracic Duct & Thymus - د. محمد عادل', youtubeId: '1LWyhHbIe5Y', url: 'https://youtu.be/1LWyhHbIe5Y' },
+      { id: 'adel-p2', title: 'تشريح الطحال (Spleen) - د. محمد عادل', youtubeId: '8OJknm7CjXQ', url: 'https://youtu.be/8OJknm7CjXQ' },
+      { id: 'adel-p3', title: 'تشريح العقد الليمفاوية (Lymph nodes) - د. محمد عادل', youtubeId: 'DXeumUXnouE', url: 'https://youtu.be/DXeumUXnouE' }
+    ],
+    tags: ['anatomy', 'mohamed adel', 'محمد عادل', 'تشريح', 'spleen', 'lymph', 'playlist']
   },
   {
     id: 'bld-anat-abdullah',
@@ -851,6 +870,46 @@ export const materialsData: MaterialItem[] = [
     tags: ['biochemistry', 'ayman', 'أيمن', 'بايوكيمستري', 'playlist']
   },
   {
+    id: 'bld-biochem-ayman-blood',
+    title: 'كيمياء حيوية الدم - د. أيمن بشير (Dr. Ayman Beshir)',
+    description: 'شرح بايوكيمستري موديول الدم كامل للدكتور أيمن بشير في قائمة تشغيل يوتيوب.',
+    url: 'https://youtube.com/playlist?list=PLbnG-DdT79tNd8rb_hsS_X6oq9uJTlwHC',
+    type: 'playlist',
+    category: 'lectures',
+    year: 2,
+    moduleId: 'year2-blood',
+    subject: 'Biochemistry',
+    author: 'Dr. Ayman Beshir',
+    addedBy: 'Mohamed Waleed',
+    playlistId: 'PLbnG-DdT79tNd8rb_hsS_X6oq9uJTlwHC',
+    videos: [
+      { id: 'PLbnG-DdT79tNd8rb_hsS_X6oq9uJTlwHC-1', title: 'سنة ثانية blood heme', youtubeId: 'zKCGdxnV94c', url: 'https://youtu.be/zKCGdxnV94c' },
+      { id: 'PLbnG-DdT79tNd8rb_hsS_X6oq9uJTlwHC-2', title: 'سنة ثانية globin structure', youtubeId: 'Gapw5R8EWEk', url: 'https://youtu.be/Gapw5R8EWEk' },
+      { id: 'PLbnG-DdT79tNd8rb_hsS_X6oq9uJTlwHC-3', title: 'سنة ثانية Hb function', youtubeId: 'hwsf24XII0I', url: 'https://youtu.be/hwsf24XII0I' },
+      { id: 'PLbnG-DdT79tNd8rb_hsS_X6oq9uJTlwHC-4', title: 'O2 binding curve', youtubeId: 'DvnsBix5fcg', url: 'https://youtu.be/DvnsBix5fcg' },
+      { id: 'PLbnG-DdT79tNd8rb_hsS_X6oq9uJTlwHC-5', title: 'سنة ثانية heme synthesis', youtubeId: 'ZaDefZ51W9M', url: 'https://youtu.be/ZaDefZ51W9M' },
+      { id: 'PLbnG-DdT79tNd8rb_hsS_X6oq9uJTlwHC-6', title: 'سنة ثانية regulation of heme synthesis', youtubeId: 'hoSDF0H2Rs8', url: 'https://youtu.be/hoSDF0H2Rs8' },
+      { id: 'PLbnG-DdT79tNd8rb_hsS_X6oq9uJTlwHC-7', title: 'porpheria 1', youtubeId: 'hcmvLWe2WQs', url: 'https://youtu.be/hcmvLWe2WQs' },
+      { id: 'PLbnG-DdT79tNd8rb_hsS_X6oq9uJTlwHC-8', title: 'porpheria 2', youtubeId: 'DZKGG03jYJ0', url: 'https://youtu.be/DZKGG03jYJ0' },
+      { id: 'PLbnG-DdT79tNd8rb_hsS_X6oq9uJTlwHC-9', title: 'سنة ثانية hemoglobinopathies 1', youtubeId: 'DS9q5E04JG4', url: 'https://youtu.be/DS9q5E04JG4' },
+      { id: 'PLbnG-DdT79tNd8rb_hsS_X6oq9uJTlwHC-10', title: 'سنة ثانية hemoglobinopathies 2', youtubeId: '1-qp6F26o_g', url: 'https://youtu.be/1-qp6F26o_g' },
+      { id: 'PLbnG-DdT79tNd8rb_hsS_X6oq9uJTlwHC-11', title: 'سنة ثانية molecular biology of globin', youtubeId: 'elCPAy6J4qY', url: 'https://youtu.be/elCPAy6J4qY' },
+      { id: 'PLbnG-DdT79tNd8rb_hsS_X6oq9uJTlwHC-12', title: 'سنة ثانية iron', youtubeId: 'deADD0iO028', url: 'https://youtu.be/deADD0iO028' },
+      { id: 'PLbnG-DdT79tNd8rb_hsS_X6oq9uJTlwHC-13', title: 'سنة ثانية iron 2', youtubeId: 'JYToBqM3T98', url: 'https://youtu.be/JYToBqM3T98' },
+      { id: 'PLbnG-DdT79tNd8rb_hsS_X6oq9uJTlwHC-14', title: 'iron 3', youtubeId: 'e9qk6dxAm6U', url: 'https://youtu.be/e9qk6dxAm6U' },
+      { id: 'PLbnG-DdT79tNd8rb_hsS_X6oq9uJTlwHC-15', title: 'سنة ثانية folic acid', youtubeId: 'UCmSLYc1pf4', url: 'https://youtu.be/UCmSLYc1pf4' },
+      { id: 'PLbnG-DdT79tNd8rb_hsS_X6oq9uJTlwHC-16', title: 'سنة ثانية correction in iron metabolism', youtubeId: 'D-Z_0xa18eI', url: 'https://youtu.be/D-Z_0xa18eI' },
+      { id: 'PLbnG-DdT79tNd8rb_hsS_X6oq9uJTlwHC-17', title: 'سنة ثانية B12', youtubeId: 'w7Kc1-CAuRw', url: 'https://youtu.be/w7Kc1-CAuRw' },
+      { id: 'PLbnG-DdT79tNd8rb_hsS_X6oq9uJTlwHC-18', title: 'سنة ثانية metabolism of RBCs 1', youtubeId: 'v9NEOZQvh1M', url: 'https://youtu.be/v9NEOZQvh1M' },
+      { id: 'PLbnG-DdT79tNd8rb_hsS_X6oq9uJTlwHC-19', title: 'سنة ثانية metabolism of RBCs 2', youtubeId: 'W8yPAhRsqA0', url: 'https://youtu.be/W8yPAhRsqA0' },
+      { id: 'PLbnG-DdT79tNd8rb_hsS_X6oq9uJTlwHC-20', title: 'سنة ثانية HMP pathway metabolism of RBCs', youtubeId: 'fM7zSWuWd3M', url: 'https://youtu.be/fM7zSWuWd3M' },
+      { id: 'PLbnG-DdT79tNd8rb_hsS_X6oq9uJTlwHC-21', title: 'سنة ثانية HMP pathway 2', youtubeId: '7M9vRIvKffg', url: 'https://youtu.be/7M9vRIvKffg' },
+      { id: 'PLbnG-DdT79tNd8rb_hsS_X6oq9uJTlwHC-22', title: 'WBCs metabolism', youtubeId: 'bzXLZGUjNnM', url: 'https://youtu.be/bzXLZGUjNnM' },
+      { id: 'PLbnG-DdT79tNd8rb_hsS_X6oq9uJTlwHC-23', title: 'سنة ثانية blood module free radicals', youtubeId: 'JuGa34pDfxw', url: 'https://youtu.be/JuGa34pDfxw' }
+    ],
+    tags: ['biochemistry', 'ayman beshir', 'أيمن بشير', 'بايوكيمستري', 'playlist', 'blood']
+  },
+  {
     id: 'bld-biochem-walaa-1',
     title: 'كيمياء حيوية الدم - د. ولاء (الجزء الأول)',
     description: 'قائمة تشغيل شرح كيمياء حيوية الدم للدكتورة ولاء - الجزء الأول.',
@@ -1073,6 +1132,20 @@ export const materialsData: MaterialItem[] = [
     author: 'ASU Med Faculty',
     addedBy: 'فاعل خير',
     tags: ['biochemistry', 'lecture', 'week 1', 'day 2', 'بايوكيمستري', 'محاضرة']
+  },
+  {
+    id: 'bld-biochem-college-recordings-dropbox',
+    title: 'تسجيلات الكلية النظرية - كيمياء حيوية الدم (Biochemistry Dropbox)',
+    description: 'مجلد دروب بوكس يحتوي على التسجيلات الصوتية الرسمية لمحاضرات بايوكيمستري موديول الدم من الكلية.',
+    url: 'https://www.dropbox.com/sh/ckiuoib17zvjojm/AAAR4hodPPwN74Ak2UV-aMyWa/Semester%201/Blood%20%26%20Lymphatic%20System/Links/Theoretical/Biochemistry?dl=0&subfolder_nav_tracking=1',
+    type: 'drive',
+    category: 'lectures',
+    year: 2,
+    moduleId: 'year2-blood',
+    subject: 'Biochemistry',
+    author: 'ASU Med Faculty',
+    addedBy: 'Mohamed Waleed',
+    tags: ['biochemistry', 'dropbox', 'recordings', 'بايوكيمستري', 'تسجيلات', 'الكلية']
   },
 
   // ==========================================
@@ -1404,6 +1477,69 @@ export const materialsData: MaterialItem[] = [
       { id: "PL0_tN0panMs-zQRtyaMYxsIE9pXPwuTRy-26", title: "Parasitology Dr Ayman - CNS module", youtubeId: "fnfBJ6jrqiM", url: "https://youtu.be/fnfBJ6jrqiM" }
     ],
     tags: ['parasitology', 'ayman ibrahim', 'أيمن إبراهيم', 'بارا', 'playlist']
+  },
+  {
+    id: 'bld-para-ayman-blood-2022',
+    title: 'طفيليات الدم - د. أيمن (Dr. Ayman)',
+    description: 'قائمة تشغيل شرح طفيليات موديول الدم للدكتور أيمن متضمنة الشرح النظري والعملي.',
+    url: 'https://youtube.com/playlist?list=PLlzicty9XavE4msPbtPKy_wAml3A5jPyv',
+    type: 'playlist',
+    category: 'lectures',
+    year: 2,
+    moduleId: 'year2-blood',
+    subject: 'Parasitology',
+    author: 'Dr. Ayman',
+    addedBy: 'Mohamed Waleed',
+    playlistId: 'PLlzicty9XavE4msPbtPKy_wAml3A5jPyv',
+    videos: [
+      { id: 'PLlzicty9XavE4msPbtPKy_wAml3A5jPyv-1', title: 'Parasitology Dr Ayman - Blood module - 1', youtubeId: 'XH7wdteVrZM', url: 'https://youtu.be/XH7wdteVrZM' },
+      { id: 'PLlzicty9XavE4msPbtPKy_wAml3A5jPyv-2', title: 'Parasitology Dr Ayman - Blood module - 2', youtubeId: 'BYR8dZjeRaw', url: 'https://youtu.be/BYR8dZjeRaw' },
+      { id: 'PLlzicty9XavE4msPbtPKy_wAml3A5jPyv-3', title: 'Parasitology Dr Ayman - Blood module - 3', youtubeId: '-ODP2Y8Yv-4', url: 'https://youtu.be/-ODP2Y8Yv-4' },
+      { id: 'PLlzicty9XavE4msPbtPKy_wAml3A5jPyv-4', title: 'Parasitology Dr Ayman - Blood module - 4', youtubeId: 'zqXeq4gMa5w', url: 'https://youtu.be/zqXeq4gMa5w' },
+      { id: 'PLlzicty9XavE4msPbtPKy_wAml3A5jPyv-5', title: 'Parasitology Dr Ayman - Blood module - 5', youtubeId: '5x3s3ThlRPk', url: 'https://youtu.be/5x3s3ThlRPk' },
+      { id: 'PLlzicty9XavE4msPbtPKy_wAml3A5jPyv-6', title: 'Parasitology Dr Ayman - Blood module - 6', youtubeId: 'sxtR0OS7MpU', url: 'https://youtu.be/sxtR0OS7MpU' },
+      { id: 'PLlzicty9XavE4msPbtPKy_wAml3A5jPyv-7', title: 'Parasitology Dr Ayman - Blood module - practical', youtubeId: '6SGpZa2V9sg', url: 'https://youtu.be/6SGpZa2V9sg' }
+    ],
+    tags: ['parasitology', 'ayman', 'أيمن', 'باراسيتولوجي', 'بارا', 'playlist']
+  },
+  {
+    id: 'bld-para-noha-madbouly-playlist',
+    title: 'طفيليات الدم - د. نهى مدبولي (Dr. Noha Madbouly)',
+    description: 'شرح طفيليات موديول الدم للدكتورة نهى مدبولي (داء الفيل، الليشمانيا، التريبانوسوما، الملاريا، والمقوسات).',
+    url: 'https://youtube.com/playlist?list=PLimtggDmQRQs5G8UgXr3B5r9sDEfsuHi4',
+    type: 'playlist',
+    category: 'lectures',
+    year: 2,
+    moduleId: 'year2-blood',
+    subject: 'Parasitology',
+    author: 'Dr. Noha Madbouly',
+    addedBy: 'Mohamed Waleed',
+    playlistId: 'PLimtggDmQRQs5G8UgXr3B5r9sDEfsuHi4',
+    videos: [
+      { id: 'PLimtggDmQRQs5G8UgXr3B5r9sDEfsuHi4-1', title: 'Lymphatic filariasis (Elephantiasis) داء الفيل', youtubeId: 'tXPJynLvYmw', url: 'https://youtu.be/tXPJynLvYmw' },
+      { id: 'PLimtggDmQRQs5G8UgXr3B5r9sDEfsuHi4-2', title: 'Tropical Pulmonary Eosinophilia حساسية الصدر', youtubeId: 'tLYPriJ_yRA', url: 'https://youtu.be/tLYPriJ_yRA' },
+      { id: 'PLimtggDmQRQs5G8UgXr3B5r9sDEfsuHi4-3', title: 'Introduction to Haemoflagellates & Visceral leishmaniasis الليشمانيا الحشوية', youtubeId: 'mijhankYLuA', url: 'https://youtu.be/mijhankYLuA' },
+      { id: 'PLimtggDmQRQs5G8UgXr3B5r9sDEfsuHi4-4', title: 'Human African Trypanosomiasis (HAT) مرض النوم', youtubeId: '38htcuV0bHw', url: 'https://youtu.be/38htcuV0bHw' },
+      { id: 'PLimtggDmQRQs5G8UgXr3B5r9sDEfsuHi4-5', title: 'American trypanosomiasis (Chagas disease) داء المثقبيات الأمريكي', youtubeId: 'DQ3rF17fjms', url: 'https://youtu.be/DQ3rF17fjms' },
+      { id: 'PLimtggDmQRQs5G8UgXr3B5r9sDEfsuHi4-6', title: 'Malaria & Babesia الملاريا والبابيسيا', youtubeId: '4eKwQ1XknoY', url: 'https://youtu.be/4eKwQ1XknoY' },
+      { id: 'PLimtggDmQRQs5G8UgXr3B5r9sDEfsuHi4-7', title: 'Toxoplasma gondii داء المقوسات / التوكسوبلازما', youtubeId: 'vzDnD7Bh5Lg', url: 'https://youtu.be/vzDnD7Bh5Lg' },
+      { id: 'PLimtggDmQRQs5G8UgXr3B5r9sDEfsuHi4-8', title: 'Immunoparasitology المناعة ضد الطفيليات', youtubeId: 'SX89LixdM90', url: 'https://youtu.be/SX89LixdM90' }
+    ],
+    tags: ['parasitology', 'madbouly', 'نهى مدبولي', 'باراسيتولوجي', 'بارا', 'playlist']
+  },
+  {
+    id: 'bld-para-college-recordings-dropbox',
+    title: 'تسجيلات الكلية النظرية - طفيليات الدم (Parasitology Dropbox)',
+    description: 'مجلد دروب بوكس يحتوي على التسجيلات الصوتية الرسمية لمحاضرات طفيليات موديول الدم من الكلية.',
+    url: 'https://www.dropbox.com/sh/ckiuoib17zvjojm/AAAKlkWnOKCrhn_FZLemZl9ba/Semester%201/Blood%20%26%20Lymphatic%20System/Links/Theoretical/Parasitology?dl=0&subfolder_nav_tracking=1',
+    type: 'drive',
+    category: 'lectures',
+    year: 2,
+    moduleId: 'year2-blood',
+    subject: 'Parasitology',
+    author: 'ASU Med Faculty',
+    addedBy: 'Mohamed Waleed',
+    tags: ['parasitology', 'dropbox', 'recordings', 'باراسيتولوجي', 'تسجيلات', 'الكلية']
   },
 
   // ==========================================
