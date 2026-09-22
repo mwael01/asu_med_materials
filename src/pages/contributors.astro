@@ -65,34 +65,97 @@ const authors = getAuthors();
 </Layout>
 
 <script>
-  function closeDialog(dialog: HTMLDialogElement): void {
-    if (dialog.open) dialog.close();
-  }
+  function initContributorPopups(): void {
+    const triggers = document.querySelectorAll<HTMLButtonElement>('[data-contributor-trigger]');
+    const popups = document.querySelectorAll<HTMLElement>('[data-contributor-popup]');
+    const containers = document.querySelectorAll<HTMLElement>('.contributor-card-container');
 
-  function openDialog(dialog: HTMLDialogElement): void {
-    if (!dialog.open) dialog.showModal();
-  }
-
-  function initContributorDialogs(): void {
-    document.querySelectorAll<HTMLDialogElement>('[data-contributor-dialog]').forEach((dialog) => {
-      dialog.addEventListener('click', (event) => {
-        const target = event.target as HTMLElement;
-        if (target === dialog || target.closest('[data-contributor-close]')) {
-          closeDialog(dialog);
+    function closeAll(): void {
+      popups.forEach((p) => p.classList.add('hidden'));
+      triggers.forEach((t) => {
+        t.setAttribute('aria-expanded', 'false');
+        t.classList.remove('border-emerald-500', 'ring-2', 'ring-emerald-500/30', 'dark:border-emerald-500');
+        const chevron = t.querySelector('.contributor-chevron');
+        if (chevron) {
+          chevron.classList.remove('-rotate-90');
+          chevron.classList.add('rotate-180');
         }
       });
+      containers.forEach((c) => c.classList.remove('z-40'));
+    }
+
+    function togglePopup(id: string, trigger: HTMLButtonElement): void {
+      const popup = document.getElementById(id);
+      if (!popup) return;
+
+      const isCurrentlyOpen = !popup.classList.contains('hidden');
+
+      // Close all open popups
+      closeAll();
+
+      // If it was not open, open it
+      if (!isCurrentlyOpen) {
+        popup.classList.remove('hidden');
+        trigger.setAttribute('aria-expanded', 'true');
+        trigger.classList.add('border-emerald-500', 'ring-2', 'ring-emerald-500/30', 'dark:border-emerald-500');
+
+        const chevron = trigger.querySelector('.contributor-chevron');
+        if (chevron) {
+          chevron.classList.remove('rotate-180');
+          chevron.classList.add('-rotate-90');
+        }
+
+        const container = trigger.closest<HTMLElement>('.contributor-card-container');
+        if (container) {
+          container.classList.add('z-40');
+        }
+
+        // Smooth scroll if popup extends below visible window
+        requestAnimationFrame(() => {
+          const rect = popup.getBoundingClientRect();
+          if (rect.bottom > window.innerHeight) {
+            popup.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+          }
+        });
+      }
+    }
+
+    triggers.forEach((trigger) => {
+      trigger.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const id = trigger.getAttribute('data-contributor-trigger');
+        if (id) togglePopup(id, trigger);
+      });
     });
 
-    document.querySelectorAll<HTMLElement>('[data-contributor-trigger]').forEach((trigger) => {
-      trigger.addEventListener('click', () => {
-        const id = trigger.getAttribute('data-contributor-trigger');
-        if (!id) return;
-        const dialog = document.getElementById(id) as HTMLDialogElement | null;
-        if (dialog) openDialog(dialog);
+    // Close button inside popup
+    document.querySelectorAll<HTMLElement>('[data-contributor-close]').forEach((btn) => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        closeAll();
       });
+    });
+
+    // Prevent clicks inside popup from closing it
+    popups.forEach((popup) => {
+      popup.addEventListener('click', (e) => {
+        e.stopPropagation();
+      });
+    });
+
+    // Close on click outside
+    document.addEventListener('click', () => {
+      closeAll();
+    });
+
+    // Close on Escape key
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        closeAll();
+      }
     });
   }
 
-  initContributorDialogs();
-  document.addEventListener('astro:after-swap', initContributorDialogs);
+  initContributorPopups();
+  document.addEventListener('astro:after-swap', initContributorPopups);
 </script>

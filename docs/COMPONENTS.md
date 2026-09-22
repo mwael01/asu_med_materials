@@ -280,8 +280,7 @@ Data lives in [`src/data/contributors.json`](file:///workspaces/asu_med_material
   ```
 
 #### [`ContributorCard.astro`](file:///workspaces/asu_med_materials/src/components/contributors/ContributorCard.astro)
-- **Location**: `src/components/contributors/ContributorCard.astro`
-- **Purpose**: Compact ranked card (`#rank` + total count). Click opens an accessible native `<dialog>` with total sources and subject count, top types, per-year breakdown, contacts, and a link to the contributor's materials (`/search?q=<name>`). Dialog open/close wiring lives once in `contributors.astro` via `data-contributor-trigger` / `data-contributor-dialog` delegation (works on touch, keyboard, and desktop).
+- **Purpose**: Compact ranked card (`#rank` + total count). Click opens an accessible anchored popup card directly beneath the clicked contributor card/name with a directional pointer caret, active card highlight, total sources and subject count, top types, per-year breakdown, contacts, and a link to the contributor's materials (`/search?q=<name>`). Supports auto-closing other popups, outside click, and Escape key dismissal.
 - **Props**:
   ```typescript
   interface Props {
