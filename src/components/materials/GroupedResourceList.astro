@@ -86,18 +86,18 @@ const uncategorized = materials.filter(
           <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" />
         </svg>
       </div>
-      <h3 class="text-sm font-bold text-zinc-900 dark:text-zinc-100 mb-1">
-        لا توجد مصادر مضافة هنا حتى الآن
+      <h3 class="text-sm font-bold text-zinc-900 dark:text-zinc-100 mb-1" data-i18n="search.emptyTitle">
+        No resources added here yet
       </h3>
-      <p class="text-xs text-zinc-500 dark:text-zinc-400 mb-4 max-w-sm mx-auto">
-        الموقع جاهز لاستقبال مصادرك ودرايفاتك لتوثيقها باسمك ومشاركتها مع زملائك في الكلية.
+      <p class="text-xs text-zinc-500 dark:text-zinc-400 mb-4 max-w-sm mx-auto" data-i18n="search.emptyDesc">
+        The platform is ready for your study materials and drives to share with classmates.
       </p>
       <a
         href="/contribute"
         class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-emerald-600 text-white hover:bg-emerald-700 text-xs font-bold transition-colors shadow-2xs"
       >
-        <span>مشاركة مصدر دراسي</span>
-        <svg class="w-3.5 h-3.5 rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <span data-i18n="nav.contribute">Share a Study Resource</span>
+        <svg class="w-3.5 h-3.5 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
           <path stroke-linecap="round" stroke-linejoin="round" d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5" />
         </svg>
       </a>
@@ -106,12 +106,12 @@ const uncategorized = materials.filter(
     grouped.map(({ config, items }) => (
       <section class="material-group-section" data-category={config.key}>
         <div class="flex items-center gap-2 mb-3 pb-2 border-b border-zinc-200 dark:border-zinc-800">
-          <h3 class="text-base font-bold text-zinc-900 dark:text-zinc-100">
-            {config.titleAr}
+          <h3
+            class="text-base font-bold text-zinc-900 dark:text-zinc-100"
+            data-i18n={`categories.${config.key}`}
+          >
+            {config.titleEn}
           </h3>
-          <span class="text-xs text-zinc-400 dark:text-zinc-500 font-medium hidden sm:inline">
-            ({config.titleEn})
-          </span>
         </div>
 
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 materials-grid">
@@ -126,8 +126,8 @@ const uncategorized = materials.filter(
   {uncategorized.length > 0 && (
     <section class="material-group-section" data-category="other">
       <div class="flex items-center gap-2 mb-3 pb-2 border-b border-zinc-200 dark:border-zinc-800">
-        <h3 class="text-base font-bold text-zinc-900 dark:text-zinc-100">
-          مصادر أخرى متنوعة
+        <h3 class="text-base font-bold text-zinc-900 dark:text-zinc-100" data-i18n="types.other">
+          Other Resources
         </h3>
       </div>
 

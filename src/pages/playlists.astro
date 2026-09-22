@@ -13,26 +13,26 @@ const subjects = Array.from(
 ---
 
 <Layout
-  title="قوائم التشغيل والشروحات المرئية - ASU Med Materials"
-  description="جميع سلاسل وقوائم تشغيل موديول الدم لطب عين شمس مع مشغّل فيديو مدمج وإمكانية تتبع المحاضرات المنجزة."
+  title="Playlists & Video Series - ASU Med Materials"
+  description="All playlists and video series for the Blood & Lymphatic System module with built-in player and progress tracking."
 >
   <!-- Header -->
-  <div class="mb-8 text-right">
+  <div class="mb-8 text-start">
     <div class="flex items-center gap-2 text-xs text-zinc-500 dark:text-zinc-400 mb-2">
-      <a href="/?redirect=false" class="hover:text-emerald-600 dark:hover:text-emerald-400">الرئيسية</a>
+      <a href="/?redirect=false" data-i18n="nav.home" class="hover:text-emerald-600 dark:hover:text-emerald-400">Home</a>
       <span>/</span>
-      <a href="/module/year2-blood" class="hover:text-emerald-600 dark:hover:text-emerald-400">موديول الدم</a>
+      <a href="/module/year2-blood" class="hover:text-emerald-600 dark:hover:text-emerald-400" data-i18n="playlists.breadcrumbModule">Blood Module</a>
       <span>/</span>
-      <span class="text-zinc-900 dark:text-zinc-100 font-bold">قوائم التشغيل</span>
+      <span class="text-zinc-900 dark:text-zinc-100 font-bold" data-i18n="playlists.breadcrumbCurrent">Playlists</span>
     </div>
 
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-zinc-200 dark:border-zinc-800 pb-4">
       <div>
-        <h1 class="text-2xl font-extrabold text-zinc-900 dark:text-zinc-100">
-          قوائم التشغيل
+        <h1 class="text-2xl font-extrabold text-zinc-900 dark:text-zinc-100" data-i18n="playlists.title">
+          Playlists
         </h1>
-        <p class="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5">
-          شروحات وسلاسل الفيديو لموديول الدم.
+        <p class="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5" data-i18n="playlists.subtitle">
+          Video lectures and playlists for the Blood & Lymphatic System module.
         </p>
       </div>
 
@@ -41,7 +41,7 @@ const subjects = Array.from(
           href="/module/year2-blood"
           class="text-xs font-semibold px-3 py-1.5 rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-zinc-700 dark:text-zinc-200 hover:bg-zinc-50 transition-colors shadow-2xs"
         >
-          كل مصادر موديول الدم &larr;
+          <span data-i18n="playlists.backToModule">All Blood Module Resources</span> &rarr;
         </a>
       </div>
     </div>
@@ -54,7 +54,9 @@ const subjects = Array.from(
       data-subject="all"
       class="sub-pill shrink-0 text-xs font-bold px-3.5 py-1.5 rounded-full bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900 transition-colors cursor-pointer"
     >
-      جميع المواد ({playlists.length})
+      <span data-i18n="playlists.allPlaylistsCount" data-i18n-params={JSON.stringify({ n: playlists.length })}>
+        All Subjects ({playlists.length})
+      </span>
     </button>
     {subjects.map((sub) => {
       const count = playlists.filter((p) => p.subject === sub).length;

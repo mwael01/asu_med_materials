@@ -32,7 +32,12 @@ This document details all UI components, their props, intended reuse guidelines,
 
 #### [`Navbar.astro`](file:///workspaces/asu_med_materials/src/components/navigation/Navbar.astro)
 - **Location**: `src/components/navigation/Navbar.astro`
-- **Purpose**: Compact top navigation bar (`h-12`) with clean text brand title (`ASU Med Materials`), academic year links, search shortcut, year indicator badge (`#nav-user-year-badge`), bookmark drawer trigger, and theme switch.
+- **Purpose**: Compact top navigation bar (`h-12`) with clean text brand title (`ASU Med Materials`), academic year links, search shortcut, year indicator badge (`#nav-user-year-badge`), language switcher (`LanguageToggle.astro`), bookmark drawer trigger, and theme switch.
+- **Props**: None.
+
+#### [`LanguageToggle.astro`](file:///workspaces/asu_med_materials/src/components/common/LanguageToggle.astro)
+- **Location**: `src/components/common/LanguageToggle.astro`
+- **Purpose**: Instant topbar language toggle button with a globe icon and language indicator badge (`AR` / `EN`). Triggers instantaneous in-place DOM translation without reloading or changing the URL route, updates `document.documentElement.lang` and `dir="ltr"` / `dir="rtl"`, persists user choice in `localStorage.getItem('asumed_lang')`, and dispatches `asumed-language-changed` for dynamic client components.
 - **Props**: None.
 
 #### [`Footer.astro`](file:///workspaces/asu_med_materials/src/components/navigation/Footer.astro)

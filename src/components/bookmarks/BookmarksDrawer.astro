@@ -17,8 +17,8 @@ import { materialsData } from '../../data/materials';
       <svg class="w-5 h-5 text-amber-500 fill-amber-500" viewBox="0 0 24 24">
         <path d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
       </svg>
-      <h2 id="bookmarks-drawer-title" class="font-bold text-zinc-900 dark:text-zinc-100 text-base">
-        المصادر المحفوظة
+      <h2 id="bookmarks-drawer-title" data-i18n="bookmarks.title" class="font-bold text-zinc-900 dark:text-zinc-100 text-base">
+        Saved Resources
       </h2>
       <span id="bookmarks-count-badge" class="text-xs px-2 py-0.5 rounded-full bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 font-bold">
         0
@@ -29,7 +29,8 @@ import { materialsData } from '../../data/materials';
       type="button"
       id="close-bookmarks-drawer"
       class="p-1.5 text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
-      aria-label="إغلاق قائمة المحفوظات"
+      data-i18n-attr="aria-label:bookmarks.closeLabel"
+      aria-label="Close bookmarks drawer"
     >
       <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
         <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
@@ -43,9 +44,9 @@ import { materialsData } from '../../data/materials';
       <svg class="w-10 h-10 mx-auto text-zinc-300 dark:text-zinc-700 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17.593 3.322c1.1.128 1.907 1.077 1.907 2.185V21L12 17.25 4.5 21V5.507c0-1.108.806-2.057 1.907-2.185a48.507 48.507 0 0111.186 0z" />
       </svg>
-      <p class="text-sm font-bold text-zinc-700 dark:text-zinc-300">مفيش مصادر محفوظة لسه</p>
-      <p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 max-w-xs mx-auto">
-        دوس على علامة الـ Bookmark في أي كارت علشان تحفظه هنا وتفتحه بسرعة حتى لو أوفلاين.
+      <p class="text-sm font-bold text-zinc-700 dark:text-zinc-300" data-i18n="bookmarks.emptyTitle">No saved resources yet</p>
+      <p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 max-w-xs mx-auto" data-i18n="bookmarks.emptyDesc">
+        Click the Bookmark icon on any card to save it here for fast offline access.
       </p>
     </div>
 
@@ -56,8 +57,8 @@ import { materialsData } from '../../data/materials';
 
   <!-- Drawer Footer -->
   <div class="p-3 border-t border-zinc-200 dark:border-zinc-800 text-center">
-    <p class="text-[11px] text-zinc-400 dark:text-zinc-500">
-      محفوظة محلياً على جهازك • متاحة أوفلاين بدون نت
+    <p class="text-[11px] text-zinc-400 dark:text-zinc-500" data-i18n="bookmarks.footerNote">
+      Saved locally on your device • Available offline
     </p>
   </div>
 </aside>
@@ -171,25 +172,26 @@ import { materialsData } from '../../data/materials';
 
       emptyState.classList.add('hidden');
       cardsContainer.classList.remove('hidden');
+      const isAr = document.documentElement.lang === 'ar';
       cardsContainer.innerHTML = bookmarked
         .map(
           (item) => `
-        <div class="p-3 bg-zinc-50 dark:bg-zinc-800/60 border border-zinc-200 dark:border-zinc-700/60 rounded-xl flex items-center justify-between gap-3 text-right">
+        <div class="p-3 bg-zinc-50 dark:bg-zinc-800/60 border border-zinc-200 dark:border-zinc-700/60 rounded-xl flex items-center justify-between gap-3 text-start">
           <div class="min-w-0 flex-1">
             <span class="text-[10px] font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">
-              السنة ${item.year} • ${item.type}
+              ${isAr ? `السنة ${item.year}` : `Year ${item.year}`} • ${item.type}
             </span>
             <a href="${item.url}" target="_blank" rel="noopener noreferrer" class="block text-xs font-bold text-zinc-900 dark:text-zinc-100 hover:text-emerald-600 truncate mt-0.5">
               ${item.title}
             </a>
           </div>
           <div class="flex items-center gap-1 shrink-0">
-            <a href="${item.url}" target="_blank" rel="noopener noreferrer" class="p-1.5 text-zinc-500 hover:text-emerald-600 rounded-md hover:bg-zinc-200 dark:hover:bg-zinc-700" title="فتح الرابط">
-              <svg class="w-4 h-4 rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <a href="${item.url}" target="_blank" rel="noopener noreferrer" class="p-1.5 text-zinc-500 hover:text-emerald-600 rounded-md hover:bg-zinc-200 dark:hover:bg-zinc-700" title="${isAr ? 'فتح الرابط' : 'Open Resource'}">
+              <svg class="w-4 h-4 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
               </svg>
             </a>
-            <button type="button" class="remove-bookmark-btn p-1.5 text-zinc-400 hover:text-rose-500 rounded-md hover:bg-zinc-200 dark:hover:bg-zinc-700" data-id="${item.id}" title="حذف من المحفوظات">
+            <button type="button" class="remove-bookmark-btn p-1.5 text-zinc-400 hover:text-rose-500 rounded-md hover:bg-zinc-200 dark:hover:bg-zinc-700 cursor-pointer" data-id="${item.id}" title="${isAr ? 'حذف من المحفوظات' : 'Remove Bookmark'}">
               <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
               </svg>
@@ -212,6 +214,8 @@ import { materialsData } from '../../data/materials';
         });
       });
     }
+
+    window.addEventListener('asumed-language-changed', renderBookmarks);
 
     function openDrawer(): void {
       renderBookmarks();

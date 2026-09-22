@@ -26,23 +26,29 @@
       const showFn = (window as any).showToast;
       if (typeof showFn !== 'function') return;
 
+      const isAr = document.documentElement.lang === 'ar';
+
       if (isIos) {
         showFn({
           id: 'pwa-install-toast',
           type: 'pwa',
-          title: 'تثبيت التطبيق على الشاشة الرئيسية',
-          message: 'اضغط على زر المشاركة في متصفح Safari ثم اختر "إضافة إلى الصفحة الرئيسية (+)".',
+          title: isAr ? 'تثبيت التطبيق على الشاشة الرئيسية' : 'Install App to Home Screen',
+          message: isAr
+            ? 'اضغط على زر المشاركة في متصفح Safari ثم اختر "إضافة إلى الصفحة الرئيسية (+)".'
+            : 'Tap the Share button in Safari and choose "Add to Home Screen (+)".',
           duration: 10000
         });
       } else {
         showFn({
           id: 'pwa-install-toast',
           type: 'pwa',
-          title: 'تثبيت التطبيق',
-          message: 'نزّل الموقع كتطبيق خفيف على جهازك لتصفح المصادر بسرعة وبدون شريط المتصفح.',
+          title: isAr ? 'تثبيت التطبيق' : 'Install Web App',
+          message: isAr
+            ? 'نزّل الموقع كتطبيق خفيف على جهازك لتصفح المصادر بسرعة وبدون شريط المتصفح.'
+            : 'Install this app on your device for faster access and offline capabilities.',
           duration: 0, // Keeps it visible until user action
           action: {
-            label: 'تثبيت الآن',
+            label: isAr ? 'تثبيت الآن' : 'Install Now',
             onClick: async () => {
               if (deferredPrompt) {
                 try {

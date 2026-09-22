@@ -18,35 +18,29 @@ export function getStaticPaths() {
 const { yearNum } = Astro.props;
 const modules = getModulesByYear(yearNum);
 const materials = getMaterialsByYear(yearNum);
-
-const yearNames: Record<number, string> = {
-  1: 'السنة الأولى (Year 1)',
-  2: 'السنة الثانية (Year 2)',
-  3: 'السنة الثالثة (Year 3)',
-  4: 'السنة الرابعة (Year 4)',
-  5: 'السنة الخامسة (Year 5)'
-};
 ---
 
 <Layout
-  title={`مصادر ${yearNames[yearNum]} - ASU Med Materials`}
-  description={`جميع موديولات ودرايفات وقنوات وورق مذكرات ${yearNames[yearNum]} بكلية الطب جامعة عين شمس.`}
+  title={`Year ${yearNum} Resources - ASU Med Materials`}
+  description={`Modules, drives, and study notes for Year ${yearNum} at ASU Faculty of Medicine.`}
 >
   <!-- Breadcrumb & Year Tabs -->
   <div class="mb-6">
     <div class="flex items-center gap-2 text-xs text-zinc-500 dark:text-zinc-400 mb-2">
-      <a href="/?redirect=false" class="hover:text-emerald-600 dark:hover:text-emerald-400">الرئيسية</a>
+      <a href="/?redirect=false" data-i18n="nav.home" class="hover:text-emerald-600 dark:hover:text-emerald-400">Home</a>
       <span>/</span>
-      <span class="text-zinc-900 dark:text-zinc-100 font-bold">{yearNames[yearNum]}</span>
+      <span class="text-zinc-900 dark:text-zinc-100 font-bold" data-i18n="nav.year" data-i18n-params={JSON.stringify({ y: yearNum })}>Year {yearNum}</span>
     </div>
 
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-zinc-200 dark:border-zinc-800 pb-4">
       <div>
-        <h1 class="text-2xl font-extrabold text-zinc-900 dark:text-zinc-100">
-          {yearNames[yearNum]}
+        <h1 class="text-2xl font-extrabold text-zinc-900 dark:text-zinc-100" data-i18n="nav.year" data-i18n-params={JSON.stringify({ y: yearNum })}>
+          Year {yearNum}
         </h1>
         <p class="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5">
-          {modules.length} موديولات دراسية • {materials.length} مصادر تعليمية معتمدة
+          <span data-i18n="year.modulesCount" data-i18n-params={JSON.stringify({ n: modules.length })}>{modules.length} Study Modules</span>
+          {' • '}
+          <span data-i18n="year.materialsCount" data-i18n-params={JSON.stringify({ n: materials.length })}>{materials.length} Verified Resources</span>
         </p>
       </div>
 
@@ -57,15 +51,15 @@ const yearNames: Record<number, string> = {
   <!-- Modules Grid -->
   <section class="mb-10">
     <div class="flex items-center justify-between mb-3">
-      <h2 class="text-base font-bold text-zinc-900 dark:text-zinc-100">
-        موديولات وبلوكات {yearNames[yearNum]}
+      <h2 class="text-base font-bold text-zinc-900 dark:text-zinc-100" data-i18n="year.modulesTitle">
+        Year Modules
       </h2>
     </div>
 
     {modules.length === 0 ? (
       <div class="py-8 text-center border border-dashed border-zinc-200 dark:border-zinc-800 rounded-xl p-6 bg-white dark:bg-zinc-900/60">
         <p class="text-xs text-zinc-500 dark:text-zinc-400">
-          لا توجد موديولات مضافة حالياً في هذه السنة الدراسية، المتاح حالياً موديول الدم (السنة الثانية).
+          No modules added yet for this year. Blood Module (Year 2) is currently available.
         </p>
       </div>
     ) : (
@@ -81,8 +75,8 @@ const yearNames: Record<number, string> = {
   <!-- Grouped Materials List for This Year -->
   <section>
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-6">
-      <h2 class="text-base font-bold text-zinc-900 dark:text-zinc-100">
-        جميع مصادر وورق شرح {yearNames[yearNum]} (مصنفة)
+      <h2 class="text-base font-bold text-zinc-900 dark:text-zinc-100" data-i18n="year.centralDrivesTitle">
+        Central Batch Resources
       </h2>
       <FilterToolbar />
     </div>

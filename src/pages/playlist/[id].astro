@@ -52,18 +52,18 @@ const initialEmbedUrl = hasDiscreteVideos
 
 <Layout
   title={`${playlist.title} - ASU Med Materials`}
-  description={`قائمة تشغيل ${playlist.title}.`}
+  description={`Playlists and lecture series for ${playlist.title}.`}
 >
   <!-- Breadcrumb -->
-  <nav class="flex items-center gap-2 text-xs text-zinc-500 dark:text-zinc-400 mb-4" aria-label="مسار التنقل">
-    <a href="/?redirect=false" class="hover:text-emerald-600 dark:hover:text-emerald-400">الرئيسية</a>
+  <nav class="flex items-center gap-2 text-xs text-zinc-500 dark:text-zinc-400 mb-4" aria-label="Breadcrumb navigation">
+    <a href="/?redirect=false" data-i18n="nav.home" class="hover:text-emerald-600 dark:hover:text-emerald-400">Home</a>
     <span>/</span>
-    <a href="/playlists" class="hover:text-emerald-600 dark:hover:text-emerald-400">قوائم التشغيل</a>
+    <a href="/playlists" data-i18n="playlists.title" class="hover:text-emerald-600 dark:hover:text-emerald-400">Playlists</a>
     <span>/</span>
     {playlist.moduleId && (
       <>
-        <a href={`/module/${playlist.moduleId}`} class="hover:text-emerald-600 dark:hover:text-emerald-400">
-          موديول الدم
+        <a href={`/module/${playlist.moduleId}`} class="hover:text-emerald-600 dark:hover:text-emerald-400" data-i18n="playlists.breadcrumbModule">
+          Blood Module
         </a>
         <span>/</span>
       </>
@@ -83,7 +83,7 @@ const initialEmbedUrl = hasDiscreteVideos
   </nav>
 
   <!-- Playlist Header & Progress Banner -->
-  <div class="bg-white dark:bg-zinc-900 border border-zinc-200/90 dark:border-zinc-800 rounded-2xl p-4 sm:p-6 mb-6 text-right shadow-2xs">
+  <div class="bg-white dark:bg-zinc-900 border border-zinc-200/90 dark:border-zinc-800 rounded-2xl p-4 sm:p-6 mb-6 text-start shadow-2xs">
     <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
       <div>
         <div class="flex flex-wrap items-center gap-2 mb-2">
@@ -93,8 +93,8 @@ const initialEmbedUrl = hasDiscreteVideos
               {playlist.subject}
             </span>
           )}
-          <span class="text-xs font-semibold px-2 py-0.5 rounded bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800/40">
-            السنة {playlist.year}
+          <span class="text-xs font-semibold px-2 py-0.5 rounded bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800/40" data-i18n="nav.year" data-i18n-params={JSON.stringify({ y: playlist.year })}>
+            Year {playlist.year}
           </span>
         </div>
 
@@ -111,12 +111,12 @@ const initialEmbedUrl = hasDiscreteVideos
         <div class="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-zinc-500 dark:text-zinc-400 font-medium">
           {authorText && (
             <p>
-              إعداد: <span class="text-zinc-800 dark:text-zinc-200 font-semibold">{authorText}</span>
+              <span data-i18n="card.by">By:</span> <span class="text-zinc-800 dark:text-zinc-200 font-semibold">{authorText}</span>
             </p>
           )}
           {addedByText && (
             <p>
-              أضافها: <span class="text-zinc-800 dark:text-zinc-200 font-semibold">{addedByText}</span>
+              <span data-i18n="card.addedBy">Added by:</span> <span class="text-zinc-800 dark:text-zinc-200 font-semibold">{addedByText}</span>
             </p>
           )}
         </div>
@@ -125,7 +125,7 @@ const initialEmbedUrl = hasDiscreteVideos
       <!-- Watch Progress Card -->
       <div class="w-full lg:w-72 bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700/60 rounded-xl p-3.5 shrink-0">
         <div class="flex items-center justify-between text-xs font-bold mb-1.5">
-          <span class="text-zinc-700 dark:text-zinc-300">الإنجاز</span>
+          <span class="text-zinc-700 dark:text-zinc-300" id="progress-heading">Progress</span>
           <span id="progress-percent-label" class="text-emerald-600 dark:text-emerald-400">0%</span>
         </div>
 
@@ -139,13 +139,13 @@ const initialEmbedUrl = hasDiscreteVideos
         </div>
 
         <div class="flex items-center justify-between text-[11px] text-zinc-500 dark:text-zinc-400">
-          <span id="progress-count-label">0 من {hasDiscreteVideos ? videos.length : 8} مكتمل</span>
+          <span id="progress-count-label">0 of {hasDiscreteVideos ? videos.length : 8} completed</span>
           <button
             type="button"
             id="reset-progress-btn"
             class="hover:text-red-500 dark:hover:text-red-400 transition-colors cursor-pointer underline"
           >
-            إعادة الضبط
+            <span id="reset-progress-text">Reset</span>
           </button>
         </div>
       </div>
@@ -154,7 +154,7 @@ const initialEmbedUrl = hasDiscreteVideos
 
   <!-- Main Player & Playlist Grid -->
   <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-    <!-- Video Player Section (Left / Center in RTL) -->
+    <!-- Video Player Section -->
     <div class="lg:col-span-8 space-y-4">
       <!-- Player Container (Responsive 16:9) -->
       <div class="relative w-full aspect-video rounded-2xl overflow-hidden bg-black shadow-lg border border-zinc-800">
@@ -169,7 +169,7 @@ const initialEmbedUrl = hasDiscreteVideos
       </div>
 
       <!-- Player Controls & Current Playing Bar -->
-      <div class="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-right">
+      <div class="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-start">
         <div class="flex items-center gap-2.5">
           <span class="w-2.5 h-2.5 rounded-full bg-red-600 shrink-0"></span>
           <h2 id="current-video-title" class="text-sm font-bold text-zinc-900 dark:text-zinc-100 truncate max-w-md">
@@ -187,7 +187,7 @@ const initialEmbedUrl = hasDiscreteVideos
             <svg class="w-4 h-4 check-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
               <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
             </svg>
-            <span id="toggle-done-text">تحديد كمكتمل</span>
+            <span id="toggle-done-text">Mark as Completed</span>
           </button>
 
           <!-- External YouTube Link -->
@@ -196,12 +196,12 @@ const initialEmbedUrl = hasDiscreteVideos
             target="_blank"
             rel="noopener noreferrer"
             class="inline-flex items-center gap-1 text-xs font-medium px-3 py-1.5 rounded-lg border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors"
-            title="فتح في تطبيق YouTube"
+            title="Open in YouTube"
           >
             <svg class="w-3.5 h-3.5 text-red-600" fill="currentColor" viewBox="0 0 24 24">
               <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
             </svg>
-            <span>يوتيوب</span>
+            <span>YouTube</span>
           </a>
         </div>
       </div>
@@ -214,32 +214,32 @@ const initialEmbedUrl = hasDiscreteVideos
             id="prev-video-btn"
             class="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer transition-colors"
           >
-            <span>&larr; الفيديو السابق</span>
+            <span class="rtl:rotate-180 inline-block">&larr;</span> <span>Previous Video</span>
           </button>
-          <span class="text-xs text-zinc-400" id="video-stepper-label">1 من {videos.length}</span>
+          <span class="text-xs text-zinc-400" id="video-stepper-label">1 of {videos.length}</span>
           <button
             type="button"
             id="next-video-btn"
             class="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer transition-colors"
           >
-            <span>الفيديو التالي &rarr;</span>
+            <span>Next Video</span> <span class="rtl:rotate-180 inline-block">&rarr;</span>
           </button>
         </div>
       )}
     </div>
 
-    <!-- Playlist / Checkpoints Sidebar (Right in RTL) -->
-    <div class="lg:col-span-4 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl p-4 text-right shadow-2xs">
+    <!-- Playlist / Checkpoints Sidebar -->
+    <div class="lg:col-span-4 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl p-4 text-start shadow-2xs">
       <div class="flex items-center justify-between pb-3 mb-3 border-b border-zinc-100 dark:border-zinc-800">
-        <h3 class="text-sm font-bold text-zinc-900 dark:text-zinc-100">
-          المحاضرات
+        <h3 class="text-sm font-bold text-zinc-900 dark:text-zinc-100" id="lectures-sidebar-heading">
+          Lectures
         </h3>
         <button
           type="button"
           id="mark-all-done-btn"
           class="text-xs font-semibold text-emerald-600 dark:text-emerald-400 hover:underline cursor-pointer"
         >
-          تحديد الكل ✓
+          <span id="mark-all-done-text">Mark All ✓</span>
         </button>
       </div>
 
@@ -362,12 +362,17 @@ const initialEmbedUrl = hasDiscreteVideos
     }
 
     function updateProgressUI() {
+      const isEn = document.documentElement.lang === 'en';
       const watchedCount = Object.values(watchedMap).filter(Boolean).length;
       const percent = Math.round((watchedCount / totalItemsCount) * 100);
 
       if (progressBarFill) progressBarFill.style.width = `${percent}%`;
       if (progressPercentLabel) progressPercentLabel.textContent = `${percent}%`;
-      if (progressCountLabel) progressCountLabel.textContent = `${watchedCount} من ${totalItemsCount} مكتمل`;
+      if (progressCountLabel) {
+        progressCountLabel.textContent = isEn
+          ? `${watchedCount} of ${totalItemsCount} completed`
+          : `${watchedCount} من ${totalItemsCount} مكتمل`;
+      }
 
       // Update checkboxes UI and completion text styles
       document.querySelectorAll('.video-done-checkbox, .checkpoint-done-checkbox').forEach((box) => {
@@ -400,7 +405,9 @@ const initialEmbedUrl = hasDiscreteVideos
         const currentId = videoItems[currentIndex]?.getAttribute('data-video-id');
         const isCurrentDone = Boolean(watchedMap[currentId]);
         if (toggleDoneText) {
-          toggleDoneText.textContent = isCurrentDone ? 'مكتمل ✓' : 'تحديد كمكتمل';
+          toggleDoneText.textContent = isCurrentDone
+            ? (isEn ? 'Completed ✓' : 'مكتمل ✓')
+            : (isEn ? 'Mark Completed' : 'تحديد كمكتمل');
         }
         if (toggleCurrentDoneBtn) {
           if (isCurrentDone) {
@@ -413,7 +420,9 @@ const initialEmbedUrl = hasDiscreteVideos
         // Full playlist mode
         const allDone = watchedCount === totalItemsCount;
         if (toggleDoneText) {
-          toggleDoneText.textContent = allDone ? 'السلسلة مكتملة ✓' : 'تحديد كمكتمل';
+          toggleDoneText.textContent = allDone
+            ? (isEn ? 'Series Completed ✓' : 'السلسلة مكتملة ✓')
+            : (isEn ? 'Mark Completed' : 'تحديد كمكتمل');
         }
       }
     }
@@ -432,7 +441,10 @@ const initialEmbedUrl = hasDiscreteVideos
         currentTitleEl.textContent = title;
       }
       if (stepperLabel) {
-        stepperLabel.textContent = `${idx + 1} من ${videoItems.length}`;
+        const isEn = document.documentElement.lang === 'en';
+        stepperLabel.textContent = isEn
+          ? `${idx + 1} of ${videoItems.length}`
+          : `${idx + 1} من ${videoItems.length}`;
       }
 
       // Highlight active in list
@@ -551,7 +563,11 @@ const initialEmbedUrl = hasDiscreteVideos
 
     // Reset progress
     resetProgressBtn?.addEventListener('click', () => {
-      if (confirm('هل تريد بالتأكيد إعادة ضبط سجل المشاهدة لهذه القائمة؟')) {
+      const isEn = document.documentElement.lang === 'en';
+      const confirmMsg = isEn
+        ? 'Are you sure you want to reset watch progress for this playlist?'
+        : 'هل تريد بالتأكيد إعادة ضبط سجل المشاهدة لهذه القائمة؟';
+      if (confirm(confirmMsg)) {
         watchedMap = {};
         saveState();
       }
@@ -560,6 +576,17 @@ const initialEmbedUrl = hasDiscreteVideos
     // Steppers
     prevBtn?.addEventListener('click', () => switchVideo(currentIndex - 1));
     nextBtn?.addEventListener('click', () => switchVideo(currentIndex + 1));
+
+    // React to language toggle
+    window.addEventListener('asumed-language-changed', () => {
+      updateProgressUI();
+      if (stepperLabel && videoItems.length > 0) {
+        const isEn = document.documentElement.lang === 'en';
+        stepperLabel.textContent = isEn
+          ? `${currentIndex + 1} of ${videoItems.length}`
+          : `${currentIndex + 1} من ${videoItems.length}`;
+      }
+    });
 
     // Initialize first video highlight & progress
     if (hasDiscreteVideos && videoItems.length > 0) {

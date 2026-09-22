@@ -6,22 +6,22 @@ import DetailedSubmitForm from '../components/contribute/DetailedSubmitForm.astr
 ---
 
 <Layout
-  title="شارك مصادرك ومذكراتك - ASU Med Materials"
-  description="شارك مصادر ودرايفات وقنوات ورسائل مجمعة لدعم زملائك الطلاب في كلية الطب جامعة عين شمس."
+  title="Share Your Resources & Notes - ASU Med Materials"
+  description="Share batch drives, lecture notes, and study collections to support your colleagues at Ain Shams University Faculty of Medicine."
 >
-  <div class="max-w-xl mx-auto py-3 text-right">
+  <div class="max-w-xl mx-auto py-3 text-start">
     <!-- Breadcrumb & Header -->
     <div class="mb-5">
       <div class="flex items-center gap-1.5 text-xs text-zinc-500 dark:text-zinc-400 mb-2">
-        <a href="/?redirect=false" class="hover:text-emerald-600 dark:hover:text-emerald-400">الرئيسية</a>
+        <a href="/?redirect=false" data-i18n="nav.home" class="hover:text-emerald-600 dark:hover:text-emerald-400">Home</a>
         <span>/</span>
-        <span class="text-zinc-900 dark:text-zinc-100 font-bold">مشاركة مصدر</span>
+        <span class="text-zinc-900 dark:text-zinc-100 font-bold" data-i18n="contribute.breadcrumbContribute">Contribute Material</span>
       </div>
-      <h1 class="text-xl sm:text-2xl font-extrabold text-zinc-900 dark:text-zinc-100 mb-1">
-        شارك مصادرك ومذكراتك
+      <h1 class="text-xl sm:text-2xl font-extrabold text-zinc-900 dark:text-zinc-100 mb-1" data-i18n="contribute.title">
+        Share Your Resources & Notes
       </h1>
-      <p class="text-xs text-zinc-500 dark:text-zinc-400 leading-relaxed">
-        شارك درايفات الدفعة، ورق الشرح، أو الصق رسائل الواتساب والتجميعات مباشرة وسنتولى تنظيمها.
+      <p class="text-xs text-zinc-500 dark:text-zinc-400 leading-relaxed" data-i18n="contribute.subtitle">
+        Share batch drives, lecture notes, or paste WhatsApp collections directly and we will organize them.
       </p>
     </div>
 
@@ -29,7 +29,8 @@ import DetailedSubmitForm from '../components/contribute/DetailedSubmitForm.astr
     <div class="mb-5 p-3 rounded-xl bg-emerald-50/80 dark:bg-emerald-950/40 border border-emerald-200/80 dark:border-emerald-800/60 flex items-center gap-2.5 text-xs">
       <span class="text-emerald-600 dark:text-emerald-400 text-sm">🌟</span>
       <p class="text-zinc-700 dark:text-zinc-300 leading-normal">
-        <strong>توثيق الإعداد:</strong> أي مصدر أو تجميعة تشاركها بنوثق عليها اسمك كـ <strong>إعداد</strong> و <strong>مساهمة</strong> تقديراً لمجهودكم.
+        <strong data-i18n="contribute.creditStrong">Author Attribution:</strong>{' '}
+        <span data-i18n="contribute.creditDesc">Any resource or collection you share will cite your name for preparation and contribution in appreciation of your efforts.</span>
       </p>
     </div>
 
@@ -41,7 +42,7 @@ import DetailedSubmitForm from '../components/contribute/DetailedSubmitForm.astr
         class="flex-1 py-1.5 px-3 text-xs font-bold rounded-lg transition-all flex items-center justify-center gap-1 cursor-pointer bg-white dark:bg-zinc-900 text-emerald-700 dark:text-emerald-400 shadow-xs"
         aria-selected="true"
       >
-        <span>⚡ تفريغ مجمع (واتساب)</span>
+        <span data-i18n="contribute.tabDump">⚡ Quick Dump (WhatsApp)</span>
       </button>
       <button
         type="button"
@@ -49,7 +50,7 @@ import DetailedSubmitForm from '../components/contribute/DetailedSubmitForm.astr
         class="flex-1 py-1.5 px-3 text-xs font-medium rounded-lg transition-all flex items-center justify-center gap-1 cursor-pointer text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200"
         aria-selected="false"
       >
-        <span>📝 رابط محدد</span>
+        <span data-i18n="contribute.tabDetailed">📝 Specific Link</span>
       </button>
     </div>
 

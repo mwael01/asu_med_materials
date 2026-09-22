@@ -24,7 +24,8 @@ const years = [
       type="button"
       id="close-multistage-btn"
       class="absolute top-4 left-4 p-2 text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors hidden"
-      aria-label="إغلاق النافذة"
+      data-i18n-attr="aria-label:selector.closeLabel"
+      aria-label="Close selection modal"
     >
       <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
         <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
@@ -39,15 +40,15 @@ const years = [
 
     <!-- Stage 1: Choose Academic Year -->
     <div id="selection-stage-1" class="space-y-4">
-      <div class="text-right">
-        <span class="text-xs font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">
-          الخطوة 1 من 2
+      <div class="text-start">
+        <span data-i18n="selector.step1Of2" class="text-xs font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">
+          Step 1 of 2
         </span>
-        <h2 id="multistage-title" class="text-xl font-bold text-zinc-900 dark:text-zinc-100 mt-1">
-          اختر سنتك الدراسية
+        <h2 id="multistage-title" data-i18n="selector.step1Title" class="text-xl font-bold text-zinc-900 dark:text-zinc-100 mt-1">
+          Choose Your Academic Year
         </h2>
-        <p class="text-xs text-zinc-500 dark:text-zinc-400 mt-1">
-          هنحفظ اختيارك علشان تظهر لك موديولات وداتا سنتك تلقائياً.
+        <p data-i18n="selector.step1Desc" class="text-xs text-zinc-500 dark:text-zinc-400 mt-1">
+          We will remember your selection to show your year modules and materials automatically.
         </p>
       </div>
 
@@ -56,22 +57,26 @@ const years = [
           <button
             type="button"
             data-stage-year={y.year}
-            class="stage-year-btn group flex items-center justify-between p-3.5 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-800/40 hover:bg-emerald-50 dark:hover:bg-emerald-950/30 hover:border-emerald-500 transition-all text-right cursor-pointer"
+            class="stage-year-btn group flex items-center justify-between p-3.5 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-800/40 hover:bg-emerald-50 dark:hover:bg-emerald-950/30 hover:border-emerald-500 transition-all text-start cursor-pointer"
           >
             <div class="flex items-center gap-3">
               <div class="w-9 h-9 rounded-lg bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 flex items-center justify-center font-bold text-sm">
                 Y{y.year}
               </div>
               <div>
-                <h3 class="font-bold text-sm text-zinc-900 dark:text-zinc-100 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">
-                  {y.titleAr}
+                <h3
+                  class="font-bold text-sm text-zinc-900 dark:text-zinc-100 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors"
+                  data-i18n="nav.year"
+                  data-i18n-params={JSON.stringify({ y: y.year })}
+                >
+                  {y.titleEn}
                 </h3>
                 <p class="text-[11px] text-zinc-500 dark:text-zinc-400 mt-0.5">
                   {y.desc}
                 </p>
               </div>
             </div>
-            <svg class="w-4 h-4 text-zinc-400 group-hover:text-emerald-600 -rotate-180 group-hover:-translate-x-1 transition-all" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <svg class="w-4 h-4 text-zinc-400 group-hover:text-emerald-600 rtl:-rotate-180 rtl:group-hover:-translate-x-1 ltr:group-hover:translate-x-1 transition-all" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
             </svg>
           </button>
@@ -85,24 +90,24 @@ const years = [
         <button
           type="button"
           id="back-to-stage-1-btn"
-          class="inline-flex items-center gap-1 text-xs font-semibold text-zinc-500 hover:text-emerald-600 transition-colors"
+          class="inline-flex items-center gap-1 text-xs font-semibold text-zinc-500 hover:text-emerald-600 transition-colors cursor-pointer"
         >
-          <svg class="w-4 h-4 rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+          <svg class="w-4 h-4 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
           </svg>
-          <span>تغيير السنة</span>
+          <span data-i18n="selector.backBtn">Back</span>
         </button>
-        <span class="text-xs font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">
-          الخطوة 2 من 2
+        <span data-i18n="selector.step2Of2" class="text-xs font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">
+          Step 2 of 2
         </span>
       </div>
 
-      <div class="text-right">
-        <h2 class="text-xl font-bold text-zinc-900 dark:text-zinc-100">
-          اختر الموديول الحالي
+      <div class="text-start">
+        <h2 data-i18n="selector.step2Title" class="text-xl font-bold text-zinc-900 dark:text-zinc-100">
+          Choose a Module or Browse Year
         </h2>
-        <p class="text-xs text-zinc-500 dark:text-zinc-400 mt-1">
-          تقدر تفتح موديول معين على طول أو تتصفح كل داتا ومصادر السنة.
+        <p data-i18n="selector.step2Desc" class="text-xs text-zinc-500 dark:text-zinc-400 mt-1">
+          Click any module to open it directly, or browse all year resources.
         </p>
       </div>
 
@@ -117,7 +122,7 @@ const years = [
         id="browse-full-year-btn"
         class="w-full py-2.5 px-4 rounded-xl border border-dashed border-emerald-500 text-emerald-700 dark:text-emerald-400 bg-emerald-50/60 dark:bg-emerald-950/30 hover:bg-emerald-100 text-xs font-bold transition-colors cursor-pointer"
       >
-        عرض كل موديولات ومصادر السنة &larr;
+        <span data-i18n="selector.browseAllYear">Browse All Year Resources</span>
       </button>
     </div>
   </div>
@@ -180,6 +185,8 @@ const years = [
       ind2?.classList.remove('bg-zinc-200', 'dark:bg-zinc-800');
       ind2?.classList.add('bg-emerald-600');
 
+      const isAr = document.documentElement.lang === 'ar';
+
       // Populate modules
       const allMods: any[] = (window as any).__MODULES_DATA || [];
       const filteredMods = allMods.filter((m) => m.year === year);
@@ -187,7 +194,9 @@ const years = [
         if (modulesContainer) {
           modulesContainer.innerHTML = `
             <div class="p-6 text-center text-xs text-zinc-500 dark:text-zinc-400 border border-dashed border-zinc-200 dark:border-zinc-800 rounded-xl">
-              لا توجد موديولات مضافة بعد لهذه السنة. المتاح حالياً موديول الدم (السنة الثانية).
+              ${isAr
+                ? 'لا توجد موديولات مضافة بعد لهذه السنة. المتاح حالياً موديول الدم (السنة الثانية).'
+                : 'No modules added for this year yet. Blood Module (Year 2) is currently available.'}
             </div>
           `;
         }
@@ -201,7 +210,7 @@ const years = [
           <button
             type="button"
             data-module-id="${m.id}"
-            class="stage-module-option group w-full flex items-center justify-between p-3 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-800/60 hover:border-emerald-500 hover:bg-emerald-50/50 dark:hover:bg-emerald-950/30 transition-all text-right cursor-pointer"
+            class="stage-module-option group w-full flex items-center justify-between p-3 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-800/60 hover:border-emerald-500 hover:bg-emerald-50/50 dark:hover:bg-emerald-950/30 transition-all text-start cursor-pointer"
           >
             <div class="flex items-center gap-2.5">
               <span class="text-xs font-bold px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300">
@@ -209,11 +218,11 @@ const years = [
               </span>
               <div>
                 <h4 class="text-xs font-bold text-zinc-900 dark:text-zinc-100 group-hover:text-emerald-600">
-                  ${m.titleAr || m.title}
+                  ${isAr ? (m.titleAr || m.title) : (m.title || m.titleAr)}
                 </h4>
               </div>
             </div>
-            <svg class="w-3.5 h-3.5 text-zinc-400 -rotate-180 group-hover:-translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <svg class="w-3.5 h-3.5 text-zinc-400 rtl:-rotate-180 rtl:group-hover:-translate-x-1 ltr:group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
             </svg>
           </button>
@@ -240,6 +249,12 @@ const years = [
         });
       }
     }
+
+    window.addEventListener('asumed-language-changed', () => {
+      if (selectedYear && stage2 && !stage2.classList.contains('hidden')) {
+        goToStage2(selectedYear);
+      }
+    });
 
     yearButtons.forEach((btn) => {
       btn.addEventListener('click', () => {

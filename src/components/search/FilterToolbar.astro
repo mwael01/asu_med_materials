@@ -7,15 +7,15 @@ interface Props {
 
 const { selectedType = 'all' } = Astro.props;
 
-const filterTypes: { label: string; value: ResourceType | 'all'; icon?: string }[] = [
-  { label: 'الكل', value: 'all' },
-  { label: 'Google Drive', value: 'drive', icon: '/icons/google-drive.svg' },
-  { label: 'Telegram', value: 'telegram', icon: '/icons/telegram.svg' },
-  { label: 'YouTube', value: 'youtube', icon: '/icons/youtube.svg' },
-  { label: 'ورق ومذكرات', value: 'summary', icon: '/icons/summary.svg' },
-  { label: 'امتحانات وريكولات', value: 'exam', icon: '/icons/exam.svg' },
-  { label: 'كتب ومراجع', value: 'book', icon: '/icons/book.svg' },
-  { label: 'WhatsApp', value: 'whatsapp', icon: '/icons/whatsapp.svg' },
+const filterTypes: { label: string; value: ResourceType | 'all'; i18nKey: string; icon?: string }[] = [
+  { label: 'All', value: 'all', i18nKey: 'search.allTypes' },
+  { label: 'Google Drive', value: 'drive', i18nKey: 'types.drive', icon: '/icons/google-drive.svg' },
+  { label: 'Telegram', value: 'telegram', i18nKey: 'types.telegram', icon: '/icons/telegram.svg' },
+  { label: 'YouTube', value: 'youtube', i18nKey: 'types.youtube', icon: '/icons/youtube.svg' },
+  { label: 'Notes / Summary', value: 'summary', i18nKey: 'types.summary', icon: '/icons/summary.svg' },
+  { label: 'Past Exams', value: 'exam', i18nKey: 'types.exam', icon: '/icons/exam.svg' },
+  { label: 'Reference Book', value: 'book', i18nKey: 'types.book', icon: '/icons/book.svg' },
+  { label: 'WhatsApp', value: 'whatsapp', i18nKey: 'types.whatsapp', icon: '/icons/whatsapp.svg' },
 ];
 ---
 
@@ -43,7 +43,7 @@ const filterTypes: { label: string; value: ResourceType | 'all'; icon?: string }
             loading="lazy"
           />
         )}
-        <span>{item.label}</span>
+        <span data-i18n={item.i18nKey}>{item.label}</span>
       </button>
     );
   })}

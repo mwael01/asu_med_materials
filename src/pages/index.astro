@@ -33,10 +33,10 @@ const yearData = [
         </div>
         <div>
           <h2 class="text-sm font-bold text-zinc-900 dark:text-zinc-100">
-            مرحباً بك! سنتك الدراسية المختارة: <span id="welcome-year-name" class="text-emerald-700 dark:text-emerald-400 font-extrabold">السنة الأولى</span>
+            <span data-i18n="home.welcomeTitle">Welcome! Your Selected Year:</span> <span id="welcome-year-name" class="text-emerald-700 dark:text-emerald-400 font-extrabold">Year 1</span>
           </h2>
-          <p class="text-xs text-zinc-600 dark:text-zinc-400 mt-0.5">
-            تم ضبط الموقع على سنتك للوصول المباشر إلى موديولاتك ودرايفاتك.
+          <p class="text-xs text-zinc-600 dark:text-zinc-400 mt-0.5" data-i18n="home.welcomeDesc">
+            The site is configured to your year for direct access to your modules and drives.
           </p>
         </div>
       </div>
@@ -47,29 +47,29 @@ const yearData = [
           href="/year/1"
           class="text-xs font-bold px-3.5 py-1.5 rounded-lg bg-emerald-600 text-white hover:bg-emerald-700 transition-colors shadow-2xs"
         >
-          فتح موديولات سنتك &larr;
+          <span data-i18n="home.openYearModules">Open Year Modules →</span>
         </a>
         <button
           type="button"
           class="trigger-multistage-selector text-xs font-semibold px-3 py-1.5 rounded-lg bg-white dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 border border-zinc-200 dark:border-zinc-700 hover:bg-zinc-100 transition-colors cursor-pointer"
         >
-          تغيير
+          <span data-i18n="home.change">Change</span>
         </button>
       </div>
     </div>
 
     <div class="mb-4">
-      <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-zinc-900 dark:text-zinc-50 mb-1.5">
-        منصة مصادر كليّة الطب - جامعة عين شمس
+      <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-zinc-900 dark:text-zinc-50 mb-1.5" data-i18n="home.heroTitle">
+        ASU Faculty of Medicine Materials Hub
       </h1>
-      <p class="text-xs sm:text-sm text-zinc-600 dark:text-zinc-400">
-        درايفات الدفعات، قنوات التليجرام، شروحات اليوتيوب، وورق ومذكرات المذاكرة لجميع السنوات الخمس.
+      <p class="text-xs sm:text-sm text-zinc-600 dark:text-zinc-400" data-i18n="home.heroSubtitle">
+        Batch drives, Telegram channels, YouTube lectures, and study notes across all five years.
       </p>
     </div>
 
     <!-- Quick Search Form -->
     <form action="/search" method="GET" class="w-full">
-      <SearchBar placeholder="ابحث باسم المادة، الموديول، اسم الدكتور، الدرايف، أو التلخيص..." />
+      <SearchBar />
     </form>
 
     <!-- Quick Access Chips -->
@@ -81,19 +81,19 @@ const yearData = [
         <svg class="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24">
           <path d="M8 5v14l11-7z"/>
         </svg>
-        <span>قوائم التشغيل</span>
+        <span data-i18n="playlists.title">Playlists</span>
       </a>
       <a
         href="/module/year2-blood"
         class="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-xl bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 border border-zinc-200 dark:border-zinc-700 hover:bg-zinc-200/70 transition-colors shrink-0"
       >
-        <span>موديول الدم (MED201)</span>
+        <span>Blood & Lymphatic System (MED201)</span>
       </a>
       <a
         href="/search?type=drive"
         class="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-xl bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 border border-zinc-200 dark:border-zinc-700 hover:bg-zinc-200/70 transition-colors shrink-0"
       >
-        <span>درايفات الدفعة</span>
+        <span data-i18n="categories.central">Central Drives</span>
       </a>
     </div>
   </section>
@@ -102,19 +102,19 @@ const yearData = [
   <section class="mb-10">
     <div class="flex items-center justify-between mb-3">
       <div class="flex items-center gap-2">
-        <h2 class="text-base font-bold text-zinc-900 dark:text-zinc-100">
-          السنوات والمراحل الدراسية
+        <h2 class="text-base font-bold text-zinc-900 dark:text-zinc-100" data-i18n="home.academicYears">
+          Academic Years
         </h2>
         <button
           type="button"
           class="trigger-multistage-selector text-xs text-emerald-600 hover:underline font-semibold cursor-pointer"
         >
-          (تحديد سنتك)
+          (<span data-i18n="nav.chooseYear">Choose Year</span>)
         </button>
       </div>
 
       <a href="/search" class="text-xs font-bold text-emerald-600 dark:text-emerald-400 hover:underline">
-        تصفح جميع المواد &larr;
+        <span data-i18n="home.browseAll">Browse All Materials</span> &rarr;
       </a>
     </div>
 
@@ -124,22 +124,28 @@ const yearData = [
         return (
           <a
             href={`/year/${y.year}`}
-            class="group bg-white dark:bg-zinc-900 border border-zinc-200/80 dark:border-zinc-800 rounded-xl p-4 transition-all hover:border-emerald-500/70 hover:shadow-sm shadow-2xs flex flex-col justify-between text-right active:scale-[0.99]"
+            class="group bg-white dark:bg-zinc-900 border border-zinc-200/80 dark:border-zinc-800 rounded-xl p-4 transition-all hover:border-emerald-500/70 hover:shadow-sm shadow-2xs flex flex-col justify-between text-start active:scale-[0.99]"
           >
             <div>
               <span class="text-xs font-extrabold text-emerald-600 dark:text-emerald-400">
                 Level {y.year}
               </span>
-              <h3 class="font-bold text-sm text-zinc-900 dark:text-zinc-100 mt-0.5 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">
-                {y.titleAr}
+              <h3
+                class="font-bold text-sm text-zinc-900 dark:text-zinc-100 mt-0.5 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors"
+                data-i18n="nav.year"
+                data-i18n-params={JSON.stringify({ y: y.year })}
+              >
+                {y.titleEn}
               </h3>
               <p class="text-[11px] text-zinc-500 dark:text-zinc-400 mt-1 line-clamp-2">
                 {y.desc}
               </p>
             </div>
             <div class="mt-3 pt-2 border-t border-zinc-100 dark:border-zinc-800/80 flex items-center justify-between text-[11px] text-zinc-400">
-              <span>{moduleCount} موديولات</span>
-              <svg class="w-3.5 h-3.5 group-hover:-translate-x-0.5 transition-transform rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <span data-i18n="year.modulesCount" data-i18n-params={JSON.stringify({ n: moduleCount })}>
+                {moduleCount} Study Modules
+              </span>
+              <svg class="w-3.5 h-3.5 group-hover:translate-x-0.5 rtl:group-hover:-translate-x-0.5 rtl:rotate-180 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
               </svg>
             </div>
@@ -149,43 +155,15 @@ const yearData = [
     </div>
   </section>
 
-  <!-- Ready For Real Data Contribution Banner (shown when materials database is awaiting submissions) -->
-  {allMaterials.length === 0 && (
-    <section class="mb-10 p-6 rounded-2xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 shadow-xs text-center sm:text-right flex flex-col sm:flex-row items-center justify-between gap-4">
-      <div>
-        <div class="inline-flex items-center gap-1.5 text-xs font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/60 px-2.5 py-1 rounded-full mb-2">
-          <span>المنصة جاهزة لاستقبال المصادر الحقيقية 🚀</span>
-        </div>
-        <h2 class="text-base sm:text-lg font-extrabold text-zinc-900 dark:text-zinc-100 mb-1">
-          شارك أول درايف أو مذكرات باسمك لدعم زملائك
-        </h2>
-        <p class="text-xs text-zinc-500 dark:text-zinc-400 max-w-xl leading-relaxed">
-          تقدر دلوقتي تضيف أي درايف للدفعة، ورق شرح، سلايدات، أو قناة تليجرام بسهولة وبدون أي خطوات معقدة عبر صفحة المشاركة.
-        </p>
-      </div>
-
-      <a
-        href="/contribute"
-        class="shrink-0 inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition-all shadow-xs"
-      >
-        <span>مشاركة مصدر جديد</span>
-        <svg class="w-3.5 h-3.5 rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5" />
-        </svg>
-      </a>
-    </section>
-  )}
-
-
   <!-- Grouped Latest Materials -->
   {recentMaterials.length > 0 && (
     <section>
       <div class="flex items-center justify-between mb-4">
-        <h2 class="text-base font-bold text-zinc-900 dark:text-zinc-100">
-          أحدث المصادر وورق الشرح المضاف
+        <h2 class="text-base font-bold text-zinc-900 dark:text-zinc-100" data-i18n="home.recentMaterials">
+          Recently Added Materials
         </h2>
         <a href="/search" class="text-xs font-bold text-emerald-600 dark:text-emerald-400 hover:underline">
-          دليل البحث الكامل &larr;
+          <span data-i18n="footer.searchCatalog">Search Catalog</span> &rarr;
         </a>
       </div>
 
@@ -204,14 +182,22 @@ const yearData = [
       const yearStr = localStorage.getItem('asumed_user_year');
       if (yearStr) {
         const y = parseInt(yearStr, 10);
-        const names: Record<number, string> = {
+        const isAr = document.documentElement.lang === 'ar';
+        const namesAr: Record<number, string> = {
           1: 'السنة الأولى (Year 1)',
           2: 'السنة الثانية (Year 2)',
           3: 'السنة الثالثة (Year 3)',
           4: 'السنة الرابعة (Year 4)',
           5: 'السنة الخامسة (Year 5)'
         };
-        if (yearName) yearName.textContent = names[y] || `السنة ${y}`;
+        const namesEn: Record<number, string> = {
+          1: 'Year 1',
+          2: 'Year 2',
+          3: 'Year 3',
+          4: 'Year 4',
+          5: 'Year 5'
+        };
+        if (yearName) yearName.textContent = isAr ? (namesAr[y] || `السنة ${y}`) : (namesEn[y] || `Year ${y}`);
         if (yearLink) yearLink.href = `/year/${y}`;
         card?.classList.remove('hidden');
         card?.classList.add('flex');
@@ -224,5 +210,6 @@ const yearData = [
 
   syncPersonalizedWelcome();
   window.addEventListener('user-preferences-updated', syncPersonalizedWelcome);
+  window.addEventListener('asumed-language-changed', syncPersonalizedWelcome);
   document.addEventListener('astro:after-swap', syncPersonalizedWelcome);
 </script>

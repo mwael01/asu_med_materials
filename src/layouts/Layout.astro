@@ -13,15 +13,15 @@ interface Props {
 }
 
 const {
-  title = 'ASU Med Materials - المنصة الشاملة لمصادر طب عين شمس',
-  description = 'داتا ومصادر ودرايفات وقنوات وورق مذكرات كلية الطب جامعة عين شمس، مجمعة ومصنفة حسب السنين والموديولات.'
+  title = 'ASU Med Materials - All-in-one Medical Study Hub',
+  description = 'Batch drives, Telegram channels, YouTube lectures, and study notes for Ain Shams University Faculty of Medicine.'
 } = Astro.props;
 
 const isHomePage = Astro.url.pathname === '/' || Astro.url.pathname === '';
 ---
 
 <!doctype html>
-<html lang="ar" dir="rtl">
+<html lang="en" dir="ltr">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -31,6 +31,17 @@ const isHomePage = Astro.url.pathname === '/' || Astro.url.pathname === '';
     <meta name="generator" content={Astro.generator} />
     <title>{title}</title>
     <meta name="description" content={description} />
+
+    <!-- Zero-flash Early Language & Direction Setter -->
+    <script is:inline>
+      (function () {
+        try {
+          var lang = localStorage.getItem('asumed_lang') || 'en';
+          document.documentElement.lang = lang;
+          document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
+        } catch (e) {}
+      })();
+    </script>
 
     <!-- Auto-redirect students to their chosen year if visiting the homepage directly -->
     {isHomePage && (
@@ -83,10 +94,14 @@ const isHomePage = Astro.url.pathname === '/' || Astro.url.pathname === '';
     <PwaInstallToast />
     <Footer />
 
-    <!-- Service Worker registration for offline PWA capabilities -->
+    <!-- Service Worker registration & i18n client synchronization -->
     <script>
       import { registerServiceWorker } from '../utils/pwa';
+      import { initLanguageClient } from '../utils/i18n';
+
+      initLanguageClient();
       registerServiceWorker();
+      document.addEventListener('astro:after-swap', initLanguageClient);
     </script>
   </body>
 </html>

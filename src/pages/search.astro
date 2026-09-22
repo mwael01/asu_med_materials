@@ -9,27 +9,27 @@ const allMaterials = getAllMaterials();
 ---
 
 <Layout
-  title="دليل البحث في المصادر - ASU Med Materials"
-  description="ابحث وتصفح جميع درايفات وورق شرح ومصادر طب عين شمس حسب السنة والمادة ونوع المصدر."
+  title="Comprehensive Resource Catalog & Search - ASU Med Materials"
+  description="Search and browse all batch drives, lecture notes, and study resources for ASU Faculty of Medicine."
 >
-  <div class="mb-6 text-right">
-    <h1 class="text-2xl font-extrabold text-zinc-900 dark:text-zinc-100 mb-1">
-      دليل البحث الشامل في المصادر
+  <div class="mb-6 text-start">
+    <h1 class="text-2xl font-extrabold text-zinc-900 dark:text-zinc-100 mb-1" data-i18n="search.title">
+      Comprehensive Resource Catalog & Search
     </h1>
-    <p class="text-xs text-zinc-500 dark:text-zinc-400 mb-4">
-      ابحث بالكلمات المفتاحية، أسماء المواد (Anatomy, Physiology, etc.)، أكواد الموديولات، أو أنواع المصادر عبر جميع السنوات الخمس.
+    <p class="text-xs text-zinc-500 dark:text-zinc-400 mb-4" data-i18n="search.subtitle">
+      Search by keywords, subject names (Anatomy, Physiology, etc.), module codes, or resource types across all five years.
     </p>
 
     <!-- Search Input -->
     <div class="mb-4">
-      <SearchBar placeholder="اكتب للبحث: مثل anatomy, ecg, pathology, مذكرات، ورق شرح، امتحانات..." autofocus={true} />
+      <SearchBar autofocus={true} />
     </div>
 
     <!-- Filter Rows -->
     <div class="space-y-2">
       <!-- Year Selectors -->
       <div class="flex items-center gap-1.5 overflow-x-auto py-1 no-scrollbar" id="year-filter-row">
-        <span class="text-xs font-bold text-zinc-400 mr-1 shrink-0">السنة:</span>
+        <span class="text-xs font-bold text-zinc-400 mr-1 shrink-0" data-i18n="search.yearFilterLabel">Year:</span>
         {['all', '1', '2', '3', '4', '5'].map((y) => (
           <button
             type="button"
@@ -41,14 +41,18 @@ const allMaterials = getAllMaterials();
                 : 'bg-white dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400 border-zinc-200 dark:border-zinc-800 hover:border-zinc-300'
             ]}
           >
-            {y === 'all' ? 'جميع السنوات' : `السنة ${y}`}
+            {y === 'all' ? (
+              <span data-i18n="search.allYears">All Years</span>
+            ) : (
+              <span data-i18n="nav.year" data-i18n-params={JSON.stringify({ y })}>Year {y}</span>
+            )}
           </button>
         ))}
       </div>
 
       <!-- Type Filter Chips -->
       <div class="flex items-center gap-1.5 overflow-x-auto py-1 no-scrollbar">
-        <span class="text-xs font-bold text-zinc-400 mr-1 shrink-0">النوع:</span>
+        <span class="text-xs font-bold text-zinc-400 mr-1 shrink-0" data-i18n="search.typeFilterLabel">Type:</span>
         <FilterToolbar />
       </div>
     </div>
@@ -56,15 +60,15 @@ const allMaterials = getAllMaterials();
 
   <!-- Results Count Bar -->
   <div class="flex items-center justify-between py-2 border-b border-zinc-200 dark:border-zinc-800 mb-4 text-xs text-zinc-500 dark:text-zinc-400">
-    <div>
-      عرض <span id="results-count" class="font-bold text-zinc-900 dark:text-zinc-100">{allMaterials.length}</span> مصادر تعليمية
+    <div id="results-count-container">
+      <span id="results-label-prefix">Showing</span> <span id="results-count" class="font-bold text-zinc-900 dark:text-zinc-100">{allMaterials.length}</span> <span id="results-label-suffix">study resources</span>
     </div>
     <button
       type="button"
       id="reset-filters-btn"
       class="text-emerald-600 dark:text-emerald-400 hover:underline font-bold hidden cursor-pointer"
     >
-      إعادة تعيين الفلاتر
+      <span data-i18n="search.resetFilters">Reset Filters</span>
     </button>
   </div>
 
@@ -176,6 +180,12 @@ const allMaterials = getAllMaterials();
         matchedCount++;
       });
 
+      const isAr = document.documentElement.lang === 'ar';
+      const prefixEl = document.getElementById('results-label-prefix');
+      const suffixEl = document.getElementById('results-label-suffix');
+      if (prefixEl) prefixEl.textContent = isAr ? 'عرض' : 'Showing';
+      if (suffixEl) suffixEl.textContent = isAr ? 'مصادر تعليمية' : 'study resources';
+
       if (resultsCount) {
         resultsCount.textContent = String(matchedCount);
       }
@@ -190,6 +200,8 @@ const allMaterials = getAllMaterials();
 
       syncUI();
     }
+
+    window.addEventListener('asumed-language-changed', applyFilter);
 
     input?.addEventListener('input', () => {
       currentQuery = input.value;

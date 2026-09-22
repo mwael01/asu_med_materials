@@ -9,28 +9,28 @@ const authors = getAuthors();
 ---
 
 <Layout
-  title="فريق العمل والمساهمون - ASU Med Materials"
-  description="فريق عمل منصة مصادر طب عين شمس وصناع المحتوى من الدكاترة والقنوات التعليمية."
+  title="Team & Contributors - ASU Med Materials"
+  description="The platform team and content creators from professors, doctors, and educational channels."
 >
-  <div class="mb-6 text-right">
+  <div class="mb-6 text-start">
     <div class="flex items-center gap-2 text-xs text-zinc-500 dark:text-zinc-400 mb-2">
-      <a href="/?redirect=false" class="hover:text-emerald-600 dark:hover:text-emerald-400">الرئيسية</a>
+      <a href="/?redirect=false" data-i18n="nav.home" class="hover:text-emerald-600 dark:hover:text-emerald-400">Home</a>
       <span>/</span>
-      <span class="text-zinc-900 dark:text-zinc-100 font-bold">فريق العمل والمساهمون</span>
+      <span class="text-zinc-900 dark:text-zinc-100 font-bold" data-i18n="contributors.breadcrumbCurrent">Team & Contributors</span>
     </div>
-    <h1 class="text-2xl font-extrabold text-zinc-900 dark:text-zinc-100 mb-1">
-      فريق العمل والمساهمون
+    <h1 class="text-2xl font-extrabold text-zinc-900 dark:text-zinc-100 mb-1" data-i18n="contributors.title">
+      Team & Contributors
     </h1>
-    <p class="text-xs text-zinc-500 dark:text-zinc-400">
-      فريق عمل المنصة ({authors.length}) وصناع المحتوى من الدكاترة والقنوات ({contributors.length}).
+    <p class="text-xs text-zinc-500 dark:text-zinc-400" data-i18n="contributors.subtitle" data-i18n-params={JSON.stringify({ a: authors.length, c: contributors.length })}>
+      Platform team ({authors.length}) and content creators from doctors and educational channels ({contributors.length}).
     </p>
   </div>
 
   <!-- Website team first, manual order from JSON -->
   <section class="mb-10" aria-labelledby="authors-heading">
     <div class="flex items-center justify-between mb-3">
-      <h2 id="authors-heading" class="text-base font-bold text-zinc-900 dark:text-zinc-100">
-        فريق العمل
+      <h2 id="authors-heading" class="text-base font-bold text-zinc-900 dark:text-zinc-100" data-i18n="contributors.teamTitle">
+        Core Team
       </h2>
     </div>
 
@@ -44,10 +44,12 @@ const authors = getAuthors();
   <!-- Content makers, ordered by contribution amount -->
   <section aria-labelledby="contributors-heading">
     <div class="flex items-center justify-between mb-3">
-      <h2 id="contributors-heading" class="text-base font-bold text-zinc-900 dark:text-zinc-100">
-        صناع المحتوى
+      <h2 id="contributors-heading" class="text-base font-bold text-zinc-900 dark:text-zinc-100" data-i18n="contributors.creatorsTitle">
+        Content Creators
       </h2>
-      <span class="text-[11px] text-zinc-500 dark:text-zinc-400">مرتبون حسب عدد المصادر • اضغط على أي بطاقة للتفاصيل</span>
+      <span class="text-[11px] text-zinc-500 dark:text-zinc-400" data-i18n="contributors.creatorsRankNote">
+        Ranked by resource count • Click any card for details
+      </span>
     </div>
 
     {contributors.length > 0 ? (
@@ -57,8 +59,8 @@ const authors = getAuthors();
         ))}
       </div>
     ) : (
-      <p class="text-xs text-zinc-500 dark:text-zinc-400 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl p-4">
-        لا توجد مساهمات بعد. شارك أول مصدر من صفحة المساهمة.
+      <p class="text-xs text-zinc-500 dark:text-zinc-400 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl p-4" data-i18n="contributors.noContributors">
+        No contributors registered yet.
       </p>
     )}
   </section>

@@ -1,5 +1,6 @@
 ---
 import ThemeToggle from '../common/ThemeToggle.astro';
+import LanguageToggle from '../common/LanguageToggle.astro';
 
 const currentPath = Astro.url.pathname;
 const isYear = (y: number) => currentPath.startsWith(`/year/${y}`);
@@ -16,50 +17,56 @@ const isYear = (y: number) => currentPath.startsWith(`/year/${y}`);
     <nav class="hidden md:flex items-center gap-0.5 text-xs font-medium">
       <a
         href="/?redirect=false"
+        data-i18n="nav.home"
         class:list={[
           'px-2.5 py-1 rounded-md transition-colors',
           currentPath === '/' ? 'text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/50 font-bold' : 'text-zinc-600 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800'
         ]}
       >
-        الرئيسية
+        Home
       </a>
       {[1, 2, 3, 4, 5].map((y) => (
         <a
           href={`/year/${y}`}
+          data-i18n="nav.year"
+          data-i18n-params={JSON.stringify({ y })}
           class:list={[
             'px-2 py-1 rounded-md transition-colors',
             isYear(y) ? 'text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/50 font-bold' : 'text-zinc-600 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800'
           ]}
         >
-          السنة {y}
+          Year {y}
         </a>
       ))}
       <a
         href="/search"
+        data-i18n="nav.search"
         class:list={[
           'px-2.5 py-1 rounded-md transition-colors',
           currentPath === '/search' ? 'text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/50 font-bold' : 'text-zinc-600 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800'
         ]}
       >
-        البحث
+        Search
       </a>
       <a
         href="/contribute"
+        data-i18n="nav.contribute"
         class:list={[
           'px-2.5 py-1 rounded-md transition-colors',
           currentPath === '/contribute' ? 'text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/50 font-bold' : 'text-zinc-600 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800'
         ]}
       >
-        شارك مصدر
+        Contribute
       </a>
       <a
         href="/contributors"
+        data-i18n="nav.contributors"
         class:list={[
           'px-2.5 py-1 rounded-md transition-colors',
           currentPath === '/contributors' ? 'text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/50 font-bold' : 'text-zinc-600 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800'
         ]}
       >
-        المساهمون
+        Contributors
       </a>
     </nav>
 
@@ -69,20 +76,22 @@ const isYear = (y: number) => currentPath.startsWith(`/year/${y}`);
       <button
         type="button"
         class="trigger-multistage-selector inline-flex items-center gap-1 text-[11px] font-semibold px-2 py-1 rounded-md bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-200 hover:bg-emerald-50 hover:text-emerald-700 dark:hover:bg-emerald-950/40 dark:hover:text-emerald-400 border border-zinc-200 dark:border-zinc-700 transition-colors cursor-pointer"
-        title="تغيير السنة والموديول"
+        data-i18n-attr="title:nav.changeYearTitle"
+        title="Change Year & Module"
       >
         <svg class="w-3 h-3 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
           <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" />
         </svg>
-        <span id="nav-user-year-badge">تغيير السنة</span>
+        <span id="nav-user-year-badge">Change Year</span>
       </button>
 
       <!-- Search Link -->
       <a
         href="/search"
         class="p-1.5 text-zinc-600 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-md transition-colors"
-        title="بحث في المواد والمصادر"
-        aria-label="بحث"
+        data-i18n-attr="title:nav.searchTitle,aria-label:nav.search"
+        title="Search Materials & Subjects"
+        aria-label="Search"
       >
         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
           <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -93,13 +102,17 @@ const isYear = (y: number) => currentPath.startsWith(`/year/${y}`);
       <button
         type="button"
         class="open-bookmarks-trigger relative p-1.5 text-zinc-600 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-md transition-colors cursor-pointer"
-        title="المصادر المحفوظة"
-        aria-label="المصادر المحفوظة"
+        data-i18n-attr="title:nav.savedResourcesTitle,aria-label:nav.savedResourcesTitle"
+        title="Saved Bookmarks"
+        aria-label="Saved Bookmarks"
       >
         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
           <path stroke-linecap="round" stroke-linejoin="round" d="M17.593 3.322c1.1.128 1.907 1.077 1.907 2.185V21L12 17.25 4.5 21V5.507c0-1.108.806-2.057 1.907-2.185a48.507 48.507 0 0111.186 0z" />
         </svg>
       </button>
+
+      <!-- Language Switcher -->
+      <LanguageToggle />
 
       <!-- Theme Switcher -->
       <ThemeToggle />
@@ -108,20 +121,24 @@ const isYear = (y: number) => currentPath.startsWith(`/year/${y}`);
 </header>
 
 <script>
+  import { getCurrentLanguage } from '../../utils/i18n';
+
   function syncNavYearBadge(): void {
     const badge = document.getElementById('nav-user-year-badge');
     if (!badge) return;
     try {
       const year = localStorage.getItem('asumed_user_year');
+      const lang = getCurrentLanguage();
       if (year) {
-        badge.textContent = `السنة ${year}`;
+        badge.textContent = lang === 'ar' ? `السنة ${year}` : `Year ${year}`;
       } else {
-        badge.textContent = 'اختر سنتك';
+        badge.textContent = lang === 'ar' ? 'اختر سنتك' : 'Choose Year';
       }
     } catch {}
   }
 
   syncNavYearBadge();
   window.addEventListener('user-preferences-updated', syncNavYearBadge);
+  window.addEventListener('asumed-language-changed', syncNavYearBadge);
   document.addEventListener('astro:after-swap', syncNavYearBadge);
 </script>

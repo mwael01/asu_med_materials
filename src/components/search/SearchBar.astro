@@ -6,14 +6,14 @@ interface Props {
 }
 
 const {
-  placeholder = 'ابحث باسم المادة، الموديول، اسم الدكتور، الدرايف، أو ورق الشرح...',
+  placeholder = 'Search modules, subjects (e.g. anatomy), professors, or resource types...',
   initialQuery = '',
   autofocus = false
 } = Astro.props;
 ---
 
 <div class="relative w-full">
-  <div class="absolute inset-y-0 right-0 pr-3.5 flex items-center pointer-events-none text-zinc-400">
+  <div class="absolute inset-y-0 start-0 ps-3.5 flex items-center pointer-events-none text-zinc-400">
     <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
       <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
     </svg>
@@ -25,11 +25,12 @@ const {
     name="q"
     value={initialQuery}
     placeholder={placeholder}
+    data-i18n-attr="placeholder:home.searchPlaceholder"
     autofocus={autofocus}
-    class="w-full pr-10 pl-12 py-2.5 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl text-sm text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 dark:placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all shadow-2xs text-right"
+    class="w-full ps-10 pe-12 py-2.5 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl text-sm text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 dark:placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all shadow-2xs text-start"
   />
 
-  <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+  <div class="absolute inset-y-0 end-0 pe-3 flex items-center pointer-events-none">
     <kbd class="hidden sm:inline-block px-1.5 py-0.5 text-[10px] font-semibold text-zinc-400 dark:text-zinc-500 bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded shadow-2xs">
       /
     </kbd>

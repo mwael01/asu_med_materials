@@ -33,39 +33,51 @@ for (const sub of module.subjects) {
 ---
 
 <Layout
-  title={`${module.code}: ${module.titleAr || module.title} - ASU Med Materials`}
-  description={`جميع مصادر ودرايفات ومحاضرات وتلخيصات ${module.titleAr || module.title} (${module.code}) بطب عين شمس.`}
+  title={`${module.code}: ${module.title} - ASU Med Materials`}
+  description={`All study materials, drives, lectures, and summaries for ${module.title} (${module.code}) at ASU Faculty of Medicine.`}
 >
   <!-- Breadcrumb -->
   <div class="flex items-center gap-2 text-xs text-zinc-500 dark:text-zinc-400 mb-3">
-    <a href="/?redirect=false" class="hover:text-emerald-600 dark:hover:text-emerald-400">الرئيسية</a>
+    <a href="/?redirect=false" data-i18n="nav.home" class="hover:text-emerald-600 dark:hover:text-emerald-400">Home</a>
     <span>/</span>
-    <a href={`/year/${module.year}`} class="hover:text-emerald-600 dark:hover:text-emerald-400">السنة {module.year}</a>
+    <a href={`/year/${module.year}`} class="hover:text-emerald-600 dark:hover:text-emerald-400" data-i18n="nav.year" data-i18n-params={JSON.stringify({ y: module.year })}>Year {module.year}</a>
     <span>/</span>
     <span class="text-zinc-900 dark:text-zinc-100 font-bold">{module.code}</span>
   </div>
 
   <!-- Module Header Banner -->
-  <div class="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl p-6 mb-8 text-right">
+  <div class="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl p-6 mb-8 text-start">
     <div class="flex flex-wrap items-center gap-2 mb-2">
       <span class="text-xs font-bold px-2.5 py-0.5 rounded-md bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300">
         {module.code}
       </span>
-      <span class="text-xs font-semibold px-2.5 py-0.5 rounded-md bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400">
-        السنة {module.year}
+      <span class="text-xs font-semibold px-2.5 py-0.5 rounded-md bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400" data-i18n="nav.year" data-i18n-params={JSON.stringify({ y: module.year })}>
+        Year {module.year}
       </span>
     </div>
 
-    <h1 class="text-2xl sm:text-3xl font-extrabold text-zinc-900 dark:text-zinc-100 mb-1.5">
-      {module.titleAr || module.title}
-    </h1>
-    <h2 class="text-sm font-semibold text-zinc-500 dark:text-zinc-400 mb-3">
+    <h1
+      class="text-2xl sm:text-3xl font-extrabold text-zinc-900 dark:text-zinc-100 mb-1.5"
+      data-i18n-mod-title-en={module.title}
+      data-i18n-mod-title-ar={module.titleAr || module.title}
+    >
       {module.title}
-    </h2>
+    </h1>
+    {module.titleAr && (
+      <h2
+        class="text-sm font-semibold text-zinc-500 dark:text-zinc-400 mb-3"
+      >
+        {module.titleAr}
+      </h2>
+    )}
 
-    {module.descriptionAr && (
-      <p class="text-xs sm:text-sm text-zinc-600 dark:text-zinc-400 max-w-2xl leading-relaxed">
-        {module.descriptionAr}
+    {(module.description || module.descriptionAr) && (
+      <p
+        class="text-xs sm:text-sm text-zinc-600 dark:text-zinc-400 max-w-2xl leading-relaxed"
+        data-i18n-mod-desc-en={module.description || ''}
+        data-i18n-mod-desc-ar={module.descriptionAr || module.description || ''}
+      >
+        {module.description || module.descriptionAr}
       </p>
     )}
   </div>
@@ -83,8 +95,8 @@ for (const sub of module.subjects) {
   <section>
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
       <div class="flex items-center gap-2">
-        <h2 class="text-lg font-bold text-zinc-900 dark:text-zinc-100">
-          مصادر الموديول المصنفة
+        <h2 class="text-lg font-bold text-zinc-900 dark:text-zinc-100" data-i18n="year.modulesTitle">
+          Categorized Module Resources
         </h2>
         <span class="text-xs px-2 py-0.5 rounded-full bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 font-bold">
           {moduleMaterials.length}

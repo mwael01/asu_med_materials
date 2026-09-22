@@ -31,7 +31,7 @@ const typeConfigs: Record<ResourceType, TypeConfig> = {
     icon: '/icons/youtube.svg'
   },
   playlist: {
-    label: 'YouTube',
+    label: 'Playlist',
     classes: 'bg-zinc-100/90 dark:bg-zinc-800/80 text-zinc-800 dark:text-zinc-200 border-zinc-200/80 dark:border-zinc-700/80',
     icon: '/icons/youtube.svg'
   },
@@ -41,27 +41,27 @@ const typeConfigs: Record<ResourceType, TypeConfig> = {
     icon: '/icons/whatsapp.svg'
   },
   book: {
-    label: 'كتب ومراجع',
+    label: 'Reference Book',
     classes: 'bg-zinc-100/90 dark:bg-zinc-800/80 text-zinc-800 dark:text-zinc-200 border-zinc-200/80 dark:border-zinc-700/80',
     icon: '/icons/book.svg'
   },
   summary: {
-    label: 'ورق ومذكرات',
+    label: 'Notes / Summary',
     classes: 'bg-zinc-100/90 dark:bg-zinc-800/80 text-zinc-800 dark:text-zinc-200 border-zinc-200/80 dark:border-zinc-700/80',
     icon: '/icons/summary.svg'
   },
   exam: {
-    label: 'امتحانات وريكولات',
+    label: 'Past Exams',
     classes: 'bg-zinc-100/90 dark:bg-zinc-800/80 text-zinc-800 dark:text-zinc-200 border-zinc-200/80 dark:border-zinc-700/80',
     icon: '/icons/exam.svg'
   },
   website: {
-    label: 'موقع',
+    label: 'Website',
     classes: 'bg-zinc-100/90 dark:bg-zinc-800/80 text-zinc-800 dark:text-zinc-200 border-zinc-200/80 dark:border-zinc-700/80',
     icon: '/icons/website.svg'
   },
   other: {
-    label: 'مصدر',
+    label: 'Resource',
     classes: 'bg-zinc-100/90 dark:bg-zinc-800/80 text-zinc-800 dark:text-zinc-200 border-zinc-200/80 dark:border-zinc-700/80',
     icon: '/icons/other.svg'
   }
@@ -86,5 +86,5 @@ const isSmall = size === 'sm';
     class:list={['shrink-0 object-contain', isSmall ? 'w-3.5 h-3.5' : 'w-4 h-4']}
     loading="lazy"
   />
-  <span>{config.label}</span>
+  <span data-i18n={`types.${type}`}>{config.label}</span>
 </span>

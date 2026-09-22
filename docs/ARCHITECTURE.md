@@ -36,7 +36,7 @@ asu_med_materials/
 │   ├── assets/                  # Bundled SVGs and images
 │   ├── components/              # Modular UI components
 │   │   ├── bookmarks/           # Offline bookmark drawer (BookmarksDrawer.astro)
-│   │   ├── common/              # Theme toggle (ThemeToggle.astro)
+│   │   ├── common/              # Theme & Language toggles (ThemeToggle.astro, LanguageToggle.astro)
 │   │   ├── materials/           # ResourceCard, GroupedResourceList, ModuleCard, SubjectBar, YearSelector
 │   │   ├── contributors/        # AuthorCard, ContributorCard, ContactButtons
 │   │   ├── navigation/          # Navbar.astro, Footer.astro
@@ -46,24 +46,30 @@ asu_med_materials/
 │   │   ├── modules.ts           # Year and module metadata (MED101-MED504)
 │   │   ├── materials.ts         # Verified study materials production database
 │   │   └── contributors.json    # Site team authors + contributor profile overrides
+│   ├── i18n/                    # Centralized bilingual dictionaries
+│   │   └── translations.ts      # Canonical Arabic & English key-value dictionaries
 │   ├── layouts/                 # Base page layouts
-│   │   └── Layout.astro         # Shell with RTL, SEO, PWA, and Theme setup
+│   │   └── Layout.astro         # Shell with RTL/LTR, SEO, PWA, i18n, and Theme setup
 │   ├── pages/                   # File-based routing
 │   │   ├── index.astro          # Landing dashboard & personalized year card
 │   │   ├── year/[year].astro    # Year-specific overview & grouped materials
 │   │   ├── module/[id].astro    # Dedicated module resources page
 │   │   ├── module/[id]/[subject].astro # Dedicated module subject page
+│   │   ├── playlists.astro      # Video playlists index & tracker
+│   │   ├── playlist/[id].astro  # Integrated video playlist player & curriculum checkpoint viewer
 │   │   ├── search.astro         # Global search & multi-filter explorer
 │   │   ├── contribute.astro     # Contribution guide & automatic submission form
 │   │   └── contributors.astro   # Site team on top + content makers (author field only, ranked)
 │   ├── styles/                  # Global styles & Tailwind configuration
 │   │   └── global.css
 │   ├── types/                   # TypeScript interfaces & types
+│   │   ├── i18n.ts              # SupportedLanguage, TranslationsDictionary types
 │   │   ├── materials.ts         # Material, module, and curriculum types
 │   │   └── contributors.ts      # Author, contributor profile, contact, and stats types
 │   └── utils/                   # Shared pure TypeScript helper functions
 │       ├── contributors.ts      # Contributor stats aggregation + initials fallback
 │       ├── filter.ts            # Search and filter matching logic
+│       ├── i18n.ts              # Language manager, DOM translation binding & reactivity
 │       ├── slug.ts              # URL slugification for subjects and routes
 │       └── storage.ts           # Bookmarks & user year preferences in localStorage
 ├── astro.config.mjs             # Astro build configuration
@@ -165,6 +171,14 @@ export interface MaterialItem {
    - Every module features a [`SubjectBar.astro`](file:///workspaces/asu_med_materials/src/components/materials/SubjectBar.astro) navigation bar showing all academic subjects for that module.
    - Each subject has a dedicated static URL route (`/module/[id]/[subject]`, e.g. `/module/year1-foundation/medical-biochemistry`) with dedicated title, SEO, custom breadcrumbs, and empty states.
    - Material cards link directly to their corresponding subject page via clickable subject badges.
+
+7. **Multi-Language Support (Client-Side In-Place Toggle)**:
+   - **Language Toggle**: Topbar button with a globe icon and language indicator badge (`AR` / `EN`) switching instantly between English (default for new visitors) and Arabic (100% preserved verbatim without alteration).
+   - **Zero URL Deviation**: Retains all static URLs identical across languages without redirects or duplicate route generation.
+   - **Zero Flash of Unstyled Text / Direction**: Synchronous inline `<script is:inline>` in `<head>` sets `lang` and `dir="ltr"` / `dir="rtl"` immediately from `localStorage.getItem('asumed_lang')` before layout rendering.
+   - **Declarative HTML Binding**: Static markup uses `data-i18n="key"` and `data-i18n-attr="attr:key"` attributes. The helper `applyLanguage()` in [`src/utils/i18n.ts`](file:///workspaces/asu_med_materials/src/utils/i18n.ts) translates elements instantly in-place.
+   - **Reactive Custom Event**: Dispatches `asumed-language-changed` on `window` whenever the language is switched, allowing client scripts (dynamic search counter, bookmarks drawer, multistage modal, video playlist stepper) to update text immediately.
+   - **Dictionary Architecture**: Centralized dictionary in [`src/i18n/translations.ts`](file:///workspaces/asu_med_materials/src/i18n/translations.ts) typed with [`src/types/i18n.ts`](file:///workspaces/asu_med_materials/src/types/i18n.ts), covering all site navigation, academic years, modules, subjects, categories, badges, toasts, and controls.
 
 ---
 
