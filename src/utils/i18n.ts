@@ -123,12 +123,53 @@ export function applyLanguage(lang: SupportedLanguage): void {
     el.textContent = lang === 'ar' ? (arText || enText) : (enText || arText);
   });
 
-  // 4. Update language toggle button visual text
+  // 4. Material titles and descriptions
+  document.querySelectorAll<HTMLElement>('[data-i18n-material-title]').forEach((el) => {
+    const enText = el.getAttribute('data-title-en') || '';
+    const arText = el.getAttribute('data-title-ar') || '';
+    if (enText || arText) {
+      el.textContent = lang === 'ar' ? (arText || enText) : (enText || arText);
+    }
+  });
+
+  document.querySelectorAll<HTMLElement>('[data-i18n-material-desc]').forEach((el) => {
+    const enText = el.getAttribute('data-desc-en') || '';
+    const arText = el.getAttribute('data-desc-ar') || '';
+    if (enText || arText) {
+      el.textContent = lang === 'ar' ? (arText || enText) : (enText || arText);
+    }
+  });
+
+  // 5. Author roles, bios, and contributor notes
+  document.querySelectorAll<HTMLElement>('[data-i18n-author-role]').forEach((el) => {
+    const enText = el.getAttribute('data-role-en') || '';
+    const arText = el.getAttribute('data-role-ar') || '';
+    if (enText || arText) {
+      el.textContent = lang === 'ar' ? (arText || enText) : (enText || arText);
+    }
+  });
+
+  document.querySelectorAll<HTMLElement>('[data-i18n-author-bio]').forEach((el) => {
+    const enText = el.getAttribute('data-bio-en') || '';
+    const arText = el.getAttribute('data-bio-ar') || '';
+    if (enText || arText) {
+      el.textContent = lang === 'ar' ? (arText || enText) : (enText || arText);
+    }
+  });
+
+  document.querySelectorAll<HTMLElement>('[data-i18n-contributor-note]').forEach((el) => {
+    const enText = el.getAttribute('data-note-en') || '';
+    const arText = el.getAttribute('data-note-ar') || '';
+    if (enText || arText) {
+      el.textContent = lang === 'ar' ? (arText || enText) : (enText || arText);
+    }
+  });
+
+  // 6. Update language toggle button visual text
   const langToggleBtn = document.getElementById('topbar-language-toggle');
   if (langToggleBtn) {
     const labelBadge = langToggleBtn.querySelector('.lang-toggle-label');
     if (labelBadge) {
-      // Show the alternative language you can switch to, or the current active code
       labelBadge.textContent = lang === 'en' ? 'EN' : 'عربي';
     }
     const nextLangTitle = lang === 'en' ? 'التبديل إلى العربية' : 'Switch to English';
@@ -136,7 +177,7 @@ export function applyLanguage(lang: SupportedLanguage): void {
     langToggleBtn.setAttribute('aria-label', nextLangTitle);
   }
 
-  // 5. Fire notification event so dynamic widgets (Search, Bookmarks, YearSelector, etc.) can react
+  // 6. Fire notification event so dynamic widgets (Search, Bookmarks, YearSelector, etc.) can react
   window.dispatchEvent(
     new CustomEvent('asumed-language-changed', {
       detail: { lang }
@@ -164,3 +205,9 @@ export function initLanguageClient(): void {
   const initial = getInitialLanguage();
   applyLanguage(initial);
 }
+
+export {
+  getMaterialEnglishTitle,
+  getMaterialEnglishDesc,
+  getMaterialArabicTitle
+} from '../i18n/materialsTranslations';

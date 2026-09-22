@@ -16,7 +16,9 @@ export interface AuthorEntry {
   id: string;
   name: string;
   role: string;
+  roleAr?: string;
   bio?: string;
+  bioEn?: string;
   photo?: string;
   order: number;
   matchNames?: string[];
@@ -28,6 +30,7 @@ export interface ContributorProfile {
   name: string;
   photo?: string;
   note?: string;
+  noteEn?: string;
   year?: number;
   matchNames: string[];
   contacts?: PersonContacts;

@@ -75,6 +75,9 @@ import { materialsData } from '../../data/materials';
 </script>
 
 <script>
+  import { getMaterialEnglishTitle } from '../../i18n/materialsTranslations';
+  import { t } from '../../utils/i18n';
+
   function initBookmarksDrawer(): void {
     const drawer = document.getElementById('bookmarks-drawer');
     const backdrop = document.getElementById('bookmarks-backdrop');
@@ -174,15 +177,17 @@ import { materialsData } from '../../data/materials';
       cardsContainer.classList.remove('hidden');
       const isAr = document.documentElement.lang === 'ar';
       cardsContainer.innerHTML = bookmarked
-        .map(
-          (item) => `
+        .map((item) => {
+          const typeLabel = t(`types.${item.type}`, isAr ? 'ar' : 'en');
+          const titleText = isAr ? item.title : (item.titleEn || getMaterialEnglishTitle(item.id, item.title));
+          return `
         <div class="p-3 bg-zinc-50 dark:bg-zinc-800/60 border border-zinc-200 dark:border-zinc-700/60 rounded-xl flex items-center justify-between gap-3 text-start">
           <div class="min-w-0 flex-1">
             <span class="text-[10px] font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">
-              ${isAr ? `السنة ${item.year}` : `Year ${item.year}`} • ${item.type}
+              ${isAr ? `السنة ${item.year}` : `Year ${item.year}`} • ${typeLabel}
             </span>
             <a href="${item.url}" target="_blank" rel="noopener noreferrer" class="block text-xs font-bold text-zinc-900 dark:text-zinc-100 hover:text-emerald-600 truncate mt-0.5">
-              ${item.title}
+              ${titleText}
             </a>
           </div>
           <div class="flex items-center gap-1 shrink-0">
@@ -198,8 +203,8 @@ import { materialsData } from '../../data/materials';
             </button>
           </div>
         </div>
-      `
-        )
+      `;
+        })
         .join('');
 
       cardsContainer.querySelectorAll('.remove-bookmark-btn').forEach((btn) => {
@@ -266,10 +271,19 @@ import { materialsData } from '../../data/materials';
 
       const showFn = (window as any).showToast;
       if (typeof showFn === 'function') {
+        const isAr = document.documentElement.lang === 'ar';
         if (index >= 0) {
-          showFn({ type: 'info', message: 'تمت إزالة المصدر من المفضلة', duration: 2200 });
+          showFn({
+            type: 'info',
+            message: isAr ? 'تمت إزالة المصدر من المفضلة' : 'Removed from bookmarks',
+            duration: 2200
+          });
         } else {
-          showFn({ type: 'success', message: 'تمت إضافة المصدر إلى المفضلة', duration: 2200 });
+          showFn({
+            type: 'success',
+            message: isAr ? 'تمت إضافة المصدر إلى المفضلة' : 'Added to bookmarks',
+            duration: 2200
+          });
         }
       }
     });

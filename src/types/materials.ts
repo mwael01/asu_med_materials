@@ -43,7 +43,9 @@ export interface ModuleInfo {
 export interface MaterialItem {
   id: string;
   title: string;
+  titleEn?: string;
   description?: string;
+  descriptionEn?: string;
   url: string;
   type: ResourceType;
   category?: MaterialCategory;

@@ -3,6 +3,7 @@ import Layout from '../layouts/Layout.astro';
 import TypeBadge from '../components/materials/TypeBadge.astro';
 import { getAllPlaylists } from '../data/materials';
 import { subjectToSlug } from '../utils/slug';
+import { getMaterialEnglishTitle, getMaterialEnglishDesc } from '../i18n/materialsTranslations';
 
 const playlists = getAllPlaylists();
 
@@ -101,6 +102,7 @@ const subjects = Array.from(
                 <span
                   class="playlist-status-badge hidden text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800/40"
                   data-badge-id={pl.id}
+                  data-i18n="common.completed"
                 >
                   مكتمل ✓
                 </span>
@@ -110,14 +112,23 @@ const subjects = Array.from(
             <!-- Title -->
             <h2 class="font-bold text-sm sm:text-base text-zinc-900 dark:text-zinc-100 leading-snug mb-1.5 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">
               <a href={`/playlist/${pl.id}`}>
-                {pl.title}
+                <span
+                  data-i18n-material-title={pl.id}
+                  data-title-ar={pl.title}
+                  data-title-en={pl.titleEn || getMaterialEnglishTitle(pl.id, pl.title)}
+                >{pl.titleEn || getMaterialEnglishTitle(pl.id, pl.title)}</span>
               </a>
             </h2>
 
             <!-- Description -->
             {pl.description && (
-              <p class="text-xs text-zinc-600 dark:text-zinc-400 line-clamp-2 mb-3">
-                {pl.description}
+              <p
+                class="text-xs text-zinc-600 dark:text-zinc-400 line-clamp-2 mb-3"
+                data-i18n-material-desc={pl.id}
+                data-desc-ar={pl.description}
+                data-desc-en={pl.descriptionEn || getMaterialEnglishDesc(pl.id, pl.description)}
+              >
+                {pl.descriptionEn || getMaterialEnglishDesc(pl.id, pl.description)}
               </p>
             )}
 
@@ -125,10 +136,10 @@ const subjects = Array.from(
             {(authorText || addedByText) && (
               <div class="text-[11px] text-zinc-500 dark:text-zinc-400 font-medium mb-3 space-y-0.5">
                 {authorText && (
-                  <div>إعداد: <span class="text-zinc-700 dark:text-zinc-300">{authorText}</span></div>
+                  <div><span data-i18n="card.by">إعداد:</span> <span class="text-zinc-700 dark:text-zinc-300">{authorText}</span></div>
                 )}
                 {addedByText && (
-                  <div>أضافها: <span class="text-zinc-700 dark:text-zinc-300">{addedByText}</span></div>
+                  <div><span data-i18n="card.addedBy">أضافها:</span> <span class="text-zinc-700 dark:text-zinc-300">{addedByText}</span></div>
                 )}
               </div>
             )}
@@ -136,8 +147,8 @@ const subjects = Array.from(
 
           <!-- Card Footer -->
           <div class="pt-3 border-t border-zinc-100 dark:border-zinc-800/80 flex items-center justify-between text-xs font-semibold text-emerald-600 dark:text-emerald-400">
-            <span>عرض القائمة</span>
-            <svg class="w-3.5 h-3.5 rotate-180 group-hover:-translate-x-0.5 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <span data-i18n="module.browseModule">عرض القائمة</span>
+            <svg class="w-3.5 h-3.5 rtl:rotate-180 group-hover:-translate-x-0.5 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
             </svg>
           </div>

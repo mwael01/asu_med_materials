@@ -4,8 +4,13 @@ import SearchBar from '../components/search/SearchBar.astro';
 import FilterToolbar from '../components/search/FilterToolbar.astro';
 import ResourceGrid from '../components/materials/ResourceGrid.astro';
 import { getAllMaterials } from '../data/materials';
+import { getMaterialEnglishTitle, getMaterialEnglishDesc } from '../i18n/materialsTranslations';
 
-const allMaterials = getAllMaterials();
+const allMaterials = getAllMaterials().map((m) => ({
+  ...m,
+  titleEn: getMaterialEnglishTitle(m.id, m.title),
+  descEn: m.description ? getMaterialEnglishDesc(m.id, m.description) : undefined,
+}));
 ---
 
 <Layout
@@ -161,8 +166,8 @@ const allMaterials = getAllMaterials();
         }
 
         if (q) {
-          const matchTitle = item.title?.toLowerCase().includes(q);
-          const matchDesc = item.description?.toLowerCase().includes(q);
+          const matchTitle = item.title?.toLowerCase().includes(q) || item.titleEn?.toLowerCase().includes(q);
+          const matchDesc = item.description?.toLowerCase().includes(q) || item.descEn?.toLowerCase().includes(q);
           const matchSubj = item.subject?.toLowerCase().includes(q);
           const authorText = Array.isArray(item.author)
             ? item.author.join(' ').toLowerCase()

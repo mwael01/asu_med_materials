@@ -13,10 +13,10 @@ const { modules } = Astro.props;
   <div id="dump-form-container">
     <div class="flex items-center justify-between gap-2 mb-3">
       <div class="flex items-center gap-2">
-        <span class="text-xs font-extrabold text-zinc-900 dark:text-zinc-100">
+        <span class="text-xs font-extrabold text-zinc-900 dark:text-zinc-100" data-i18n="contribute.dumpTitle">
           تفريغ سريع للمصادر
         </span>
-        <span class="text-[10px] bg-emerald-100 dark:bg-emerald-950/80 text-emerald-700 dark:text-emerald-400 font-bold px-2 py-0.5 rounded-full">
+        <span class="text-[10px] bg-emerald-100 dark:bg-emerald-950/80 text-emerald-700 dark:text-emerald-400 font-bold px-2 py-0.5 rounded-full" data-i18n="contribute.dumpBadge">
           الأسرع
         </span>
       </div>
@@ -25,6 +25,7 @@ const { modules } = Astro.props;
           type="button"
           id="quick-dump-sample-btn"
           class="text-[11px] text-emerald-600 dark:text-emerald-400 hover:underline cursor-pointer"
+          data-i18n="contribute.dumpSample"
         >
           تجربة بنموذج
         </button>
@@ -33,18 +34,19 @@ const { modules } = Astro.props;
           type="button"
           id="quick-dump-clear-btn"
           class="text-[11px] text-zinc-400 hover:text-rose-600 dark:hover:text-rose-400 transition-colors cursor-pointer"
+          data-i18n="contribute.dumpClear"
         >
           مسح
         </button>
       </div>
     </div>
 
-    <form id="quick-dump-form" class="space-y-3.5 text-right">
+    <form id="quick-dump-form" class="space-y-3.5 text-start">
       <!-- Main Textarea -->
       <div>
         <div class="flex items-center justify-between mb-1 text-[11px]">
           <label for="dump-content" class="font-bold text-zinc-700 dark:text-zinc-300">
-            النص أو الروابط المجمعة <span class="text-emerald-600">*</span>
+            <span data-i18n="contribute.dumpTextareaLabel">النص أو الروابط المجمعة</span> <span class="text-emerald-600">*</span>
           </label>
           <div id="dump-url-count" class="text-zinc-400 dark:text-zinc-500 font-medium">
             0 رابط
@@ -55,6 +57,7 @@ const { modules } = Astro.props;
           id="dump-content"
           rows="6"
           placeholder="الصق هنا رسالة الواتساب، أو رابطاً مع وصف بسيط، أو قائمة مذكرات ودرايفات..."
+          data-i18n-attr="placeholder:contribute.dumpPlaceholder"
           required
           class="w-full px-3.5 py-2.5 text-xs bg-zinc-50 dark:bg-zinc-800/60 border border-zinc-200 dark:border-zinc-700 rounded-xl text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 resize-y leading-relaxed font-sans"
         ></textarea>
@@ -66,12 +69,13 @@ const { modules } = Astro.props;
       <!-- Optional Contributor Name -->
       <div>
         <label for="dump-contributor" class="block text-xs font-bold text-zinc-700 dark:text-zinc-300 mb-1">
-          اسمك أو فريق العمل <span class="text-[10px] text-zinc-400 font-normal">(اختياري - لحفظ حق الإعداد)</span>
+          <span data-i18n="contribute.dumpContributorLabel">اسمك أو فريق العمل</span> <span class="text-[10px] text-zinc-400 font-normal" data-i18n="contribute.dumpContributorHint">(اختياري - لحفظ حق الإعداد)</span>
         </label>
         <input
           type="text"
           id="dump-contributor"
           placeholder="مثال: د. أحمد سامح (أو اتركه فارغاً إذا كنت تفضل فاعل خير)"
+          data-i18n-attr="placeholder:contribute.dumpContributorPlaceholder"
           class="w-full px-3 py-2 text-xs bg-zinc-50 dark:bg-zinc-800/60 border border-zinc-200 dark:border-zinc-700 rounded-xl text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-emerald-500"
         />
       </div>
@@ -80,32 +84,32 @@ const { modules } = Astro.props;
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <div>
           <label for="dump-year" class="block text-xs font-bold text-zinc-700 dark:text-zinc-300 mb-1">
-            السنة الدراسية <span class="text-[10px] text-zinc-400 font-normal">(اختياري)</span>
+            <span data-i18n="contribute.yearLabel">السنة الدراسية</span> <span class="text-[10px] text-zinc-400 font-normal" data-i18n="contribute.optional">(اختياري)</span>
           </label>
           <select
             id="dump-year"
             class="w-full px-3 py-2 text-xs bg-zinc-50 dark:bg-zinc-800/60 border border-zinc-200 dark:border-zinc-700 rounded-xl text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-emerald-500"
           >
-            <option value="general">عام / غير محدد</option>
-            <option value="1">السنة الأولى</option>
-            <option value="2">السنة الثانية</option>
-            <option value="3">السنة الثالثة</option>
-            <option value="4">السنة الرابعة</option>
-            <option value="5">السنة الخامسة</option>
+            <option value="general" data-i18n="contribute.yearGeneral">عام / غير محدد</option>
+            <option value="1" data-i18n="nav.year" data-i18n-params={JSON.stringify({ y: 1 })}>السنة الأولى</option>
+            <option value="2" data-i18n="nav.year" data-i18n-params={JSON.stringify({ y: 2 })}>السنة الثانية</option>
+            <option value="3" data-i18n="nav.year" data-i18n-params={JSON.stringify({ y: 3 })}>السنة الثالثة</option>
+            <option value="4" data-i18n="nav.year" data-i18n-params={JSON.stringify({ y: 4 })}>السنة الرابعة</option>
+            <option value="5" data-i18n="nav.year" data-i18n-params={JSON.stringify({ y: 5 })}>السنة الخامسة</option>
           </select>
         </div>
 
         <div>
           <label for="dump-module" class="block text-xs font-bold text-zinc-700 dark:text-zinc-300 mb-1">
-            الموديول المستهدف <span class="text-[10px] text-zinc-400 font-normal">(اختياري)</span>
+            <span data-i18n="contribute.moduleLabel">الموديول المستهدف</span> <span class="text-[10px] text-zinc-400 font-normal" data-i18n="contribute.optional">(اختياري)</span>
           </label>
           <select
             id="dump-module"
             class="w-full px-3 py-2 text-xs bg-zinc-50 dark:bg-zinc-800/60 border border-zinc-200 dark:border-zinc-700 rounded-xl text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-emerald-500"
           >
-            <option value="general">عام / كل السنة / غير محدد</option>
+            <option value="general" data-i18n="contribute.moduleGeneral">عام / كل السنة / غير محدد</option>
             {modules.map((m) => (
-              <option value={m.code}>{m.code} - {m.titleAr || m.title}</option>
+              <option value={m.code}>{m.code} - {m.title}</option>
             ))}
           </select>
         </div>
@@ -127,8 +131,8 @@ const { modules } = Astro.props;
               <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
             </svg>
           </span>
-          <span id="dump-btn-text">إرسال وتفريغ المصادر</span>
-          <svg id="dump-btn-icon" class="w-3.5 h-3.5 rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <span id="dump-btn-text" data-i18n="contribute.dumpSubmitBtn">إرسال وتفريغ المصادر</span>
+          <svg id="dump-btn-icon" class="w-3.5 h-3.5 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
             <path stroke-linecap="round" stroke-linejoin="round" d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5" />
           </svg>
         </button>
@@ -143,10 +147,10 @@ const { modules } = Astro.props;
         <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
       </svg>
     </div>
-    <h3 class="text-sm font-extrabold text-zinc-900 dark:text-zinc-100">
+    <h3 class="text-sm font-extrabold text-zinc-900 dark:text-zinc-100" data-i18n="contribute.dumpSuccessTitle">
       تم استلام المصادر بنجاح!
     </h3>
-    <p class="text-xs text-zinc-500 dark:text-zinc-400 max-w-sm mx-auto leading-relaxed">
+    <p class="text-xs text-zinc-500 dark:text-zinc-400 max-w-sm mx-auto leading-relaxed" data-i18n="contribute.dumpSuccessDesc">
       شكراً لمساهمتك لدعم زملائك! سيقوم المشرف بمراجعة الروابط وتنسيقها وإدراجها بالموقع تباعاً.
     </p>
     <div id="dump-success-issue-link" class="pt-1"></div>
@@ -156,7 +160,7 @@ const { modules } = Astro.props;
         id="dump-reset-btn"
         class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-zinc-800 dark:text-zinc-200 text-xs font-bold transition-all cursor-pointer"
       >
-        <span>إرسال دفعة مصادر أخرى</span>
+        <span data-i18n="contribute.dumpSubmitAnother">إرسال دفعة مصادر أخرى</span>
       </button>
     </div>
   </div>
@@ -189,12 +193,13 @@ const { modules } = Astro.props;
     // Live URL counter & platform tags
     function updateUrlState(): void {
       if (!contentInput || !urlCountBadge || !platformTagsContainer) return;
+      const isEn = document.documentElement.lang === 'en';
       const text = contentInput.value;
       const urls = extractUrls(text);
       const count = urls.length;
 
       if (count > 0) {
-        urlCountBadge.textContent = `🔗 ${count} رابط مكتشف`;
+        urlCountBadge.textContent = isEn ? `🔗 ${count} link(s) detected` : `🔗 ${count} رابط مكتشف`;
         urlCountBadge.className = 'font-bold text-emerald-600 dark:text-emerald-400';
 
         const platforms = detectPlatformTags(urls);
@@ -203,7 +208,7 @@ const { modules } = Astro.props;
           .join('');
         platformTagsContainer.classList.remove('hidden');
       } else {
-        urlCountBadge.textContent = '0 رابط';
+        urlCountBadge.textContent = isEn ? '0 links' : '0 رابط';
         urlCountBadge.className = 'text-zinc-400 dark:text-zinc-500 font-medium';
         platformTagsContainer.classList.add('hidden');
         platformTagsContainer.innerHTML = '';
@@ -221,7 +226,18 @@ const { modules } = Astro.props;
 
     // Sample message action
     sampleBtn?.addEventListener('click', () => {
-      contentInput.value = `السلام عليكم دي تجميعة مصادر مهمة لموديول الدم:
+      const isEn = document.documentElement.lang === 'en';
+      contentInput.value = isEn
+        ? `Hello, here is a batch of useful Blood module study resources:
+1. Lecture slides and notes drive:
+https://drive.google.com/drive/folders/sample_blood_materials
+
+2. Dr. Nagi Physiology video lectures:
+https://youtube.com/playlist?list=sample_physio_playlist
+
+3. Pathology MCQs and questions Telegram channel:
+https://t.me/sample_asu_patho_questions`
+        : `السلام عليكم دي تجميعة مصادر مهمة لموديول الدم:
 1. درايف مذكرات وسلايدات المحاضرات:
 https://drive.google.com/drive/folders/sample_blood_materials
 
@@ -232,7 +248,7 @@ https://youtube.com/playlist?list=sample_physio_playlist
 https://t.me/sample_asu_patho_questions`;
 
       if (contributorInput && !contributorInput.value) {
-        contributorInput.value = 'أحمد سامح، مروان كمال';
+        contributorInput.value = isEn ? 'Ahmed Sameh, Marwan Kamal' : 'أحمد سامح، مروان كمال';
       }
       if (yearSelect) yearSelect.value = '2';
       if (moduleSelect) moduleSelect.value = 'MED201';
@@ -251,9 +267,10 @@ https://t.me/sample_asu_patho_questions`;
 
     // Submission handler
     submitBtn.addEventListener('click', async () => {
+      const isEn = document.documentElement.lang === 'en';
       const content = contentInput.value.trim();
       if (!content) {
-        alert('من فضلك الصق رسالة الواتساب أو الروابط أولاً قبل الإرسال.');
+        alert(isEn ? 'Please paste your WhatsApp message or links before submitting.' : 'من فضلك الصق رسالة الواتساب أو الروابط أولاً قبل الإرسال.');
         contentInput.focus();
         return;
       }
@@ -266,7 +283,7 @@ https://t.me/sample_asu_patho_questions`;
       submitBtn.disabled = true;
       spinner?.classList.remove('hidden');
       btnIcon?.classList.add('hidden');
-      if (btnText) btnText.textContent = 'جاري الإرسال...';
+      if (btnText) btnText.textContent = isEn ? 'Submitting...' : 'جاري الإرسال...';
       if (errorBox) errorBox.classList.add('hidden');
 
       const result = await submitMaterial({
@@ -280,8 +297,11 @@ https://t.me/sample_asu_patho_questions`;
       if (result.success) {
         // Swap to celebratory success view
         if (issueLinkBox) {
+          const previewText = isEn
+            ? `Preview issue on GitHub #${result.issueNumber} &rarr;`
+            : `معاينة التذكرة على GitHub #${result.issueNumber} &larr;`;
           issueLinkBox.innerHTML = result.issueUrl
-            ? `<a href="${result.issueUrl}" target="_blank" rel="noopener noreferrer" class="text-xs text-emerald-600 dark:text-emerald-400 font-bold underline hover:opacity-80">معاينة التذكرة على GitHub #${result.issueNumber} &larr;</a>`
+            ? `<a href="${result.issueUrl}" target="_blank" rel="noopener noreferrer" class="text-xs text-emerald-600 dark:text-emerald-400 font-bold underline hover:opacity-80">${previewText}</a>`
             : '';
         }
         formContainer?.classList.add('hidden');
@@ -290,19 +310,23 @@ https://t.me/sample_asu_patho_questions`;
         updateUrlState();
       } else {
         const fallbackUrl = result.fallbackUrl || '';
+        const fallbackText = isEn
+          ? 'Open issue directly on GitHub to save your details &rarr;'
+          : 'فتح التذكرة على GitHub لحفظ بياناتك مباشرة &larr;';
+        const serverError = isEn ? 'Unable to submit via server at this time.' : 'تعذر الإرسال عبر الخادم حالياً.';
         const fallbackBtn = fallbackUrl
-          ? `<div class="pt-1"><a href="${fallbackUrl}" target="_blank" rel="noopener noreferrer" class="font-bold underline text-xs">فتح التذكرة على GitHub لحفظ بياناتك مباشرة &larr;</a></div>`
+          ? `<div class="pt-1"><a href="${fallbackUrl}" target="_blank" rel="noopener noreferrer" class="font-bold underline text-xs">${fallbackText}</a></div>`
           : '';
         if (errorBox) {
           errorBox.classList.remove('hidden');
-          errorBox.innerHTML = `<div>⚠️ ${result.error || 'تعذر الإرسال عبر الخادم حالياً.'}</div>${fallbackBtn}`;
+          errorBox.innerHTML = `<div>⚠️ ${result.error || serverError}</div>${fallbackBtn}`;
         }
       }
 
       submitBtn.disabled = false;
       spinner?.classList.add('hidden');
       btnIcon?.classList.remove('hidden');
-      if (btnText) btnText.textContent = 'إرسال وتفريغ المصادر';
+      if (btnText) btnText.textContent = isEn ? 'Send & Process Links' : 'إرسال وتفريغ المصادر';
     });
 
     // Reset button to show form again

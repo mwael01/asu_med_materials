@@ -34,8 +34,9 @@
         <button
           type="button"
           class="toast-cancel-btn text-xs font-semibold px-2.5 py-1.5 rounded-lg text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-200 transition-colors cursor-pointer"
+          data-i18n="toast.later"
         >
-          لاحقاً
+          Later
         </button>
       </div>
     </div>
@@ -44,8 +45,9 @@
     <button
       type="button"
       class="toast-close-btn p-1 text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 rounded-lg transition-colors shrink-0 cursor-pointer"
-      title="إغلاق"
-      aria-label="إغلاق التنبيه"
+      title="Close"
+      aria-label="Dismiss notification"
+      data-i18n-attr="title:toast.close,aria-label:toast.dismissAria"
     >
       <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
         <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
@@ -116,9 +118,18 @@
       messageEl.textContent = options.message;
     }
 
+    const isEn = document.documentElement.lang === 'en';
+    toastCard.dir = isEn ? 'ltr' : 'rtl';
+    toastCard.classList.remove('text-right', 'text-left');
+    toastCard.classList.add(isEn ? 'text-left' : 'text-right');
+
     const actionContainer = toastCard.querySelector('.toast-action-container') as HTMLElement;
     const actionBtn = toastCard.querySelector('.toast-action-btn') as HTMLButtonElement;
     const cancelBtn = toastCard.querySelector('.toast-cancel-btn') as HTMLButtonElement;
+
+    if (cancelBtn) {
+      cancelBtn.textContent = isEn ? 'Later' : 'لاحقاً';
+    }
 
     if (options.action && actionBtn && actionContainer) {
       actionBtn.textContent = options.action.label;
@@ -127,13 +138,15 @@
         options.action?.onClick?.();
         dismiss(toastCard);
       });
-      cancelBtn.addEventListener('click', () => {
+      cancelBtn?.addEventListener('click', () => {
         dismiss(toastCard);
       });
     }
 
     const closeBtn = toastCard.querySelector('.toast-close-btn') as HTMLElement;
     if (closeBtn) {
+      closeBtn.setAttribute('title', isEn ? 'Close' : 'إغلاق');
+      closeBtn.setAttribute('aria-label', isEn ? 'Dismiss notification' : 'إغلاق التنبيه');
       closeBtn.addEventListener('click', () => dismiss(toastCard));
     }
 

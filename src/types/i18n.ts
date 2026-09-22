@@ -116,6 +116,42 @@ export interface TranslationsSchema {
     creditDesc: string;
     tabDump: string;
     tabDetailed: string;
+    detailedTitle: string;
+    detailedSubtitle: string;
+    urlLabel: string;
+    urlPlaceholder: string;
+    titleLabel: string;
+    optional: string;
+    titlePlaceholder: string;
+    doctorLabel: string;
+    doctorHint: string;
+    doctorPlaceholder: string;
+    contributorLabel: string;
+    contributorHint: string;
+    contributorPlaceholder: string;
+    yearLabel: string;
+    yearGeneral: string;
+    moduleLabel: string;
+    moduleGeneral: string;
+    typeLabel: string;
+    submitBtn: string;
+    sendingBtn: string;
+    successTitle: string;
+    successDesc: string;
+    submitAnother: string;
+    dumpTitle: string;
+    dumpBadge: string;
+    dumpSample: string;
+    dumpClear: string;
+    dumpTextareaLabel: string;
+    dumpPlaceholder: string;
+    dumpContributorLabel: string;
+    dumpContributorHint: string;
+    dumpContributorPlaceholder: string;
+    dumpSubmitBtn: string;
+    dumpSuccessTitle: string;
+    dumpSuccessDesc: string;
+    dumpSubmitAnother: string;
   };
   contributors: {
     breadcrumbHome: string;
@@ -126,6 +162,29 @@ export interface TranslationsSchema {
     creatorsTitle: string;
     creatorsRankNote: string;
     noContributors: string;
+    totalCount: string;
+    clickDetails: string;
+    rank: string;
+    totalResources: string;
+    subjectsCount: string;
+    byType: string;
+    academicYears: string;
+    yearPrefix: string;
+    viewAll: string;
+  };
+  contacts: {
+    whatsapp: string;
+    telegram: string;
+    instagram: string;
+  };
+  common: {
+    close: string;
+    completed: string;
+  };
+  toast: {
+    later: string;
+    close: string;
+    dismissAria: string;
   };
   playlists: {
     breadcrumbHome: string;
@@ -136,6 +195,18 @@ export interface TranslationsSchema {
     backToModule: string;
     allSubjects: string;
     allPlaylistsCount: string;
+    progress: string;
+    reset: string;
+    markCompleted: string;
+    completed: string;
+    seriesCompleted: string;
+    lectures: string;
+    markAllDone: string;
+    nowPlaying: string;
+    prevVideo: string;
+    nextVideo: string;
+    lecturePrefix: string;
+    resetConfirm: string;
   };
   pwa: {
     installPrompt: string;

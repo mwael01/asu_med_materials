@@ -2,6 +2,7 @@
 import type { MaterialItem } from '../../types/materials';
 import TypeBadge from './TypeBadge.astro';
 import { subjectToSlug } from '../../utils/slug';
+import { getMaterialEnglishTitle, getMaterialEnglishDesc } from '../../i18n/materialsTranslations';
 
 interface Props {
   material: MaterialItem;
@@ -9,6 +10,9 @@ interface Props {
 }
 
 const { material, showYear = false } = Astro.props;
+
+const titleEn = material.titleEn || getMaterialEnglishTitle(material.id, material.title);
+const descEn = material.descriptionEn || (material.description ? getMaterialEnglishDesc(material.id, material.description) : undefined);
 
 // Normalize author (who made/prepared the material)
 const rawAuthors: string[] = Array.isArray(material.author)
@@ -88,14 +92,23 @@ const targetAttr = isPlaylist ? '_self' : '_blank';
     <h3 class="font-bold text-zinc-900 dark:text-zinc-100 text-sm leading-snug line-clamp-2 mb-1.5 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 group-hover:underline group-active:underline group-focus-visible:underline underline-offset-4 decoration-emerald-500 dark:decoration-emerald-400 transition-colors">
       <a href={cardHref} target={targetAttr} rel={isPlaylist ? undefined : "noopener noreferrer"} class="focus:outline-none">
         <span class="absolute inset-0" aria-hidden="true"></span>
-        {material.title}
+        <span
+          data-i18n-material-title={material.id}
+          data-title-ar={material.title}
+          data-title-en={titleEn}
+        >{titleEn || material.title}</span>
       </a>
     </h3>
 
     <!-- Description -->
     {material.description && (
-      <p class="text-xs text-zinc-600 dark:text-zinc-400 line-clamp-2 mb-3">
-        {material.description}
+      <p
+        class="text-xs text-zinc-600 dark:text-zinc-400 line-clamp-2 mb-3"
+        data-i18n-material-desc={material.id}
+        data-desc-ar={material.description}
+        data-desc-en={descEn}
+      >
+        {descEn || material.description}
       </p>
     )}
 
