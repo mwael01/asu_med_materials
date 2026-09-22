@@ -1,0 +1,172 @@
+---
+import type { ContributorStats } from '../../types/contributors';
+import { getInitials } from '../../utils/contributors';
+import ContactButtons from './ContactButtons.astro';
+
+interface Props {
+  contributor: ContributorStats;
+  dialogId: string;
+  rank: number;
+}
+
+const { contributor, dialogId, rank } = Astro.props;
+const photo = contributor.profile?.photo;
+const note = contributor.profile?.note;
+const typeEntries = Object.entries(contributor.byType).sort((a, b) => b[1] - a[1]).slice(0, 4);
+const yearEntries = Object.entries(contributor.byYear).sort((a, b) => Number(a[0]) - Number(b[0]));
+const searchHref = `/search?q=${encodeURIComponent(contributor.name)}`;
+---
+
+<div>
+  <button
+    type="button"
+    data-contributor-trigger={dialogId}
+    class="w-full group bg-white dark:bg-zinc-900 border border-zinc-200/80 dark:border-zinc-800 rounded-xl p-4 shadow-2xs hover:shadow-md hover:border-emerald-500/70 active:scale-[0.99] transition-all text-right flex items-center gap-3 cursor-pointer"
+    aria-haspopup="dialog"
+  >
+    {photo ? (
+      <div
+        class="relative rounded-full overflow-hidden border border-zinc-200 dark:border-zinc-700 shrink-0 bg-zinc-100 dark:bg-zinc-800 aspect-square"
+        style="width: 52px; height: 52px; min-width: 52px; min-height: 52px; max-width: 52px; max-height: 52px; border-radius: 50%; -webkit-mask-image: -webkit-radial-gradient(white, black);"
+      >
+        <img
+          src={photo}
+          alt={contributor.name}
+          width="52"
+          height="52"
+          loading="lazy"
+          decoding="async"
+          class="absolute inset-0 w-full h-full object-cover object-center block"
+          style="aspect-ratio: 1 / 1; border-radius: 50%;"
+        />
+      </div>
+    ) : (
+      <span
+        class="rounded-full bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900 flex items-center justify-center text-sm font-extrabold shrink-0 select-none aspect-square"
+        style="width: 52px; height: 52px; min-width: 52px; min-height: 52px; max-width: 52px; max-height: 52px; border-radius: 50%;"
+        aria-hidden="true"
+      >
+        {getInitials(contributor.name)}
+      </span>
+    )}
+    <span class="flex-1 min-w-0">
+      <span class="flex items-center gap-1.5">
+        <span class="text-[11px] font-bold text-emerald-600 dark:text-emerald-400 shrink-0">#{rank}</span>
+        <span class="font-bold text-sm text-zinc-900 dark:text-zinc-100 truncate group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">
+          {contributor.name}
+        </span>
+      </span>
+      <span class="mt-0.5 block text-[11px] text-zinc-500 dark:text-zinc-400">
+        {contributor.total} مصدر • اضغط للتفاصيل
+      </span>
+      {note && (
+        <span class="block text-[11px] text-zinc-400 dark:text-zinc-500 truncate">{note}</span>
+      )}
+    </span>
+    <svg class="w-4 h-4 text-zinc-400 shrink-0 rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+    </svg>
+  </button>
+
+  <dialog
+    id={dialogId}
+    data-contributor-dialog={dialogId}
+    class="m-auto w-[calc(100%-2rem)] max-w-sm rounded-2xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 p-0 shadow-xl backdrop:bg-zinc-950/50 text-right"
+  >
+    <div class="p-5">
+      <div class="flex items-start justify-between gap-3 mb-4">
+        <div class="flex items-center gap-3 min-w-0">
+          {photo ? (
+            <div
+              class="relative rounded-full overflow-hidden border border-zinc-200 dark:border-zinc-700 shrink-0 bg-zinc-100 dark:bg-zinc-800 aspect-square"
+              style="width: 64px; height: 64px; min-width: 64px; min-height: 64px; max-width: 64px; max-height: 64px; border-radius: 50%; -webkit-mask-image: -webkit-radial-gradient(white, black);"
+            >
+              <img
+                src={photo}
+                alt={contributor.name}
+                width="64"
+                height="64"
+                loading="lazy"
+                decoding="async"
+                class="absolute inset-0 w-full h-full object-cover object-center block"
+                style="aspect-ratio: 1 / 1; border-radius: 50%;"
+              />
+            </div>
+          ) : (
+            <span
+              class="rounded-full bg-emerald-600 text-white flex items-center justify-center text-xl font-extrabold shrink-0 aspect-square"
+              style="width: 64px; height: 64px; min-width: 64px; min-height: 64px; max-width: 64px; max-height: 64px; border-radius: 50%;"
+              aria-hidden="true"
+            >
+              {getInitials(contributor.name)}
+            </span>
+          )}
+          <div class="min-w-0">
+            <h3 class="font-bold text-sm text-zinc-900 dark:text-zinc-100 truncate">{contributor.name}</h3>
+            <p class="text-[11px] text-zinc-500 dark:text-zinc-400">المرتبة #{rank} حسب المساهمة</p>
+          </div>
+        </div>
+        <button
+          type="button"
+          data-contributor-close
+          class="p-1.5 rounded-lg text-zinc-500 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors cursor-pointer shrink-0"
+          aria-label="إغلاق"
+        >
+          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+
+      <div class="grid grid-cols-2 gap-2 mb-4 text-center">
+        <div class="rounded-xl bg-zinc-50 dark:bg-zinc-800/60 border border-zinc-200/70 dark:border-zinc-700/60 px-2 py-2.5">
+          <div class="text-base font-extrabold text-zinc-900 dark:text-zinc-100">{contributor.total}</div>
+          <div class="text-[11px] text-zinc-500 dark:text-zinc-400">إجمالي المصادر</div>
+        </div>
+        <div class="rounded-xl bg-zinc-50 dark:bg-zinc-800/60 border border-zinc-200/70 dark:border-zinc-700/60 px-2 py-2.5">
+          <div class="text-base font-extrabold text-zinc-900 dark:text-zinc-100">{contributor.subjects}</div>
+          <div class="text-[11px] text-zinc-500 dark:text-zinc-400">مواد دراسية</div>
+        </div>
+      </div>
+
+      {typeEntries.length > 0 && (
+        <div class="mb-3">
+          <h4 class="text-[11px] font-bold text-zinc-500 dark:text-zinc-400 mb-1.5">حسب النوع</h4>
+          <div class="flex flex-wrap gap-1.5">
+            {typeEntries.map(([type, count]) => (
+              <span class="text-[11px] font-semibold px-2 py-0.5 rounded bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300">
+                {type}: {count}
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {yearEntries.length > 0 && (
+        <div class="mb-4">
+          <h4 class="text-[11px] font-bold text-zinc-500 dark:text-zinc-400 mb-1.5">حسب السنة</h4>
+          <div class="flex flex-wrap gap-1.5">
+            {yearEntries.map(([year, count]) => (
+              <span class="text-[11px] font-semibold px-2 py-0.5 rounded bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300">
+                السنة {year}: {count}
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {contributor.profile?.contacts && (
+        <div class="mb-4">
+          <ContactButtons contacts={contributor.profile.contacts} />
+        </div>
+      )}
+
+      <a
+        href={searchHref}
+        class="block text-center text-xs font-bold px-3.5 py-2 rounded-xl bg-emerald-600 text-white hover:bg-emerald-700 transition-colors"
+      >
+        عرض مساهماته &larr;
+      </a>
+    </div>
+  </dialog>
+</div>

@@ -252,3 +252,42 @@ This document details all UI components, their props, intended reuse guidelines,
   }
   ```
 
+---
+
+### Contributors & Site Team (`/contributors`)
+
+Data lives in [`src/data/contributors.json`](file:///workspaces/asu_med_materials/src/data/contributors.json) (site team `authors` in manual order + `contributorProfiles` overrides with `matchNames`, optional photo, and labeled contacts). The contributors list shows content makers only: derived at build time by [`src/utils/contributors.ts`](file:///workspaces/asu_med_materials/src/utils/contributors.ts) scanning the `author` field across `materialsData` (`addedBy` ignored), then sorting descending by total. Types in [`src/types/contributors.ts`](file:///workspaces/asu_med_materials/src/types/contributors.ts).
+
+#### [`ContactButtons.astro`](file:///workspaces/asu_med_materials/src/components/contributors/ContactButtons.astro)
+- **Location**: `src/components/contributors/ContactButtons.astro`
+- **Purpose**: Reusable labeled contact pills for WhatsApp, Telegram, GitHub, LinkedIn, and Instagram. Each link supports an optional label (e.g. shared batch number vs personal).
+- **Props**:
+  ```typescript
+  interface Props {
+    contacts?: PersonContacts;
+    compact?: boolean;
+  }
+  ```
+
+#### [`AuthorCard.astro`](file:///workspaces/asu_med_materials/src/components/contributors/AuthorCard.astro)
+- **Location**: `src/components/contributors/AuthorCard.astro`
+- **Purpose**: Site team card with big circular photo (`w-24 h-24 rounded-full`) or initials fallback, name, emerald role pill, one-line bio, and contact buttons.
+- **Props**:
+  ```typescript
+  interface Props {
+    author: AuthorEntry;
+  }
+  ```
+
+#### [`ContributorCard.astro`](file:///workspaces/asu_med_materials/src/components/contributors/ContributorCard.astro)
+- **Location**: `src/components/contributors/ContributorCard.astro`
+- **Purpose**: Compact ranked card (`#rank` + total count). Click opens an accessible native `<dialog>` with total sources and subject count, top types, per-year breakdown, contacts, and a link to the contributor's materials (`/search?q=<name>`). Dialog open/close wiring lives once in `contributors.astro` via `data-contributor-trigger` / `data-contributor-dialog` delegation (works on touch, keyboard, and desktop).
+- **Props**:
+  ```typescript
+  interface Props {
+    contributor: ContributorStats;
+    dialogId: string;
+    rank: number;
+  }
+  ```
+

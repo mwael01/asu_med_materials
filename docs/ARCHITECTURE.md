@@ -38,12 +38,14 @@ asu_med_materials/
 │   │   ├── bookmarks/           # Offline bookmark drawer (BookmarksDrawer.astro)
 │   │   ├── common/              # Theme toggle (ThemeToggle.astro)
 │   │   ├── materials/           # ResourceCard, GroupedResourceList, ModuleCard, SubjectBar, YearSelector
+│   │   ├── contributors/        # AuthorCard, ContributorCard, ContactButtons
 │   │   ├── navigation/          # Navbar.astro, Footer.astro
 │   │   ├── search/              # SearchBar.astro, FilterToolbar.astro
 │   │   └── selection/           # MultistageSelector.astro (Two-stage Year/Module modal)
 │   ├── data/                    # Structured study materials & curriculum data
 │   │   ├── modules.ts           # Year and module metadata (MED101-MED504)
-│   │   └── materials.ts         # Verified study materials production database
+│   │   ├── materials.ts         # Verified study materials production database
+│   │   └── contributors.json    # Site team authors + contributor profile overrides
 │   ├── layouts/                 # Base page layouts
 │   │   └── Layout.astro         # Shell with RTL, SEO, PWA, and Theme setup
 │   ├── pages/                   # File-based routing
@@ -52,12 +54,15 @@ asu_med_materials/
 │   │   ├── module/[id].astro    # Dedicated module resources page
 │   │   ├── module/[id]/[subject].astro # Dedicated module subject page
 │   │   ├── search.astro         # Global search & multi-filter explorer
-│   │   └── contribute.astro     # Contribution guide & automatic submission form
+│   │   ├── contribute.astro     # Contribution guide & automatic submission form
+│   │   └── contributors.astro   # Site team on top + content makers (author field only, ranked)
 │   ├── styles/                  # Global styles & Tailwind configuration
 │   │   └── global.css
 │   ├── types/                   # TypeScript interfaces & types
-│   │   └── materials.ts         # Material, module, and curriculum types
+│   │   ├── materials.ts         # Material, module, and curriculum types
+│   │   └── contributors.ts      # Author, contributor profile, contact, and stats types
 │   └── utils/                   # Shared pure TypeScript helper functions
+│       ├── contributors.ts      # Contributor stats aggregation + initials fallback
 │       ├── filter.ts            # Search and filter matching logic
 │       ├── slug.ts              # URL slugification for subjects and routes
 │       └── storage.ts           # Bookmarks & user year preferences in localStorage

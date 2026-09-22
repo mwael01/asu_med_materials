@@ -1,0 +1,112 @@
+---
+import type { PersonContacts } from '../../types/contributors';
+
+interface Props {
+  contacts?: PersonContacts;
+  showLabels?: boolean;
+}
+
+const { contacts, showLabels = true } = Astro.props;
+
+function hasContacts(): boolean {
+  if (!contacts) return false;
+  return Boolean(
+    contacts.whatsapp?.length ||
+    contacts.telegram?.length ||
+    contacts.github?.length ||
+    contacts.linkedin?.length ||
+    contacts.instagram?.length
+  );
+}
+---
+
+{hasContacts() && (
+  <div class="flex flex-wrap items-center justify-center gap-1.5">
+    {/* WhatsApp */}
+    {contacts?.whatsapp?.map((c) => (
+      <a
+        href={c.href}
+        target="_blank"
+        rel="noopener noreferrer"
+        title={c.label ? `${c.label}: ${c.value}` : `واتساب: ${c.value}`}
+        aria-label={c.label || 'واتساب'}
+        class="inline-flex items-center justify-center gap-1.5 h-8 px-3 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200/80 hover:bg-emerald-600 hover:text-white dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-800/60 dark:hover:bg-emerald-600 dark:hover:text-white hover:scale-105 active:scale-95 transition-all duration-150 shadow-2xs text-xs font-medium"
+      >
+        <svg class="w-3.5 h-3.5 shrink-0" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+          <path d="M12.04 2c-5.46 0-9.91 4.45-9.91 9.91 0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38c1.45.79 3.08 1.21 4.74 1.21 5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.82 9.82 0 0 0 12.04 2m.01 1.67c2.2 0 4.26.86 5.82 2.42a8.23 8.23 0 0 1 2.41 5.83c0 4.54-3.7 8.24-8.24 8.24-1.42 0-2.82-.37-4.06-1.07l-.29-.17-3.02.79.81-2.94-.19-.3a8.21 8.21 0 0 1-1.26-4.38c0-4.54 3.7-8.24 8.24-8.24m-3.53 3.44c-.19 0-.5.07-.76.35-.26.29-1 1-1 2.43 0 1.43 1.03 2.81 1.18 3s2.02 3.1 4.9 4.34c.69.3 1.22.48 1.64.61.69.22 1.32.19 1.81.12.55-.08 1.7-1.05 1.94-1.72.24-.67.24-1.24.17-1.36-.07-.12-.26-.19-.55-.33s-1.7-.84-1.96-.94c-.26-.1-.45-.14-.64.14-.19.29-.74.93-.91 1.13-.17.19-.34.22-.63.07-.29-.14-1.22-.45-2.32-1.43-.86-.77-1.44-1.71-1.61-2-.17-.29-.02-.45.13-.59.13-.13.29-.34.43-.5.14-.17.19-.29.29-.48.1-.19.05-.36-.02-.5-.07-.14-.64-1.56-.88-2.14-.23-.56-.47-.49-.64-.5z"/>
+        </svg>
+        {showLabels && <span>واتساب</span>}
+      </a>
+    ))}
+
+    {/* Telegram */}
+    {contacts?.telegram?.map((c) => (
+      <a
+        href={c.href}
+        target="_blank"
+        rel="noopener noreferrer"
+        title={c.label ? `${c.label}: ${c.value}` : `تليجرام: ${c.value}`}
+        aria-label={c.label || 'تليجرام'}
+        class="inline-flex items-center justify-center gap-1.5 h-8 px-3 rounded-full bg-sky-50 text-sky-700 border border-sky-200/80 hover:bg-sky-500 hover:text-white dark:bg-sky-950/40 dark:text-sky-300 dark:border-sky-800/60 dark:hover:bg-sky-500 dark:hover:text-white hover:scale-105 active:scale-95 transition-all duration-150 shadow-2xs text-xs font-medium"
+      >
+        <svg class="w-3.5 h-3.5 shrink-0" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+          <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69a.2.2 0 00-.05-.18c-.06-.05-.14-.03-.21-.02-.09.02-1.49.95-4.22 2.79-.4.27-.76.41-1.08.4-.36-.01-1.04-.2-1.55-.37-.63-.2-1.12-.31-1.08-.66.02-.18.27-.36.74-.55 2.92-1.27 4.86-2.11 5.83-2.51 2.78-1.16 3.35-1.36 3.73-1.36.08 0 .27.02.39.12.1.08.13.19.14.27-.01.06.01.24 0 .38z"/>
+        </svg>
+        {showLabels && <span>تليجرام</span>}
+      </a>
+    ))}
+
+    {/* GitHub */}
+    {contacts?.github?.map((c) => (
+      <a
+        href={c.href}
+        target="_blank"
+        rel="noopener noreferrer"
+        title={c.label ? `${c.label}: ${c.value}` : `GitHub: ${c.value}`}
+        aria-label="GitHub"
+        class="inline-flex items-center justify-center gap-1.5 h-8 px-3 rounded-full bg-zinc-100 text-zinc-700 border border-zinc-200/80 hover:bg-zinc-900 hover:text-white dark:bg-zinc-800 dark:text-zinc-300 dark:border-zinc-700 dark:hover:bg-zinc-100 dark:hover:text-zinc-900 hover:scale-105 active:scale-95 transition-all duration-150 shadow-2xs text-xs font-medium"
+      >
+        <svg class="w-3.5 h-3.5 shrink-0" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+          <path fill-rule="evenodd" clip-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"/>
+        </svg>
+        {showLabels && <span>GitHub</span>}
+      </a>
+    ))}
+
+    {/* Instagram */}
+    {contacts?.instagram?.map((c) => (
+      <a
+        href={c.href}
+        target="_blank"
+        rel="noopener noreferrer"
+        title={c.label ? `${c.label}: ${c.value}` : `انستجرام: ${c.value}`}
+        aria-label="Instagram"
+        class="inline-flex items-center justify-center gap-1.5 h-8 px-3 rounded-full bg-pink-50 text-pink-700 border border-pink-200/80 hover:bg-pink-600 hover:text-white dark:bg-pink-950/40 dark:text-pink-300 dark:border-pink-800/60 dark:hover:bg-pink-600 dark:hover:text-white hover:scale-105 active:scale-95 transition-all duration-150 shadow-2xs text-xs font-medium"
+      >
+        <svg class="w-3.5 h-3.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <rect width="20" height="20" x="2" y="2" rx="5" ry="5"/>
+          <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/>
+          <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/>
+        </svg>
+        {showLabels && <span>انستجرام</span>}
+      </a>
+    ))}
+
+    {/* LinkedIn */}
+    {contacts?.linkedin?.map((c) => (
+      <a
+        href={c.href}
+        target="_blank"
+        rel="noopener noreferrer"
+        title={c.label ? `${c.label}: ${c.value}` : `LinkedIn: ${c.value}`}
+        aria-label="LinkedIn"
+        class="inline-flex items-center justify-center gap-1.5 h-8 px-3 rounded-full bg-blue-50 text-blue-700 border border-blue-200/80 hover:bg-blue-600 hover:text-white dark:bg-blue-950/40 dark:text-blue-300 dark:border-blue-800/60 dark:hover:bg-blue-600 dark:hover:text-white hover:scale-105 active:scale-95 transition-all duration-150 shadow-2xs text-xs font-medium"
+      >
+        <svg class="w-3.5 h-3.5 shrink-0" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+          <path d="M19 3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14m-.5 15.5v-5.3a3.26 3.26 0 0 0-3.26-3.26c-.85 0-1.84.52-2.28 1.3v-1.11h-2.79v8.37h2.79v-4.93c0-.77.62-1.4 1.39-1.4a1.4 1.4 0 0 1 1.4 1.4v4.93h2.75M6.88 8.56a1.68 1.68 0 0 0 1.68-1.68c0-.93-.75-1.69-1.68-1.69a1.69 1.69 0 0 0-1.69 1.69c0 .93.76 1.68 1.69 1.68m1.39 9.94v-8.37H5.5v8.37h2.77z"/>
+        </svg>
+        {showLabels && <span>LinkedIn</span>}
+      </a>
+    ))}
+  </div>
+)}

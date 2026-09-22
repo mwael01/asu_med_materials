@@ -1,0 +1,61 @@
+{
+  "authors": [
+    {
+      "id": "mohammed-wael",
+      "name": "Mohammed Wael",
+      "role": "Web Developer",
+      "bio": "مطور المنصة والمسؤول عن تنظيم المصادر.",
+      "order": 1,
+      "photo": "/contributors/mohammed-wael.png",
+      "matchNames": ["M. Wael", "Mohammed Wael", "Mohmmed Wael"],
+      "contacts": {
+        "github": [
+          { "label": "GitHub", "value": "mwael01", "href": "https://github.com/mwael01" }
+        ]
+      }
+    },
+    {
+      "id": "amr-mohamed-saad",
+      "name": "Amr Saad",
+      "role": "Content Advisor",
+      "bio": "مشرف المحتوى ومراجعة المصادر.",
+      "order": 2,
+      "photo": "/contributors/amr-mohamed-saad.jpg",
+      "matchNames": ["Amr Saad"],
+      "contacts": {
+        "whatsapp": [
+          { "label": "واتساب", "value": "+20 12 80001426", "href": "https://wa.me/201280001426" }
+        ]
+      }
+    },
+    {
+      "id": "mohamed-walid-mohamed",
+      "name": "Mohamed Waleed",
+      "role": "Content Advisor",
+      "bio": "مشرف المحتوى ومراجعة المصادر.",
+      "order": 3,
+      "photo": "/contributors/mohamed-walid-mohamed.jpg",
+      "matchNames": ["Mohamed Walid"],
+      "contacts": {
+        "whatsapp": [
+          { "label": "واتساب", "value": "+20 10 17819182", "href": "https://wa.me/201017819182" }
+        ]
+      }
+    },
+    {
+      "id": "mazen-yasin",
+      "name": "Mazen Yasin",
+      "role": "Content Advisor",
+      "bio": "مشرف المحتوى ومراجعة المصادر.",
+      "order": 4,
+      "photo": "/contributors/mazen-yasin.jpg",
+      "matchNames": ["Mazen Yasin"],
+      "contacts": {
+        "whatsapp": [
+          { "label": "واتساب", "value": "+20 10 30811700", "href": "https://wa.me/201030811700" }
+        ]
+      }
+    }
+  ],
+  "contributorProfiles": []
+}

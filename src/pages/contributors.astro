@@ -1,0 +1,98 @@
+---
+import Layout from '../layouts/Layout.astro';
+import AuthorCard from '../components/contributors/AuthorCard.astro';
+import ContributorCard from '../components/contributors/ContributorCard.astro';
+import { getAllContributors, getAuthors } from '../utils/contributors';
+
+const contributors = getAllContributors();
+const authors = getAuthors();
+---
+
+<Layout
+  title="فريق العمل والمساهمون - ASU Med Materials"
+  description="فريق عمل منصة مصادر طب عين شمس وصناع المحتوى من الدكاترة والقنوات التعليمية."
+>
+  <div class="mb-6 text-right">
+    <div class="flex items-center gap-2 text-xs text-zinc-500 dark:text-zinc-400 mb-2">
+      <a href="/?redirect=false" class="hover:text-emerald-600 dark:hover:text-emerald-400">الرئيسية</a>
+      <span>/</span>
+      <span class="text-zinc-900 dark:text-zinc-100 font-bold">فريق العمل والمساهمون</span>
+    </div>
+    <h1 class="text-2xl font-extrabold text-zinc-900 dark:text-zinc-100 mb-1">
+      فريق العمل والمساهمون
+    </h1>
+    <p class="text-xs text-zinc-500 dark:text-zinc-400">
+      فريق عمل المنصة ({authors.length}) وصناع المحتوى من الدكاترة والقنوات ({contributors.length}).
+    </p>
+  </div>
+
+  <!-- Website team first, manual order from JSON -->
+  <section class="mb-10" aria-labelledby="authors-heading">
+    <div class="flex items-center justify-between mb-3">
+      <h2 id="authors-heading" class="text-base font-bold text-zinc-900 dark:text-zinc-100">
+        فريق العمل
+      </h2>
+    </div>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      {authors.map((author) => (
+        <AuthorCard author={author} />
+      ))}
+    </div>
+  </section>
+
+  <!-- Content makers, ordered by contribution amount -->
+  <section aria-labelledby="contributors-heading">
+    <div class="flex items-center justify-between mb-3">
+      <h2 id="contributors-heading" class="text-base font-bold text-zinc-900 dark:text-zinc-100">
+        صناع المحتوى
+      </h2>
+      <span class="text-[11px] text-zinc-500 dark:text-zinc-400">مرتبون حسب عدد المصادر • اضغط على أي بطاقة للتفاصيل</span>
+    </div>
+
+    {contributors.length > 0 ? (
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+        {contributors.map((contributor, index) => (
+          <ContributorCard contributor={contributor} dialogId={`contributor-dialog-${index}`} rank={index + 1} />
+        ))}
+      </div>
+    ) : (
+      <p class="text-xs text-zinc-500 dark:text-zinc-400 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl p-4">
+        لا توجد مساهمات بعد. شارك أول مصدر من صفحة المساهمة.
+      </p>
+    )}
+  </section>
+</Layout>
+
+<script>
+  function closeDialog(dialog: HTMLDialogElement): void {
+    if (dialog.open) dialog.close();
+  }
+
+  function openDialog(dialog: HTMLDialogElement): void {
+    if (!dialog.open) dialog.showModal();
+  }
+
+  function initContributorDialogs(): void {
+    document.querySelectorAll<HTMLDialogElement>('[data-contributor-dialog]').forEach((dialog) => {
+      dialog.addEventListener('click', (event) => {
+        const target = event.target as HTMLElement;
+        if (target === dialog || target.closest('[data-contributor-close]')) {
+          closeDialog(dialog);
+        }
+      });
+    });
+
+    document.querySelectorAll<HTMLElement>('[data-contributor-trigger]').forEach((trigger) => {
+      trigger.addEventListener('click', () => {
+        const id = trigger.getAttribute('data-contributor-trigger');
+        if (!id) return;
+        const dialog = document.getElementById(id) as HTMLDialogElement | null;
+        if (dialog) openDialog(dialog);
+      });
+    });
+  }
+
+  initContributorDialogs();
+  document.addEventListener('astro:after-swap', initContributorDialogs);
+</script>
