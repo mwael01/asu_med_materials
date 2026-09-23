@@ -100,6 +100,7 @@ export interface TranslationsSchema {
     openResource: string;
     copiedToast: string;
     markStudied: string;
+    unmarkStudied: string;
     studiedToast: string;
     unstudiedToast: string;
   };

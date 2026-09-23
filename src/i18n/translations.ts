@@ -106,7 +106,8 @@ export const translations: Record<SupportedLanguage, TranslationsSchema> = {
       save: 'حفظ',
       openResource: 'فتح المصدر',
       copiedToast: 'تم نسخ الرابط إلى الحافظة',
-      markStudied: 'تمت المذاكرة',
+      markStudied: 'تحديد كمذاكر',
+      unmarkStudied: 'إلغاء التحديد كمذاكر',
       studiedToast: 'تم التحديد كمذاكر',
       unstudiedToast: 'تم إلغاء التحديد'
     },
@@ -326,6 +327,7 @@ export const translations: Record<SupportedLanguage, TranslationsSchema> = {
       openResource: 'Open Resource',
       copiedToast: 'Link copied to clipboard',
       markStudied: 'Mark as studied',
+      unmarkStudied: 'Unmark as studied',
       studiedToast: 'Marked as studied',
       unstudiedToast: 'Unmarked as studied'
     },

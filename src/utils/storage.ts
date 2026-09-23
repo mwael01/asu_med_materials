@@ -67,7 +67,7 @@ export function getStoredStudiedIds(): string[] {
   return memoryStudiedFallback ? [...memoryStudiedFallback] : [];
 }
 
-export function saveStudiedIds(ids: string[]): void {
+export function saveStudiedIds(ids: string[], sourceId?: string): void {
   memoryStudiedFallback = [...ids];
   if (typeof window === 'undefined') return;
   try {
@@ -76,7 +76,7 @@ export function saveStudiedIds(ids: string[]): void {
     console.error('Failed to save studied materials to localStorage', err);
   }
   try {
-    window.dispatchEvent(new CustomEvent('studied-updated', { detail: ids }));
+    window.dispatchEvent(new CustomEvent('studied-updated', { detail: { ids, sourceId } }));
   } catch {}
 }
 
@@ -95,7 +95,7 @@ export function toggleItemStudied(id: string): boolean {
     updated = [...current, id];
   }
 
-  saveStudiedIds(updated);
+  saveStudiedIds(updated, id);
   return index < 0; // returns true if newly studied, false if unmarked
 }
 

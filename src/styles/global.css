@@ -49,3 +49,9 @@
   border-color: #34d399;
   background-color: rgba(16, 185, 129, 0.15);
 }
+.studied-btn:hover .studied-box.is-checked {
+  filter: brightness(0.92);
+}
+.dark .studied-btn:hover .studied-box.is-checked {
+  filter: brightness(1.1);
+}
