@@ -6,6 +6,7 @@ import BookmarksDrawer from '../components/bookmarks/BookmarksDrawer.astro';
 import MultistageSelector from '../components/selection/MultistageSelector.astro';
 import Toast from '../components/common/Toast.astro';
 import PwaInstallToast from '../components/pwa/PwaInstallToast.astro';
+import Analytics from '@vercel/analytics/astro';
 
 interface Props {
   title?: string;
@@ -86,5 +87,7 @@ const {
         initStudiedMaterials();
       });
     </script>
+
+    <Analytics />
   </body>
 </html>
