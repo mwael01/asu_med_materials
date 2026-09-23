@@ -37,13 +37,6 @@ export function detectPlatformTags(urls: string[]): string[] {
 }
 
 /**
- * Generates direct prefilled GitHub issue URL as a fallback
- */
-export function generateFallbackUrl(title: string, body: string): string {
-  return `https://github.com/mwael01/asu_med_materials/issues/new?title=${encodeURIComponent(title)}&body=${encodeURIComponent(body)}`;
-}
-
-/**
  * Submits payload to the API handler
  */
 export async function submitMaterial(payload: MaterialSubmission): Promise<SubmissionResponse> {
@@ -57,17 +50,9 @@ export async function submitMaterial(payload: MaterialSubmission): Promise<Submi
     const result = await response.json();
     return result;
   } catch (err: any) {
-    const fallbackTitle = payload.mode === 'dump'
-      ? '[تفريغ مصادر]: رسالة مجمعة'
-      : `[إضافة مصدر]: ${payload.title || payload.url}`;
-    const fallbackBody = payload.mode === 'dump'
-      ? payload.content
-      : `الرابط: ${payload.url}\nالعنوان: ${payload.title || ''}\nالملاحظات: ${payload.description || ''}`;
-
     return {
       success: false,
-      fallbackUrl: generateFallbackUrl(fallbackTitle, fallbackBody),
-      error: 'تعذر الاتصال بالخادم. يمكنك فتح التذكرة على GitHub مباشرة لحفظ مصادرك.'
+      error: 'تعذر الاتصال بالخادم. يرجى التأكد من اتصال الإنترنت والمحاولة مرة أخرى.'
     };
   }
 }

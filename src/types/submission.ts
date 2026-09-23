@@ -28,9 +28,10 @@ export type MaterialSubmission = QuickDumpSubmission | DetailedSubmission;
 
 export interface SubmissionResponse {
   success: boolean;
-  issueNumber?: number;
-  issueUrl?: string;
-  fallbackUrl?: string;
+  timestamp?: string;
+  mock?: boolean;
+  row?: number;
   error?: string;
   details?: unknown;
 }
+

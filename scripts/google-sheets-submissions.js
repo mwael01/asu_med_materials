@@ -1,0 +1,148 @@
+/**
+ * ============================================================================
+ * ASU Med Materials - Google Sheets Submissions Webhook Script
+ * ============================================================================
+ *
+ * This Google Apps Script acts as a serverless webhook endpoint that receives
+ * student material submissions from the ASU Med Materials website (/contribute)
+ * and appends them into your Google Sheet for easy review and organization.
+ *
+ * ----------------------------------------------------------------------------
+ * 📋 HOW TO DEPLOY THIS SCRIPT (5-Step Guide):
+ * ----------------------------------------------------------------------------
+ *
+ * Step 1: Create a Google Sheet
+ *   1. Go to https://sheets.new (or create a new sheet in Google Drive).
+ *   2. Title the sheet: "ASU Med Materials - Submissions" (or any name you like).
+ *
+ * Step 2: Open Google Apps Script
+ *   1. In your Google Sheet top menu, click:
+ *      Extensions (الإضافات) -> Apps Script.
+ *   2. Erase any placeholder code inside "Code.gs".
+ *   3. Copy this entire file and paste it into the Apps Script editor.
+ *   4. Save the project (Ctrl + S or Cmd + S).
+ *
+ * Step 3: Deploy as a Web App
+ *   1. In the top-right corner, click the blue "Deploy" (نشر / تطوير) button.
+ *   2. Choose: "New deployment" (نشر جديد).
+ *   3. Click the gear icon (⚙️) next to "Select type" and choose "Web app" (تطبيق ويب).
+ *   4. Set the deployment fields:
+ *      - Description: "ASU Med Materials Submissions Webhook"
+ *      - Execute as: "Me" (your Google account email)
+ *      - Who has access: "Anyone" (أي شخص)
+ *        ⚠️ CRITICAL: Must be "Anyone" so the website backend can post rows
+ *        without requiring a Google login.
+ *   5. Click "Deploy" (نشر).
+ *   6. Click "Authorize access" (منح الإذن) and select your Google account.
+ *      (If you see "Google hasn't verified this app", click "Advanced" /
+ *      "إعدادات متقدمة" -> "Go to Untitled project (unsafe)" -> "Allow" / "سماح").
+ *   7. Copy the generated "Web app URL"
+ *      (It looks like: https://script.google.com/macros/s/AKfycb.../exec).
+ *
+ * Step 4: Add Environment Variable in Vercel & Locally
+ *   1. In Vercel Project Settings -> "Environment Variables":
+ *      - Key: GOOGLE_SHEETS_WEBHOOK_URL
+ *      - Value: <paste the Web app URL copied in Step 3>
+ *      - Environments: Production, Preview, Development.
+ *   2. For local testing, add the same variable to your .env.local file:
+ *      GOOGLE_SHEETS_WEBHOOK_URL=https://script.google.com/macros/s/.../exec
+ *
+ * Step 5: Updating the Script in the Future
+ *   Whenever you update this script code in the Google editor:
+ *   1. Click "Deploy" -> "Manage deployments".
+ *   2. Click the pencil icon (Edit) on your deployment.
+ *   3. Under "Version", select "New version".
+ *   4. Click "Deploy". The Web app URL stays the exact same!
+ *
+ * ============================================================================
+ */
+
+/**
+ * Handles incoming HTTP POST requests from /api/submit-material
+ */
+function doPost(e) {
+  try {
+    var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+    var data = {};
+
+    // Parse JSON body
+    if (e && e.postData && e.postData.contents) {
+      data = JSON.parse(e.postData.contents);
+    } else {
+      return ContentService.createTextOutput(JSON.stringify({
+        success: false,
+        error: "لم يتم استلام أي بيانات صالحة (Empty payload)"
+      })).setMimeType(ContentService.MimeType.JSON);
+    }
+
+    // Auto-create styled header row if the sheet is completely empty
+    if (sheet.getLastRow() === 0) {
+      var headers = [
+        "التاريخ والوقت",
+        "نوع الإرسال",
+        "المساهم",
+        "السنة الدراسية",
+        "الموديول",
+        "العنوان / الملاحظات",
+        "المحتوى / الرابط الأصلي",
+        "الروابط المستخرجة",
+        "حالة المراجعة"
+      ];
+      sheet.appendRow(headers);
+
+      // Style header: Emerald background, white bold text, freeze top row
+      var headerRange = sheet.getRange(1, 1, 1, headers.length);
+      headerRange.setBackground("#059669");
+      headerRange.setFontColor("#ffffff");
+      headerRange.setFontWeight("bold");
+      headerRange.setHorizontalAlignment("center");
+      sheet.setFrozenRows(1);
+    }
+
+    // Normalize and format data fields
+    var timestamp = data.timestamp || new Date().toLocaleString("ar-EG", { timeZone: "Africa/Cairo" });
+    var type = data.type === "single" ? "مصدر فردي (Single)" : "تفريغ رسالة (Dump)";
+    var contributor = (data.contributor || "فاعل خير").toString().trim();
+    var year = (data.year || "عام").toString();
+    var moduleName = (data.module || "عام").toString();
+    var title = (data.title || "").toString().trim();
+    var content = (data.content || "").toString().trim();
+    var extractedUrls = Array.isArray(data.extractedUrls) ? data.extractedUrls.join("\n") : (data.extractedUrls || "");
+    var status = "قيد المراجعة (Pending)";
+
+    // Append new submission row
+    sheet.appendRow([
+      timestamp,
+      type,
+      contributor,
+      year,
+      moduleName,
+      title,
+      content,
+      extractedUrls,
+      status
+    ]);
+
+    // Return JSON response to website
+    return ContentService.createTextOutput(JSON.stringify({
+      success: true,
+      timestamp: timestamp
+    })).setMimeType(ContentService.MimeType.JSON);
+
+  } catch (error) {
+    return ContentService.createTextOutput(JSON.stringify({
+      success: false,
+      error: error.toString()
+    })).setMimeType(ContentService.MimeType.JSON);
+  }
+}
+
+/**
+ * Handles incoming HTTP GET requests (useful for browser testing)
+ */
+function doGet() {
+  return ContentService.createTextOutput(JSON.stringify({
+    status: "ok",
+    message: "ASU Med Materials Google Sheets Webhook is active and running!"
+  })).setMimeType(ContentService.MimeType.JSON);
+}
