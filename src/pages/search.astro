@@ -172,10 +172,14 @@ const allMaterials = getAllMaterials().map((m) => ({
           const authorText = Array.isArray(item.author)
             ? item.author.join(' ').toLowerCase()
             : (item.author ? item.author.toLowerCase() : '');
+          const addedByText = Array.isArray(item.addedBy)
+            ? item.addedBy.join(' ').toLowerCase()
+            : (item.addedBy ? item.addedBy.toLowerCase() : '');
           const matchAuthor = authorText.includes(q);
+          const matchAddedBy = addedByText.includes(q);
           const matchTags = item.tags?.some((t: string) => t.toLowerCase().includes(q));
 
-          if (!matchTitle && !matchDesc && !matchSubj && !matchAuthor && !matchTags) {
+          if (!matchTitle && !matchDesc && !matchSubj && !matchAuthor && !matchAddedBy && !matchTags) {
             (cardEl as HTMLElement).style.display = 'none';
             return;
           }

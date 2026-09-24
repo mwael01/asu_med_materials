@@ -166,6 +166,12 @@ export interface TranslationsSchema {
     academicYears: string;
     yearPrefix: string;
     viewAll: string;
+    resourceTitle: string;
+    resourceRankNote: string;
+    resourceRank: string;
+    viewAllAdded: string;
+    showAllCreators: string;
+    showLess: string;
   };
   contacts: {
     whatsapp: string;

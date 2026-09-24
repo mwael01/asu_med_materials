@@ -7,9 +7,10 @@ interface Props {
   contributor: ContributorStats;
   dialogId: string;
   rank: number;
+  roleType?: 'creator' | 'resource';
 }
 
-const { contributor, dialogId, rank } = Astro.props;
+const { contributor, dialogId, rank, roleType = 'creator' } = Astro.props;
 const photo = contributor.profile?.photo;
 const note = contributor.profile?.note;
 const noteEn = contributor.profile?.noteEn;
@@ -109,8 +110,12 @@ const searchHref = `/search?q=${encodeURIComponent(contributor.name)}`;
         )}
         <div class="min-w-0">
           <h3 class="font-bold text-sm text-zinc-900 dark:text-zinc-100 truncate">{contributor.name}</h3>
-          <span class="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-600 dark:text-emerald-400 mt-0.5" data-i18n="contributors.rank" data-i18n-params={JSON.stringify({ r: rank })}>
-            المرتبة #{rank} بين صناع المحتوى
+          <span
+            class="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-600 dark:text-emerald-400 mt-0.5"
+            data-i18n={roleType === 'resource' ? 'contributors.resourceRank' : 'contributors.rank'}
+            data-i18n-params={JSON.stringify({ r: rank })}
+          >
+            {roleType === 'resource' ? `المرتبة #${rank} بين مساهمي المصادر` : `المرتبة #${rank} بين صناع المحتوى`}
           </span>
           {note && (
             <p
@@ -189,7 +194,12 @@ const searchHref = `/search?q=${encodeURIComponent(contributor.name)}`;
       href={searchHref}
       class="w-full text-center text-xs font-bold py-2.5 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white shadow-xs transition-colors flex items-center justify-center gap-1.5"
     >
-      <span data-i18n="contributors.viewAll" data-i18n-params={JSON.stringify({ n: contributor.total })}>عرض كل مصادره ({contributor.total})</span>
+      <span
+        data-i18n={roleType === 'resource' ? 'contributors.viewAllAdded' : 'contributors.viewAll'}
+        data-i18n-params={JSON.stringify({ n: contributor.total })}
+      >
+        {roleType === 'resource' ? `عرض كل المواد المضافة (${contributor.total})` : `عرض كل مصادره (${contributor.total})`}
+      </span>
       <svg class="w-3.5 h-3.5 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
         <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
       </svg>

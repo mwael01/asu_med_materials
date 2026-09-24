@@ -42,10 +42,14 @@ export function filterMaterials(
       const authorText = Array.isArray(item.author)
         ? item.author.join(' ')
         : (item.author ?? '');
+      const addedByText = Array.isArray(item.addedBy)
+        ? item.addedBy.join(' ')
+        : (item.addedBy ?? '');
       const inAuthor = authorText.toLowerCase().includes(query);
+      const inAddedBy = addedByText.toLowerCase().includes(query);
       const inTags = item.tags.some((tag) => tag.toLowerCase().includes(query));
 
-      if (!inTitle && !inDescription && !inSubject && !inAuthor && !inTags) {
+      if (!inTitle && !inDescription && !inSubject && !inAuthor && !inAddedBy && !inTags) {
         return false;
       }
     }

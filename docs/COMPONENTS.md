@@ -297,13 +297,14 @@ Data lives in [`src/data/contributors.json`](file:///workspaces/asu_med_material
   ```
 
 #### [`ContributorCard.astro`](file:///workspaces/asu_med_materials/src/components/contributors/ContributorCard.astro)
-- **Purpose**: Compact ranked card (`#rank` + total count). Click opens an accessible anchored popup card directly beneath the clicked contributor card/name with a directional pointer caret, active card highlight, total sources and subject count, top types, per-year breakdown, contacts, and a link to the contributor's materials (`/search?q=<name>`). Supports auto-closing other popups, outside click, and Escape key dismissal.
+- **Purpose**: Compact ranked card (`#rank` + total count). Click opens an accessible anchored popup card directly beneath the clicked contributor card/name with a directional pointer caret, active card highlight, total sources and subject count, top types, per-year breakdown, contacts, and a link to search their materials (`/search?q=<name>`). Supports auto-closing other popups, outside click, and Escape key dismissal. Supports both content creators (`creator`) and platform uploaders/curators (`resource`) with tailored badges and actions.
 - **Props**:
   ```typescript
   interface Props {
     contributor: ContributorStats;
     dialogId: string;
     rank: number;
+    roleType?: 'creator' | 'resource';
   }
   ```
 
