@@ -1,0 +1,688 @@
+[
+  {
+    "id": "bld-anat-moodle-p1",
+    "title": "تشريح الدم - Moodle الرسمي (Part 1)",
+    "description": "تسجيل محاضرة التشريح الرسمية للكلية عبر منصة مودل - الجزء الأول.",
+    "url": "https://drive.google.com/file/d/1hInCixkgIgwWMZU0rL5P--F3fxfojupn/view",
+    "type": "drive",
+    "category": "lectures",
+    "year": 2,
+    "moduleId": "year2-blood",
+    "subject": "Anatomy",
+    "author": "ASU Moodle",
+    "addedBy": "M. Wael",
+    "tags": [
+      "anatomy",
+      "moodle",
+      "تشريح",
+      "مودل"
+    ]
+  },
+  {
+    "id": "bld-anat-moodle-p2",
+    "title": "تشريح الدم - Moodle الرسمي (Part 2)",
+    "description": "تسجيل محاضرة التشريح الرسمية للكلية عبر منصة ستريم مودل - الجزء الثاني.",
+    "url": "https://web.microsoftstream.com/video/68921174-83c0-4308-8c7a-5d7cad817d05",
+    "type": "website",
+    "category": "lectures",
+    "year": 2,
+    "moduleId": "year2-blood",
+    "subject": "Anatomy",
+    "author": "ASU Moodle",
+    "addedBy": "M. Wael",
+    "tags": [
+      "anatomy",
+      "stream",
+      "تشريح",
+      "مودل"
+    ]
+  },
+  {
+    "id": "bld-anat-moodle-p3",
+    "title": "تشريح الدم - Moodle الرسمي (Part 3)",
+    "description": "تسجيل محاضرة التشريح الرسمية للكلية عبر منصة مودل - الجزء الثالث.",
+    "url": "https://drive.google.com/file/d/1PK7kwGQhHZPUgD58y9bTmuWkufdAp59w/view",
+    "type": "drive",
+    "category": "lectures",
+    "year": 2,
+    "moduleId": "year2-blood",
+    "subject": "Anatomy",
+    "author": "ASU Moodle",
+    "addedBy": "M. Wael",
+    "tags": [
+      "anatomy",
+      "moodle",
+      "تشريح",
+      "مودل"
+    ]
+  },
+  {
+    "id": "bld-anat-wahdan",
+    "title": "شرح تشريح موديول Blood - د. وهدان (Dr. Wahdan)",
+    "description": "قائمة تشغيل شرح تشريح الدم والجهاز الليمفاوي كاملة للدكتور وهدان.",
+    "url": "https://www.youtube.com/playlist?list=PLIZNmuBMEjaMZmwn2FVmG8bYsmVs5n-_v",
+    "type": "playlist",
+    "category": "lectures",
+    "year": 2,
+    "moduleId": "year2-blood",
+    "subject": "Anatomy",
+    "author": "Dr. Wahdan",
+    "addedBy": [
+      "M. Wael",
+      "Mohamed Waleed"
+    ],
+    "playlistId": "PLIZNmuBMEjaMZmwn2FVmG8bYsmVs5n-_v",
+    "videos": [
+      {
+        "id": "PLIZNmuBMEjaMZmwn2FVmG8bYsmVs5n-_v-1",
+        "title": "Support of the channel",
+        "youtubeId": "ym373Eez9Q8",
+        "url": "https://youtu.be/ym373Eez9Q8"
+      },
+      {
+        "id": "PLIZNmuBMEjaMZmwn2FVmG8bYsmVs5n-_v-2",
+        "title": "anatomy of spleen 1",
+        "youtubeId": "fGheL9cI9is",
+        "url": "https://youtu.be/fGheL9cI9is"
+      },
+      {
+        "id": "PLIZNmuBMEjaMZmwn2FVmG8bYsmVs5n-_v-3",
+        "title": "anatomy of spleen 2",
+        "youtubeId": "PXrHRUSBsGE",
+        "url": "https://youtu.be/PXrHRUSBsGE"
+      },
+      {
+        "id": "PLIZNmuBMEjaMZmwn2FVmG8bYsmVs5n-_v-4",
+        "title": "anatomy of spleen 3",
+        "youtubeId": "QIeFXC71xhQ",
+        "url": "https://youtu.be/QIeFXC71xhQ"
+      },
+      {
+        "id": "PLIZNmuBMEjaMZmwn2FVmG8bYsmVs5n-_v-5",
+        "title": "anatomy of spleen 4",
+        "youtubeId": "iCJibDXuRKY",
+        "url": "https://youtu.be/iCJibDXuRKY"
+      },
+      {
+        "id": "PLIZNmuBMEjaMZmwn2FVmG8bYsmVs5n-_v-6",
+        "title": "Lymphatic drainage of the body 1 ,by Dr. Wahdan",
+        "youtubeId": "3EpJ1CedREc",
+        "url": "https://youtu.be/3EpJ1CedREc"
+      },
+      {
+        "id": "PLIZNmuBMEjaMZmwn2FVmG8bYsmVs5n-_v-7",
+        "title": "Lymphatic drainage of the body 2 ,by Dr. Wahdan",
+        "youtubeId": "uA_l7cxIzeI",
+        "url": "https://youtu.be/uA_l7cxIzeI"
+      },
+      {
+        "id": "PLIZNmuBMEjaMZmwn2FVmG8bYsmVs5n-_v-8",
+        "title": "Lymphatic drainage of the body  3 ,by Dr. Wahdan",
+        "youtubeId": "vxh0ohbK5zQ",
+        "url": "https://youtu.be/vxh0ohbK5zQ"
+      },
+      {
+        "id": "PLIZNmuBMEjaMZmwn2FVmG8bYsmVs5n-_v-9",
+        "title": "Lymphatic drainage of the body  4 ,by Dr. Wahdan",
+        "youtubeId": "W7NOVRYmsvo",
+        "url": "https://youtu.be/W7NOVRYmsvo"
+      },
+      {
+        "id": "PLIZNmuBMEjaMZmwn2FVmG8bYsmVs5n-_v-10",
+        "title": "Lymphatic drainage of the body 5 ,by Dr. Wahdan",
+        "youtubeId": "j1wCiBRklfo",
+        "url": "https://youtu.be/j1wCiBRklfo"
+      },
+      {
+        "id": "PLIZNmuBMEjaMZmwn2FVmG8bYsmVs5n-_v-11",
+        "title": "Lymphatic drainage of the body  6 ,by Dr. Wahdan",
+        "youtubeId": "vFauq_qMblE",
+        "url": "https://youtu.be/vFauq_qMblE"
+      },
+      {
+        "id": "PLIZNmuBMEjaMZmwn2FVmG8bYsmVs5n-_v-12",
+        "title": "Lymphatic drainage of the body  7 ,by Dr. Wahdan",
+        "youtubeId": "NErjrnFkfWU",
+        "url": "https://youtu.be/NErjrnFkfWU"
+      },
+      {
+        "id": "PLIZNmuBMEjaMZmwn2FVmG8bYsmVs5n-_v-13",
+        "title": "Lymphatic drainage of the body 8 ,by Dr. Wahdan",
+        "youtubeId": "Us-YAtqJLbo",
+        "url": "https://youtu.be/Us-YAtqJLbo"
+      },
+      {
+        "id": "PLIZNmuBMEjaMZmwn2FVmG8bYsmVs5n-_v-14",
+        "title": "Anatomy of lower limb 61 (lymphatic drainage  , part 1), by Dr.Wahdan",
+        "youtubeId": "nx7JTcaytI8",
+        "url": "https://youtu.be/nx7JTcaytI8"
+      },
+      {
+        "id": "PLIZNmuBMEjaMZmwn2FVmG8bYsmVs5n-_v-15",
+        "title": "Anatomy of lower limb 61 (lymphatic drainage  , part 1), by Dr.Wahdan",
+        "youtubeId": "DQXVIZsSfdA",
+        "url": "https://youtu.be/DQXVIZsSfdA"
+      },
+      {
+        "id": "PLIZNmuBMEjaMZmwn2FVmG8bYsmVs5n-_v-16",
+        "title": "Anatomy of upper limb 63 ( Axilla , part 1 ) , by Dr. Wahdan",
+        "youtubeId": "Sqm0bRAus78",
+        "url": "https://youtu.be/Sqm0bRAus78"
+      },
+      {
+        "id": "PLIZNmuBMEjaMZmwn2FVmG8bYsmVs5n-_v-17",
+        "title": "Anatomy of upper limb 64 (  lymphatic drainage of upper limb ) , by Dr. Wahdan",
+        "youtubeId": "q-Sjz_Ivspg",
+        "url": "https://youtu.be/q-Sjz_Ivspg"
+      },
+      {
+        "id": "PLIZNmuBMEjaMZmwn2FVmG8bYsmVs5n-_v-18",
+        "title": "ANA. Lymphatics of Thorax Dr. Wahdan 3rd year",
+        "youtubeId": "7ebxMNKDe4o",
+        "url": "https://youtu.be/7ebxMNKDe4o"
+      },
+      {
+        "id": "PLIZNmuBMEjaMZmwn2FVmG8bYsmVs5n-_v-19",
+        "title": "Enjoywithmedicine.com",
+        "youtubeId": "TmkguVM_IEY",
+        "url": "https://youtu.be/TmkguVM_IEY"
+      },
+      {
+        "id": "PLIZNmuBMEjaMZmwn2FVmG8bYsmVs5n-_v-20",
+        "title": "Enjoywithmedicine.com 2",
+        "youtubeId": "DF7eiKfC760",
+        "url": "https://youtu.be/DF7eiKfC760"
+      },
+      {
+        "id": "PLIZNmuBMEjaMZmwn2FVmG8bYsmVs5n-_v-21",
+        "title": "How to study",
+        "youtubeId": "ppj_N-F2_RA",
+        "url": "https://youtu.be/ppj_N-F2_RA"
+      }
+    ],
+    "tags": [
+      "anatomy",
+      "wahdan",
+      "وهدان",
+      "تشريح",
+      "playlist"
+    ]
+  },
+  {
+    "id": "bld-anat-sameh",
+    "title": "تشريح الدم - Sameh (Part 1 & 2)",
+    "description": "سلسلة فيديو شرح تشريح موديول الدم لدكتور سامح (مقسمة لجزئين).",
+    "url": "https://youtu.be/CdxBqhfzMFg",
+    "type": "playlist",
+    "category": "lectures",
+    "year": 2,
+    "moduleId": "year2-blood",
+    "subject": "Anatomy",
+    "author": "Sameh",
+    "addedBy": "M. Wael",
+    "videos": [
+      {
+        "id": "sameh-p1",
+        "title": "تشريح الدم - سامح (الجزء 1)",
+        "youtubeId": "CdxBqhfzMFg",
+        "url": "https://youtu.be/CdxBqhfzMFg"
+      },
+      {
+        "id": "sameh-p2",
+        "title": "تشريح الدم - سامح (الجزء 2)",
+        "youtubeId": "rrAfcJwypSs",
+        "url": "https://youtu.be/rrAfcJwypSs"
+      }
+    ],
+    "tags": [
+      "anatomy",
+      "sameh",
+      "تشريح",
+      "playlist"
+    ]
+  },
+  {
+    "id": "bld-anat-mohamed-adel",
+    "title": "تشريح الدم والأعضاء الليمفاوية - د. محمد عادل",
+    "description": "سلسلة شروحات تشريح الطحال والعقد الليمفاوية والقناة الصدرية للدكتور محمد عادل.",
+    "url": "https://youtu.be/1LWyhHbIe5Y",
+    "type": "playlist",
+    "category": "lectures",
+    "year": 2,
+    "moduleId": "year2-blood",
+    "subject": "Anatomy",
+    "author": "Dr. Mohamed Adel",
+    "addedBy": "Mohamed Waleed",
+    "videos": [
+      {
+        "id": "adel-p1",
+        "title": "تشريح Thoracic Duct & Thymus - د. محمد عادل",
+        "youtubeId": "1LWyhHbIe5Y",
+        "url": "https://youtu.be/1LWyhHbIe5Y"
+      },
+      {
+        "id": "adel-p2",
+        "title": "تشريح الطحال (Spleen) - د. محمد عادل",
+        "youtubeId": "8OJknm7CjXQ",
+        "url": "https://youtu.be/8OJknm7CjXQ"
+      },
+      {
+        "id": "adel-p3",
+        "title": "تشريح العقد الليمفاوية (Lymph nodes) - د. محمد عادل",
+        "youtubeId": "DXeumUXnouE",
+        "url": "https://youtu.be/DXeumUXnouE"
+      }
+    ],
+    "tags": [
+      "anatomy",
+      "mohamed adel",
+      "محمد عادل",
+      "تشريح",
+      "spleen",
+      "lymph",
+      "playlist"
+    ]
+  },
+  {
+    "id": "bld-anat-abdullah",
+    "title": "تشريح الدم - عبدالله (Abdullah)",
+    "description": "قائمة تشغيل شروحات تشريح موديول الدم لدكتور عبدالله.",
+    "url": "https://youtube.com/playlist?list=PLuTP8UDoc4g8l22pdJhOUJwTPlLW7JOqQ",
+    "type": "playlist",
+    "category": "lectures",
+    "year": 2,
+    "moduleId": "year2-blood",
+    "subject": "Anatomy",
+    "author": "Abdullah",
+    "addedBy": "M. Wael",
+    "playlistId": "PLuTP8UDoc4g8l22pdJhOUJwTPlLW7JOqQ",
+    "videos": [
+      {
+        "id": "PLuTP8UDoc4g8l22pdJhOUJwTPlLW7JOqQ-1",
+        "title": "Lymph introduction",
+        "youtubeId": "Z1iDjdDFV34",
+        "url": "https://youtu.be/Z1iDjdDFV34"
+      },
+      {
+        "id": "PLuTP8UDoc4g8l22pdJhOUJwTPlLW7JOqQ-2",
+        "title": "Thoracic Duct &cisterna chyili",
+        "youtubeId": "k-s69iNasK4",
+        "url": "https://youtu.be/k-s69iNasK4"
+      },
+      {
+        "id": "PLuTP8UDoc4g8l22pdJhOUJwTPlLW7JOqQ-3",
+        "title": "Thymus",
+        "youtubeId": "6Zx_2x4vLj0",
+        "url": "https://youtu.be/6Zx_2x4vLj0"
+      },
+      {
+        "id": "PLuTP8UDoc4g8l22pdJhOUJwTPlLW7JOqQ-4",
+        "title": "spleen 1 (Intro- surface anatomy)",
+        "youtubeId": "CY8IMhl7kKQ",
+        "url": "https://youtu.be/CY8IMhl7kKQ"
+      },
+      {
+        "id": "PLuTP8UDoc4g8l22pdJhOUJwTPlLW7JOqQ-5",
+        "title": "spleen 2 (surfaces- Relation)",
+        "youtubeId": "3eqCwQlPMjA",
+        "url": "https://youtu.be/3eqCwQlPMjA"
+      },
+      {
+        "id": "PLuTP8UDoc4g8l22pdJhOUJwTPlLW7JOqQ-6",
+        "title": "Spleen 3",
+        "youtubeId": "ZT3AtsLk0K8",
+        "url": "https://youtu.be/ZT3AtsLk0K8"
+      }
+    ],
+    "tags": [
+      "anatomy",
+      "abdullah",
+      "عبدالله",
+      "تشريح",
+      "playlist"
+    ]
+  },
+  {
+    "id": "bld-anat-mohammed",
+    "title": "تشريح الدم - محمد (Mohammed)",
+    "description": "قائمة تشغيل شروحات تشريح موديول الدم لدكتور محمد.",
+    "url": "https://youtube.com/playlist?list=PLOs4vdEd6G8QWPMb8SBYltbYx7NVsIblt",
+    "type": "playlist",
+    "category": "lectures",
+    "year": 2,
+    "moduleId": "year2-blood",
+    "subject": "Anatomy",
+    "author": "Mohammed",
+    "addedBy": "M. Wael",
+    "playlistId": "PLOs4vdEd6G8QWPMb8SBYltbYx7NVsIblt",
+    "videos": [
+      {
+        "id": "PLOs4vdEd6G8QWPMb8SBYltbYx7NVsIblt-1",
+        "title": "Introduction To Lymphatic System",
+        "youtubeId": "cB0gtKtt1mk",
+        "url": "https://youtu.be/cB0gtKtt1mk"
+      },
+      {
+        "id": "PLOs4vdEd6G8QWPMb8SBYltbYx7NVsIblt-2",
+        "title": "Spleen -Thymus gland-waldeyer's lymphatic ring",
+        "youtubeId": "Ma0Cn19vxeg",
+        "url": "https://youtu.be/Ma0Cn19vxeg"
+      },
+      {
+        "id": "PLOs4vdEd6G8QWPMb8SBYltbYx7NVsIblt-3",
+        "title": "Tutorial Anatomy",
+        "youtubeId": "Jao-PthPfHc",
+        "url": "https://youtu.be/Jao-PthPfHc"
+      },
+      {
+        "id": "PLOs4vdEd6G8QWPMb8SBYltbYx7NVsIblt-4",
+        "title": "lymphatic organ part 1(Thymus &LN)",
+        "youtubeId": "Nw--RzMN3R4",
+        "url": "https://youtu.be/Nw--RzMN3R4"
+      },
+      {
+        "id": "PLOs4vdEd6G8QWPMb8SBYltbYx7NVsIblt-5",
+        "title": "Lymphatic Organ Part 2(Spleen&Tonsils)",
+        "youtubeId": "mzg_3_eRV_M",
+        "url": "https://youtu.be/mzg_3_eRV_M"
+      },
+      {
+        "id": "PLOs4vdEd6G8QWPMb8SBYltbYx7NVsIblt-6",
+        "title": "RBCs Platelet and BM",
+        "youtubeId": "rRhpnrLdPO8",
+        "url": "https://youtu.be/rRhpnrLdPO8"
+      },
+      {
+        "id": "PLOs4vdEd6G8QWPMb8SBYltbYx7NVsIblt-7",
+        "title": "WBCs",
+        "youtubeId": "x2fw4C48NJM",
+        "url": "https://youtu.be/x2fw4C48NJM"
+      },
+      {
+        "id": "PLOs4vdEd6G8QWPMb8SBYltbYx7NVsIblt-8",
+        "title": "Hemoglobin Metabolism",
+        "youtubeId": "U-SMW1xAlC4",
+        "url": "https://youtu.be/U-SMW1xAlC4"
+      },
+      {
+        "id": "PLOs4vdEd6G8QWPMb8SBYltbYx7NVsIblt-9",
+        "title": "Hemoglobin Catabolism",
+        "youtubeId": "lb_xo7NOoeU",
+        "url": "https://youtu.be/lb_xo7NOoeU"
+      },
+      {
+        "id": "PLOs4vdEd6G8QWPMb8SBYltbYx7NVsIblt-10",
+        "title": "Iron",
+        "youtubeId": "V3oqvf0CxsM",
+        "url": "https://youtu.be/V3oqvf0CxsM"
+      }
+    ],
+    "tags": [
+      "anatomy",
+      "mohammed",
+      "تشريح",
+      "playlist"
+    ]
+  },
+  {
+    "id": "bld-anat-wageh",
+    "title": "تشريح الدم - وجيه (Wageh - Part 1 & 2)",
+    "description": "فيديوهات شرح تشريح موديول الدم للدكتور وجيه (جزئين كاملين).",
+    "url": "https://youtu.be/tzkF5C1ja94",
+    "type": "playlist",
+    "category": "lectures",
+    "year": 2,
+    "moduleId": "year2-blood",
+    "subject": "Anatomy",
+    "author": "Wageh",
+    "addedBy": "M. Wael",
+    "videos": [
+      {
+        "id": "wageh-p1",
+        "title": "تشريح الدم - وجيه (الجزء 1)",
+        "youtubeId": "tzkF5C1ja94",
+        "url": "https://youtu.be/tzkF5C1ja94"
+      },
+      {
+        "id": "wageh-p2",
+        "title": "تشريح الدم - وجيه (الجزء 2)",
+        "youtubeId": "LxRv6UxQh1c",
+        "url": "https://youtu.be/LxRv6UxQh1c"
+      }
+    ],
+    "tags": [
+      "anatomy",
+      "wageh",
+      "وجيه",
+      "تشريح",
+      "playlist"
+    ]
+  },
+  {
+    "id": "bld-anat-shareef",
+    "title": "تشريح الدم - د. شريف (Dr. Shareef)",
+    "description": "قائمة تشغيل شروحات تشريح موديول الدم للدكتور شريف.",
+    "url": "https://youtube.com/playlist?list=PLe2L3M_TgeCg0ozSwFSz3Hv8q9Zyk2nAm",
+    "type": "playlist",
+    "category": "lectures",
+    "year": 2,
+    "moduleId": "year2-blood",
+    "subject": "Anatomy",
+    "author": "Dr. Shareef",
+    "addedBy": "M. Wael",
+    "playlistId": "PLe2L3M_TgeCg0ozSwFSz3Hv8q9Zyk2nAm",
+    "videos": [
+      {
+        "id": "PLe2L3M_TgeCg0ozSwFSz3Hv8q9Zyk2nAm-1",
+        "title": "Anatomy of lymphatic system (Basis)",
+        "youtubeId": "3Mm0hby503A",
+        "url": "https://youtu.be/3Mm0hby503A"
+      },
+      {
+        "id": "PLe2L3M_TgeCg0ozSwFSz3Hv8q9Zyk2nAm-2",
+        "title": "Lymphatic drainage of limbs (Lymph 1)",
+        "youtubeId": "QzkqWubzqoo",
+        "url": "https://youtu.be/QzkqWubzqoo"
+      },
+      {
+        "id": "PLe2L3M_TgeCg0ozSwFSz3Hv8q9Zyk2nAm-3",
+        "title": "Lymphatic drainage of head, neck, thorax & abdomen(lymph part 2)",
+        "youtubeId": "RzKJF1L2IB4",
+        "url": "https://youtu.be/RzKJF1L2IB4"
+      },
+      {
+        "id": "PLe2L3M_TgeCg0ozSwFSz3Hv8q9Zyk2nAm-4",
+        "title": "Lymphatic  drainage of limbs (live lecture)",
+        "youtubeId": "6hS7qkgC5BE",
+        "url": "https://youtu.be/6hS7qkgC5BE"
+      },
+      {
+        "id": "PLe2L3M_TgeCg0ozSwFSz3Hv8q9Zyk2nAm-5",
+        "title": "Lymphatic part 2 (live lecture)",
+        "youtubeId": "ccV7gVzwhOw",
+        "url": "https://youtu.be/ccV7gVzwhOw"
+      },
+      {
+        "id": "PLe2L3M_TgeCg0ozSwFSz3Hv8q9Zyk2nAm-6",
+        "title": "Lymphatic drainage of the whole body (Revision lecture)",
+        "youtubeId": "1JuCWVsbWZ0",
+        "url": "https://youtu.be/1JuCWVsbWZ0"
+      },
+      {
+        "id": "PLe2L3M_TgeCg0ozSwFSz3Hv8q9Zyk2nAm-7",
+        "title": "Anatomy and histology of the spleen",
+        "youtubeId": "1ihjCcMVvGs",
+        "url": "https://youtu.be/1ihjCcMVvGs"
+      },
+      {
+        "id": "PLe2L3M_TgeCg0ozSwFSz3Hv8q9Zyk2nAm-8",
+        "title": "Histology of lymphatic system",
+        "youtubeId": "2efJD48_CyU",
+        "url": "https://youtu.be/2efJD48_CyU"
+      }
+    ],
+    "tags": [
+      "anatomy",
+      "shareef",
+      "شريف",
+      "تشريح",
+      "playlist"
+    ]
+  },
+  {
+    "id": "bld-anat-ahmad-fareed",
+    "title": "تشريح الدم - د. أحمد فريد (Dr. Ahmad Fareed)",
+    "description": "قائمة تشغيل شروحات تشريح موديول الدم للدكتور أحمد فريد.",
+    "url": "https://youtube.com/playlist?list=PLs0O24oUQeaCgOmLXzJSqKp7UEzjJwnBr",
+    "type": "playlist",
+    "category": "lectures",
+    "year": 2,
+    "moduleId": "year2-blood",
+    "subject": "Anatomy",
+    "author": "Dr. Ahmad Fareed",
+    "addedBy": "M. Wael",
+    "playlistId": "PLs0O24oUQeaCgOmLXzJSqKp7UEzjJwnBr",
+    "videos": [
+      {
+        "id": "PLs0O24oUQeaCgOmLXzJSqKp7UEzjJwnBr-1",
+        "title": "Mediastinal Divisions with Anatomy of Pericardium - Dr. Ahmed Farid",
+        "youtubeId": "ODqTnzLuoNs",
+        "url": "https://youtu.be/ODqTnzLuoNs"
+      },
+      {
+        "id": "PLs0O24oUQeaCgOmLXzJSqKp7UEzjJwnBr-2",
+        "title": "External Features of the Heart - Dr. Ahmed Farid",
+        "youtubeId": "kuOYI4eebD4",
+        "url": "https://youtu.be/kuOYI4eebD4"
+      },
+      {
+        "id": "PLs0O24oUQeaCgOmLXzJSqKp7UEzjJwnBr-3",
+        "title": "Grooves of the Heart - Dr. Ahmed Farid",
+        "youtubeId": "48lR0hWCx24",
+        "url": "https://youtu.be/48lR0hWCx24"
+      },
+      {
+        "id": "PLs0O24oUQeaCgOmLXzJSqKp7UEzjJwnBr-4",
+        "title": "Internal Features of the Heart (Part 1) - The Atria",
+        "youtubeId": "KB7XYFwDivc",
+        "url": "https://youtu.be/KB7XYFwDivc"
+      },
+      {
+        "id": "PLs0O24oUQeaCgOmLXzJSqKp7UEzjJwnBr-5",
+        "title": "Internal Features of the Heart (Part 2) - The Ventricles",
+        "youtubeId": "eTfXCiii2O8",
+        "url": "https://youtu.be/eTfXCiii2O8"
+      },
+      {
+        "id": "PLs0O24oUQeaCgOmLXzJSqKp7UEzjJwnBr-6",
+        "title": "Internal Features of the Heart (Part 3) - Valves and Septa",
+        "youtubeId": "40e6mrV93_4",
+        "url": "https://youtu.be/40e6mrV93_4"
+      },
+      {
+        "id": "PLs0O24oUQeaCgOmLXzJSqKp7UEzjJwnBr-7",
+        "title": "Blood Supply and Nerve Supply of the Heart - Dr. Ahmed Farid",
+        "youtubeId": "lK-3DGoaVyk",
+        "url": "https://youtu.be/lK-3DGoaVyk"
+      },
+      {
+        "id": "PLs0O24oUQeaCgOmLXzJSqKp7UEzjJwnBr-8",
+        "title": "Arteries of the Thorax - Dr. Ahmed Farid",
+        "youtubeId": "MEQIxqORKoI",
+        "url": "https://youtu.be/MEQIxqORKoI"
+      },
+      {
+        "id": "PLs0O24oUQeaCgOmLXzJSqKp7UEzjJwnBr-9",
+        "title": "Veins of the Thorax - Dr. Ahmed Farid",
+        "youtubeId": "BJvQR9Kfcww",
+        "url": "https://youtu.be/BJvQR9Kfcww"
+      },
+      {
+        "id": "PLs0O24oUQeaCgOmLXzJSqKp7UEzjJwnBr-10",
+        "title": "Arteries of the Head and Neck - Dr. Ahmed Farid",
+        "youtubeId": "X3tbAke_3Rc",
+        "url": "https://youtu.be/X3tbAke_3Rc"
+      },
+      {
+        "id": "PLs0O24oUQeaCgOmLXzJSqKp7UEzjJwnBr-11",
+        "title": "Veins of the Head and Neck - Dr. Ahmed Farid",
+        "youtubeId": "au2NI8EfB2E",
+        "url": "https://youtu.be/au2NI8EfB2E"
+      },
+      {
+        "id": "PLs0O24oUQeaCgOmLXzJSqKp7UEzjJwnBr-12",
+        "title": "Axillary Vessels and Lymph Nodes - Dr. Ahmed Farid",
+        "youtubeId": "08NYeo9r5zc",
+        "url": "https://youtu.be/08NYeo9r5zc"
+      },
+      {
+        "id": "PLs0O24oUQeaCgOmLXzJSqKp7UEzjJwnBr-13",
+        "title": "Vessels of the Forearm - Dr. Ahmed Farid",
+        "youtubeId": "IVMDDYoR2DU",
+        "url": "https://youtu.be/IVMDDYoR2DU"
+      },
+      {
+        "id": "PLs0O24oUQeaCgOmLXzJSqKp7UEzjJwnBr-14",
+        "title": "Femoral and Obturator Arteries - Dr. Ahmed Farid",
+        "youtubeId": "sbq5SbZ55i4",
+        "url": "https://youtu.be/sbq5SbZ55i4"
+      },
+      {
+        "id": "PLs0O24oUQeaCgOmLXzJSqKp7UEzjJwnBr-15",
+        "title": "Popliteal Artery - Dr. Ahmed Farid",
+        "youtubeId": "UNS3gyJKul0",
+        "url": "https://youtu.be/UNS3gyJKul0"
+      },
+      {
+        "id": "PLs0O24oUQeaCgOmLXzJSqKp7UEzjJwnBr-16",
+        "title": "Anterior Tibial Artery - Dr. Ahmed Farid",
+        "youtubeId": "rNmfo9yETg0",
+        "url": "https://youtu.be/rNmfo9yETg0"
+      },
+      {
+        "id": "PLs0O24oUQeaCgOmLXzJSqKp7UEzjJwnBr-17",
+        "title": "Posterior Tibial Artery and Plantar Arteries - Dr. Ahmed Farid",
+        "youtubeId": "IpdUqpq5mSU",
+        "url": "https://youtu.be/IpdUqpq5mSU"
+      },
+      {
+        "id": "PLs0O24oUQeaCgOmLXzJSqKp7UEzjJwnBr-18",
+        "title": "Veins and Lymphatics of the Lower Limb - Dr. Ahmed Farid",
+        "youtubeId": "wJI-OHx1UgU",
+        "url": "https://youtu.be/wJI-OHx1UgU"
+      },
+      {
+        "id": "PLs0O24oUQeaCgOmLXzJSqKp7UEzjJwnBr-19",
+        "title": "The Mediastinum (3D) - Dr. Ahmed Farid",
+        "youtubeId": "sFI18QD96J8",
+        "url": "https://youtu.be/sFI18QD96J8"
+      }
+    ],
+    "tags": [
+      "anatomy",
+      "ahmad fareed",
+      "أحمد فريد",
+      "تشريح",
+      "playlist"
+    ]
+  },
+  {
+    "id": "bld-anat-mahmoud-alaa",
+    "title": "تسجيلات وملفات تشريح الدم - د. محمود علاء",
+    "description": "تسجيلات وملفات التشريح للدكتور محمود علاء على تليجرام موديول Blood.",
+    "url": "https://t.me/Blood_Module/2600",
+    "type": "telegram",
+    "category": "summaries",
+    "year": 2,
+    "moduleId": "year2-blood",
+    "subject": "Anatomy",
+    "author": "Dr. Mahmoud Alaa",
+    "addedBy": "M. Wael",
+    "tags": [
+      "anatomy",
+      "telegram",
+      "محمود علاء",
+      "تسجيلات"
+    ]
+  }
+]

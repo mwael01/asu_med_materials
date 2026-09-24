@@ -1,0 +1,42 @@
+[
+  {
+    "id": "bld-clin-bleeding-disorders",
+    "title": "محاضرة أمراض وسيولة الدم والنزيف الإكلينيكية (Bleeding Disorders)",
+    "description": "المحاضرة الإكلينيكية الرسمية لكلية الطب جامعة عين شمس عبر مايكروسوفت ستريم حول أمراض النزف والتجلط.",
+    "url": "https://medasuedu-my.sharepoint.com/:v:/g/personal/emp220069_med_asu_edu_eg/EX8_T-fqH6dBrBOhQSNE60oBAsuOPpy3d8Aq-FAKS9jyUA?e=5i7Q1c&nav=eyJyZWZlcnJhbEluZm8iOnsicmVmZXJyYWxBcHAiOiJTdHJlYW1XZWJBcHAiLCJyZWZlcnJhbFZpZXciOiJTaGFyZURpYWxvZyIsInJlZmVycmFsQXBwUGxhdGZvcm0iOiJXZWIiLCJyZWZlcnJhbE1vZGUiOiJ2aWV3In19",
+    "type": "website",
+    "category": "lectures",
+    "year": 2,
+    "moduleId": "year2-blood",
+    "subject": "Clinical",
+    "author": "ASU Faculty Stream",
+    "addedBy": "M. Wael",
+    "tags": [
+      "clinical",
+      "bleeding",
+      "disorders",
+      "عيادات",
+      "أمراض دم"
+    ]
+  },
+  {
+    "id": "bld-clin-wbc-disorders",
+    "title": "محاضرة أمراض كرات الدم البيضاء واللوكيميا الإكلينيكية (WBC Disorders)",
+    "description": "المحاضرة الإكلينيكية الرسمية لكلية الطب جامعة عين شمس عبر مايكروسوفت ستريم حول اضطرابات كريات الدم البيضاء.",
+    "url": "https://medasuedu-my.sharepoint.com/:v:/g/personal/emp220159_med_asu_edu_eg/ESGNfSkHXwFKs26hTMdME34BDycc3DE1bPQZbejf0ndJlg?e=m3tOMF&nav=eyJyZWZlcnJhbEluZm8iOnsicmVmZXJyYWxBcHAiOiJTdHJlYW1XZWJBcHAiLCJyZWZlcnJhbFZpZXciOiJTaGFyZURpYWxvZyIsInJlZmVycmFsQXBwUGxhdGZvcm0iOiJXZWIiLCJyZWZlcnJhbE1vZGUiOiJ2aWV3In19",
+    "type": "website",
+    "category": "lectures",
+    "year": 2,
+    "moduleId": "year2-blood",
+    "subject": "Clinical",
+    "author": "ASU Faculty Stream",
+    "addedBy": "M. Wael",
+    "tags": [
+      "clinical",
+      "wbc",
+      "leukemia",
+      "disorders",
+      "عيادات"
+    ]
+  }
+]

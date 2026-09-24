@@ -1,0 +1,445 @@
+[
+  {
+    "id": "bld-pharma-nour-eldin",
+    "title": "فارماكولوجي الدم - د. أحمد نور الدين",
+    "description": "شرح أدوية وسيولة الدم والتجلط والأنيميا للدكتور أحمد نور الدين.",
+    "url": "https://www.youtube.com/playlist?list=PL_7f3u0OA6BM06UfWmzinSeaRNS_xvxNA",
+    "type": "playlist",
+    "category": "lectures",
+    "year": 2,
+    "moduleId": "year2-blood",
+    "subject": "Pharmacology",
+    "author": "Dr. Ahmed Nour Eldin",
+    "addedBy": "M. Wael",
+    "playlistId": "PL_7f3u0OA6BM06UfWmzinSeaRNS_xvxNA",
+    "videos": [
+      {
+        "id": "PL_7f3u0OA6BM06UfWmzinSeaRNS_xvxNA-1",
+        "title": "Blood Pharmacology 2018: 1 Overview of hemostasis & Parentral anticoagulants",
+        "youtubeId": "TBC5Mhvh1Z8",
+        "url": "https://youtu.be/TBC5Mhvh1Z8"
+      },
+      {
+        "id": "PL_7f3u0OA6BM06UfWmzinSeaRNS_xvxNA-2",
+        "title": "Blood Pharmacology 2018: 2- Oral Anticoagulants",
+        "youtubeId": "CxhOFBW_XHM",
+        "url": "https://youtu.be/CxhOFBW_XHM"
+      },
+      {
+        "id": "PL_7f3u0OA6BM06UfWmzinSeaRNS_xvxNA-3",
+        "title": "Blood Pharmacology 2018: 3-  Antiplatelets",
+        "youtubeId": "8-nj44RNNjo",
+        "url": "https://youtu.be/8-nj44RNNjo"
+      },
+      {
+        "id": "PL_7f3u0OA6BM06UfWmzinSeaRNS_xvxNA-4",
+        "title": "Blood Pharmacology 2018: 4  Clinical uses of antithrombotics + Fibrinolytics",
+        "youtubeId": "MRPBzkuMzzk",
+        "url": "https://youtu.be/MRPBzkuMzzk"
+      },
+      {
+        "id": "PL_7f3u0OA6BM06UfWmzinSeaRNS_xvxNA-5",
+        "title": "Blood Pharmacology 2018: 5- Hemostatic Drugs",
+        "youtubeId": "Cvfchi84poo",
+        "url": "https://youtu.be/Cvfchi84poo"
+      },
+      {
+        "id": "PL_7f3u0OA6BM06UfWmzinSeaRNS_xvxNA-6",
+        "title": "6- Drug Therapy Of Dyslipidemia (Old Classic Drugs)",
+        "youtubeId": "lC7TTOW4Mc4",
+        "url": "https://youtu.be/lC7TTOW4Mc4"
+      },
+      {
+        "id": "PL_7f3u0OA6BM06UfWmzinSeaRNS_xvxNA-7",
+        "title": "Blood Pharmacology 2018: 7- Drug therapy of anaemia",
+        "youtubeId": "VT-sVjFCDCM",
+        "url": "https://youtu.be/VT-sVjFCDCM"
+      },
+      {
+        "id": "PL_7f3u0OA6BM06UfWmzinSeaRNS_xvxNA-8",
+        "title": "Blood Pharmacology 2019: 8- Drug Therapy of Malaria",
+        "youtubeId": "cry4rCMnKvY",
+        "url": "https://youtu.be/cry4rCMnKvY"
+      },
+      {
+        "id": "PL_7f3u0OA6BM06UfWmzinSeaRNS_xvxNA-9",
+        "title": "Blood Pharmacology 2019: 9-Concepts in Treatment of Leukemia",
+        "youtubeId": "5LlPhENljQg",
+        "url": "https://youtu.be/5LlPhENljQg"
+      }
+    ],
+    "tags": [
+      "pharmacology",
+      "nour eldin",
+      "أحمد نور الدين",
+      "فارما",
+      "playlist"
+    ]
+  },
+  {
+    "id": "bld-pharma-fouda",
+    "title": "فارماكولوجي الدم المكثف (4 ساعات) - د. عبد المتعال فودة",
+    "description": "مراجعة وشرح مركز لفارما الدم في 4 ساعات للدكتور عبد المتعال فودة.",
+    "url": "https://t.me/Blood_Module/2595",
+    "type": "telegram",
+    "category": "summaries",
+    "year": 2,
+    "moduleId": "year2-blood",
+    "subject": "Pharmacology",
+    "author": "Dr. Abdel Motaal Fouda",
+    "addedBy": "M. Wael",
+    "tags": [
+      "pharmacology",
+      "fouda",
+      "عبد المتعال فودة",
+      "فارما"
+    ]
+  },
+  {
+    "id": "bld-pharma-tah",
+    "title": "فارماكولوجي الدم (4.5 ساعات) - د. تاح",
+    "description": "شرح فارما الدم في 4 ساعات ونصف للدكتور تاح عبر تليجرام.",
+    "url": "https://t.me/Blood_Module/2597",
+    "type": "telegram",
+    "category": "summaries",
+    "year": 2,
+    "moduleId": "year2-blood",
+    "subject": "Pharmacology",
+    "author": "Dr. Tah",
+    "addedBy": "M. Wael",
+    "tags": [
+      "pharmacology",
+      "tah",
+      "تاح",
+      "فارما"
+    ]
+  },
+  {
+    "id": "bld-pharma-abdelrahman",
+    "title": "فارماكولوجي الدم (6 ساعات) - د. أحمد عبد الرحمن",
+    "description": "كورس وشرح فارما الدم الكامل في 6 ساعات للدكتور أحمد عبد الرحمن.",
+    "url": "https://t.me/Blood_Module/2596",
+    "type": "telegram",
+    "category": "summaries",
+    "year": 2,
+    "moduleId": "year2-blood",
+    "subject": "Pharmacology",
+    "author": "Dr. Ahmed Abdel Rahman",
+    "addedBy": "M. Wael",
+    "tags": [
+      "pharmacology",
+      "abdel rahman",
+      "أحمد عبد الرحمن",
+      "فارما"
+    ]
+  },
+  {
+    "id": "bld-pharma-shaer",
+    "title": "فارماكولوجي الدم - د. الشاعر",
+    "description": "قائمة تشغيل شرح فارماكولوجيا الدم للدكتور الشاعر على يوتيوب.",
+    "url": "https://www.youtube.com/playlist?list=PL0_tN0panMs8W-tpVy4a_eM9QR2DwwvxA",
+    "type": "playlist",
+    "category": "lectures",
+    "year": 2,
+    "moduleId": "year2-blood",
+    "subject": "Pharmacology",
+    "author": "Dr. El Shaer",
+    "addedBy": "M. Wael",
+    "playlistId": "PL0_tN0panMs8W-tpVy4a_eM9QR2DwwvxA",
+    "videos": [
+      {
+        "id": "PL0_tN0panMs8W-tpVy4a_eM9QR2DwwvxA-1",
+        "title": "Pharma Dr M. Al Shaer - Respiratory 1",
+        "youtubeId": "1ONRjLkyLPU",
+        "url": "https://youtu.be/1ONRjLkyLPU"
+      },
+      {
+        "id": "PL0_tN0panMs8W-tpVy4a_eM9QR2DwwvxA-2",
+        "title": "Pharma Dr M. Al Shaer - Respiratory 2",
+        "youtubeId": "9z72M5cgIKA",
+        "url": "https://youtu.be/9z72M5cgIKA"
+      },
+      {
+        "id": "PL0_tN0panMs8W-tpVy4a_eM9QR2DwwvxA-3",
+        "title": "Pharma Dr M. Al Shaer - Respiratory 3",
+        "youtubeId": "s_jbxA8fBko",
+        "url": "https://youtu.be/s_jbxA8fBko"
+      },
+      {
+        "id": "PL0_tN0panMs8W-tpVy4a_eM9QR2DwwvxA-4",
+        "title": "Pharma Dr M. Al Shaer - Respiratory 4",
+        "youtubeId": "1s_TyvxmX-c",
+        "url": "https://youtu.be/1s_TyvxmX-c"
+      },
+      {
+        "id": "PL0_tN0panMs8W-tpVy4a_eM9QR2DwwvxA-5",
+        "title": "Pharma Dr M. Al Shaer - Blood - 1",
+        "youtubeId": "wXKE2afTsX8",
+        "url": "https://youtu.be/wXKE2afTsX8"
+      },
+      {
+        "id": "PL0_tN0panMs8W-tpVy4a_eM9QR2DwwvxA-6",
+        "title": "Pharma Dr M. Al Shaer - Blood - 2",
+        "youtubeId": "stjWvF4DVlc",
+        "url": "https://youtu.be/stjWvF4DVlc"
+      },
+      {
+        "id": "PL0_tN0panMs8W-tpVy4a_eM9QR2DwwvxA-7",
+        "title": "Pharma Dr M. Al Shaer - Blood - 3a",
+        "youtubeId": "Fe-v-GxBgoY",
+        "url": "https://youtu.be/Fe-v-GxBgoY"
+      },
+      {
+        "id": "PL0_tN0panMs8W-tpVy4a_eM9QR2DwwvxA-8",
+        "title": "Pharma Dr M. Al Shaer - Blood - 3b",
+        "youtubeId": "cexj2cNaBzU",
+        "url": "https://youtu.be/cexj2cNaBzU"
+      },
+      {
+        "id": "PL0_tN0panMs8W-tpVy4a_eM9QR2DwwvxA-9",
+        "title": "Pharma Dr M. Al Shaer - Blood - 4 Leukemia",
+        "youtubeId": "QJKrnx3OGjU",
+        "url": "https://youtu.be/QJKrnx3OGjU"
+      },
+      {
+        "id": "PL0_tN0panMs8W-tpVy4a_eM9QR2DwwvxA-10",
+        "title": "Pharma Dr M. Al Shaer - Blood - Revesion",
+        "youtubeId": "LHO-6c6oKXM",
+        "url": "https://youtu.be/LHO-6c6oKXM"
+      },
+      {
+        "id": "PL0_tN0panMs8W-tpVy4a_eM9QR2DwwvxA-11",
+        "title": "Pharma Dr M. Al Shaer - CVS - Angina 1",
+        "youtubeId": "fIAzH5WqYUA",
+        "url": "https://youtu.be/fIAzH5WqYUA"
+      },
+      {
+        "id": "PL0_tN0panMs8W-tpVy4a_eM9QR2DwwvxA-12",
+        "title": "Pharma Dr M. Al Shaer - CVS - Angina 2",
+        "youtubeId": "_MZufS6WQpQ",
+        "url": "https://youtu.be/_MZufS6WQpQ"
+      },
+      {
+        "id": "PL0_tN0panMs8W-tpVy4a_eM9QR2DwwvxA-13",
+        "title": "Pharma Dr M. Al Shaer - CVS - HF1 pt1",
+        "youtubeId": "-97jVeQyUJI",
+        "url": "https://youtu.be/-97jVeQyUJI"
+      },
+      {
+        "id": "PL0_tN0panMs8W-tpVy4a_eM9QR2DwwvxA-14",
+        "title": "Pharma Dr M. Al Shaer - CVS - Hf1 pt2",
+        "youtubeId": "yjmW7MVOXUE",
+        "url": "https://youtu.be/yjmW7MVOXUE"
+      },
+      {
+        "id": "PL0_tN0panMs8W-tpVy4a_eM9QR2DwwvxA-15",
+        "title": "Pharma Dr M. Al Shaer - CVS - Hf 2",
+        "youtubeId": "FPTVZdTtbe4",
+        "url": "https://youtu.be/FPTVZdTtbe4"
+      },
+      {
+        "id": "PL0_tN0panMs8W-tpVy4a_eM9QR2DwwvxA-16",
+        "title": "Pharma Dr M. Al Shaer - CVS - Hf 2 part 2",
+        "youtubeId": "qsKL0sPwQgs",
+        "url": "https://youtu.be/qsKL0sPwQgs"
+      },
+      {
+        "id": "PL0_tN0panMs8W-tpVy4a_eM9QR2DwwvxA-17",
+        "title": "Pharma Dr M. Al Shaer - CVS - hypertention",
+        "youtubeId": "qnR0zSjQjfY",
+        "url": "https://youtu.be/qnR0zSjQjfY"
+      },
+      {
+        "id": "PL0_tN0panMs8W-tpVy4a_eM9QR2DwwvxA-18",
+        "title": "Pharma Dr M. Al Shaer - CVS - Hypertention part 2",
+        "youtubeId": "B1IsR_Xmyac",
+        "url": "https://youtu.be/B1IsR_Xmyac"
+      },
+      {
+        "id": "PL0_tN0panMs8W-tpVy4a_eM9QR2DwwvxA-19",
+        "title": "Pharma Dr M. Al Shaer - CVS - Arrhythmia pt1",
+        "youtubeId": "3E7sV5eB4aw",
+        "url": "https://youtu.be/3E7sV5eB4aw"
+      },
+      {
+        "id": "PL0_tN0panMs8W-tpVy4a_eM9QR2DwwvxA-20",
+        "title": "Pharma Dr M. Al Shaer - CVS - Arrhythmia pt2",
+        "youtubeId": "2a9ovBQHUjQ",
+        "url": "https://youtu.be/2a9ovBQHUjQ"
+      },
+      {
+        "id": "PL0_tN0panMs8W-tpVy4a_eM9QR2DwwvxA-21",
+        "title": "Pharma Dr M. Al Shaer - Respiratory 1",
+        "youtubeId": "1ONRjLkyLPU",
+        "url": "https://youtu.be/1ONRjLkyLPU"
+      },
+      {
+        "id": "PL0_tN0panMs8W-tpVy4a_eM9QR2DwwvxA-22",
+        "title": "Pharma Dr M. Al Shaer - Respiratory 2",
+        "youtubeId": "9z72M5cgIKA",
+        "url": "https://youtu.be/9z72M5cgIKA"
+      },
+      {
+        "id": "PL0_tN0panMs8W-tpVy4a_eM9QR2DwwvxA-23",
+        "title": "Pharma Dr M. Al Shaer - Blood - 3a",
+        "youtubeId": "Fe-v-GxBgoY",
+        "url": "https://youtu.be/Fe-v-GxBgoY"
+      },
+      {
+        "id": "PL0_tN0panMs8W-tpVy4a_eM9QR2DwwvxA-24",
+        "title": "Pharma Dr M. Al Shaer - Respiratory 3",
+        "youtubeId": "s_jbxA8fBko",
+        "url": "https://youtu.be/s_jbxA8fBko"
+      },
+      {
+        "id": "PL0_tN0panMs8W-tpVy4a_eM9QR2DwwvxA-25",
+        "title": "Pharma Dr M. Al Shaer - Respiratory 4",
+        "youtubeId": "1s_TyvxmX-c",
+        "url": "https://youtu.be/1s_TyvxmX-c"
+      },
+      {
+        "id": "PL0_tN0panMs8W-tpVy4a_eM9QR2DwwvxA-26",
+        "title": "Pharma Dr M. Al Shaer - CNS - Opioids",
+        "youtubeId": "kYneufV4XVo",
+        "url": "https://youtu.be/kYneufV4XVo"
+      },
+      {
+        "id": "PL0_tN0panMs8W-tpVy4a_eM9QR2DwwvxA-27",
+        "title": "Pharma Dr M. Al Shaer - CNS - Psychosis & Depression",
+        "youtubeId": "cbK_Odt8Ync",
+        "url": "https://youtu.be/cbK_Odt8Ync"
+      },
+      {
+        "id": "PL0_tN0panMs8W-tpVy4a_eM9QR2DwwvxA-28",
+        "title": "Pharma Dr M. Al Shaer - CNS - Anesthesia",
+        "youtubeId": "g_biXQK6GJY",
+        "url": "https://youtu.be/g_biXQK6GJY"
+      },
+      {
+        "id": "PL0_tN0panMs8W-tpVy4a_eM9QR2DwwvxA-29",
+        "title": "Pharma Dr M. Al Shaer - CNS - Epilepsy",
+        "youtubeId": "2lfE1Wsp6hM",
+        "url": "https://youtu.be/2lfE1Wsp6hM"
+      },
+      {
+        "id": "PL0_tN0panMs8W-tpVy4a_eM9QR2DwwvxA-30",
+        "title": "Pharma Dr M. Al Shaer - CNS - Parkinsonism",
+        "youtubeId": "suteMzzNlTI",
+        "url": "https://youtu.be/suteMzzNlTI"
+      },
+      {
+        "id": "PL0_tN0panMs8W-tpVy4a_eM9QR2DwwvxA-31",
+        "title": "Pharma Dr M. Al Shaer - CNS - 6",
+        "youtubeId": "F2blzfQ1dT4",
+        "url": "https://youtu.be/F2blzfQ1dT4"
+      },
+      {
+        "id": "PL0_tN0panMs8W-tpVy4a_eM9QR2DwwvxA-32",
+        "title": "Pharma Dr M. Al Shaer - GIT - 1",
+        "youtubeId": "pFR3YSk9YGE",
+        "url": "https://youtu.be/pFR3YSk9YGE"
+      },
+      {
+        "id": "PL0_tN0panMs8W-tpVy4a_eM9QR2DwwvxA-33",
+        "title": "Pharma Dr M. Al Shaer - GIT - 2 PPI",
+        "youtubeId": "hY3u0ZCn8fA",
+        "url": "https://youtu.be/hY3u0ZCn8fA"
+      },
+      {
+        "id": "PL0_tN0panMs8W-tpVy4a_eM9QR2DwwvxA-34",
+        "title": "Pharma Dr M. Al Shaer - GIT - 3",
+        "youtubeId": "n4QX9L5Ra4c",
+        "url": "https://youtu.be/n4QX9L5Ra4c"
+      },
+      {
+        "id": "PL0_tN0panMs8W-tpVy4a_eM9QR2DwwvxA-35",
+        "title": "Pharma Dr M. Al Shaer - GIT - 4 Vomiting",
+        "youtubeId": "lJCOaPA4e4k",
+        "url": "https://youtu.be/lJCOaPA4e4k"
+      },
+      {
+        "id": "PL0_tN0panMs8W-tpVy4a_eM9QR2DwwvxA-36",
+        "title": "Pharma Dr M. Al Shaer - GIT - 5 Peptic Ulcer",
+        "youtubeId": "punCVofqxxA",
+        "url": "https://youtu.be/punCVofqxxA"
+      },
+      {
+        "id": "PL0_tN0panMs8W-tpVy4a_eM9QR2DwwvxA-37",
+        "title": "Pharma Dr M. Al Shaer - GIT - 6 Acid related diseases",
+        "youtubeId": "R8ZbsO3Avsk",
+        "url": "https://youtu.be/R8ZbsO3Avsk"
+      },
+      {
+        "id": "PL0_tN0panMs8W-tpVy4a_eM9QR2DwwvxA-38",
+        "title": "Pharma Dr M. Al Shaer - GIT - 7",
+        "youtubeId": "42aYeJFtLkQ",
+        "url": "https://youtu.be/42aYeJFtLkQ"
+      },
+      {
+        "id": "PL0_tN0panMs8W-tpVy4a_eM9QR2DwwvxA-39",
+        "title": "Pharma Dr M. Al Shaer - GIT - 8 Ameba & GERD & Conistipation",
+        "youtubeId": "-2J_2XcJieM",
+        "url": "https://youtu.be/-2J_2XcJieM"
+      },
+      {
+        "id": "PL0_tN0panMs8W-tpVy4a_eM9QR2DwwvxA-40",
+        "title": "Pharma Dr M. Al Shaer - GIT - 9 Liver Disorders and Transplantation",
+        "youtubeId": "M03TChN8eo4",
+        "url": "https://youtu.be/M03TChN8eo4"
+      },
+      {
+        "id": "PL0_tN0panMs8W-tpVy4a_eM9QR2DwwvxA-41",
+        "title": "Pharma Dr M. Al Shaer - GIT - 10 Revision Of Acid Diseases - GERD",
+        "youtubeId": "Zyj2fXVgIU4",
+        "url": "https://youtu.be/Zyj2fXVgIU4"
+      }
+    ],
+    "tags": [
+      "pharmacology",
+      "shaer",
+      "الشاعر",
+      "فارما",
+      "playlist"
+    ]
+  },
+  {
+    "id": "bld-pharma-drug-list",
+    "title": "قائمة وتفريغ أدوية الدم المعتمدة (Pharma Drug List)",
+    "description": "ملف تفريغ وتلخيص كامل قائمة الأدوية المطلوبة في موديول الدم.",
+    "url": "https://t.me/MG_ASU_MED/1236",
+    "type": "telegram",
+    "category": "summaries",
+    "year": 2,
+    "moduleId": "year2-blood",
+    "subject": "Pharmacology",
+    "author": "MG ASU MED",
+    "addedBy": "M. Wael",
+    "tags": [
+      "pharma",
+      "drug list",
+      "أدوية",
+      "قائمة الأدوية"
+    ]
+  },
+  {
+    "id": "bld-pharma-shorbagy-lec01",
+    "title": "فارماكولوجي الدم - د. الشوربجي (المحاضرة الأولى: علاج أنيميا نقص الحديد)",
+    "description": "المحاضرة التجريبية الأولى من كورس الفارماكولوجي لموديول الدم لدكتور الشوربجي (Dr El Shorbagy - Pharma Blood Module Lec 01 - TTT of Iron Deficiency Anemia).",
+    "url": "https://youtu.be/j8W-_lm4puY",
+    "type": "youtube",
+    "category": "lectures",
+    "year": 2,
+    "moduleId": "year2-blood",
+    "subject": "Pharmacology",
+    "author": "Dr. El-Shorbagy",
+    "addedBy": "أميرة الشعراوي",
+    "tags": [
+      "pharmacology",
+      "shorbagy",
+      "الشوربجي",
+      "فارما",
+      "anemia",
+      "محاضرة تجريبية"
+    ]
+  }
+]

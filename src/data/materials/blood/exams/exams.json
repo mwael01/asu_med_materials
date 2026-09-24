@@ -1,0 +1,313 @@
+[
+  {
+    "id": "bld-q-phys-mcq",
+    "title": "بنك أسئلة MCQs فسيولوجي الدم (Physiology MCQs)",
+    "description": "بنك أسئلة الاختيار من متعدد لمادة فسيولوجيا الدم.",
+    "url": "https://t.me/MG_ASU_MED/1239",
+    "type": "telegram",
+    "category": "exams",
+    "year": 2,
+    "moduleId": "year2-blood",
+    "subject": "Physiology",
+    "author": "MG ASU MED",
+    "addedBy": "M. Wael",
+    "tags": [
+      "questions",
+      "mcq",
+      "physiology",
+      "فسيولوجي",
+      "أسئلة"
+    ]
+  },
+  {
+    "id": "bld-q-phys-essay",
+    "title": "بنك الأسئلة المقالية فسيولوجي الدم (Physiology Essay)",
+    "description": "تجميعة الأسئلة المقالية المقررة في فسيولوجيا موديول الدم.",
+    "url": "https://t.me/MG_ASU_MED/1251",
+    "type": "telegram",
+    "category": "exams",
+    "year": 2,
+    "moduleId": "year2-blood",
+    "subject": "Physiology",
+    "author": "MG ASU MED",
+    "addedBy": "M. Wael",
+    "tags": [
+      "questions",
+      "essay",
+      "physiology",
+      "مقالي"
+    ]
+  },
+  {
+    "id": "bld-q-biochem-mcq",
+    "title": "بنك أسئلة MCQs كيمياء حيوية الدم (Biochemistry MCQs)",
+    "description": "بنك أسئلة الاختيار من متعدد لمادة بايوكيمستري الدم.",
+    "url": "https://t.me/MG_ASU_MED/1271",
+    "type": "telegram",
+    "category": "exams",
+    "year": 2,
+    "moduleId": "year2-blood",
+    "subject": "Biochemistry",
+    "author": "MG ASU MED",
+    "addedBy": "M. Wael",
+    "tags": [
+      "questions",
+      "mcq",
+      "biochemistry",
+      "بايوكيمستري",
+      "أسئلة"
+    ]
+  },
+  {
+    "id": "bld-q-biochem-essay",
+    "title": "بنك الأسئلة المقالية بايوكيمستري الدم (Biochemistry Essay)",
+    "description": "تجميعة الأسئلة المقالية المقررة في كيمياء حيوية الدم.",
+    "url": "https://t.me/MG_ASU_MED/1280",
+    "type": "telegram",
+    "category": "exams",
+    "year": 2,
+    "moduleId": "year2-blood",
+    "subject": "Biochemistry",
+    "author": "MG ASU MED",
+    "addedBy": "M. Wael",
+    "tags": [
+      "questions",
+      "essay",
+      "biochemistry",
+      "مقالي"
+    ]
+  },
+  {
+    "id": "bld-q-histo-mcq",
+    "title": "بنك أسئلة MCQs هستولوجي الدم (Histology MCQs)",
+    "description": "بنك أسئلة الاختيار من متعدد لمادة هستولوجيا الدم.",
+    "url": "https://t.me/MG_ASU_MED/1253",
+    "type": "telegram",
+    "category": "exams",
+    "year": 2,
+    "moduleId": "year2-blood",
+    "subject": "Histology",
+    "author": "MG ASU MED",
+    "addedBy": "M. Wael",
+    "tags": [
+      "questions",
+      "mcq",
+      "histology",
+      "هستولوجي",
+      "أسئلة"
+    ]
+  },
+  {
+    "id": "bld-q-histo-essay",
+    "title": "بنك الأسئلة المقالية هستولوجي الدم (Histology Essay)",
+    "description": "تجميعة الأسئلة المقالية المقررة في هستولوجيا الدم.",
+    "url": "https://t.me/MG_ASU_MED/1268",
+    "type": "telegram",
+    "category": "exams",
+    "year": 2,
+    "moduleId": "year2-blood",
+    "subject": "Histology",
+    "author": "MG ASU MED",
+    "addedBy": "M. Wael",
+    "tags": [
+      "questions",
+      "essay",
+      "histology",
+      "مقالي"
+    ]
+  },
+  {
+    "id": "bld-q-pharma-mcq",
+    "title": "بنك أسئلة MCQs فارماكولوجي الدم (Pharmacology MCQs)",
+    "description": "بنك أسئلة الاختيار من متعدد لمادة فارماكولوجي الدم.",
+    "url": "https://t.me/MG_ASU_MED/1303",
+    "type": "telegram",
+    "category": "exams",
+    "year": 2,
+    "moduleId": "year2-blood",
+    "subject": "Pharmacology",
+    "author": "MG ASU MED",
+    "addedBy": "M. Wael",
+    "tags": [
+      "questions",
+      "mcq",
+      "pharmacology",
+      "فارما",
+      "أسئلة"
+    ]
+  },
+  {
+    "id": "bld-q-pharma-essay",
+    "title": "بنك الأسئلة المقالية فارما الدم (Pharmacology Essay)",
+    "description": "تجميعة الأسئلة المقالية المقررة في فارماكولوجي موديول الدم.",
+    "url": "https://t.me/MG_ASU_MED/1309",
+    "type": "telegram",
+    "category": "exams",
+    "year": 2,
+    "moduleId": "year2-blood",
+    "subject": "Pharmacology",
+    "author": "MG ASU MED",
+    "addedBy": "M. Wael",
+    "tags": [
+      "questions",
+      "essay",
+      "pharmacology",
+      "مقالي"
+    ]
+  },
+  {
+    "id": "bld-q-patho-mcq",
+    "title": "بنك أسئلة MCQs باثولوجي الدم (Pathology MCQs)",
+    "description": "بنك أسئلة الاختيار من متعدد لمادة باثولوجيا الدم.",
+    "url": "https://t.me/MG_ASU_MED/1282",
+    "type": "telegram",
+    "category": "exams",
+    "year": 2,
+    "moduleId": "year2-blood",
+    "subject": "Pathology",
+    "author": "MG ASU MED",
+    "addedBy": "M. Wael",
+    "tags": [
+      "questions",
+      "mcq",
+      "pathology",
+      "باثولوجي",
+      "أسئلة"
+    ]
+  },
+  {
+    "id": "bld-q-patho-essay",
+    "title": "بنك الأسئلة المقالية باثولوجي الدم (Pathology Essay)",
+    "description": "تجميعة الأسئلة المقالية المقررة في باثولوجيا موديول الدم.",
+    "url": "https://t.me/MG_ASU_MED/1300",
+    "type": "telegram",
+    "category": "exams",
+    "year": 2,
+    "moduleId": "year2-blood",
+    "subject": "Pathology",
+    "author": "MG ASU MED",
+    "addedBy": "M. Wael",
+    "tags": [
+      "questions",
+      "essay",
+      "pathology",
+      "مقالي"
+    ]
+  },
+  {
+    "id": "bld-q-para-mcq",
+    "title": "بنك أسئلة MCQs طفيليات الدم (Parasitology MCQs)",
+    "description": "بنك أسئلة الاختيار من متعدد لمادة باراسيتولوجي الدم.",
+    "url": "https://t.me/MG_ASU_MED/1313",
+    "type": "telegram",
+    "category": "exams",
+    "year": 2,
+    "moduleId": "year2-blood",
+    "subject": "Parasitology",
+    "author": "MG ASU MED",
+    "addedBy": "M. Wael",
+    "tags": [
+      "questions",
+      "mcq",
+      "parasitology",
+      "بارا",
+      "أسئلة"
+    ]
+  },
+  {
+    "id": "bld-q-para-essay",
+    "title": "بنك الأسئلة المقالية باراسيتولوجي الدم (Parasitology Essay)",
+    "description": "تجميعة الأسئلة المقالية المقررة في طفيليات موديول الدم.",
+    "url": "https://t.me/MG_ASU_MED/1326",
+    "type": "telegram",
+    "category": "exams",
+    "year": 2,
+    "moduleId": "year2-blood",
+    "subject": "Parasitology",
+    "author": "MG ASU MED",
+    "addedBy": "M. Wael",
+    "tags": [
+      "questions",
+      "essay",
+      "parasitology",
+      "مقالي"
+    ]
+  },
+  {
+    "id": "bld-q-micro-mcq",
+    "title": "بنك أسئلة MCQs ميكروبيولوجي الدم (Microbiology MCQs)",
+    "description": "بنك أسئلة الاختيار من متعدد لمادة ميكروبيولوجي الدم.",
+    "url": "https://t.me/MG_ASU_MED/1328",
+    "type": "telegram",
+    "category": "exams",
+    "year": 2,
+    "moduleId": "year2-blood",
+    "subject": "Microbiology",
+    "author": "MG ASU MED",
+    "addedBy": "M. Wael",
+    "tags": [
+      "questions",
+      "mcq",
+      "microbiology",
+      "مايكرو",
+      "أسئلة"
+    ]
+  },
+  {
+    "id": "bld-q-micro-essay",
+    "title": "بنك الأسئلة المقالية ميكروبيولوجي الدم (Microbiology Essay)",
+    "description": "تجميعة الأسئلة المقالية المقررة في ميكروبيولوجي ومناعة موديول الدم.",
+    "url": "https://t.me/MG_ASU_MED/1340",
+    "type": "telegram",
+    "category": "exams",
+    "year": 2,
+    "moduleId": "year2-blood",
+    "subject": "Microbiology",
+    "author": "MG ASU MED",
+    "addedBy": "M. Wael",
+    "tags": [
+      "questions",
+      "essay",
+      "microbiology",
+      "مقالي"
+    ]
+  },
+  {
+    "id": "bld-q-formatives-drive",
+    "title": "درايف أرشيف امتحانات الفورماتيف (Formatives Archive Drive)",
+    "description": "أرشيف امتحانات وكويزات الفورماتيف لكلية الطب جامعة عين شمس لموديول الدم.",
+    "url": "https://drive.google.com/drive/folders/1vZX6X-JzuPU4IOwMaTWGRzET72Hi_2FB",
+    "type": "drive",
+    "category": "exams",
+    "year": 2,
+    "moduleId": "year2-blood",
+    "author": "ASU Med Batch Drive",
+    "addedBy": "M. Wael",
+    "tags": [
+      "formatives",
+      "quiz",
+      "drive",
+      "فورماتيف",
+      "كويزات"
+    ]
+  },
+  {
+    "id": "bld-q-assessments-final-drive",
+    "title": "درايف امتحانات الفاينل والتقييمات السابقة (Assessments & Finals)",
+    "description": "أرشيف امتحانات الفاينل والمدتيرم والتقييمات للسنوات السابقة لموديول الدم.",
+    "url": "https://drive.google.com/drive/folders/1-bnDlLUNl7P--_jAM2-yxGgk3xY2eU1R",
+    "type": "drive",
+    "category": "exams",
+    "year": 2,
+    "moduleId": "year2-blood",
+    "author": "ASU Med Batch Drive",
+    "addedBy": "M. Wael",
+    "tags": [
+      "finals",
+      "assessments",
+      "exams",
+      "امتحانات سابقة",
+      "فاينل"
+    ]
+  }
+]

@@ -1,0 +1,531 @@
+[
+  {
+    "id": "bld-micro-essam",
+    "title": "ميكروبيولوجي الدم الشامل (14 ساعة) - د. أحمد عصام",
+    "description": "كورس ميكروبيولوجيا الدم والمناعة المفصل في 14 ساعة للدكتور أحمد عصام.",
+    "url": "https://t.me/Blood_Module/2579",
+    "type": "telegram",
+    "category": "summaries",
+    "year": 2,
+    "moduleId": "year2-blood",
+    "subject": "Microbiology",
+    "author": "Dr. Ahmed Essam",
+    "addedBy": "M. Wael",
+    "tags": [
+      "microbiology",
+      "ahmed essam",
+      "أحمد عصام",
+      "مايكرو"
+    ]
+  },
+  {
+    "id": "bld-micro-kot",
+    "title": "ميكروبيولوجي الدم (11 ساعة) - د. هنادي القط",
+    "description": "شرح ميكروبيولوجي ومناعة الدم في 11 ساعة للدكتورة هنادي القط على تليجرام.",
+    "url": "https://t.me/Blood_Module/18",
+    "type": "telegram",
+    "category": "summaries",
+    "year": 2,
+    "moduleId": "year2-blood",
+    "subject": "Microbiology",
+    "author": "Dr. Hanadi El-Kot",
+    "addedBy": "M. Wael",
+    "tags": [
+      "microbiology",
+      "hanadi kot",
+      "هنادي القط",
+      "مايكرو"
+    ]
+  },
+  {
+    "id": "bld-micro-atef",
+    "title": "ميكروبيولوجي الدم - د. محمد عاطف",
+    "description": "شرح ميكروبيولوجي الدم ومكافحة العدوى للدكتور محمد عاطف على يوتيوب.",
+    "url": "https://youtube.com/playlist?list=PL9tL_1NKaz5eEaPIwMyIqXdkznGeQMaCg",
+    "type": "playlist",
+    "category": "lectures",
+    "year": 2,
+    "moduleId": "year2-blood",
+    "subject": "Microbiology",
+    "author": "Dr. Mohamed Atef",
+    "addedBy": "M. Wael",
+    "playlistId": "PL9tL_1NKaz5eEaPIwMyIqXdkznGeQMaCg",
+    "videos": [
+      {
+        "id": "PL9tL_1NKaz5eEaPIwMyIqXdkznGeQMaCg-1",
+        "title": "Innate immunity",
+        "youtubeId": "xcAj1NFYXaU",
+        "url": "https://youtu.be/xcAj1NFYXaU"
+      },
+      {
+        "id": "PL9tL_1NKaz5eEaPIwMyIqXdkznGeQMaCg-2",
+        "title": "Overview of immune system",
+        "youtubeId": "zqzBn_vcrM4",
+        "url": "https://youtu.be/zqzBn_vcrM4"
+      },
+      {
+        "id": "PL9tL_1NKaz5eEaPIwMyIqXdkznGeQMaCg-3",
+        "title": "Antigen",
+        "youtubeId": "swMgK0xTKZ4",
+        "url": "https://youtu.be/swMgK0xTKZ4"
+      },
+      {
+        "id": "PL9tL_1NKaz5eEaPIwMyIqXdkznGeQMaCg-4",
+        "title": "Cell mediated immunity",
+        "youtubeId": "LmWBODY7u_g",
+        "url": "https://youtu.be/LmWBODY7u_g"
+      },
+      {
+        "id": "PL9tL_1NKaz5eEaPIwMyIqXdkznGeQMaCg-5",
+        "title": "Humoral immunity",
+        "youtubeId": "qtUNYiUt8DI",
+        "url": "https://youtu.be/qtUNYiUt8DI"
+      },
+      {
+        "id": "PL9tL_1NKaz5eEaPIwMyIqXdkznGeQMaCg-6",
+        "title": "Immunoglobulin",
+        "youtubeId": "PvIgf2QB2xY",
+        "url": "https://youtu.be/PvIgf2QB2xY"
+      },
+      {
+        "id": "PL9tL_1NKaz5eEaPIwMyIqXdkznGeQMaCg-7",
+        "title": "Complement",
+        "youtubeId": "FtP0rA5wVhE",
+        "url": "https://youtu.be/FtP0rA5wVhE"
+      },
+      {
+        "id": "PL9tL_1NKaz5eEaPIwMyIqXdkznGeQMaCg-8",
+        "title": "Hypersensitivity",
+        "youtubeId": "xYI7C_a8aqk",
+        "url": "https://youtu.be/xYI7C_a8aqk"
+      },
+      {
+        "id": "PL9tL_1NKaz5eEaPIwMyIqXdkznGeQMaCg-9",
+        "title": "Tumor Immunology",
+        "youtubeId": "Doqf40PjK9Y",
+        "url": "https://youtu.be/Doqf40PjK9Y"
+      },
+      {
+        "id": "PL9tL_1NKaz5eEaPIwMyIqXdkznGeQMaCg-10",
+        "title": "Tolerance & Autoimmune disease",
+        "youtubeId": "VvS4R-1YsPM",
+        "url": "https://youtu.be/VvS4R-1YsPM"
+      },
+      {
+        "id": "PL9tL_1NKaz5eEaPIwMyIqXdkznGeQMaCg-11",
+        "title": "Immunodeficiency",
+        "youtubeId": "vDJRRF829lY",
+        "url": "https://youtu.be/vDJRRF829lY"
+      },
+      {
+        "id": "PL9tL_1NKaz5eEaPIwMyIqXdkznGeQMaCg-12",
+        "title": "Diagnosis of virus",
+        "youtubeId": "gaz4Wg8DGJc",
+        "url": "https://youtu.be/gaz4Wg8DGJc"
+      }
+    ],
+    "tags": [
+      "microbiology",
+      "atef",
+      "محمد عاطف",
+      "مايكرو",
+      "playlist"
+    ]
+  },
+  {
+    "id": "bld-micro-sherif",
+    "title": "ميكروبيولوجي الدم - د. محمد الشريف",
+    "description": "شرح ميكروبيولوجيا الدم للدكتور محمد الشريف على يوتيوب.",
+    "url": "https://www.youtube.com/playlist?list=PL6HncFuy-vP76l0_g637yq52tbl6gw8cD",
+    "type": "playlist",
+    "category": "lectures",
+    "year": 2,
+    "moduleId": "year2-blood",
+    "subject": "Microbiology",
+    "author": "Dr. Mohamed El-Sherif",
+    "addedBy": "M. Wael",
+    "playlistId": "PL6HncFuy-vP76l0_g637yq52tbl6gw8cD",
+    "videos": [
+      {
+        "id": "PL6HncFuy-vP76l0_g637yq52tbl6gw8cD-1",
+        "title": "Introduction to Immunology",
+        "youtubeId": "NYicBnqwSOE",
+        "url": "https://youtu.be/NYicBnqwSOE"
+      },
+      {
+        "id": "PL6HncFuy-vP76l0_g637yq52tbl6gw8cD-2",
+        "title": "Hapten",
+        "youtubeId": "QQzNRoGIoYE",
+        "url": "https://youtu.be/QQzNRoGIoYE"
+      },
+      {
+        "id": "PL6HncFuy-vP76l0_g637yq52tbl6gw8cD-3",
+        "title": "Introduction to Immunology (Updated 2021)",
+        "youtubeId": "90teRbG6uOg",
+        "url": "https://youtu.be/90teRbG6uOg"
+      },
+      {
+        "id": "PL6HncFuy-vP76l0_g637yq52tbl6gw8cD-4",
+        "title": "Types of Antigen - Part 1",
+        "youtubeId": "T-13_JvoGyE",
+        "url": "https://youtu.be/T-13_JvoGyE"
+      },
+      {
+        "id": "PL6HncFuy-vP76l0_g637yq52tbl6gw8cD-5",
+        "title": "Types of Antigen - Part 2",
+        "youtubeId": "SdkVJedifsk",
+        "url": "https://youtu.be/SdkVJedifsk"
+      },
+      {
+        "id": "PL6HncFuy-vP76l0_g637yq52tbl6gw8cD-6",
+        "title": "Types of Antigen - Part 3",
+        "youtubeId": "YHfJzCPB_SY",
+        "url": "https://youtu.be/YHfJzCPB_SY"
+      },
+      {
+        "id": "PL6HncFuy-vP76l0_g637yq52tbl6gw8cD-7",
+        "title": "Cells of the immune system",
+        "youtubeId": "yPRAWe8YViw",
+        "url": "https://youtu.be/yPRAWe8YViw"
+      },
+      {
+        "id": "PL6HncFuy-vP76l0_g637yq52tbl6gw8cD-8",
+        "title": "Natural Killer Cell",
+        "youtubeId": "2T1xUQKN9dA",
+        "url": "https://youtu.be/2T1xUQKN9dA"
+      },
+      {
+        "id": "PL6HncFuy-vP76l0_g637yq52tbl6gw8cD-9",
+        "title": "Major histocompatibility complex (MHC)",
+        "youtubeId": "-lVeyYjgvMg",
+        "url": "https://youtu.be/-lVeyYjgvMg"
+      },
+      {
+        "id": "PL6HncFuy-vP76l0_g637yq52tbl6gw8cD-10",
+        "title": "Humoral immune response",
+        "youtubeId": "0xggMqvNg-M",
+        "url": "https://youtu.be/0xggMqvNg-M"
+      },
+      {
+        "id": "PL6HncFuy-vP76l0_g637yq52tbl6gw8cD-11",
+        "title": "Cell mediated immune response",
+        "youtubeId": "n010QegHpzQ",
+        "url": "https://youtu.be/n010QegHpzQ"
+      },
+      {
+        "id": "PL6HncFuy-vP76l0_g637yq52tbl6gw8cD-12",
+        "title": "MHC in relation to Humoral immunity and Cell mediated immunity - هام جداً لعدم اللخبطه",
+        "youtubeId": "0MFfF4MJK3E",
+        "url": "https://youtu.be/0MFfF4MJK3E"
+      },
+      {
+        "id": "PL6HncFuy-vP76l0_g637yq52tbl6gw8cD-13",
+        "title": "General aspects of immunoglobulins",
+        "youtubeId": "ynr773S-d8Q",
+        "url": "https://youtu.be/ynr773S-d8Q"
+      },
+      {
+        "id": "PL6HncFuy-vP76l0_g637yq52tbl6gw8cD-14",
+        "title": "Immunoglobulins",
+        "youtubeId": "cRzD9cZa37g",
+        "url": "https://youtu.be/cRzD9cZa37g"
+      },
+      {
+        "id": "PL6HncFuy-vP76l0_g637yq52tbl6gw8cD-15",
+        "title": "Theories of Immunoglobulin formation",
+        "youtubeId": "FQ2bNQI9xg4",
+        "url": "https://youtu.be/FQ2bNQI9xg4"
+      },
+      {
+        "id": "PL6HncFuy-vP76l0_g637yq52tbl6gw8cD-16",
+        "title": "IgE and it's relation to Type 1 Hypersensitivity",
+        "youtubeId": "GbL83I_MIBs",
+        "url": "https://youtu.be/GbL83I_MIBs"
+      },
+      {
+        "id": "PL6HncFuy-vP76l0_g637yq52tbl6gw8cD-17",
+        "title": "Clonal expansion, Clonal deletion and monoclonal antibodies",
+        "youtubeId": "bAUhBFRLxEE",
+        "url": "https://youtu.be/bAUhBFRLxEE"
+      },
+      {
+        "id": "PL6HncFuy-vP76l0_g637yq52tbl6gw8cD-18",
+        "title": "Factors affecting the Immune Response",
+        "youtubeId": "c9ZTtuDQMo8",
+        "url": "https://youtu.be/c9ZTtuDQMo8"
+      },
+      {
+        "id": "PL6HncFuy-vP76l0_g637yq52tbl6gw8cD-19",
+        "title": "Primary and Secondary Immune Response",
+        "youtubeId": "y8egXonZKcA",
+        "url": "https://youtu.be/y8egXonZKcA"
+      },
+      {
+        "id": "PL6HncFuy-vP76l0_g637yq52tbl6gw8cD-20",
+        "title": "General characters of Complement and it's classic pathway",
+        "youtubeId": "JFHLfEBx4kY",
+        "url": "https://youtu.be/JFHLfEBx4kY"
+      },
+      {
+        "id": "PL6HncFuy-vP76l0_g637yq52tbl6gw8cD-21",
+        "title": "Complement Alternative pathway",
+        "youtubeId": "Q916EKuDjks",
+        "url": "https://youtu.be/Q916EKuDjks"
+      },
+      {
+        "id": "PL6HncFuy-vP76l0_g637yq52tbl6gw8cD-22",
+        "title": "Super Antigen and Antibody dependent cytotoxicity",
+        "youtubeId": "LnTifRDFdMg",
+        "url": "https://youtu.be/LnTifRDFdMg"
+      },
+      {
+        "id": "PL6HncFuy-vP76l0_g637yq52tbl6gw8cD-23",
+        "title": "Innate Immunity (natural)",
+        "youtubeId": "jEWTkv-oqsY",
+        "url": "https://youtu.be/jEWTkv-oqsY"
+      },
+      {
+        "id": "PL6HncFuy-vP76l0_g637yq52tbl6gw8cD-24",
+        "title": "Adaptive Immunity (acquired)",
+        "youtubeId": "9vxRE5RBbCI",
+        "url": "https://youtu.be/9vxRE5RBbCI"
+      },
+      {
+        "id": "PL6HncFuy-vP76l0_g637yq52tbl6gw8cD-25",
+        "title": "Type 1 Hypersensitivity",
+        "youtubeId": "24TFCdeI47g",
+        "url": "https://youtu.be/24TFCdeI47g"
+      },
+      {
+        "id": "PL6HncFuy-vP76l0_g637yq52tbl6gw8cD-26",
+        "title": "Type 2 Hypersensitivity",
+        "youtubeId": "lTbhiXmW5Go",
+        "url": "https://youtu.be/lTbhiXmW5Go"
+      },
+      {
+        "id": "PL6HncFuy-vP76l0_g637yq52tbl6gw8cD-27",
+        "title": "Type 3 Hypersensitivity",
+        "youtubeId": "nxExVst568Y",
+        "url": "https://youtu.be/nxExVst568Y"
+      },
+      {
+        "id": "PL6HncFuy-vP76l0_g637yq52tbl6gw8cD-28",
+        "title": "Type 4 Hypersensitivity",
+        "youtubeId": "heyFHgrnxlQ",
+        "url": "https://youtu.be/heyFHgrnxlQ"
+      },
+      {
+        "id": "PL6HncFuy-vP76l0_g637yq52tbl6gw8cD-29",
+        "title": "Hypersensitivity - تفاعل فرط التحسس",
+        "youtubeId": "Y6sCU-MCO7s",
+        "url": "https://youtu.be/Y6sCU-MCO7s"
+      },
+      {
+        "id": "PL6HncFuy-vP76l0_g637yq52tbl6gw8cD-30",
+        "title": "Autoimmune disease",
+        "youtubeId": "SZ5PRoGSt4E",
+        "url": "https://youtu.be/SZ5PRoGSt4E"
+      },
+      {
+        "id": "PL6HncFuy-vP76l0_g637yq52tbl6gw8cD-31",
+        "title": "Tumor Immunology",
+        "youtubeId": "107r8Dhxkis",
+        "url": "https://youtu.be/107r8Dhxkis"
+      },
+      {
+        "id": "PL6HncFuy-vP76l0_g637yq52tbl6gw8cD-32",
+        "title": "Transplantation",
+        "youtubeId": "d96EO3YdhEs",
+        "url": "https://youtu.be/d96EO3YdhEs"
+      },
+      {
+        "id": "PL6HncFuy-vP76l0_g637yq52tbl6gw8cD-33",
+        "title": "Cytokines - السيتوكينات لغة التواصل بين الخلايا",
+        "youtubeId": "xF3r1yHmwiA",
+        "url": "https://youtu.be/xF3r1yHmwiA"
+      },
+      {
+        "id": "PL6HncFuy-vP76l0_g637yq52tbl6gw8cD-34",
+        "title": "DNA vaccination - تلقيح الحمض النووي",
+        "youtubeId": "8xUyBJtiShg",
+        "url": "https://youtu.be/8xUyBJtiShg"
+      },
+      {
+        "id": "PL6HncFuy-vP76l0_g637yq52tbl6gw8cD-35",
+        "title": "Tolerance, Autoimmune Disease, Tumor Immunology & Immunotherapy - مناعة الأورام والمزيد من المواضيع",
+        "youtubeId": "9f3N4j5P1iY",
+        "url": "https://youtu.be/9f3N4j5P1iY"
+      },
+      {
+        "id": "PL6HncFuy-vP76l0_g637yq52tbl6gw8cD-36",
+        "title": "Practical (Immunology & Microbiology) Part 1",
+        "youtubeId": "w1u5ZW67XU0",
+        "url": "https://youtu.be/w1u5ZW67XU0"
+      },
+      {
+        "id": "PL6HncFuy-vP76l0_g637yq52tbl6gw8cD-37",
+        "title": "Coombs Test, Actinomycosis and Rickettsia",
+        "youtubeId": "9zXrX0wAABA",
+        "url": "https://youtu.be/9zXrX0wAABA"
+      },
+      {
+        "id": "PL6HncFuy-vP76l0_g637yq52tbl6gw8cD-38",
+        "title": "General Immunology Revision (محاضرة مجمعة) Part 1",
+        "youtubeId": "vRdY_GdGcgQ",
+        "url": "https://youtu.be/vRdY_GdGcgQ"
+      },
+      {
+        "id": "PL6HncFuy-vP76l0_g637yq52tbl6gw8cD-39",
+        "title": "General Immunology Revision (محاضرة مجمعة) Part 2",
+        "youtubeId": "P2M0TKzNNjo",
+        "url": "https://youtu.be/P2M0TKzNNjo"
+      }
+    ],
+    "tags": [
+      "microbiology",
+      "sherif",
+      "محمد الشريف",
+      "مايكرو",
+      "playlist"
+    ]
+  },
+  {
+    "id": "bld-micro-mofy",
+    "title": "ميكروبيولوجي الدم - د. خالد الموفي",
+    "description": "شرح كورس ميكروبيولوجي الدم للدكتور خالد الموفي على يوتيوب.",
+    "url": "https://youtube.com/playlist?list=PLvwOqR8bEHxCZRe1cJGmdG5Apae45qt5s",
+    "type": "playlist",
+    "category": "lectures",
+    "year": 2,
+    "moduleId": "year2-blood",
+    "subject": "Microbiology",
+    "author": "Dr. Khaled El-Mofy",
+    "addedBy": "M. Wael",
+    "playlistId": "PLvwOqR8bEHxCZRe1cJGmdG5Apae45qt5s",
+    "videos": [
+      {
+        "id": "PLvwOqR8bEHxCZRe1cJGmdG5Apae45qt5s-1",
+        "title": "Micro IBL system L1 basic immunity",
+        "youtubeId": "3USxcTOL52U",
+        "url": "https://youtu.be/3USxcTOL52U"
+      },
+      {
+        "id": "PLvwOqR8bEHxCZRe1cJGmdG5Apae45qt5s-2",
+        "title": "Micro IBL system L2 (Adaptive Immunity)",
+        "youtubeId": "zuxLK8-aHPc",
+        "url": "https://youtu.be/zuxLK8-aHPc"
+      },
+      {
+        "id": "PLvwOqR8bEHxCZRe1cJGmdG5Apae45qt5s-3",
+        "title": "Micro IBL system L8 (immunodeficiency&tumor immunology). Clinical immunity",
+        "youtubeId": "V1KOpHoaOx8",
+        "url": "https://youtu.be/V1KOpHoaOx8"
+      },
+      {
+        "id": "PLvwOqR8bEHxCZRe1cJGmdG5Apae45qt5s-4",
+        "title": "(Micro IBL system L11(joint)(transplantation immunology",
+        "youtubeId": "cDXLBYmpCl4",
+        "url": "https://youtu.be/cDXLBYmpCl4"
+      }
+    ],
+    "tags": [
+      "microbiology",
+      "mofy",
+      "خالد الموفي",
+      "مايكرو",
+      "playlist"
+    ]
+  },
+  {
+    "id": "bld-micro-ninja-nerd",
+    "title": "المناعة وميكروبيولوجيا الدم - Ninja Nerd",
+    "description": "شروحات الجهاز المناعي، الخلايا التائية والبائية والأجسام المضادة المصورة من نينجا نيرد.",
+    "url": "https://www.youtube.com/playlist?list=PLTF9h-T1TcJj4AOPCxGxOUTH0IVmaH7_8",
+    "type": "playlist",
+    "category": "lectures",
+    "year": 2,
+    "moduleId": "year2-blood",
+    "subject": "Microbiology",
+    "author": "Ninja Nerd",
+    "addedBy": "M. Wael",
+    "playlistId": "PLTF9h-T1TcJj4AOPCxGxOUTH0IVmaH7_8",
+    "videos": [
+      {
+        "id": "PLTF9h-T1TcJj4AOPCxGxOUTH0IVmaH7_8-1",
+        "title": "Immunology | Inflammation: Vascular Events: Part 1",
+        "youtubeId": "LArxUakFsFs",
+        "url": "https://youtu.be/LArxUakFsFs"
+      },
+      {
+        "id": "PLTF9h-T1TcJj4AOPCxGxOUTH0IVmaH7_8-2",
+        "title": "Immunology | Inflammation: Cellular Events: Part 2",
+        "youtubeId": "yTIZpzoaIT0",
+        "url": "https://youtu.be/yTIZpzoaIT0"
+      },
+      {
+        "id": "PLTF9h-T1TcJj4AOPCxGxOUTH0IVmaH7_8-3",
+        "title": "Immunology | Inflammation: Complement Proteins: Part 3",
+        "youtubeId": "80Q-OPDjoE8",
+        "url": "https://youtu.be/80Q-OPDjoE8"
+      },
+      {
+        "id": "PLTF9h-T1TcJj4AOPCxGxOUTH0IVmaH7_8-4",
+        "title": "Immunology | Inflammation: Toll Like Receptors and Interferons: Part 4",
+        "youtubeId": "cKSWHMRPOoI",
+        "url": "https://youtu.be/cKSWHMRPOoI"
+      },
+      {
+        "id": "PLTF9h-T1TcJj4AOPCxGxOUTH0IVmaH7_8-5",
+        "title": "Immunology | Adaptive Immunity",
+        "youtubeId": "7_hiaCq2rew",
+        "url": "https://youtu.be/7_hiaCq2rew"
+      },
+      {
+        "id": "PLTF9h-T1TcJj4AOPCxGxOUTH0IVmaH7_8-6",
+        "title": "علم المناعة | الجهاز المناعي: نظرة عامة",
+        "youtubeId": "qkIfYwnaYqc",
+        "url": "https://youtu.be/qkIfYwnaYqc"
+      },
+      {
+        "id": "PLTF9h-T1TcJj4AOPCxGxOUTH0IVmaH7_8-7",
+        "title": "Immunology | Antibody Structure & Function",
+        "youtubeId": "zg61a3BoR8Y",
+        "url": "https://youtu.be/zg61a3BoR8Y"
+      },
+      {
+        "id": "PLTF9h-T1TcJj4AOPCxGxOUTH0IVmaH7_8-8",
+        "title": "Immunology | T- Cell Development",
+        "youtubeId": "JeV-HuPq7CI",
+        "url": "https://youtu.be/JeV-HuPq7CI"
+      }
+    ],
+    "tags": [
+      "microbiology",
+      "immunology",
+      "ninja nerd",
+      "مناعة",
+      "playlist"
+    ]
+  },
+  {
+    "id": "bld-micro-kareem-emad-lec01",
+    "title": "ميكروبيولوجي الدم - د. كريم عماد (المحاضرة الأولى: Parvo B19)",
+    "description": "المحاضرة الأولى من كورس الميكروبيولوجي لموديول الدم لدكتور كريم عماد (Lecture 1 \"Parvo B19\" : Dr Karim Emad).",
+    "url": "https://youtu.be/4IpHvWfmIk0",
+    "type": "youtube",
+    "category": "lectures",
+    "year": 2,
+    "moduleId": "year2-blood",
+    "subject": "Microbiology",
+    "author": "Dr. Karim Emad",
+    "addedBy": "أميرة الشعراوي",
+    "tags": [
+      "microbiology",
+      "kareem emad",
+      "كريم عماد",
+      "مايكرو",
+      "parvo b19",
+      "محاضرة تجريبية"
+    ]
+  }
+]

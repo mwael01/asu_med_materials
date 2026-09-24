@@ -1,0 +1,198 @@
+[
+  {
+    "id": "bld-drive-semester3",
+    "title": "درايف الترم الأول المركزي (Semester 3 Drive)",
+    "description": "الدرايف المركزي الرئيسي لمحتوى الترم الأول للفرقة الثانية بكلية الطب جامعة عين شمس.",
+    "url": "https://drive.google.com/drive/folders/1CQc2-YTMiwcCxi_bHzey00z76RI5Ar7G",
+    "type": "drive",
+    "category": "central",
+    "year": 2,
+    "moduleId": "year2-blood",
+    "author": "ASU Med Batch Drive",
+    "addedBy": "M. Wael",
+    "tags": [
+      "داتا",
+      "درايف",
+      "الترم الاول",
+      "semester 3",
+      "blood"
+    ]
+  },
+  {
+    "id": "bld-anki-s3",
+    "title": "Anki Decks Semester 3 (بطاقات أنكي للاستذكار المتباعد)",
+    "description": "فلاش كاردز أنكي المنسقة والمنظمة لموديولات الترم الأول سنة ثانية.",
+    "url": "https://drive.google.com/drive/folders/1vcN5P39Vh0g4KDTyHz-LwayPkDIsC-Xt",
+    "type": "drive",
+    "category": "summaries",
+    "year": 2,
+    "moduleId": "year2-blood",
+    "author": "Anki ASU",
+    "addedBy": "M. Wael",
+    "tags": [
+      "anki",
+      "decks",
+      "flashcards",
+      "أنكي",
+      "مراجعة"
+    ]
+  },
+  {
+    "id": "bld-daily-lectures-practical",
+    "title": "الداتا اليومية للمحاضرات والسكاشن العملية (Day by Day)",
+    "description": "تسجيلات وسلايدات المحاضرات والسكاشن العملية يوم بيوم من الكلية.",
+    "url": "https://drive.google.com/drive/folders/1KJc7ATSQ-Y3QUvi30VxM8K4mTbBROu8O",
+    "type": "drive",
+    "category": "practical",
+    "year": 2,
+    "moduleId": "year2-blood",
+    "author": "ASU Med Batch Drive",
+    "addedBy": "M. Wael",
+    "tags": [
+      "daily",
+      "practical",
+      "lectures",
+      "يوم بيوم",
+      "عملي"
+    ]
+  },
+  {
+    "id": "bld-comprehensive-module-drive",
+    "title": "درايف موديول Blood الشامل (MCQs، فورماتيف، وفاينل)",
+    "description": "درايف شامل لكل ما يخص موديول الدم: أسئلة MCQs، فورماتيف الكلية، الامتحانات السابقة، وقائمة الأدوية.",
+    "url": "https://drive.google.com/drive/folders/146BPx_lcIGMwrleN91M80sqbJkBt6KI4",
+    "type": "drive",
+    "category": "exams",
+    "year": 2,
+    "moduleId": "year2-blood",
+    "author": "ASU Med Batch Drive",
+    "addedBy": "M. Wael",
+    "tags": [
+      "comprehensive",
+      "mcq",
+      "formatives",
+      "finals",
+      "drug list",
+      "شامل"
+    ]
+  },
+  {
+    "id": "bld-year2-central-drives",
+    "title": "درايفات سنة ثانية المركزية (Year 2 Central Drives)",
+    "description": "مجلد الأرشيف الكامل لدرايفات الفرقة الثانية طب عين شمس.",
+    "url": "https://drive.google.com/drive/folders/1641f5i37IeKWNocZeQA90W4VXniuyD5K",
+    "type": "drive",
+    "category": "central",
+    "year": 2,
+    "moduleId": "year2-blood",
+    "author": "ASU Med Batch Drive",
+    "addedBy": "M. Wael",
+    "tags": [
+      "درايفات",
+      "سنة ثانية",
+      "year 2",
+      "archives"
+    ]
+  },
+  {
+    "id": "bld-batch-lectures-drive",
+    "title": "درايف محاضرات وسكاشن موديول Blood (تسجيلات وملفات PDF)",
+    "description": "الدرايف المخصص من الدفعة لرفع ملفات الـ PDFs وتسجيلات المحاضرات والسكاشن العملية لموديول الدم أولاً بأول.",
+    "url": "https://drive.google.com/drive/folders/1CXOMHWZ2uljfTBZndttZRf7nWWD-f2eS",
+    "type": "drive",
+    "category": "central",
+    "year": 2,
+    "moduleId": "year2-blood",
+    "author": "ASU Med Batch Drive",
+    "addedBy": "فاعل خير",
+    "tags": [
+      "drive",
+      "lectures",
+      "sections",
+      "pdfs",
+      "محاضرات",
+      "سكاشن",
+      "blood"
+    ]
+  },
+  {
+    "id": "bld-batch-lectures-telegram",
+    "title": "قناة تليجرام محاضرات وسكاشن موديول Blood",
+    "description": "القناة الرسمية على تليجرام لرفع تسجيلات وريكوردات المحاضرات والسكاشن اليومية لموديول الدم.",
+    "url": "https://t.me/+HZtd9fQ6wg43NzJk",
+    "type": "telegram",
+    "category": "central",
+    "year": 2,
+    "moduleId": "year2-blood",
+    "author": "ASU Med Batch",
+    "addedBy": "فاعل خير",
+    "tags": [
+      "telegram",
+      "lectures",
+      "sections",
+      "تليجرام",
+      "محاضرات",
+      "سكاشن"
+    ]
+  },
+  {
+    "id": "bld-bot-asumedzone",
+    "title": "بوت ASU Med Zone (@ASUMedZonebot)",
+    "description": "بوت تليجرام التفاعلي لطلاب طب عين شمس للوصول السريع إلى مصادر وداتا وشروحات موديول الدم ومختلف الموديولات والفرق.",
+    "url": "https://t.me/ASUMedZonebot",
+    "type": "telegram",
+    "category": "central",
+    "year": 2,
+    "moduleId": "year2-blood",
+    "author": "ASU Med Zone",
+    "addedBy": "Mohamed Waleed",
+    "tags": [
+      "bot",
+      "telegram",
+      "asumedzone",
+      "بوت",
+      "تليجرام",
+      "داتا"
+    ]
+  },
+  {
+    "id": "bld-bot-asubooks",
+    "title": "بوت ASU Books (@ASUbooksbot)",
+    "description": "بوت تليجرام المخصص لمصادر وكتب ومراجع ومذكرات طب عين شمس وموديول الدم.",
+    "url": "https://t.me/ASUbooksbot",
+    "type": "telegram",
+    "category": "references",
+    "year": 2,
+    "moduleId": "year2-blood",
+    "author": "ASU Books",
+    "addedBy": "Mohamed Waleed",
+    "tags": [
+      "bot",
+      "telegram",
+      "books",
+      "بوت",
+      "كتب",
+      "مراجع",
+      "تليجرام"
+    ]
+  },
+  {
+    "id": "bld-youtube-rahma-ayman",
+    "title": "قناة د. رحمة أيمن - شروحات موديول Blood",
+    "description": "القناة الرسمية للدكتورة رحمة أيمن لنشر شروحات ومحاضرات موديول الدم لطلاب الفرقة الثانية طب عين شمس.",
+    "url": "https://www.youtube.com/@rahma_ayman_2008",
+    "type": "youtube",
+    "category": "lectures",
+    "year": 2,
+    "moduleId": "year2-blood",
+    "author": "Dr. Rahma Ayman",
+    "addedBy": "أميرة الشعراوي",
+    "tags": [
+      "youtube",
+      "rahma ayman",
+      "رحمة أيمن",
+      "قناة",
+      "شرح"
+    ]
+  }
+]

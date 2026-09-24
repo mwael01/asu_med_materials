@@ -1,0 +1,181 @@
+[
+  {
+    "id": "bld-patho-nemer",
+    "title": "باثولوجي الدم المركز (ساعتان) - د. أحمد النمر",
+    "description": "شرح مكثف ومختصر لباثولوجي الدم في ساعتين فقط للدكتور أحمد النمر.",
+    "url": "https://t.me/Blood_Module/2581",
+    "type": "telegram",
+    "category": "summaries",
+    "year": 2,
+    "moduleId": "year2-blood",
+    "subject": "Pathology",
+    "author": "Dr. Ahmed El-Nemer",
+    "addedBy": "M. Wael",
+    "tags": [
+      "pathology",
+      "nemer",
+      "أحمد النمر",
+      "باثولوجي"
+    ]
+  },
+  {
+    "id": "bld-patho-ghazy",
+    "title": "باثولوجي الدم (4 ساعات) - د. سامح غازي",
+    "description": "شرح باثولوجي الأنيميا وأورام الدم واللوكيميا والليمفوما في 4 ساعات للدكتور سامح غازي.",
+    "url": "https://t.me/Blood_Module/2599",
+    "type": "telegram",
+    "category": "summaries",
+    "year": 2,
+    "moduleId": "year2-blood",
+    "subject": "Pathology",
+    "author": "Dr. Sameh Ghazy",
+    "addedBy": "M. Wael",
+    "tags": [
+      "pathology",
+      "sameh ghazy",
+      "سامح غازي",
+      "باثولوجي"
+    ]
+  },
+  {
+    "id": "bld-patho-khalifa",
+    "title": "باثولوجي الدم المفصل (5.5 ساعات) - د. عبد الرحمن خليفة",
+    "description": "شرح باثولوجي الدم الكامل والشامل في 5 ساعات ونصف للدكتور عبد الرحمن خليفة.",
+    "url": "https://t.me/Blood_Module/2582",
+    "type": "telegram",
+    "category": "summaries",
+    "year": 2,
+    "moduleId": "year2-blood",
+    "subject": "Pathology",
+    "author": "Dr. Abdel Rahman Khalifa",
+    "addedBy": "M. Wael",
+    "tags": [
+      "pathology",
+      "khalifa",
+      "عبد الرحمن خليفة",
+      "باثولوجي"
+    ]
+  },
+  {
+    "id": "bld-patho-sharkawy",
+    "title": "باثولوجي الدم - د. خالد الشرقاوي",
+    "description": "قائمة تشغيل شرح باثولوجي موديول الدم للدكتور خالد الشرقاوي على يوتيوب.",
+    "url": "https://www.youtube.com/playlist?list=PLLmNysLEaLbj-ULVe6IKH8SSD7sF33F5-",
+    "type": "playlist",
+    "category": "lectures",
+    "year": 2,
+    "moduleId": "year2-blood",
+    "subject": "Pathology",
+    "author": "Dr. Khaled El-Sharkawy",
+    "addedBy": "M. Wael",
+    "playlistId": "PLLmNysLEaLbj-ULVe6IKH8SSD7sF33F5-",
+    "videos": [
+      {
+        "id": "PLLmNysLEaLbj-ULVe6IKH8SSD7sF33F5--1",
+        "title": "Practical pathology of lymphatic system",
+        "youtubeId": "M9t2vWpWx8I",
+        "url": "https://youtu.be/M9t2vWpWx8I"
+      },
+      {
+        "id": "PLLmNysLEaLbj-ULVe6IKH8SSD7sF33F5--2",
+        "title": "Hypersensitivity reaction type 3 & 4",
+        "youtubeId": "ehM4V1T8SE0",
+        "url": "https://youtu.be/ehM4V1T8SE0"
+      },
+      {
+        "id": "PLLmNysLEaLbj-ULVe6IKH8SSD7sF33F5--3",
+        "title": "Hypersensitivity reactions type 1&2",
+        "youtubeId": "IPcSiy5L1DI",
+        "url": "https://youtu.be/IPcSiy5L1DI"
+      },
+      {
+        "id": "PLLmNysLEaLbj-ULVe6IKH8SSD7sF33F5--4",
+        "title": "Lymphadenopathy",
+        "youtubeId": "zuxTaUxa8Uw",
+        "url": "https://youtu.be/zuxTaUxa8Uw"
+      },
+      {
+        "id": "PLLmNysLEaLbj-ULVe6IKH8SSD7sF33F5--5",
+        "title": "Hodgkin's  and non Hodgkin's lymphomas",
+        "youtubeId": "ZgIOd8o8Jp8",
+        "url": "https://youtu.be/ZgIOd8o8Jp8"
+      },
+      {
+        "id": "PLLmNysLEaLbj-ULVe6IKH8SSD7sF33F5--6",
+        "title": "Autoimmune disorders",
+        "youtubeId": "zSobwu7wCj0",
+        "url": "https://youtu.be/zSobwu7wCj0"
+      },
+      {
+        "id": "PLLmNysLEaLbj-ULVe6IKH8SSD7sF33F5--7",
+        "title": "Immune deficiency disorders",
+        "youtubeId": "kxe-QrrBdbA",
+        "url": "https://youtu.be/kxe-QrrBdbA"
+      },
+      {
+        "id": "PLLmNysLEaLbj-ULVe6IKH8SSD7sF33F5--8",
+        "title": "Allergy",
+        "youtubeId": "_X07NxMpwA4",
+        "url": "https://youtu.be/_X07NxMpwA4"
+      }
+    ],
+    "tags": [
+      "pathology",
+      "sharkawy",
+      "خالد الشرقاوي",
+      "باثولوجي",
+      "playlist"
+    ]
+  },
+  {
+    "id": "bld-patho-elradad",
+    "title": "شرح باثولوجي الدم (Anemia & RBCs Disorders) - د. إسلام الرداد",
+    "titleEn": "Blood Pathology (Anemia & RBCs Disorders) - Dr. Eslam Elradad",
+    "description": "شرح باثولوجيا خلايا الدم الحمراء والأنيميا وتطبيقاتها الإكلينيكية للدكتور إسلام الرداد.",
+    "descriptionEn": "Pathology lectures covering RBCs disorders, anemias, polycythemia, and clinical correlations by Dr. Eslam Elradad.",
+    "url": "https://youtube.com/playlist?list=PLMlH191fWjvc",
+    "type": "playlist",
+    "category": "lectures",
+    "year": 2,
+    "moduleId": "year2-blood",
+    "subject": "Pathology",
+    "author": "Dr. Eslam Elradad",
+    "addedBy": "Shahd Hany",
+    "playlistId": "PLMlH191fWjvc",
+    "videos": [
+      {
+        "id": "PLMlH191fWjvc-1",
+        "title": "Anemia And Polycythemia",
+        "youtubeId": "IxouD3-YESw",
+        "url": "https://youtu.be/IxouD3-YESw"
+      },
+      {
+        "id": "PLMlH191fWjvc-2",
+        "title": "قراءة الكتاب (Anemia and Polycythemia)",
+        "youtubeId": "VAezLE4Yx5U",
+        "url": "https://youtu.be/VAezLE4Yx5U"
+      },
+      {
+        "id": "PLMlH191fWjvc-3",
+        "title": "Clinical RBCs Disorder 2 (Acquired hemolytic anemia - macrocytic anemia- polycythemia)",
+        "youtubeId": "WtfR1jTr4AM",
+        "url": "https://youtu.be/WtfR1jTr4AM"
+      },
+      {
+        "id": "PLMlH191fWjvc-4",
+        "title": "Clinical RBCs Disorder 1 (introduction - microcytic anemia - Inherited hemolytic anemia)",
+        "youtubeId": "DilgXQSdaJU",
+        "url": "https://youtu.be/DilgXQSdaJU"
+      }
+    ],
+    "tags": [
+      "pathology",
+      "elradad",
+      "إسلام الرداد",
+      "باثولوجي",
+      "anemia",
+      "playlist"
+    ],
+    "createdAt": "2026-09-24T08:01:34.530Z"
+  }
+]

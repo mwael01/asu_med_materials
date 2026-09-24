@@ -44,8 +44,23 @@ asu_med_materials/
 │   │   └── selection/           # MultistageSelector.astro (Two-stage Year/Module modal)
 │   ├── data/                    # Structured study materials & curriculum data
 │   │   ├── modules.ts           # Year and module metadata (MED101-MED504)
-│   │   ├── materials.ts         # Verified study materials production database
-│   │   └── contributors.json    # Site team authors + contributor profile overrides
+│   │   ├── contributors.json    # Site team authors + contributor profile overrides
+│   │   ├── materials.ts         # Facade re-exporting from ./materials/index
+│   │   └── materials/           # Modular study materials database
+│   │       ├── index.ts         # Unified materials aggregator and query functions
+│   │       └── blood/           # Year 2 - Blood & Lymphatic System (MED201)
+│   │           ├── blood.ts     # Aggregates all blood subject JSON files
+│   │           ├── central/central.json
+│   │           ├── anatomy/anatomy.json
+│   │           ├── physiology/physiology.json
+│   │           ├── histology/histology.json
+│   │           ├── biochemistry/biochemistry.json
+│   │           ├── pharmacology/pharmacology.json
+│   │           ├── pathology/pathology.json
+│   │           ├── parasitology/parasitology.json
+│   │           ├── microbiology/microbiology.json
+│   │           ├── clinical/clinical.json
+│   │           └── exams/exams.json
 │   ├── i18n/                    # Centralized bilingual dictionaries
 │   │   └── translations.ts      # Canonical Arabic & English key-value dictionaries
 │   ├── layouts/                 # Base page layouts

@@ -1,0 +1,461 @@
+[
+  {
+    "id": "bld-para-madbouly",
+    "title": "طفيليات الدم (5 ساعات) - د. نهى مدبولي",
+    "description": "شرح طفيليات الدم (الملاريا والليشمانيا والتريبانوسوما) في 5 ساعات للدكتورة نهى مدبولي.",
+    "url": "https://t.me/Blood_Module/2584",
+    "type": "telegram",
+    "category": "summaries",
+    "year": 2,
+    "moduleId": "year2-blood",
+    "subject": "Parasitology",
+    "author": "Dr. Noha Madbouly",
+    "addedBy": "M. Wael",
+    "tags": [
+      "parasitology",
+      "madbouly",
+      "نهى مدبولي",
+      "بارا"
+    ]
+  },
+  {
+    "id": "bld-para-tokhy",
+    "title": "طفيليات الدم (5.5 ساعات) - د. الطوخي",
+    "description": "شرح باراسيتولوجي موديول الدم في 5 ساعات ونصف للدكتور الطوخي.",
+    "url": "https://t.me/Blood_Module/2586",
+    "type": "telegram",
+    "category": "summaries",
+    "year": 2,
+    "moduleId": "year2-blood",
+    "subject": "Parasitology",
+    "author": "Dr. El-Tokhy",
+    "addedBy": "M. Wael",
+    "tags": [
+      "parasitology",
+      "tokhy",
+      "الطوخي",
+      "بارا"
+    ]
+  },
+  {
+    "id": "bld-para-habib",
+    "title": "طفيليات الدم - د. خالد حبيب",
+    "description": "قائمة تشغيل شروحات باراسيتولوجي الدم للدكتور خالد حبيب على يوتيوب.",
+    "url": "https://youtube.com/playlist?list=PLMnvpkQoftOI&si=um90GKLZ4QTh06wE",
+    "type": "playlist",
+    "category": "lectures",
+    "year": 2,
+    "moduleId": "year2-blood",
+    "subject": "Parasitology",
+    "author": "Dr. Khaled Habib",
+    "addedBy": "M. Wael",
+    "playlistId": "PLMnvpkQoftOI",
+    "videos": [
+      {
+        "id": "PLMnvpkQoftOI-1",
+        "title": "Parasitology Blood module part 1 malaria 1",
+        "youtubeId": "EUTaJsihEzw",
+        "url": "https://youtu.be/EUTaJsihEzw"
+      },
+      {
+        "id": "PLMnvpkQoftOI-2",
+        "title": "Parasitology Blood module Part 2 Malaria part 2",
+        "youtubeId": "guNHjwsUHrM",
+        "url": "https://youtu.be/guNHjwsUHrM"
+      },
+      {
+        "id": "PLMnvpkQoftOI-3",
+        "title": "Parasitology Blood module part 3 mosquitoes",
+        "youtubeId": "DwKYaB5NbKs",
+        "url": "https://youtu.be/DwKYaB5NbKs"
+      },
+      {
+        "id": "PLMnvpkQoftOI-4",
+        "title": "Parasitology Blood module part 4 Polymorphic trypansoma",
+        "youtubeId": "Iws3cK2QZ0E",
+        "url": "https://youtu.be/Iws3cK2QZ0E"
+      },
+      {
+        "id": "PLMnvpkQoftOI-5",
+        "title": "Parasitology blood module part 5  American Trypansoma",
+        "youtubeId": "akTMiYRl_EY",
+        "url": "https://youtu.be/akTMiYRl_EY"
+      },
+      {
+        "id": "PLMnvpkQoftOI-6",
+        "title": "Parasitologyt blood module part  6 Glossina & Triatoma megista",
+        "youtubeId": "rlmAEV96aM0",
+        "url": "https://youtu.be/rlmAEV96aM0"
+      },
+      {
+        "id": "PLMnvpkQoftOI-7",
+        "title": "Parasitology Blood module part 7  Visceral leishmania",
+        "youtubeId": "8NEBatYO4vo",
+        "url": "https://youtu.be/8NEBatYO4vo"
+      },
+      {
+        "id": "PLMnvpkQoftOI-8",
+        "title": "Parasitology Blood Module Part 8  Toxoplasma part 1",
+        "youtubeId": "JUUL-w7LRoQ",
+        "url": "https://youtu.be/JUUL-w7LRoQ"
+      },
+      {
+        "id": "PLMnvpkQoftOI-9",
+        "title": "Parasitology Blood module Part 9 Toxoplasma part 2",
+        "youtubeId": "hOz0ljC_8_o",
+        "url": "https://youtu.be/hOz0ljC_8_o"
+      },
+      {
+        "id": "PLMnvpkQoftOI-10",
+        "title": "Parasitology Blood module part 10   Wucheraria bancrofti",
+        "youtubeId": "-aA_jbb7C6w",
+        "url": "https://youtu.be/-aA_jbb7C6w"
+      }
+    ],
+    "tags": [
+      "parasitology",
+      "khaled habib",
+      "خالد حبيب",
+      "بارا",
+      "playlist"
+    ]
+  },
+  {
+    "id": "bld-para-ayman-ibrahim",
+    "title": "طفيليات الدم - د. أيمن إبراهيم",
+    "description": "قائمة تشغيل شرح طفيليات الدم للدكتور أيمن إبراهيم على يوتيوب.",
+    "url": "https://youtube.com/playlist?list=PL0_tN0panMs-zQRtyaMYxsIE9pXPwuTRy",
+    "type": "playlist",
+    "category": "lectures",
+    "year": 2,
+    "moduleId": "year2-blood",
+    "subject": "Parasitology",
+    "author": "Dr. Ayman Ibrahim",
+    "addedBy": "M. Wael",
+    "playlistId": "PL0_tN0panMs-zQRtyaMYxsIE9pXPwuTRy",
+    "videos": [
+      {
+        "id": "PL0_tN0panMs-zQRtyaMYxsIE9pXPwuTRy-1",
+        "title": "Parasitology Dr Ayman - Urogenital module - 1",
+        "youtubeId": "QZGK1ce963A",
+        "url": "https://youtu.be/QZGK1ce963A"
+      },
+      {
+        "id": "PL0_tN0panMs-zQRtyaMYxsIE9pXPwuTRy-2",
+        "title": "Parasitology Dr Ayman - Urogenital module - 2",
+        "youtubeId": "rnTA735X9g8",
+        "url": "https://youtu.be/rnTA735X9g8"
+      },
+      {
+        "id": "PL0_tN0panMs-zQRtyaMYxsIE9pXPwuTRy-3",
+        "title": "Parasitology Dr Ayman - GIT module - 1",
+        "youtubeId": "e7OeNyDsxZs",
+        "url": "https://youtu.be/e7OeNyDsxZs"
+      },
+      {
+        "id": "PL0_tN0panMs-zQRtyaMYxsIE9pXPwuTRy-4",
+        "title": "Parasitology Dr Ayman - GIT module - 2",
+        "youtubeId": "Ml_9uB0x2Hc",
+        "url": "https://youtu.be/Ml_9uB0x2Hc"
+      },
+      {
+        "id": "PL0_tN0panMs-zQRtyaMYxsIE9pXPwuTRy-5",
+        "title": "Parasitology Dr Ayman - GIT module - 3",
+        "youtubeId": "16wyg_xdfTQ",
+        "url": "https://youtu.be/16wyg_xdfTQ"
+      },
+      {
+        "id": "PL0_tN0panMs-zQRtyaMYxsIE9pXPwuTRy-6",
+        "title": "Parasitology Dr Ayman - GIT module - 4",
+        "youtubeId": "MsnmEkOmEf4",
+        "url": "https://youtu.be/MsnmEkOmEf4"
+      },
+      {
+        "id": "PL0_tN0panMs-zQRtyaMYxsIE9pXPwuTRy-7",
+        "title": "Parasitology Dr Ayman - GIT module - 5",
+        "youtubeId": "LU8R9X2-ocU",
+        "url": "https://youtu.be/LU8R9X2-ocU"
+      },
+      {
+        "id": "PL0_tN0panMs-zQRtyaMYxsIE9pXPwuTRy-8",
+        "title": "Parasitology Dr Ayman - GIT module - 6",
+        "youtubeId": "PpLsvYt-btU",
+        "url": "https://youtu.be/PpLsvYt-btU"
+      },
+      {
+        "id": "PL0_tN0panMs-zQRtyaMYxsIE9pXPwuTRy-9",
+        "title": "Parasitology Dr Ayman - GIT module - 7",
+        "youtubeId": "a9YXeeJAJvw",
+        "url": "https://youtu.be/a9YXeeJAJvw"
+      },
+      {
+        "id": "PL0_tN0panMs-zQRtyaMYxsIE9pXPwuTRy-10",
+        "title": "Parasitology Dr Ayman - GIT module - 8",
+        "youtubeId": "SHFn9xo-5Tc",
+        "url": "https://youtu.be/SHFn9xo-5Tc"
+      },
+      {
+        "id": "PL0_tN0panMs-zQRtyaMYxsIE9pXPwuTRy-11",
+        "title": "Parasitology Dr Ayman - GIT module - 9",
+        "youtubeId": "PhotMF81xro",
+        "url": "https://youtu.be/PhotMF81xro"
+      },
+      {
+        "id": "PL0_tN0panMs-zQRtyaMYxsIE9pXPwuTRy-12",
+        "title": "Parasitology Dr Ayman - GIT module - Community para",
+        "youtubeId": "wh1-L61K_yE",
+        "url": "https://youtu.be/wh1-L61K_yE"
+      },
+      {
+        "id": "PL0_tN0panMs-zQRtyaMYxsIE9pXPwuTRy-13",
+        "title": "Parasitology Dr Ayman - Blood module - 1",
+        "youtubeId": "XH7wdteVrZM",
+        "url": "https://youtu.be/XH7wdteVrZM"
+      },
+      {
+        "id": "PL0_tN0panMs-zQRtyaMYxsIE9pXPwuTRy-14",
+        "title": "Parasitology Dr Ayman - Blood module - 2",
+        "youtubeId": "BYR8dZjeRaw",
+        "url": "https://youtu.be/BYR8dZjeRaw"
+      },
+      {
+        "id": "PL0_tN0panMs-zQRtyaMYxsIE9pXPwuTRy-15",
+        "title": "Parasitology Dr Ayman - Blood module - 3",
+        "youtubeId": "-ODP2Y8Yv-4",
+        "url": "https://youtu.be/-ODP2Y8Yv-4"
+      },
+      {
+        "id": "PL0_tN0panMs-zQRtyaMYxsIE9pXPwuTRy-16",
+        "title": "Parasitology Dr Ayman - Blood module - 4",
+        "youtubeId": "zqXeq4gMa5w",
+        "url": "https://youtu.be/zqXeq4gMa5w"
+      },
+      {
+        "id": "PL0_tN0panMs-zQRtyaMYxsIE9pXPwuTRy-17",
+        "title": "Parasitology Dr Ayman - Blood module - 5",
+        "youtubeId": "5x3s3ThlRPk",
+        "url": "https://youtu.be/5x3s3ThlRPk"
+      },
+      {
+        "id": "PL0_tN0panMs-zQRtyaMYxsIE9pXPwuTRy-18",
+        "title": "Parasitology Dr Ayman - Blood module - 6",
+        "youtubeId": "sxtR0OS7MpU",
+        "url": "https://youtu.be/sxtR0OS7MpU"
+      },
+      {
+        "id": "PL0_tN0panMs-zQRtyaMYxsIE9pXPwuTRy-19",
+        "title": "Parasitology Dr Ayman - Blood module - practical",
+        "youtubeId": "6SGpZa2V9sg",
+        "url": "https://youtu.be/6SGpZa2V9sg"
+      },
+      {
+        "id": "PL0_tN0panMs-zQRtyaMYxsIE9pXPwuTRy-20",
+        "title": "Parasitology Dr Ayman - Infection module - 1",
+        "youtubeId": "tJ8OjySQuuQ",
+        "url": "https://youtu.be/tJ8OjySQuuQ"
+      },
+      {
+        "id": "PL0_tN0panMs-zQRtyaMYxsIE9pXPwuTRy-21",
+        "title": "Parasitology Dr Ayman - Infection module - 2",
+        "youtubeId": "IeF_0p6c99M",
+        "url": "https://youtu.be/IeF_0p6c99M"
+      },
+      {
+        "id": "PL0_tN0panMs-zQRtyaMYxsIE9pXPwuTRy-22",
+        "title": "Parasitology Dr Ayman - Infection module - 3",
+        "youtubeId": "sGZw18Vgb3g",
+        "url": "https://youtu.be/sGZw18Vgb3g"
+      },
+      {
+        "id": "PL0_tN0panMs-zQRtyaMYxsIE9pXPwuTRy-23",
+        "title": "Parasitology Dr Ayman - Infection module - 4",
+        "youtubeId": "_VcD9htsJ1U",
+        "url": "https://youtu.be/_VcD9htsJ1U"
+      },
+      {
+        "id": "PL0_tN0panMs-zQRtyaMYxsIE9pXPwuTRy-24",
+        "title": "Parasitology Dr Ayman - Infection module - 5 Management",
+        "youtubeId": "h3SP2gullNw",
+        "url": "https://youtu.be/h3SP2gullNw"
+      },
+      {
+        "id": "PL0_tN0panMs-zQRtyaMYxsIE9pXPwuTRy-25",
+        "title": "Parasitology Dr Ayman - Respiratory module  - Paragonimus westermani",
+        "youtubeId": "VrV4AoR-yHs",
+        "url": "https://youtu.be/VrV4AoR-yHs"
+      },
+      {
+        "id": "PL0_tN0panMs-zQRtyaMYxsIE9pXPwuTRy-26",
+        "title": "Parasitology Dr Ayman - CNS module",
+        "youtubeId": "fnfBJ6jrqiM",
+        "url": "https://youtu.be/fnfBJ6jrqiM"
+      }
+    ],
+    "tags": [
+      "parasitology",
+      "ayman ibrahim",
+      "أيمن إبراهيم",
+      "بارا",
+      "playlist"
+    ]
+  },
+  {
+    "id": "bld-para-ayman-blood-2022",
+    "title": "طفيليات الدم - د. أيمن (Dr. Ayman)",
+    "description": "قائمة تشغيل شرح طفيليات موديول الدم للدكتور أيمن متضمنة الشرح النظري والعملي.",
+    "url": "https://youtube.com/playlist?list=PLlzicty9XavE4msPbtPKy_wAml3A5jPyv",
+    "type": "playlist",
+    "category": "lectures",
+    "year": 2,
+    "moduleId": "year2-blood",
+    "subject": "Parasitology",
+    "author": "Dr. Ayman",
+    "addedBy": "Mohamed Waleed",
+    "playlistId": "PLlzicty9XavE4msPbtPKy_wAml3A5jPyv",
+    "videos": [
+      {
+        "id": "PLlzicty9XavE4msPbtPKy_wAml3A5jPyv-1",
+        "title": "Parasitology Dr Ayman - Blood module - 1",
+        "youtubeId": "XH7wdteVrZM",
+        "url": "https://youtu.be/XH7wdteVrZM"
+      },
+      {
+        "id": "PLlzicty9XavE4msPbtPKy_wAml3A5jPyv-2",
+        "title": "Parasitology Dr Ayman - Blood module - 2",
+        "youtubeId": "BYR8dZjeRaw",
+        "url": "https://youtu.be/BYR8dZjeRaw"
+      },
+      {
+        "id": "PLlzicty9XavE4msPbtPKy_wAml3A5jPyv-3",
+        "title": "Parasitology Dr Ayman - Blood module - 3",
+        "youtubeId": "-ODP2Y8Yv-4",
+        "url": "https://youtu.be/-ODP2Y8Yv-4"
+      },
+      {
+        "id": "PLlzicty9XavE4msPbtPKy_wAml3A5jPyv-4",
+        "title": "Parasitology Dr Ayman - Blood module - 4",
+        "youtubeId": "zqXeq4gMa5w",
+        "url": "https://youtu.be/zqXeq4gMa5w"
+      },
+      {
+        "id": "PLlzicty9XavE4msPbtPKy_wAml3A5jPyv-5",
+        "title": "Parasitology Dr Ayman - Blood module - 5",
+        "youtubeId": "5x3s3ThlRPk",
+        "url": "https://youtu.be/5x3s3ThlRPk"
+      },
+      {
+        "id": "PLlzicty9XavE4msPbtPKy_wAml3A5jPyv-6",
+        "title": "Parasitology Dr Ayman - Blood module - 6",
+        "youtubeId": "sxtR0OS7MpU",
+        "url": "https://youtu.be/sxtR0OS7MpU"
+      },
+      {
+        "id": "PLlzicty9XavE4msPbtPKy_wAml3A5jPyv-7",
+        "title": "Parasitology Dr Ayman - Blood module - practical",
+        "youtubeId": "6SGpZa2V9sg",
+        "url": "https://youtu.be/6SGpZa2V9sg"
+      }
+    ],
+    "tags": [
+      "parasitology",
+      "ayman",
+      "أيمن",
+      "باراسيتولوجي",
+      "بارا",
+      "playlist"
+    ]
+  },
+  {
+    "id": "bld-para-noha-madbouly-playlist",
+    "title": "طفيليات الدم - د. نهى مدبولي (Dr. Noha Madbouly)",
+    "description": "شرح طفيليات موديول الدم للدكتورة نهى مدبولي (داء الفيل، الليشمانيا، التريبانوسوما، الملاريا، والمقوسات).",
+    "url": "https://youtube.com/playlist?list=PLimtggDmQRQs5G8UgXr3B5r9sDEfsuHi4",
+    "type": "playlist",
+    "category": "lectures",
+    "year": 2,
+    "moduleId": "year2-blood",
+    "subject": "Parasitology",
+    "author": "Dr. Noha Madbouly",
+    "addedBy": "Mohamed Waleed",
+    "playlistId": "PLimtggDmQRQs5G8UgXr3B5r9sDEfsuHi4",
+    "videos": [
+      {
+        "id": "PLimtggDmQRQs5G8UgXr3B5r9sDEfsuHi4-1",
+        "title": "Lymphatic filariasis (Elephantiasis) داء الفيل",
+        "youtubeId": "tXPJynLvYmw",
+        "url": "https://youtu.be/tXPJynLvYmw"
+      },
+      {
+        "id": "PLimtggDmQRQs5G8UgXr3B5r9sDEfsuHi4-2",
+        "title": "Tropical Pulmonary Eosinophilia حساسية الصدر",
+        "youtubeId": "tLYPriJ_yRA",
+        "url": "https://youtu.be/tLYPriJ_yRA"
+      },
+      {
+        "id": "PLimtggDmQRQs5G8UgXr3B5r9sDEfsuHi4-3",
+        "title": "Introduction to Haemoflagellates & Visceral leishmaniasis الليشمانيا الحشوية",
+        "youtubeId": "mijhankYLuA",
+        "url": "https://youtu.be/mijhankYLuA"
+      },
+      {
+        "id": "PLimtggDmQRQs5G8UgXr3B5r9sDEfsuHi4-4",
+        "title": "Human African Trypanosomiasis (HAT) مرض النوم",
+        "youtubeId": "38htcuV0bHw",
+        "url": "https://youtu.be/38htcuV0bHw"
+      },
+      {
+        "id": "PLimtggDmQRQs5G8UgXr3B5r9sDEfsuHi4-5",
+        "title": "American trypanosomiasis (Chagas disease) داء المثقبيات الأمريكي",
+        "youtubeId": "DQ3rF17fjms",
+        "url": "https://youtu.be/DQ3rF17fjms"
+      },
+      {
+        "id": "PLimtggDmQRQs5G8UgXr3B5r9sDEfsuHi4-6",
+        "title": "Malaria & Babesia الملاريا والبابيسيا",
+        "youtubeId": "4eKwQ1XknoY",
+        "url": "https://youtu.be/4eKwQ1XknoY"
+      },
+      {
+        "id": "PLimtggDmQRQs5G8UgXr3B5r9sDEfsuHi4-7",
+        "title": "Toxoplasma gondii داء المقوسات / التوكسوبلازما",
+        "youtubeId": "vzDnD7Bh5Lg",
+        "url": "https://youtu.be/vzDnD7Bh5Lg"
+      },
+      {
+        "id": "PLimtggDmQRQs5G8UgXr3B5r9sDEfsuHi4-8",
+        "title": "Immunoparasitology المناعة ضد الطفيليات",
+        "youtubeId": "SX89LixdM90",
+        "url": "https://youtu.be/SX89LixdM90"
+      }
+    ],
+    "tags": [
+      "parasitology",
+      "madbouly",
+      "نهى مدبولي",
+      "باراسيتولوجي",
+      "بارا",
+      "playlist"
+    ]
+  },
+  {
+    "id": "bld-para-college-recordings-dropbox",
+    "title": "تسجيلات الكلية النظرية - طفيليات الدم (Parasitology Dropbox)",
+    "description": "مجلد دروب بوكس يحتوي على التسجيلات الصوتية الرسمية لمحاضرات طفيليات موديول الدم من الكلية.",
+    "url": "https://www.dropbox.com/sh/ckiuoib17zvjojm/AAAKlkWnOKCrhn_FZLemZl9ba/Semester%201/Blood%20%26%20Lymphatic%20System/Links/Theoretical/Parasitology?dl=0&subfolder_nav_tracking=1",
+    "type": "drive",
+    "category": "lectures",
+    "year": 2,
+    "moduleId": "year2-blood",
+    "subject": "Parasitology",
+    "author": "ASU Med Faculty",
+    "addedBy": "Mohamed Waleed",
+    "tags": [
+      "parasitology",
+      "dropbox",
+      "recordings",
+      "باراسيتولوجي",
+      "تسجيلات",
+      "الكلية"
+    ]
+  }
+]

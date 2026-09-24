@@ -1,0 +1,931 @@
+[
+  {
+    "id": "bld-biochem-esawi",
+    "title": "كيمياء حيوية الدم - د. عيسوي (Dr. Esawi)",
+    "description": "شرح كيمياء الهيموجلوبين، البورفيريا، والأيض للدكتور عيسوي.",
+    "url": "https://www.youtube.com/playlist?list=PLw03kzQQoHv0zzA3VmasZYxxGhYzfFIpx",
+    "type": "playlist",
+    "category": "lectures",
+    "year": 2,
+    "moduleId": "year2-blood",
+    "subject": "Biochemistry",
+    "author": "Dr. Esawi",
+    "addedBy": "M. Wael",
+    "playlistId": "PLw03kzQQoHv0zzA3VmasZYxxGhYzfFIpx",
+    "videos": [
+      {
+        "id": "PLw03kzQQoHv0zzA3VmasZYxxGhYzfFIpx-1",
+        "title": "Blood Biochemistry - Hemoglobin Structure and function",
+        "youtubeId": "no3bts_89HU",
+        "url": "https://youtu.be/no3bts_89HU"
+      },
+      {
+        "id": "PLw03kzQQoHv0zzA3VmasZYxxGhYzfFIpx-2",
+        "title": "Blood Biochemistry - Heme Metabolism",
+        "youtubeId": "4i_gXOJ9iRE",
+        "url": "https://youtu.be/4i_gXOJ9iRE"
+      },
+      {
+        "id": "PLw03kzQQoHv0zzA3VmasZYxxGhYzfFIpx-3",
+        "title": "Blood Biochemistry - Hemoglobinopathies & Hemoglobin Electrophoresis",
+        "youtubeId": "6WlLk2dz_Y8",
+        "url": "https://youtu.be/6WlLk2dz_Y8"
+      },
+      {
+        "id": "PLw03kzQQoHv0zzA3VmasZYxxGhYzfFIpx-4",
+        "title": "Blood Biochemistry - Iron Metabolism and Etiology of Iron Deficiency Anemia",
+        "youtubeId": "7jHm3HFG8cc",
+        "url": "https://youtu.be/7jHm3HFG8cc"
+      },
+      {
+        "id": "PLw03kzQQoHv0zzA3VmasZYxxGhYzfFIpx-5",
+        "title": "Blood Biochemistry - Glycolysis & 2,3-BPG",
+        "youtubeId": "APpvrF9-AFI",
+        "url": "https://youtu.be/APpvrF9-AFI"
+      },
+      {
+        "id": "PLw03kzQQoHv0zzA3VmasZYxxGhYzfFIpx-6",
+        "title": "Blood Biochemistry - Iron Deficiency Anemia vs. Iron Overload",
+        "youtubeId": "jZkQUTOBCH8",
+        "url": "https://youtu.be/jZkQUTOBCH8"
+      },
+      {
+        "id": "PLw03kzQQoHv0zzA3VmasZYxxGhYzfFIpx-7",
+        "title": "Blood Biochemistry - Folate and Vitamin B12 Metabolism",
+        "youtubeId": "J20n9LIE0Ro",
+        "url": "https://youtu.be/J20n9LIE0Ro"
+      },
+      {
+        "id": "PLw03kzQQoHv0zzA3VmasZYxxGhYzfFIpx-8",
+        "title": "Blood Biochemistry - Hexose Monophosphate (HMP) Shunt",
+        "youtubeId": "ai874XziLpo",
+        "url": "https://youtu.be/ai874XziLpo"
+      },
+      {
+        "id": "PLw03kzQQoHv0zzA3VmasZYxxGhYzfFIpx-9",
+        "title": "Blood Biochemistry - WBCs Metabolism",
+        "youtubeId": "MM35sMF_zw4",
+        "url": "https://youtu.be/MM35sMF_zw4"
+      },
+      {
+        "id": "PLw03kzQQoHv0zzA3VmasZYxxGhYzfFIpx-10",
+        "title": "Hemolytic Anemia",
+        "youtubeId": "XFcidr09mwI",
+        "url": "https://youtu.be/XFcidr09mwI"
+      }
+    ],
+    "tags": [
+      "biochemistry",
+      "esawi",
+      "عيسوي",
+      "بايوكيمستري",
+      "playlist"
+    ]
+  },
+  {
+    "id": "bld-biochem-ayman",
+    "title": "كيمياء حيوية الدم - د. أيمن (Dr. Ayman)",
+    "description": "شرح موديول بايوكيمستري الدم للدكتور أيمن.",
+    "url": "https://youtube.com/playlist?list=PLmjIY3SPvf2nea96csM-ni6mkdjwQ0g0C",
+    "type": "playlist",
+    "category": "lectures",
+    "year": 2,
+    "moduleId": "year2-blood",
+    "subject": "Biochemistry",
+    "author": "Dr. Ayman",
+    "addedBy": "M. Wael",
+    "playlistId": "PLmjIY3SPvf2nea96csM-ni6mkdjwQ0g0C",
+    "videos": [
+      {
+        "id": "PLmjIY3SPvf2nea96csM-ni6mkdjwQ0g0C-1",
+        "title": "Dr Ayman Beshir - Integration Of Metabolism 1",
+        "youtubeId": "F4jQnbN6ovw",
+        "url": "https://youtu.be/F4jQnbN6ovw"
+      },
+      {
+        "id": "PLmjIY3SPvf2nea96csM-ni6mkdjwQ0g0C-2",
+        "title": "Dr Ayman Beshir - Integration Of Metabolism 2",
+        "youtubeId": "F6mrQwZod44",
+        "url": "https://youtu.be/F6mrQwZod44"
+      },
+      {
+        "id": "PLmjIY3SPvf2nea96csM-ni6mkdjwQ0g0C-3",
+        "title": "Dr Ayman Beshir - Diabetes Mellitus",
+        "youtubeId": "PDnp9u9QqY0",
+        "url": "https://youtu.be/PDnp9u9QqY0"
+      },
+      {
+        "id": "PLmjIY3SPvf2nea96csM-ni6mkdjwQ0g0C-4",
+        "title": "Dr Ayman Beshir - Complications Of Diabetes",
+        "youtubeId": "q_rw99gl24U",
+        "url": "https://youtu.be/q_rw99gl24U"
+      },
+      {
+        "id": "PLmjIY3SPvf2nea96csM-ni6mkdjwQ0g0C-5",
+        "title": "Dr Ayman Beshir - Calcium Regulation",
+        "youtubeId": "AZujOSdy_cw",
+        "url": "https://youtu.be/AZujOSdy_cw"
+      },
+      {
+        "id": "PLmjIY3SPvf2nea96csM-ni6mkdjwQ0g0C-6",
+        "title": "Dr Ayman Beshir - Amino Acid Catabolism",
+        "youtubeId": "I-DM4AEZL8Q",
+        "url": "https://youtu.be/I-DM4AEZL8Q"
+      },
+      {
+        "id": "PLmjIY3SPvf2nea96csM-ni6mkdjwQ0g0C-7",
+        "title": "Dr Ayman Beshir - Amino Acid Catabolism 2",
+        "youtubeId": "v6ijrqmiZt4",
+        "url": "https://youtu.be/v6ijrqmiZt4"
+      },
+      {
+        "id": "PLmjIY3SPvf2nea96csM-ni6mkdjwQ0g0C-8",
+        "title": "Dr Ayman Beshir - Branched AAs Catabolism + Derivatives Of AAs",
+        "youtubeId": "AhFU4xE5C34",
+        "url": "https://youtu.be/AhFU4xE5C34"
+      },
+      {
+        "id": "PLmjIY3SPvf2nea96csM-ni6mkdjwQ0g0C-9",
+        "title": "Dr Ayman Beshir - Third Block Revision",
+        "youtubeId": "brQbVMoDadY",
+        "url": "https://youtu.be/brQbVMoDadY"
+      },
+      {
+        "id": "PLmjIY3SPvf2nea96csM-ni6mkdjwQ0g0C-10",
+        "title": "Dr Ayman Beshir - Digestion Of Lipids",
+        "youtubeId": "Pbs3use2K9A",
+        "url": "https://youtu.be/Pbs3use2K9A"
+      },
+      {
+        "id": "PLmjIY3SPvf2nea96csM-ni6mkdjwQ0g0C-11",
+        "title": "Dr Ayman Beshir - Transport Of Lipids In Blood 1",
+        "youtubeId": "e5rna_twXPk",
+        "url": "https://youtu.be/e5rna_twXPk"
+      },
+      {
+        "id": "PLmjIY3SPvf2nea96csM-ni6mkdjwQ0g0C-12",
+        "title": "Dr Ayman Beshir - Transport Of Lipids In Blood 2",
+        "youtubeId": "p4pkcr9j-Fc",
+        "url": "https://youtu.be/p4pkcr9j-Fc"
+      },
+      {
+        "id": "PLmjIY3SPvf2nea96csM-ni6mkdjwQ0g0C-13",
+        "title": "Dr Ayman Beshir - Transport Of Lipids In Blood 3",
+        "youtubeId": "77niIiPS88Y",
+        "url": "https://youtu.be/77niIiPS88Y"
+      },
+      {
+        "id": "PLmjIY3SPvf2nea96csM-ni6mkdjwQ0g0C-14",
+        "title": "Dr Ayman Beshir - Primary Hyperlipoproteinemia, Hypolipoproteinemia & Fatty Liver",
+        "youtubeId": "kuZyVbXnO4Y",
+        "url": "https://youtu.be/kuZyVbXnO4Y"
+      },
+      {
+        "id": "PLmjIY3SPvf2nea96csM-ni6mkdjwQ0g0C-15",
+        "title": "Dr Ayman Beshir - Cholesterol Metabolism",
+        "youtubeId": "husGRHrR-s0",
+        "url": "https://youtu.be/husGRHrR-s0"
+      },
+      {
+        "id": "PLmjIY3SPvf2nea96csM-ni6mkdjwQ0g0C-16",
+        "title": "Dr Ayman Beshir - CHO & Protein Digestion",
+        "youtubeId": "1Man_UKTRyo",
+        "url": "https://youtu.be/1Man_UKTRyo"
+      },
+      {
+        "id": "PLmjIY3SPvf2nea96csM-ni6mkdjwQ0g0C-17",
+        "title": "Dr Ayman Beshir - HDL Metabolism",
+        "youtubeId": "cNnOgEKhcmQ",
+        "url": "https://youtu.be/cNnOgEKhcmQ"
+      },
+      {
+        "id": "PLmjIY3SPvf2nea96csM-ni6mkdjwQ0g0C-18",
+        "title": "Dr Ayman Beshir - Heme Metabolism 1",
+        "youtubeId": "7VSEM2tNxqQ",
+        "url": "https://youtu.be/7VSEM2tNxqQ"
+      },
+      {
+        "id": "PLmjIY3SPvf2nea96csM-ni6mkdjwQ0g0C-19",
+        "title": "Dr Ayman Beshir - Heme Metabolism 2",
+        "youtubeId": "M2qvLANyHrg",
+        "url": "https://youtu.be/M2qvLANyHrg"
+      },
+      {
+        "id": "PLmjIY3SPvf2nea96csM-ni6mkdjwQ0g0C-20",
+        "title": "Dr Ayman Beshir - Heme Metabolism 3 , Iron Metabolism 1",
+        "youtubeId": "oxUE7gA_C74",
+        "url": "https://youtu.be/oxUE7gA_C74"
+      },
+      {
+        "id": "PLmjIY3SPvf2nea96csM-ni6mkdjwQ0g0C-21",
+        "title": "Dr Ayman Beshir - Practical Revision 1",
+        "youtubeId": "5wHA50N37CA",
+        "url": "https://youtu.be/5wHA50N37CA"
+      },
+      {
+        "id": "PLmjIY3SPvf2nea96csM-ni6mkdjwQ0g0C-22",
+        "title": "Dr Ayman Beshir - Iron Metabolism 2",
+        "youtubeId": "XIZODjoKF0E",
+        "url": "https://youtu.be/XIZODjoKF0E"
+      },
+      {
+        "id": "PLmjIY3SPvf2nea96csM-ni6mkdjwQ0g0C-23",
+        "title": "Dr Ayman Beshir - Glucuronic Acid Pathway, Metabolism Of Xenobiotics 1",
+        "youtubeId": "p7_WRaLR_TE",
+        "url": "https://youtu.be/p7_WRaLR_TE"
+      },
+      {
+        "id": "PLmjIY3SPvf2nea96csM-ni6mkdjwQ0g0C-24",
+        "title": "Dr Ayman Beshir - Metabolism Of Xenobiotics 2 , Nutrition 1",
+        "youtubeId": "So57NGT5iHg",
+        "url": "https://youtu.be/So57NGT5iHg"
+      },
+      {
+        "id": "PLmjIY3SPvf2nea96csM-ni6mkdjwQ0g0C-25",
+        "title": "Dr Ayman Beshir - Nutrition 2 & Obesity",
+        "youtubeId": "cDm8N1dpxMM",
+        "url": "https://youtu.be/cDm8N1dpxMM"
+      },
+      {
+        "id": "PLmjIY3SPvf2nea96csM-ni6mkdjwQ0g0C-26",
+        "title": "Dr Ayman Beshir - One Carbon Units Metabolism & Folic Acid 1",
+        "youtubeId": "MFoIkK05tJk",
+        "url": "https://youtu.be/MFoIkK05tJk"
+      },
+      {
+        "id": "PLmjIY3SPvf2nea96csM-ni6mkdjwQ0g0C-27",
+        "title": "Dr Ayman Beshir - Folic acid 2 , Vit B12 & Vit C",
+        "youtubeId": "UfIdhiYM-jc",
+        "url": "https://youtu.be/UfIdhiYM-jc"
+      },
+      {
+        "id": "PLmjIY3SPvf2nea96csM-ni6mkdjwQ0g0C-28",
+        "title": "Dr Ayman Beshir - The Rest Of The Vitamins",
+        "youtubeId": "VEZqr3tCp0M",
+        "url": "https://youtu.be/VEZqr3tCp0M"
+      },
+      {
+        "id": "PLmjIY3SPvf2nea96csM-ni6mkdjwQ0g0C-29",
+        "title": "Dr Ayman Beshir - Minerals & Free Radicals",
+        "youtubeId": "0c3eHrdjwYU",
+        "url": "https://youtu.be/0c3eHrdjwYU"
+      },
+      {
+        "id": "PLmjIY3SPvf2nea96csM-ni6mkdjwQ0g0C-30",
+        "title": "Dr Ayman Beshir - CHO Revision 1",
+        "youtubeId": "1LGGl4EuWjQ",
+        "url": "https://youtu.be/1LGGl4EuWjQ"
+      },
+      {
+        "id": "PLmjIY3SPvf2nea96csM-ni6mkdjwQ0g0C-31",
+        "title": "Dr Ayman Beshir - CHO Revision 2",
+        "youtubeId": "Eye6_zmY-4A",
+        "url": "https://youtu.be/Eye6_zmY-4A"
+      },
+      {
+        "id": "PLmjIY3SPvf2nea96csM-ni6mkdjwQ0g0C-32",
+        "title": "Dr Ayman Beshir - CHO Revision 3 + AAs Revision 1",
+        "youtubeId": "lFIPkzug03o",
+        "url": "https://youtu.be/lFIPkzug03o"
+      },
+      {
+        "id": "PLmjIY3SPvf2nea96csM-ni6mkdjwQ0g0C-33",
+        "title": "Dr Ayman Beshir - Steroid Hormones Synthesis +  AAs Revision 2",
+        "youtubeId": "7dvvejX-xlY",
+        "url": "https://youtu.be/7dvvejX-xlY"
+      },
+      {
+        "id": "PLmjIY3SPvf2nea96csM-ni6mkdjwQ0g0C-34",
+        "title": "Dr Ayman Beshir - AAs Revision 3",
+        "youtubeId": "cSLj0ezndSI",
+        "url": "https://youtu.be/cSLj0ezndSI"
+      },
+      {
+        "id": "PLmjIY3SPvf2nea96csM-ni6mkdjwQ0g0C-35",
+        "title": "Dr Ayman Beshir - Lipids Revision 1",
+        "youtubeId": "xdOmQTFJv2U",
+        "url": "https://youtu.be/xdOmQTFJv2U"
+      },
+      {
+        "id": "PLmjIY3SPvf2nea96csM-ni6mkdjwQ0g0C-36",
+        "title": "Dr Ayman Beshir - Lipids Revision 2",
+        "youtubeId": "k6MEKLKg8Rc",
+        "url": "https://youtu.be/k6MEKLKg8Rc"
+      },
+      {
+        "id": "PLmjIY3SPvf2nea96csM-ni6mkdjwQ0g0C-37",
+        "title": "Dr Ayman Beshir - Lipids Revision 3",
+        "youtubeId": "j43z08BcuGM",
+        "url": "https://youtu.be/j43z08BcuGM"
+      },
+      {
+        "id": "PLmjIY3SPvf2nea96csM-ni6mkdjwQ0g0C-38",
+        "title": "1 Electron Transport chain",
+        "youtubeId": "qe5kILJWQOo",
+        "url": "https://youtu.be/qe5kILJWQOo"
+      },
+      {
+        "id": "PLmjIY3SPvf2nea96csM-ni6mkdjwQ0g0C-39",
+        "title": "2 ETC&Inhibtors",
+        "youtubeId": "Vc0IptG0XqU",
+        "url": "https://youtu.be/Vc0IptG0XqU"
+      },
+      {
+        "id": "PLmjIY3SPvf2nea96csM-ni6mkdjwQ0g0C-40",
+        "title": "3 Bioenergetics",
+        "youtubeId": "NKTs_fpK7oo",
+        "url": "https://youtu.be/NKTs_fpK7oo"
+      },
+      {
+        "id": "PLmjIY3SPvf2nea96csM-ni6mkdjwQ0g0C-41",
+        "title": "1 Fasting,Well-Fed,Excercise",
+        "youtubeId": "U-zbKb6vcIc",
+        "url": "https://youtu.be/U-zbKb6vcIc"
+      }
+    ],
+    "tags": [
+      "biochemistry",
+      "ayman",
+      "أيمن",
+      "بايوكيمستري",
+      "playlist"
+    ]
+  },
+  {
+    "id": "bld-biochem-ayman-blood",
+    "title": "كيمياء حيوية الدم - د. أيمن بشير (Dr. Ayman Beshir)",
+    "description": "شرح بايوكيمستري موديول الدم كامل للدكتور أيمن بشير في قائمة تشغيل يوتيوب.",
+    "url": "https://youtube.com/playlist?list=PLbnG-DdT79tNd8rb_hsS_X6oq9uJTlwHC",
+    "type": "playlist",
+    "category": "lectures",
+    "year": 2,
+    "moduleId": "year2-blood",
+    "subject": "Biochemistry",
+    "author": "Dr. Ayman Beshir",
+    "addedBy": "Mohamed Waleed",
+    "playlistId": "PLbnG-DdT79tNd8rb_hsS_X6oq9uJTlwHC",
+    "videos": [
+      {
+        "id": "PLbnG-DdT79tNd8rb_hsS_X6oq9uJTlwHC-1",
+        "title": "سنة ثانية blood heme",
+        "youtubeId": "zKCGdxnV94c",
+        "url": "https://youtu.be/zKCGdxnV94c"
+      },
+      {
+        "id": "PLbnG-DdT79tNd8rb_hsS_X6oq9uJTlwHC-2",
+        "title": "سنة ثانية globin structure",
+        "youtubeId": "Gapw5R8EWEk",
+        "url": "https://youtu.be/Gapw5R8EWEk"
+      },
+      {
+        "id": "PLbnG-DdT79tNd8rb_hsS_X6oq9uJTlwHC-3",
+        "title": "سنة ثانية Hb function",
+        "youtubeId": "hwsf24XII0I",
+        "url": "https://youtu.be/hwsf24XII0I"
+      },
+      {
+        "id": "PLbnG-DdT79tNd8rb_hsS_X6oq9uJTlwHC-4",
+        "title": "O2 binding curve",
+        "youtubeId": "DvnsBix5fcg",
+        "url": "https://youtu.be/DvnsBix5fcg"
+      },
+      {
+        "id": "PLbnG-DdT79tNd8rb_hsS_X6oq9uJTlwHC-5",
+        "title": "سنة ثانية heme synthesis",
+        "youtubeId": "ZaDefZ51W9M",
+        "url": "https://youtu.be/ZaDefZ51W9M"
+      },
+      {
+        "id": "PLbnG-DdT79tNd8rb_hsS_X6oq9uJTlwHC-6",
+        "title": "سنة ثانية regulation of heme synthesis",
+        "youtubeId": "hoSDF0H2Rs8",
+        "url": "https://youtu.be/hoSDF0H2Rs8"
+      },
+      {
+        "id": "PLbnG-DdT79tNd8rb_hsS_X6oq9uJTlwHC-7",
+        "title": "porpheria 1",
+        "youtubeId": "hcmvLWe2WQs",
+        "url": "https://youtu.be/hcmvLWe2WQs"
+      },
+      {
+        "id": "PLbnG-DdT79tNd8rb_hsS_X6oq9uJTlwHC-8",
+        "title": "porpheria 2",
+        "youtubeId": "DZKGG03jYJ0",
+        "url": "https://youtu.be/DZKGG03jYJ0"
+      },
+      {
+        "id": "PLbnG-DdT79tNd8rb_hsS_X6oq9uJTlwHC-9",
+        "title": "سنة ثانية hemoglobinopathies 1",
+        "youtubeId": "DS9q5E04JG4",
+        "url": "https://youtu.be/DS9q5E04JG4"
+      },
+      {
+        "id": "PLbnG-DdT79tNd8rb_hsS_X6oq9uJTlwHC-10",
+        "title": "سنة ثانية hemoglobinopathies 2",
+        "youtubeId": "1-qp6F26o_g",
+        "url": "https://youtu.be/1-qp6F26o_g"
+      },
+      {
+        "id": "PLbnG-DdT79tNd8rb_hsS_X6oq9uJTlwHC-11",
+        "title": "سنة ثانية molecular biology of globin",
+        "youtubeId": "elCPAy6J4qY",
+        "url": "https://youtu.be/elCPAy6J4qY"
+      },
+      {
+        "id": "PLbnG-DdT79tNd8rb_hsS_X6oq9uJTlwHC-12",
+        "title": "سنة ثانية iron",
+        "youtubeId": "deADD0iO028",
+        "url": "https://youtu.be/deADD0iO028"
+      },
+      {
+        "id": "PLbnG-DdT79tNd8rb_hsS_X6oq9uJTlwHC-13",
+        "title": "سنة ثانية iron 2",
+        "youtubeId": "JYToBqM3T98",
+        "url": "https://youtu.be/JYToBqM3T98"
+      },
+      {
+        "id": "PLbnG-DdT79tNd8rb_hsS_X6oq9uJTlwHC-14",
+        "title": "iron 3",
+        "youtubeId": "e9qk6dxAm6U",
+        "url": "https://youtu.be/e9qk6dxAm6U"
+      },
+      {
+        "id": "PLbnG-DdT79tNd8rb_hsS_X6oq9uJTlwHC-15",
+        "title": "سنة ثانية folic acid",
+        "youtubeId": "UCmSLYc1pf4",
+        "url": "https://youtu.be/UCmSLYc1pf4"
+      },
+      {
+        "id": "PLbnG-DdT79tNd8rb_hsS_X6oq9uJTlwHC-16",
+        "title": "سنة ثانية correction in iron metabolism",
+        "youtubeId": "D-Z_0xa18eI",
+        "url": "https://youtu.be/D-Z_0xa18eI"
+      },
+      {
+        "id": "PLbnG-DdT79tNd8rb_hsS_X6oq9uJTlwHC-17",
+        "title": "سنة ثانية B12",
+        "youtubeId": "w7Kc1-CAuRw",
+        "url": "https://youtu.be/w7Kc1-CAuRw"
+      },
+      {
+        "id": "PLbnG-DdT79tNd8rb_hsS_X6oq9uJTlwHC-18",
+        "title": "سنة ثانية metabolism of RBCs 1",
+        "youtubeId": "v9NEOZQvh1M",
+        "url": "https://youtu.be/v9NEOZQvh1M"
+      },
+      {
+        "id": "PLbnG-DdT79tNd8rb_hsS_X6oq9uJTlwHC-19",
+        "title": "سنة ثانية metabolism of RBCs 2",
+        "youtubeId": "W8yPAhRsqA0",
+        "url": "https://youtu.be/W8yPAhRsqA0"
+      },
+      {
+        "id": "PLbnG-DdT79tNd8rb_hsS_X6oq9uJTlwHC-20",
+        "title": "سنة ثانية HMP pathway metabolism of RBCs",
+        "youtubeId": "fM7zSWuWd3M",
+        "url": "https://youtu.be/fM7zSWuWd3M"
+      },
+      {
+        "id": "PLbnG-DdT79tNd8rb_hsS_X6oq9uJTlwHC-21",
+        "title": "سنة ثانية HMP pathway 2",
+        "youtubeId": "7M9vRIvKffg",
+        "url": "https://youtu.be/7M9vRIvKffg"
+      },
+      {
+        "id": "PLbnG-DdT79tNd8rb_hsS_X6oq9uJTlwHC-22",
+        "title": "WBCs metabolism",
+        "youtubeId": "bzXLZGUjNnM",
+        "url": "https://youtu.be/bzXLZGUjNnM"
+      },
+      {
+        "id": "PLbnG-DdT79tNd8rb_hsS_X6oq9uJTlwHC-23",
+        "title": "سنة ثانية blood module free radicals",
+        "youtubeId": "JuGa34pDfxw",
+        "url": "https://youtu.be/JuGa34pDfxw"
+      }
+    ],
+    "tags": [
+      "biochemistry",
+      "ayman beshir",
+      "أيمن بشير",
+      "بايوكيمستري",
+      "playlist",
+      "blood"
+    ]
+  },
+  {
+    "id": "bld-biochem-walaa-1",
+    "title": "كيمياء حيوية الدم - د. ولاء (الجزء الأول)",
+    "description": "قائمة تشغيل شرح كيمياء حيوية الدم للدكتورة ولاء - الجزء الأول.",
+    "url": "https://www.youtube.com/playlist?list=PLXd13HOsAnZy_t0jdd-D6ewRMVSNtalVo",
+    "type": "playlist",
+    "category": "lectures",
+    "year": 2,
+    "moduleId": "year2-blood",
+    "subject": "Biochemistry",
+    "author": "Dr. Walaa",
+    "addedBy": "M. Wael",
+    "playlistId": "PLXd13HOsAnZy_t0jdd-D6ewRMVSNtalVo",
+    "videos": [
+      {
+        "id": "PLXd13HOsAnZy_t0jdd-D6ewRMVSNtalVo-1",
+        "title": "Heme Metaboilsm ( session1)",
+        "youtubeId": "JJ7dPxeq9R8",
+        "url": "https://youtu.be/JJ7dPxeq9R8"
+      },
+      {
+        "id": "PLXd13HOsAnZy_t0jdd-D6ewRMVSNtalVo-2",
+        "title": "Heme Metabolism ( Session 2) Porphrias",
+        "youtubeId": "wEOdW1Rr2ms",
+        "url": "https://youtu.be/wEOdW1Rr2ms"
+      },
+      {
+        "id": "PLXd13HOsAnZy_t0jdd-D6ewRMVSNtalVo-3",
+        "title": "Heme degradation",
+        "youtubeId": "KO_5BSExJec",
+        "url": "https://youtu.be/KO_5BSExJec"
+      }
+    ],
+    "tags": [
+      "biochemistry",
+      "walaa",
+      "ولاء",
+      "بايوكيمستري",
+      "playlist"
+    ]
+  },
+  {
+    "id": "bld-biochem-walaa-2",
+    "title": "كيمياء حيوية الدم - د. ولاء (الجزء الثاني)",
+    "description": "قائمة تشغيل شرح كيمياء حيوية الدم للدكتورة ولاء - الجزء الثاني.",
+    "url": "https://www.youtube.com/playlist?list=PLXd13HOsAnZy9bTXaZ7fLI9-kSOUQPfPk",
+    "type": "playlist",
+    "category": "lectures",
+    "year": 2,
+    "moduleId": "year2-blood",
+    "subject": "Biochemistry",
+    "author": "Dr. Walaa",
+    "addedBy": "M. Wael",
+    "playlistId": "PLXd13HOsAnZy9bTXaZ7fLI9-kSOUQPfPk",
+    "videos": [
+      {
+        "id": "PLXd13HOsAnZy9bTXaZ7fLI9-kSOUQPfPk-1",
+        "title": "Vitamin D",
+        "youtubeId": "PkvmaardQ74",
+        "url": "https://youtu.be/PkvmaardQ74"
+      },
+      {
+        "id": "PLXd13HOsAnZy9bTXaZ7fLI9-kSOUQPfPk-2",
+        "title": "Vitamin A",
+        "youtubeId": "NHnZ7DbLSq4",
+        "url": "https://youtu.be/NHnZ7DbLSq4"
+      },
+      {
+        "id": "PLXd13HOsAnZy9bTXaZ7fLI9-kSOUQPfPk-3",
+        "title": "Vit  A  Cont",
+        "youtubeId": "ulMCO9x5uBc",
+        "url": "https://youtu.be/ulMCO9x5uBc"
+      },
+      {
+        "id": "PLXd13HOsAnZy9bTXaZ7fLI9-kSOUQPfPk-4",
+        "title": "Vitamin E",
+        "youtubeId": "KDRpxRHHDw0",
+        "url": "https://youtu.be/KDRpxRHHDw0"
+      },
+      {
+        "id": "PLXd13HOsAnZy9bTXaZ7fLI9-kSOUQPfPk-5",
+        "title": "Vitamin K",
+        "youtubeId": "7U9WmIgtGT0",
+        "url": "https://youtu.be/7U9WmIgtGT0"
+      }
+    ],
+    "tags": [
+      "biochemistry",
+      "walaa",
+      "ولاء",
+      "بايوكيمستري",
+      "playlist"
+    ]
+  },
+  {
+    "id": "bld-biochem-mohammed",
+    "title": "كيمياء حيوية الدم - د. محمد (5 أجزاء)",
+    "description": "سلسلة شروحات كيمياء حيوية موديول الدم للدكتور محمد (مقسمة إلى 5 محاضرات فيديو).",
+    "url": "https://youtu.be/csgUGDeXW7k",
+    "type": "playlist",
+    "category": "lectures",
+    "year": 2,
+    "moduleId": "year2-blood",
+    "subject": "Biochemistry",
+    "author": "Dr. Mohammed",
+    "addedBy": "M. Wael",
+    "videos": [
+      {
+        "id": "mohammed-p1",
+        "title": "بايوكيمستري الدم - د. محمد (الجزء 1)",
+        "youtubeId": "csgUGDeXW7k",
+        "url": "https://youtu.be/csgUGDeXW7k"
+      },
+      {
+        "id": "mohammed-p2",
+        "title": "بايوكيمستري الدم - د. محمد (الجزء 2)",
+        "youtubeId": "C3jCs4hvMUA",
+        "url": "https://youtu.be/C3jCs4hvMUA"
+      },
+      {
+        "id": "mohammed-p3",
+        "title": "بايوكيمستري الدم - د. محمد (الجزء 3)",
+        "youtubeId": "9XEaxRBlV-c",
+        "url": "https://youtu.be/9XEaxRBlV-c"
+      },
+      {
+        "id": "mohammed-p4",
+        "title": "بايوكيمستري الدم - د. محمد (الجزء 4)",
+        "youtubeId": "VRzO7ncnmLM",
+        "url": "https://youtu.be/VRzO7ncnmLM"
+      },
+      {
+        "id": "mohammed-p5",
+        "title": "بايوكيمستري الدم - د. محمد (الجزء 5)",
+        "youtubeId": "I_jxHx4FDRo",
+        "url": "https://youtu.be/I_jxHx4FDRo"
+      }
+    ],
+    "tags": [
+      "biochemistry",
+      "mohammed",
+      "بايوكيمستري",
+      "playlist"
+    ]
+  },
+  {
+    "id": "bld-biochem-marwa",
+    "title": "كيمياء حيوية الدم ومراجعات - د. مروة حمدي",
+    "description": "قائمة تشغيل مراجعات وشروحات كيمياء حيوية موديول الدم للدكتورة مروة حمدي (Hb & Globin synthesis، Heme، Iron metabolism، وFolic acid).",
+    "url": "https://www.youtube.com/playlist?list=PLQiJ4rqPLWt0",
+    "type": "playlist",
+    "category": "lectures",
+    "year": 2,
+    "moduleId": "year2-blood",
+    "subject": "Biochemistry",
+    "author": "Dr. Marwa Hamdy",
+    "addedBy": [
+      "M. Wael",
+      "أميرة الشعراوي"
+    ],
+    "playlistId": "PLQiJ4rqPLWt0",
+    "videos": [
+      {
+        "id": "PLQiJ4rqPLWt0-1",
+        "title": "Bio . Blood.Rev 1 . Hb. globin , systhyesis, hemoglobinpathies",
+        "youtubeId": "Idy7y9iSKbM",
+        "url": "https://youtu.be/Idy7y9iSKbM"
+      },
+      {
+        "id": "PLQiJ4rqPLWt0-2",
+        "title": "Bio Blood 🩸Rev 2 … Heme synthesis",
+        "youtubeId": "Ggl2T7x8PJs",
+        "url": "https://youtu.be/Ggl2T7x8PJs"
+      },
+      {
+        "id": "PLQiJ4rqPLWt0-3",
+        "title": "Bio.Dr.Marwa.Hamdy.Blood Module. Revision3. Iron Metabolism",
+        "youtubeId": "pKtEGea18Io",
+        "url": "https://youtu.be/pKtEGea18Io"
+      },
+      {
+        "id": "PLQiJ4rqPLWt0-4",
+        "title": "Bio.DR.MARWA.HAMDY. Revision 4🩸Blood folic acid vitamin k… Second Y",
+        "youtubeId": "iht8ApIZp7A",
+        "url": "https://youtu.be/iht8ApIZp7A"
+      }
+    ],
+    "tags": [
+      "biochemistry",
+      "marwa hamdy",
+      "مروة حمدي",
+      "بايوكيمستري",
+      "playlist",
+      "مراجعة"
+    ]
+  },
+  {
+    "id": "bld-biochem-marwa-telegram-series",
+    "title": "تسجيلات وشروحات بايوكيمستري الدم - د. مروة حمدي (Medical Team Telegram)",
+    "description": "كورس وتسجيلات الدكتورة مروة حمدي في كيمياء حيوية الدم عبر تليجرام (Hb structure 1-5, Heme synthesis, Iron metabolism, HMP, Glycolysis, Folic acid & B12, WBCs metabolism).",
+    "url": "https://t.me/MedicalTeamMT/4792",
+    "type": "telegram",
+    "category": "lectures",
+    "year": 2,
+    "moduleId": "year2-blood",
+    "subject": "Biochemistry",
+    "author": "Dr. Marwa Hamdy",
+    "addedBy": "أميرة الشعراوي",
+    "tags": [
+      "biochemistry",
+      "marwa hamdy",
+      "مروة حمدي",
+      "بايوكيمستري",
+      "telegram",
+      "تسجيلات"
+    ]
+  },
+  {
+    "id": "bld-biochem-marwa-heme-synthesis-tg",
+    "title": "تسجيل Heme synthesis - بايو الدم - د. مروة حمدي",
+    "description": "تسجيل شرح تصنيع الهيم (Heme synthesis) للدكتورة مروة حمدي على تليجرام.",
+    "url": "https://t.me/MedicalTeamMT/4797",
+    "type": "telegram",
+    "category": "lectures",
+    "year": 2,
+    "moduleId": "year2-blood",
+    "subject": "Biochemistry",
+    "author": "Dr. Marwa Hamdy",
+    "addedBy": "أميرة الشعراوي",
+    "tags": [
+      "biochemistry",
+      "heme synthesis",
+      "marwa hamdy",
+      "مروة حمدي"
+    ]
+  },
+  {
+    "id": "bld-biochem-marwa-iron-metabolism-tg",
+    "title": "تسجيل Iron metabolism - بايو الدم - د. مروة حمدي",
+    "description": "تسجيل شرح أيض وتمثيل الحديد (Iron metabolism) للدكتورة مروة حمدي على تليجرام.",
+    "url": "https://t.me/MedicalTeamMT/4798",
+    "type": "telegram",
+    "category": "lectures",
+    "year": 2,
+    "moduleId": "year2-blood",
+    "subject": "Biochemistry",
+    "author": "Dr. Marwa Hamdy",
+    "addedBy": "أميرة الشعراوي",
+    "tags": [
+      "biochemistry",
+      "iron metabolism",
+      "marwa hamdy",
+      "مروة حمدي"
+    ]
+  },
+  {
+    "id": "bld-biochem-marwa-hmp-tg",
+    "title": "تسجيل مسار HMP pathway - بايو الدم - د. مروة حمدي",
+    "description": "تسجيل شرح مسار HMP shunt للدكتورة مروة حمدي على تليجرام.",
+    "url": "https://t.me/MedicalTeamMT/4799",
+    "type": "telegram",
+    "category": "lectures",
+    "year": 2,
+    "moduleId": "year2-blood",
+    "subject": "Biochemistry",
+    "author": "Dr. Marwa Hamdy",
+    "addedBy": "أميرة الشعراوي",
+    "tags": [
+      "biochemistry",
+      "hmp",
+      "marwa hamdy",
+      "مروة حمدي"
+    ]
+  },
+  {
+    "id": "bld-biochem-marwa-glycolysis-tg",
+    "title": "تسجيل Glycolysis - بايو الدم - د. مروة حمدي",
+    "description": "تسجيل شرح تحلل الجلوكوز (Glycolysis) للدكتورة مروة حمدي على تليجرام.",
+    "url": "https://t.me/MedicalTeamMT/4800",
+    "type": "telegram",
+    "category": "lectures",
+    "year": 2,
+    "moduleId": "year2-blood",
+    "subject": "Biochemistry",
+    "author": "Dr. Marwa Hamdy",
+    "addedBy": "أميرة الشعراوي",
+    "tags": [
+      "biochemistry",
+      "glycolysis",
+      "marwa hamdy",
+      "مروة حمدي"
+    ]
+  },
+  {
+    "id": "bld-biochem-marwa-folic-b12-tg",
+    "title": "تسجيل Folic acid & Vit B12 - بايو الدم - د. مروة حمدي",
+    "description": "تسجيل شرح حمض الفوليك وفيتامين B12 للدكتورة مروة حمدي على تليجرام.",
+    "url": "https://t.me/MedicalTeamMT/4802",
+    "type": "telegram",
+    "category": "lectures",
+    "year": 2,
+    "moduleId": "year2-blood",
+    "subject": "Biochemistry",
+    "author": "Dr. Marwa Hamdy",
+    "addedBy": "أميرة الشعراوي",
+    "tags": [
+      "biochemistry",
+      "folic acid",
+      "vitamin b12",
+      "marwa hamdy",
+      "مروة حمدي"
+    ]
+  },
+  {
+    "id": "bld-biochem-marwa-wbcs-tg",
+    "title": "تسجيل WBCs metabolism - بايو الدم - د. مروة حمدي",
+    "description": "تسجيل شرح أيض خلايا الدم البيضاء (WBCs metabolism) للدكتورة مروة حمدي على تليجرام.",
+    "url": "https://t.me/MedicalTeamMT/4803",
+    "type": "telegram",
+    "category": "lectures",
+    "year": 2,
+    "moduleId": "year2-blood",
+    "subject": "Biochemistry",
+    "author": "Dr. Marwa Hamdy",
+    "addedBy": "أميرة الشعراوي",
+    "tags": [
+      "biochemistry",
+      "wbcs",
+      "marwa hamdy",
+      "مروة حمدي"
+    ]
+  },
+  {
+    "id": "bld-biochem-marwa-telegram-revision",
+    "title": "تسجيلات مراجعة بايوكيمستري الدم (تليجرام) - د. مروة حمدي",
+    "description": "تسجيلات مراجعة موديول الدم (Hb & Globin, Heme, Iron metabolism) على تليجرام للدكتورة مروة حمدي.",
+    "url": "https://t.me/MedicalTeamMT/4805",
+    "type": "telegram",
+    "category": "summaries",
+    "year": 2,
+    "moduleId": "year2-blood",
+    "subject": "Biochemistry",
+    "author": "Dr. Marwa Hamdy",
+    "addedBy": "أميرة الشعراوي",
+    "tags": [
+      "biochemistry",
+      "revision",
+      "marwa hamdy",
+      "مروة حمدي",
+      "مراجعة"
+    ]
+  },
+  {
+    "id": "bld-lec-w1d2-bio-1",
+    "title": "محاضرة بايوكيمستري 1 (الأسبوع 1 - اليوم 2)",
+    "description": "تسجيل المحاضرة الأولى في مادة الكيمياء الحيوية لموديول الدم من الكلية (الأسبوع الأول - اليوم الثاني) عبر تليجرام الدفعة.",
+    "url": "https://t.me/c/3987936983/149",
+    "type": "telegram",
+    "category": "lectures",
+    "year": 2,
+    "moduleId": "year2-blood",
+    "subject": "Biochemistry",
+    "author": "ASU Med Faculty",
+    "addedBy": "فاعل خير",
+    "tags": [
+      "biochemistry",
+      "lecture",
+      "week 1",
+      "day 2",
+      "بايوكيمستري",
+      "محاضرة"
+    ]
+  },
+  {
+    "id": "bld-lec-w1d2-bio-2",
+    "title": "محاضرة بايوكيمستري 2 (الأسبوع 1 - اليوم 2)",
+    "description": "تسجيل المحاضرة الثانية في مادة الكيمياء الحيوية لموديول الدم من الكلية (الأسبوع الأول - اليوم الثاني) عبر تليجرام الدفعة.",
+    "url": "https://t.me/c/3987936983/185",
+    "type": "telegram",
+    "category": "lectures",
+    "year": 2,
+    "moduleId": "year2-blood",
+    "subject": "Biochemistry",
+    "author": "ASU Med Faculty",
+    "addedBy": "فاعل خير",
+    "tags": [
+      "biochemistry",
+      "lecture",
+      "week 1",
+      "day 2",
+      "بايوكيمستري",
+      "محاضرة"
+    ]
+  },
+  {
+    "id": "bld-biochem-college-recordings-dropbox",
+    "title": "تسجيلات الكلية النظرية - كيمياء حيوية الدم (Biochemistry Dropbox)",
+    "description": "مجلد دروب بوكس يحتوي على التسجيلات الصوتية الرسمية لمحاضرات بايوكيمستري موديول الدم من الكلية.",
+    "url": "https://www.dropbox.com/sh/ckiuoib17zvjojm/AAAR4hodPPwN74Ak2UV-aMyWa/Semester%201/Blood%20%26%20Lymphatic%20System/Links/Theoretical/Biochemistry?dl=0&subfolder_nav_tracking=1",
+    "type": "drive",
+    "category": "lectures",
+    "year": 2,
+    "moduleId": "year2-blood",
+    "subject": "Biochemistry",
+    "author": "ASU Med Faculty",
+    "addedBy": "Mohamed Waleed",
+    "tags": [
+      "biochemistry",
+      "dropbox",
+      "recordings",
+      "بايوكيمستري",
+      "تسجيلات",
+      "الكلية"
+    ]
+  }
+]

@@ -1,10 +1,13 @@
+#!/usr/bin/env node
 /**
- * Script to automatically populate `videos` for all playlists with `playlistId` in `src/data/materials.ts`.
+ * Script to automatically populate `videos` for all playlists with `playlistId`
+ * across the modular JSON files under `src/data/materials/`.
  *
  * Usage:
  *   node scripts/sync-all-playlists.js
+ *   node scripts/sync-all-playlists.js --file src/data/materials/blood/physiology/physiology.json
  *
- * This updates `src/data/materials.ts` with real video titles and IDs fetched from YouTube.
+ * This updates the corresponding JSON files with real video titles and IDs fetched from YouTube.
  */
 
 import fs from 'node:fs';
@@ -14,76 +17,89 @@ import { fetchPlaylistVideos } from './fetch-youtube-playlist.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-const materialsFilePath = path.resolve(__dirname, '../src/data/materials.ts');
+const materialsDir = path.resolve(__dirname, '../src/data/materials');
+
+function getAllJsonFiles(dir) {
+  let results = [];
+  const list = fs.readdirSync(dir, { withFileTypes: true });
+  for (const entry of list) {
+    const fullPath = path.join(dir, entry.name);
+    if (entry.isDirectory()) {
+      results = results.concat(getAllJsonFiles(fullPath));
+    } else if (entry.isFile() && entry.name.endsWith('.json')) {
+      results.push(fullPath);
+    }
+  }
+  return results;
+}
 
 async function syncAllPlaylists() {
-  console.log('Reading materials data from:', materialsFilePath);
-  let content = fs.readFileSync(materialsFilePath, 'utf8');
+  const args = process.argv.slice(2);
+  let filesToProcess = [];
 
-  // Find all playlist blocks:
-  // Match objects with type: 'playlist' and playlistId: '...'
-  const playlistBlockRegex = /{\s*id:\s*'([^']+)',[\s\S]*?type:\s*'playlist',[\s\S]*?playlistId:\s*'([^']+)',([\s\S]*?tags:)/g;
-
-  let match;
-  const updates = [];
-
-  while ((match = playlistBlockRegex.exec(content)) !== null) {
-    const id = match[1];
-    const playlistId = match[2];
-    const intermediate = match[3];
-
-    // Only fetch if videos is not already present
-    if (!intermediate.includes('videos:')) {
-      updates.push({ id, playlistId });
+  const fileArgIndex = args.indexOf('--file');
+  if (fileArgIndex !== -1 && args[fileArgIndex + 1]) {
+    const customPath = path.resolve(process.cwd(), args[fileArgIndex + 1]);
+    if (!fs.existsSync(customPath)) {
+      throw new Error(`Specified file not found: ${customPath}`);
     }
+    filesToProcess = [customPath];
+  } else {
+    filesToProcess = getAllJsonFiles(materialsDir);
   }
 
-  console.log(`Found ${updates.length} playlists to fetch video items for...`);
+  console.log(`Scanning ${filesToProcess.length} JSON file(s) under materials directory...`);
 
-  for (const item of updates) {
-    console.log(`\nFetching for playlist ${item.id} (${item.playlistId})...`);
+  let totalUpdatedPlaylists = 0;
+
+  for (const filePath of filesToProcess) {
+    const relPath = path.relative(path.resolve(__dirname, '..'), filePath);
+    let items;
     try {
-      const videos = await fetchPlaylistVideos(item.playlistId);
-      console.log(`  -> Found ${videos.length} videos`);
+      const raw = fs.readFileSync(filePath, 'utf8');
+      items = JSON.parse(raw);
+    } catch (err) {
+      console.warn(`Skipping unparseable JSON file ${relPath}: ${err.message}`);
+      continue;
+    }
 
-      if (videos.length > 0) {
-        // Format videos as JS code
-        const videosCode =
-          'videos: [\n' +
-          videos
-            .map(
-              (v) =>
-                `      { id: ${JSON.stringify(v.id)}, title: ${JSON.stringify(v.title)}, youtubeId: ${JSON.stringify(v.youtubeId)}, url: ${JSON.stringify(v.url)} }`
-            )
-            .join(',\n') +
-          '\n    ],\n    ';
+    if (!Array.isArray(items)) continue;
 
-        // Insert videos right after playlistId: '...'
-        const targetSearch = `id: '${item.id}',`;
-        const itemIdx = content.indexOf(targetSearch);
-        if (itemIdx !== -1) {
-          const playlistIdStr = `playlistId: '${item.playlistId}',`;
-          const plIdIdx = content.indexOf(playlistIdStr, itemIdx);
-          if (plIdIdx !== -1) {
-            const insertPos = plIdIdx + playlistIdStr.length;
-            content =
-              content.slice(0, insertPos) +
-              '\n    ' +
-              videosCode.trim() +
-              content.slice(insertPos);
-            console.log(`  -> Successfully injected ${videos.length} videos into ${item.id}`);
+    let fileChanged = false;
+
+    for (const item of items) {
+      if (item && item.type === 'playlist' && item.playlistId) {
+        const needsSync = !Array.isArray(item.videos) || item.videos.length === 0;
+        if (needsSync) {
+          console.log(`\nFetching videos for playlist ${item.id} (${item.playlistId}) in ${relPath}...`);
+          try {
+            const videos = await fetchPlaylistVideos(item.playlistId);
+            console.log(`  -> Found ${videos.length} videos`);
+            if (videos.length > 0) {
+              item.videos = videos;
+              fileChanged = true;
+              totalUpdatedPlaylists++;
+            }
+          } catch (err) {
+            console.error(`  -> Failed for ${item.id}:`, err.message);
           }
+          // Small delay to avoid aggressive rate limiting
+          await new Promise((r) => setTimeout(r, 600));
         }
       }
-    } catch (err) {
-      console.error(`  -> Failed for ${item.id}:`, err.message);
     }
-    // Small delay to avoid aggressive rate limiting
-    await new Promise((r) => setTimeout(r, 600));
+
+    if (fileChanged) {
+      fs.writeFileSync(filePath, JSON.stringify(items, null, 2) + '\n', 'utf8');
+      console.log(`Saved updates to ${relPath}`);
+    }
   }
 
-  fs.writeFileSync(materialsFilePath, content, 'utf8');
-  console.log('\nAll playlist video sync completed and saved to src/data/materials.ts!');
+  if (totalUpdatedPlaylists === 0) {
+    console.log('\nAll playlists are already fully synchronized! No missing video arrays found.');
+  } else {
+    console.log(`\nSuccessfully synchronized ${totalUpdatedPlaylists} playlist(s) across JSON files!`);
+  }
 }
 
 syncAllPlaylists().catch(console.error);

@@ -190,7 +190,7 @@ Options:
   const results = parseDumpText(textToParse, options);
   console.log(`\nFound ${results.length} material(s):\n`);
 
-  console.log('// Copy-paste into src/data/materials.ts:');
+  console.log('// Copy-paste into the relevant subject JSON file (e.g. src/data/materials/blood/<subject>/<subject>.json):');
   console.log(JSON.stringify(results, null, 2));
 }
 

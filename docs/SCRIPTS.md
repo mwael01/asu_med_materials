@@ -27,11 +27,19 @@ node scripts/fetch-youtube-playlist.js --json <playlistId_or_URL>
 ## 2. All Playlists Synchronizer
 
 - **Location**: [`scripts/sync-all-playlists.js`](file:///workspaces/asu_med_materials/scripts/sync-all-playlists.js)
-- **Purpose**: Iterates over all playlist records defined in [`src/data/materials.ts`](file:///workspaces/asu_med_materials/src/data/materials.ts) that contain a `playlistId`, fetches their live lecture videos from YouTube, and populates the `videos: [ ... ]` property with authentic video names and IDs.
+- **Purpose**: Iterates over all playlist records defined across the modular JSON files in [`src/data/materials/`](file:///workspaces/asu_med_materials/src/data/materials/) that contain a `playlistId`, fetches their live lecture videos from YouTube without regex, and populates the `videos: [ ... ]` property with authentic video names and IDs.
+- **Capabilities**:
+  - Automatically discovers all `.json` subject files under `src/data/materials/`.
+  - Supports `--file <path>` to target a single JSON file.
+  - Safe JSON reading and writing without fragile text replacements.
 
 ### Usage:
 ```bash
+# Sync all modular JSON files:
 node scripts/sync-all-playlists.js
+
+# Sync a specific subject file:
+node scripts/sync-all-playlists.js --file src/data/materials/blood/physiology/physiology.json
 ```
 
 ---
@@ -39,7 +47,7 @@ node scripts/sync-all-playlists.js
 ## 3. Materials Dump Parser
 
 - **Location**: [`scripts/parse-materials-dump.js`](file:///workspaces/asu_med_materials/scripts/parse-materials-dump.js)
-- **Purpose**: Parses raw WhatsApp messages, multi-link text blocks, or GitHub issues and extracts structured draft `MaterialItem` objects ready to copy-paste into `src/data/materials.ts`.
+- **Purpose**: Parses raw WhatsApp messages, multi-link text blocks, or GitHub issues and extracts structured draft `MaterialItem` JSON objects ready to copy-paste into the respective `src/data/materials/<module>/<subject>/<subject>.json` file.
 - **Capabilities**:
   - Automatically identifies URLs (Google Drive, Telegram channels, YouTube playlists/videos, WhatsApp groups, PDF downloads).
   - Extracts title and context around each link from preceding or inline text.
@@ -61,7 +69,7 @@ node scripts/parse-materials-dump.js --issue 15
 ---
 
 ## Instructions for AI Agents
-- When adding new YouTube playlists or series to `src/data/materials.ts`, you may use these scripts to populate detailed video lectures automatically instead of manually typing each video ID.
+- When adding new YouTube playlists or series to `src/data/materials/<module>/<subject>/<subject>.json`, you may use these scripts to populate detailed video lectures automatically instead of manually typing each video ID.
 - Maintain error handling and rate-limiting timeouts between YouTube fetches to prevent network bans.
 - Always run static validation (`pnpm astro check && pnpm build`) after updating data files.
 
