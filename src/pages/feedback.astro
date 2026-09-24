@@ -1,12 +1,12 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import { modulesData } from '../data/modules';
-import ContributeForm from '../components/contribute/ContributeForm.astro';
+import FeedbackForm from '../components/feedback/FeedbackForm.astro';
 ---
 
 <Layout
-  title="Share Study Materials - ASU Med Materials"
-  description="Share batch drives, lecture notes, and study collections to support your colleagues at Ain Shams University Faculty of Medicine."
+  title="Feedback & Suggestions - ASU Med Materials"
+  description="Share your feedback, suggest features, or report broken links and errors to help improve ASU Med Materials for all medical students."
 >
   <div class="max-w-xl mx-auto py-4 text-start">
     <!-- Breadcrumb & Header -->
@@ -14,29 +14,29 @@ import ContributeForm from '../components/contribute/ContributeForm.astro';
       <div class="flex items-center gap-1.5 text-xs text-zinc-500 dark:text-zinc-400 mb-2">
         <a href="/?redirect=false" data-i18n="nav.home" class="hover:text-emerald-600 dark:hover:text-emerald-400">Home</a>
         <span>/</span>
-        <span class="text-zinc-900 dark:text-zinc-100 font-bold" data-i18n="contribute.breadcrumbContribute">Contribute</span>
+        <span class="text-zinc-900 dark:text-zinc-100 font-bold" data-i18n="feedback.breadcrumbFeedback">Feedback</span>
       </div>
-      <h1 class="text-xl sm:text-2xl font-extrabold text-zinc-900 dark:text-zinc-100 mb-1" data-i18n="contribute.title">
-        Share Study Materials
+      <h1 class="text-xl sm:text-2xl font-extrabold text-zinc-900 dark:text-zinc-100 mb-1" data-i18n="feedback.title">
+        Feedback & Suggestions
       </h1>
-      <p class="text-xs text-zinc-500 dark:text-zinc-400 leading-relaxed" data-i18n="contribute.subtitle">
-        Share drives, lecture playlists, or study notes to support fellow medical students.
+      <p class="text-xs text-zinc-500 dark:text-zinc-400 leading-relaxed" data-i18n="feedback.subtitle">
+        Help us improve ASU Med Materials by sharing ideas, reporting broken links, or reporting technical issues.
       </p>
     </div>
 
-    <!-- Unified Form -->
-    <ContributeForm modules={modulesData} />
+    <!-- Unified Feedback Form -->
+    <FeedbackForm modules={modulesData} />
 
-    <!-- Reciprocal Link to Feedback -->
+    <!-- Reciprocal Link to Contribute -->
     <div class="mt-5 p-4 rounded-2xl bg-zinc-50 dark:bg-zinc-900/60 border border-zinc-200 dark:border-zinc-800 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
       <div class="text-zinc-600 dark:text-zinc-400 font-medium text-center sm:text-start">
-        <span data-i18n="contribute.toFeedbackPrompt">Have an idea to improve the site or noticed a broken link?</span>
+        <span data-i18n="feedback.toContributePrompt">Looking to share batch drives, lecture playlists, or study notes?</span>
       </div>
       <a
-        href="/feedback"
+        href="/contribute"
         class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-emerald-700 dark:text-emerald-400 hover:text-emerald-800 dark:hover:text-emerald-300 font-bold transition-all shrink-0 shadow-2xs hover:border-emerald-300 dark:hover:border-emerald-700/50"
       >
-        <span data-i18n="contribute.toFeedbackLink">Send your feedback or report the issue here →</span>
+        <span data-i18n="feedback.toContributeLink">Share study materials here →</span>
       </a>
     </div>
   </div>

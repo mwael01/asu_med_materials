@@ -12,6 +12,7 @@ export interface TranslationsSchema {
     changeYearTitle: string;
     searchTitle: string;
     savedResourcesTitle: string;
+    feedback: string;
     toggleThemeTitle: string;
     toggleLangTitle: string;
     menu: string;
@@ -144,6 +145,8 @@ export interface TranslationsSchema {
     submitAnother: string;
     emptyError: string;
     optional: string;
+    toFeedbackPrompt: string;
+    toFeedbackLink: string;
   };
   contributors: {
     breadcrumbHome: string;
@@ -205,12 +208,43 @@ export interface TranslationsSchema {
     installBtn: string;
     laterBtn: string;
   };
+  feedback: {
+    breadcrumbHome: string;
+    breadcrumbFeedback: string;
+    title: string;
+    subtitle: string;
+    categoryLabel: string;
+    categorySuggestion: string;
+    categoryContentIssue: string;
+    categoryBug: string;
+    categoryGeneral: string;
+    messageLabel: string;
+    messagePlaceholder: string;
+    yearLabel: string;
+    yearGeneral: string;
+    moduleLabel: string;
+    moduleGeneral: string;
+    senderNameLabel: string;
+    senderNamePlaceholder: string;
+    contactLabel: string;
+    contactPlaceholder: string;
+    submitBtn: string;
+    sendingBtn: string;
+    successTitle: string;
+    successDesc: string;
+    submitAnother: string;
+    emptyError: string;
+    optional: string;
+    toContributePrompt: string;
+    toContributeLink: string;
+  };
   footer: {
     tagline: string;
     university: string;
     madeBy: string;
     shareResource: string;
     contributors: string;
+    feedback: string;
     searchCatalog: string;
   };
 }

@@ -13,6 +13,7 @@ export const translations: Record<SupportedLanguage, TranslationsSchema> = {
       changeYearTitle: 'تغيير السنة والموديول',
       searchTitle: 'بحث في المواد والمصادر',
       savedResourcesTitle: 'المصادر المحفوظة',
+      feedback: 'الآراء والملاحظات',
       toggleThemeTitle: 'تبديل المظهر',
       toggleLangTitle: 'Switch to English',
       menu: 'القائمة',
@@ -150,7 +151,9 @@ export const translations: Record<SupportedLanguage, TranslationsSchema> = {
       successDesc: 'شكراً جزيلاً لوقتك ومساعدتك لزملائك. سيتم مراجعة الروابط وإضافتها للموقع في أقرب وقت لتفيد الجميع.',
       submitAnother: 'مشاركة مواد أخرى',
       emptyError: 'من فضلك الصق رابطاً أو محتوى الرسالة قبل الضغط على إرسال',
-      optional: '(اختياري)'
+      optional: '(اختياري)',
+      toFeedbackPrompt: 'عندك اقتراح لتطوير الموقع أو لاحظت رابطاً لا يعمل؟',
+      toFeedbackLink: 'شاركنا رأيك أو أبلغ عن المشكلة هنا ←'
     },
     contributors: {
       breadcrumbHome: 'الرئيسية',
@@ -212,12 +215,43 @@ export const translations: Record<SupportedLanguage, TranslationsSchema> = {
       installBtn: 'تثبيت الآن',
       laterBtn: 'لاحقاً'
     },
+    feedback: {
+      breadcrumbHome: 'الرئيسية',
+      breadcrumbFeedback: 'الآراء والملاحظات',
+      title: 'الآراء والملاحظات والاقتراحات',
+      subtitle: 'شاركنا اقتراحاتك، أو أبلغ عن رابط لا يعمل أو محتوى ناقص، أو أي مشكلة واجهتك في الموقع.',
+      categoryLabel: 'نوع الرسالة أو الملاحظة',
+      categorySuggestion: '💡 اقتراح ميزة أو فكرة جديدة',
+      categoryContentIssue: '🔗 مشكلة بمحتوى أو رابط لا يعمل',
+      categoryBug: '🐛 مشكلة تقنية في الموقع',
+      categoryGeneral: '💬 رأي عام أو رسالة لفريق العمل',
+      messageLabel: 'الملاحظات أو التفاصيل',
+      messagePlaceholder: 'اكتب تفاصيل اقتراحك، أو اسم الرابط ومكانه، أو أي فكرة تساعدنا في تطوير الموقع...',
+      yearLabel: 'السنة الدراسية المتعلقة',
+      yearGeneral: 'عام / غير محدد',
+      moduleLabel: 'الموديول المتعلق',
+      moduleGeneral: 'عام / غير محدد',
+      senderNameLabel: 'اسمك أو دفعتك',
+      senderNamePlaceholder: 'اسمك (أو اتركه فارغاً للإرسال كفاعل خير)',
+      contactLabel: 'وسيلة تواصل للرد',
+      contactPlaceholder: 'تليجرام، واتساب، أو بريد إلكتروني (اختياري للرد عليك)',
+      submitBtn: 'إرسال الملاحظات',
+      sendingBtn: 'جاري إرسال ملاحظاتك...',
+      successTitle: 'شكراً جزيلاً! تم استلام رسالتك بنجاح ❤️',
+      successDesc: 'رأيك وملاحظاتك تهمنا جداً وتساعدنا في تحسين المنصة لجميع الطلاب.',
+      submitAnother: 'إرسال ملاحظة أخرى',
+      emptyError: 'من فضلك اكتب تفاصيل رسالتك أو ملاحظتك قبل الإرسال',
+      optional: '(اختياري)',
+      toContributePrompt: 'هل تبحث عن مشاركة مذكرات أو درايفات للدفعات؟',
+      toContributeLink: 'شارك المواد والمصادر التعليمية هنا ←'
+    },
     footer: {
       tagline: 'المنصة الشاملة لمصادر طب عين شمس',
       university: 'كلية الطب جامعة عين شمس',
       madeBy: 'Made by',
       shareResource: 'شارك مصدراً أو درايف',
       contributors: 'فريق العمل والمساهمون',
+      feedback: 'الآراء والملاحظات',
       searchCatalog: 'دليل البحث الشامل'
     }
   },
@@ -233,6 +267,7 @@ export const translations: Record<SupportedLanguage, TranslationsSchema> = {
       changeYearTitle: 'Change Year & Module',
       searchTitle: 'Search Materials & Subjects',
       savedResourcesTitle: 'Saved Bookmarks',
+      feedback: 'Feedback & Ideas',
       toggleThemeTitle: 'Toggle Theme',
       toggleLangTitle: 'التبديل إلى العربية',
       menu: 'Menu',
@@ -370,7 +405,9 @@ export const translations: Record<SupportedLanguage, TranslationsSchema> = {
       successDesc: 'Your contribution means a lot to your fellow students. The links will be reviewed and added to the platform soon.',
       submitAnother: 'Share More Materials',
       emptyError: 'Please paste at least one link or message content before submitting.',
-      optional: '(Optional)'
+      optional: '(Optional)',
+      toFeedbackPrompt: 'Have an idea to improve the site or noticed a broken link?',
+      toFeedbackLink: 'Send your feedback or report the issue here →'
     },
     contributors: {
       breadcrumbHome: 'Home',
@@ -432,12 +469,43 @@ export const translations: Record<SupportedLanguage, TranslationsSchema> = {
       installBtn: 'Install Now',
       laterBtn: 'Later'
     },
+    feedback: {
+      breadcrumbHome: 'Home',
+      breadcrumbFeedback: 'Feedback & Suggestions',
+      title: 'Feedback & Suggestions',
+      subtitle: 'Help us improve ASU Med Materials by sharing ideas, reporting broken links, or reporting technical issues.',
+      categoryLabel: 'Category',
+      categorySuggestion: '💡 Feature Suggestion or Idea',
+      categoryContentIssue: '🔗 Broken Link or Missing Material',
+      categoryBug: '🐛 Bug or Technical Issue',
+      categoryGeneral: '💬 General Feedback or Compliment',
+      messageLabel: 'Your Feedback / Details',
+      messagePlaceholder: 'Describe your suggestion, the broken link location, or any details to help us make the platform better...',
+      yearLabel: 'Related Academic Year',
+      yearGeneral: 'General / Not Specified',
+      moduleLabel: 'Related Module',
+      moduleGeneral: 'General / Not Specified',
+      senderNameLabel: 'Your Name or Batch',
+      senderNamePlaceholder: 'Enter your name (or leave blank to remain anonymous)',
+      contactLabel: 'Contact Info for Follow-up',
+      contactPlaceholder: 'Telegram handle, WhatsApp, or email (optional)',
+      submitBtn: 'Send Feedback',
+      sendingBtn: 'Sending your feedback...',
+      successTitle: 'Thank You! Feedback Received! ❤️',
+      successDesc: 'Your insights and feedback mean a lot and help us continually improve the platform for everyone.',
+      submitAnother: 'Send Another Message',
+      emptyError: 'Please enter your feedback message before sending.',
+      optional: '(Optional)',
+      toContributePrompt: 'Looking to share batch drives, lecture playlists, or study notes?',
+      toContributeLink: 'Share study materials here →'
+    },
     footer: {
       tagline: 'All-in-one Medical Study Hub for ASU',
       university: 'Ain Shams University Faculty of Medicine',
       madeBy: 'Made by',
       shareResource: 'Share a Resource or Drive',
       contributors: 'Team & Contributors',
+      feedback: 'Feedback & Suggestions',
       searchCatalog: 'Comprehensive Search'
     }
   }

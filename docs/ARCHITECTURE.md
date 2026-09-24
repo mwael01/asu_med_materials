@@ -74,15 +74,19 @@ asu_med_materials/
 │   │   ├── playlist/[id].astro  # Integrated video playlist player & curriculum checkpoint viewer
 │   │   ├── search.astro         # Global search & multi-filter explorer
 │   │   ├── contribute.astro     # Contribution guide & automatic submission form
+│   │   ├── feedback.astro       # Student feedback, issue reporting & suggestions
 │   │   └── contributors.astro   # Site team on top + content makers (author field only, ranked)
 │   ├── styles/                  # Global styles & Tailwind configuration
 │   │   └── global.css
 │   ├── types/                   # TypeScript interfaces & types
 │   │   ├── i18n.ts              # SupportedLanguage, TranslationsDictionary types
 │   │   ├── materials.ts         # Material, module, and curriculum types
+│   │   ├── submission.ts        # Material submission payload and response types
+│   │   ├── feedback.ts          # Feedback category and submission types
 │   │   └── contributors.ts      # Author, contributor profile, contact, and stats types
 │   └── utils/                   # Shared pure TypeScript helper functions
 │       ├── contributors.ts      # Contributor stats aggregation + initials fallback
+│       ├── feedback.ts          # Feedback submission API client
 │       ├── filter.ts            # Search and filter matching logic
 │       ├── i18n.ts              # Language manager, DOM translation binding & reactivity
 │       ├── slug.ts              # URL slugification for subjects and routes
@@ -203,6 +207,13 @@ export interface MaterialItem {
    - **Reactive Custom Event**: Dispatches `asumed-language-changed` on `window` whenever the language is switched, allowing client scripts (dynamic search counter, bookmarks drawer, multistage modal, video playlist stepper) to update text immediately.
    - **Event Listener Lifecycle Safeguards**: All client scripts in persistent components and pages (`index.astro`, `BookmarksDrawer.astro`, `MultistageSelector.astro`, `MobileMenu.astro`) utilize global listener guards or `AbortController` cleanup to completely prevent listener duplication across ViewTransitions (`astro:after-swap`).
    - **Dictionary Architecture**: Centralized dictionary in [`src/i18n/translations.ts`](file:///workspaces/asu_med_materials/src/i18n/translations.ts) typed with [`src/types/i18n.ts`](file:///workspaces/asu_med_materials/src/types/i18n.ts), covering all site navigation, academic years, modules, subjects, categories, badges, toasts, forms, and controls.
+
+9. **Student Feedback & Google Sheets Webhook Integration**:
+   - Dedicated route at `/feedback` ([`src/pages/feedback.astro`](file:///workspaces/asu_med_materials/src/pages/feedback.astro)) powered by [`FeedbackForm.astro`](file:///workspaces/asu_med_materials/src/components/feedback/FeedbackForm.astro).
+   - Reciprocal cross-linking between `/contribute` and `/feedback` ensures students can seamlessly navigate between sharing study drives and submitting feedback or bug reports.
+   - Handled via [`api/submit-feedback.ts`](file:///workspaces/asu_med_materials/api/submit-feedback.ts) (Vercel Serverless Function & local Vite middleware) which forwards JSON payloads directly to Google Sheets via Google Apps Script webhooks (`GOOGLE_SHEETS_FEEDBACK_WEBHOOK_URL` or `GOOGLE_SHEETS_WEBHOOK_URL`).
+   - Automatically pre-selects the student's academic year from `localStorage.getItem('asumed_user_year')` and filters related modules for instant submission.
+   - Provides local development fallback mocking successful responses when no webhook is configured.
 
 ---
 

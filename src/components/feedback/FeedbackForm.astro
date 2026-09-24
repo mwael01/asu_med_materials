@@ -1,0 +1,293 @@
+---
+import type { ModuleInfo } from '../../types/materials';
+
+interface Props {
+  modules: ModuleInfo[];
+}
+
+const { modules } = Astro.props;
+---
+
+<div class="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl p-5 sm:p-6 shadow-xs text-start">
+  <!-- Form Container -->
+  <div id="feedback-form-container">
+    <form id="unified-feedback-form" class="space-y-4">
+      <!-- 1. Feedback Category -->
+      <div>
+        <label for="fb-category" class="block text-xs font-bold text-zinc-700 dark:text-zinc-300 mb-1">
+          <span data-i18n="feedback.categoryLabel">Feedback Category</span> <span class="text-emerald-600">*</span>
+        </label>
+        <select
+          id="fb-category"
+          required
+          class="w-full px-3 py-2 text-xs bg-zinc-50 dark:bg-zinc-800/60 border border-zinc-200 dark:border-zinc-700 rounded-xl text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-emerald-500 cursor-pointer"
+        >
+          <option value="suggestion" data-i18n="feedback.categorySuggestion">💡 Feature Suggestion or Idea</option>
+          <option value="content_issue" data-i18n="feedback.categoryContentIssue">🔗 Broken Link or Missing Material</option>
+          <option value="bug" data-i18n="feedback.categoryBug">🐛 Bug or Technical Issue</option>
+          <option value="general" selected data-i18n="feedback.categoryGeneral">💬 General Feedback or Compliment</option>
+        </select>
+      </div>
+
+      <!-- 2. Message / Details Input -->
+      <div>
+        <label for="fb-message" class="block text-xs font-bold text-zinc-700 dark:text-zinc-300 mb-1">
+          <span data-i18n="feedback.messageLabel">Your Feedback / Details</span> <span class="text-emerald-600">*</span>
+        </label>
+        <textarea
+          id="fb-message"
+          rows="4"
+          required
+          placeholder="Describe your suggestion, the broken link location, or any details to help us make the platform better..."
+          data-i18n-attr="placeholder:feedback.messagePlaceholder"
+          class="w-full px-3.5 py-2.5 text-xs bg-zinc-50 dark:bg-zinc-800/60 border border-zinc-200 dark:border-zinc-700 rounded-xl text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent font-sans leading-relaxed transition-all resize-y"
+        ></textarea>
+      </div>
+
+      <!-- 3. Context Row: Year & Module -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div>
+          <label for="fb-year" class="block text-xs font-bold text-zinc-700 dark:text-zinc-300 mb-1" data-i18n="feedback.yearLabel">
+            Related Academic Year
+          </label>
+          <select
+            id="fb-year"
+            class="w-full px-3 py-2 text-xs bg-zinc-50 dark:bg-zinc-800/60 border border-zinc-200 dark:border-zinc-700 rounded-xl text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-emerald-500 cursor-pointer"
+          >
+            <option value="general" data-i18n="feedback.yearGeneral">General / Not Specified</option>
+            <option value="1" data-i18n="nav.year" data-i18n-params={JSON.stringify({ y: 1 })}>Year 1</option>
+            <option value="2" data-i18n="nav.year" data-i18n-params={JSON.stringify({ y: 2 })}>Year 2</option>
+            <option value="3" data-i18n="nav.year" data-i18n-params={JSON.stringify({ y: 3 })}>Year 3</option>
+            <option value="4" data-i18n="nav.year" data-i18n-params={JSON.stringify({ y: 4 })}>Year 4</option>
+            <option value="5" data-i18n="nav.year" data-i18n-params={JSON.stringify({ y: 5 })}>Year 5</option>
+          </select>
+        </div>
+
+        <div>
+          <label for="fb-module" class="block text-xs font-bold text-zinc-700 dark:text-zinc-300 mb-1" data-i18n="feedback.moduleLabel">
+            Related Module
+          </label>
+          <select
+            id="fb-module"
+            class="w-full px-3 py-2 text-xs bg-zinc-50 dark:bg-zinc-800/60 border border-zinc-200 dark:border-zinc-700 rounded-xl text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-emerald-500 cursor-pointer"
+          >
+            <option value="general" data-i18n="feedback.moduleGeneral">General / Not Specified</option>
+            {modules.map((m) => (
+              <option value={m.title} data-year={m.year}>{m.title}</option>
+            ))}
+          </select>
+        </div>
+      </div>
+
+      <!-- 4. Attribution & Contact Row (Optional) -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div>
+          <label for="fb-sender" class="block text-xs font-bold text-zinc-700 dark:text-zinc-300 mb-1">
+            <span data-i18n="feedback.senderNameLabel">Your Name or Batch</span> <span class="text-[10px] text-zinc-400 font-normal" data-i18n="feedback.optional">(Optional)</span>
+          </label>
+          <input
+            type="text"
+            id="fb-sender"
+            placeholder="Enter your name (or leave blank to remain anonymous)"
+            data-i18n-attr="placeholder:feedback.senderNamePlaceholder"
+            class="w-full px-3.5 py-2 text-xs bg-zinc-50 dark:bg-zinc-800/60 border border-zinc-200 dark:border-zinc-700 rounded-xl text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all"
+          />
+        </div>
+
+        <div>
+          <label for="fb-contact" class="block text-xs font-bold text-zinc-700 dark:text-zinc-300 mb-1">
+            <span data-i18n="feedback.contactLabel">Contact Info for Follow-up</span> <span class="text-[10px] text-zinc-400 font-normal" data-i18n="feedback.optional">(Optional)</span>
+          </label>
+          <input
+            type="text"
+            id="fb-contact"
+            placeholder="Telegram handle, WhatsApp, or email (optional)"
+            data-i18n-attr="placeholder:feedback.contactPlaceholder"
+            class="w-full px-3.5 py-2 text-xs bg-zinc-50 dark:bg-zinc-800/60 border border-zinc-200 dark:border-zinc-700 rounded-xl text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all"
+          />
+        </div>
+      </div>
+
+      <!-- Error Box -->
+      <div id="fb-error-box" class="hidden p-3 rounded-xl text-xs bg-rose-50 dark:bg-rose-950/50 text-rose-800 dark:text-rose-300 border border-rose-200 dark:border-rose-800/40"></div>
+
+      <!-- Submit Action -->
+      <div class="pt-1">
+        <button
+          type="submit"
+          id="fb-submit-btn"
+          class="w-full py-2.5 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 active:scale-[0.99] text-white text-xs font-bold transition-all shadow-xs flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          <svg class="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5" />
+          </svg>
+          <span id="fb-btn-text" data-i18n="feedback.submitBtn">Send Feedback</span>
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Dedicated Warm Success Card -->
+  <div id="fb-success-card" class="hidden text-center py-7 px-4 space-y-3.5">
+    <div class="w-14 h-14 rounded-full bg-emerald-100 dark:bg-emerald-950/80 text-emerald-600 dark:text-emerald-400 mx-auto flex items-center justify-center shadow-xs">
+      <svg class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+      </svg>
+    </div>
+    <div class="space-y-1">
+      <h3 class="text-base font-extrabold text-zinc-900 dark:text-zinc-100" data-i18n="feedback.successTitle">
+        Thank You! Feedback Received! ❤️
+      </h3>
+      <p class="text-xs text-zinc-500 dark:text-zinc-400 max-w-sm mx-auto leading-relaxed" data-i18n="feedback.successDesc">
+        Your insights and feedback mean a lot and help us continually improve the platform for everyone.
+      </p>
+    </div>
+    <div class="pt-2">
+      <button
+        type="button"
+        id="fb-reset-btn"
+        class="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-xl bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-zinc-800 dark:text-zinc-200 text-xs font-bold transition-all cursor-pointer shadow-xs active:scale-[0.98]"
+      >
+        <span data-i18n="feedback.submitAnother">Send Another Message</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+  import { submitFeedback } from '../../utils/feedback';
+  import { t, getCurrentLanguage } from '../../utils/i18n';
+  import type { FeedbackCategory, FeedbackSubmission } from '../../types/feedback';
+
+  function initFeedbackForm(): void {
+    const form = document.getElementById('unified-feedback-form') as HTMLFormElement | null;
+    const formContainer = document.getElementById('feedback-form-container');
+    const successCard = document.getElementById('fb-success-card');
+    const categoryEl = document.getElementById('fb-category') as HTMLSelectElement | null;
+    const messageEl = document.getElementById('fb-message') as HTMLTextAreaElement | null;
+    const yearEl = document.getElementById('fb-year') as HTMLSelectElement | null;
+    const moduleEl = document.getElementById('fb-module') as HTMLSelectElement | null;
+    const senderEl = document.getElementById('fb-sender') as HTMLInputElement | null;
+    const contactEl = document.getElementById('fb-contact') as HTMLInputElement | null;
+    const submitBtn = document.getElementById('fb-submit-btn') as HTMLButtonElement | null;
+    const btnText = document.getElementById('fb-btn-text');
+    const errorBox = document.getElementById('fb-error-box');
+    const resetBtn = document.getElementById('fb-reset-btn');
+
+    if (!form || !messageEl) return;
+
+    // Filter module dropdown options based on chosen year
+    function filterModules(): void {
+      if (!yearEl || !moduleEl) return;
+      const selectedYear = yearEl.value;
+      const options = moduleEl.querySelectorAll<HTMLOptionElement>('option');
+
+      options.forEach((opt) => {
+        if (opt.value === 'general') {
+          opt.hidden = false;
+          return;
+        }
+        const optYear = opt.getAttribute('data-year');
+        if (selectedYear === 'general' || optYear === selectedYear) {
+          opt.hidden = false;
+        } else {
+          opt.hidden = true;
+          if (moduleEl.value === opt.value) {
+            moduleEl.value = 'general';
+          }
+        }
+      });
+    }
+
+    // Auto-detect student's active year from localStorage
+    try {
+      const savedYear = localStorage.getItem('asumed_user_year');
+      if (savedYear && ['1', '2', '3', '4', '5'].includes(savedYear) && yearEl) {
+        yearEl.value = savedYear;
+      }
+    } catch {}
+
+    filterModules();
+    yearEl?.addEventListener('change', filterModules);
+
+    // Form submission
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      if (!messageEl) return;
+
+      const message = messageEl.value.trim();
+      const lang = getCurrentLanguage();
+
+      if (!message) {
+        if (errorBox) {
+          errorBox.textContent = t('feedback.emptyError', lang);
+          errorBox.classList.remove('hidden');
+        }
+        messageEl.focus();
+        return;
+      }
+
+      if (errorBox) errorBox.classList.add('hidden');
+      if (submitBtn) submitBtn.disabled = true;
+      if (btnText) btnText.textContent = t('feedback.sendingBtn', lang);
+
+      const category = (categoryEl?.value || 'general') as FeedbackCategory;
+      const year = yearEl?.value || 'general';
+      const moduleId = moduleEl?.value || 'general';
+      const senderName = senderEl?.value.trim() || undefined;
+      const contact = contactEl?.value.trim() || undefined;
+      const pageUrl = window.location.href;
+
+      const payload: FeedbackSubmission = {
+        category,
+        message,
+        year: year !== 'general' ? (Number(year) as any) : 'general',
+        moduleId: moduleId !== 'general' ? moduleId : undefined,
+        senderName,
+        contact,
+        pageUrl
+      };
+
+      try {
+        const result = await submitFeedback(payload);
+
+        if (result.success) {
+          formContainer?.classList.add('hidden');
+          successCard?.classList.remove('hidden');
+        } else {
+          if (errorBox) {
+            const isEn = getCurrentLanguage() === 'en';
+            const defaultMsg = isEn
+              ? 'Unable to submit feedback right now. Please check your connection and try again.'
+              : 'تعذر إرسال الملاحظات حالياً. يرجى التأكد من اتصال الإنترنت والمحاولة مرة أخرى.';
+            errorBox.textContent = result.error || defaultMsg;
+            errorBox.classList.remove('hidden');
+          }
+        }
+      } catch {
+        if (errorBox) {
+          const isEn = getCurrentLanguage() === 'en';
+          errorBox.textContent = isEn
+            ? 'An unexpected error occurred. Please try again.'
+            : 'حدث خطأ غير متوقع. يرجى المحاولة مرة أخرى.';
+          errorBox.classList.remove('hidden');
+        }
+      } finally {
+        if (submitBtn) submitBtn.disabled = false;
+        if (btnText) btnText.textContent = t('feedback.submitBtn', getCurrentLanguage());
+      }
+    });
+
+    // Reset to submit another
+    resetBtn?.addEventListener('click', () => {
+      form.reset();
+      if (errorBox) errorBox.classList.add('hidden');
+      successCard?.classList.add('hidden');
+      formContainer?.classList.remove('hidden');
+      messageEl.focus();
+    });
+  }
+
+  initFeedbackForm();
+  document.addEventListener('astro:after-swap', initFeedbackForm);
+</script>

@@ -9,7 +9,7 @@ export default defineConfig({
       {
         name: 'api-dev-middleware',
         configureServer(server) {
-          server.middlewares.use('/api/submit-material', (req, res) => {
+          const createApiHandler = (handlerPath) => (req, res) => {
             /** @type {any[]} */
             const chunks = [];
             req.on('data', (chunk) => chunks.push(chunk));
@@ -23,10 +23,13 @@ export default defineConfig({
                 // @ts-ignore
                 req.body = {};
               }
-              const { default: handler } = await import('./api/submit-material.ts');
+              const { default: handler } = await import(handlerPath);
               await handler(req, res);
             });
-          });
+          };
+
+          server.middlewares.use('/api/submit-material', createApiHandler('./api/submit-material.ts'));
+          server.middlewares.use('/api/submit-feedback', createApiHandler('./api/submit-feedback.ts'));
         }
       }
     ]

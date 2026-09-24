@@ -14,7 +14,8 @@ The all-in-one directory for Ain Shams University (FOM-ASU) medical students to 
 - **Arabic-First with Technical English**: Intuitive Arabic RTL navigation with standardized English terminology for subjects, module codes, and resource platforms.
 - **Default White Theme**: Crisp, high-contrast light theme by default, with an optional dark mode toggle.
 - **Instant Search & Multi-filter**: Live keyword filtering across all modules, subjects, and resource types.
-- **Direct Resource Submission**: Fast on-page form for students to submit new materials directly through the GitHub Issues API without leaving the website.
+- **Direct Resource Submission**: Fast on-page form for students to submit new materials directly through the serverless Google Sheets integration without leaving the website.
+- **Student Feedback & Suggestions (الآراء والملاحظات)**: Dedicated form (`/feedback`) connecting directly to Google Sheets via serverless webhooks for ideas, broken link reports, and technical issues.
 - **Offline & PWA Ready**: Bookmark favorite resources locally and access them without an active connection.
 
 ---
@@ -45,6 +46,7 @@ For deeper details on system design, component architecture, and the curriculum 
 
 - [System Architecture](file:///workspaces/asu_med_materials/docs/ARCHITECTURE.md) - Project structure, state management, and data flow.
 - [UI Components Specification](file:///workspaces/asu_med_materials/docs/COMPONENTS.md) - Component inventory, props, and design guidelines.
+- [Google Sheets Webhook Setup](file:///workspaces/asu_med_materials/docs/FEEDBACK_SETUP.md) - Deploying Apps Script webhooks for feedback and submissions.
 - [Curriculum Mapping](file:///workspaces/asu_med_materials/docs/CURRICULUM_STRUCTURE.md) - Ain Shams University 5-year modular curriculum breakdown.
 - [Development Guidelines](file:///workspaces/asu_med_materials/AGENTS.md) - Code quality and contributor rules.
 

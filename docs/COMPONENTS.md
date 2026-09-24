@@ -314,5 +314,27 @@ The homepage reuses canonical shared components directly rather than bespoke car
 - **Welcome & Focus Banner**: Minimalist alert matching the original design displaying active year, direct link to year modules, and change year trigger.
 - **Personal Study Library**: Reuses [`ResourceCard.astro`](file:///workspaces/asu_med_materials/src/components/materials/ResourceCard.astro) inside responsive subject grids structured by automatic academic hierarchy (`Module > Subject > Materials`). Includes dynamic module filter chips and an unstudied-only toggle. Removes all manual folder dialogs, count boxes, and extraneous pills for a clean, unified presentation.
 
+---
+
+### Feedback & Community Voice (`/feedback`)
+
+#### [`FeedbackForm.astro`](file:///workspaces/asu_med_materials/src/components/feedback/FeedbackForm.astro)
+- **Location**: `src/components/feedback/FeedbackForm.astro`
+- **Purpose**: Unified feedback and issue reporting form allowing students to submit feature ideas, report broken/outdated links, and log bugs directly to Google Sheets via Google Apps Script.
+- **Key Features**:
+  - Category selector (`suggestion`, `content_issue`, `bug`, `general`).
+  - Contextual Academic Year & Module filters prefilled from `localStorage.getItem('asumed_user_year')`.
+  - Attribution & follow-up contact fields (optional).
+  - Clean error banner and responsive loading button state.
+  - Dedicated warm success card with instant reset action.
+  - View Transitions safe (`astro:after-swap`).
+- **Props**:
+  ```typescript
+  interface Props {
+    modules: ModuleInfo[];
+  }
+  ```
+
+
 
 
