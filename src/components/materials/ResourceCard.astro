@@ -38,6 +38,7 @@ const displayedAddedByText = rawAddedBy.slice(0, maxVisible).join('، ');
 const fullAddedByTooltip = rawAddedBy.join('، ');
 
 const isPlaylist = material.type === 'playlist' || Boolean(material.playlistId) || Boolean(material.videos);
+const isReferenceMaterial = Boolean(material.moduleId && /^year\d+-reference-books$/.test(material.moduleId));
 const cardHref = isPlaylist ? `/playlist/${material.id}` : material.url;
 const targetAttr = isPlaylist ? '_self' : '_blank';
 ---
@@ -56,10 +57,10 @@ const targetAttr = isPlaylist ? '_self' : '_blank';
         {showYear && (
           <span
             class="text-[11px] font-semibold px-2 py-0.5 rounded bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400"
-            data-i18n="nav.year"
-            data-i18n-params={JSON.stringify({ y: material.year })}
+            data-i18n={isReferenceMaterial ? 'categories.references' : 'nav.year'}
+            data-i18n-params={isReferenceMaterial ? undefined : JSON.stringify({ y: material.year })}
           >
-            Year {material.year}
+            {isReferenceMaterial ? 'References' : `Year ${material.year}`}
           </span>
         )}
         <!-- Done / Studied Checkbox Button -->

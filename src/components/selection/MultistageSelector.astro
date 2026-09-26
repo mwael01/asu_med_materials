@@ -86,19 +86,42 @@ const years = [
     const triggers = document.querySelectorAll('.trigger-multistage-selector');
 
     function showModal(): void {
-      modal?.classList.remove('hidden');
+      if (!modal) return;
+      modal.classList.remove('hidden');
+      modal.setAttribute('data-modal-open', 'true');
+      modal.setAttribute('aria-hidden', 'false');
       document.body.style.overflow = 'hidden';
     }
 
     function hideModal(): void {
-      modal?.classList.add('hidden');
+      if (!modal) return;
+      modal.classList.add('hidden');
+      modal.setAttribute('data-modal-open', 'false');
+      modal.setAttribute('aria-hidden', 'true');
       document.body.style.overflow = '';
     }
 
-    // First-visit auto-show logic
+    // First-visit auto-show logic:
+    // show the welcome quote first on initial load, then open the year selector after the quote is dismissed
     if (!getHasVisited() && !getUserStoredYear()) {
-      setHasVisited();
-      showModal();
+      const welcomeQuoteModal = document.getElementById('welcome-quote-modal');
+      const quoteAlreadyDismissed = window.sessionStorage.getItem('asu-med-welcome-quote-dismissed') === 'true';
+
+      if (welcomeQuoteModal && !quoteAlreadyDismissed) {
+        window.addEventListener(
+          'welcome-quote-dismissed',
+          () => {
+            if (!getHasVisited() && !getUserStoredYear()) {
+              setHasVisited();
+              showModal();
+            }
+          },
+          { once: true }
+        );
+      } else {
+        setHasVisited();
+        showModal();
+      }
     }
 
     yearButtons.forEach((btn) => {
