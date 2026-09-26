@@ -10,6 +10,14 @@
     if (isPwaInstalledOrStandalone()) {
       return;
     }
+
+    const isYearPage = /^\/year\/(\d+)(\/.*)?$/.test(window.location.pathname || '');
+
+    // Only show the install prompt when a year page is loaded, never on the home/start screen.
+    if (!isYearPage) {
+      return;
+    }
+
     // Service worker is registered automatically by @vite-pwa/astro integration
 
     let deferredPrompt: any = null;
@@ -21,10 +29,15 @@
     } catch {}
 
     function showInstallNotification(isIos: boolean = false): void {
-      if (isPwaInstalledOrStandalone() || isDismissed) return;
+      if (isPwaInstalledOrStandalone() || isDismissed || !isYearPage) return;
 
       const showFn = (window as any).showToast;
       if (typeof showFn !== 'function') return;
+
+      try {
+        sessionStorage.setItem('asumed_pwa_prompt_dismissed', 'true');
+      } catch {}
+      isDismissed = true;
 
       const isAr = document.documentElement.lang === 'ar';
 
@@ -72,7 +85,7 @@
       e.preventDefault();
 
       // Double-check if website is already running in standalone mode
-      if (isPwaInstalledOrStandalone()) {
+      if (isPwaInstalledOrStandalone() || !isYearPage) {
         return;
       }
 
@@ -85,9 +98,9 @@
     });
 
     // Handle iOS Safari guidance if not already installed as standalone
-    if (isIosDevice() && !isPwaInstalledOrStandalone() && !isDismissed) {
+    if (isIosDevice() && !isPwaInstalledOrStandalone() && !isDismissed && isYearPage) {
       setTimeout(() => {
-        if (!isPwaInstalledOrStandalone()) {
+        if (!isPwaInstalledOrStandalone() && isYearPage) {
           showInstallNotification(true);
         }
       }, 4000);

@@ -5,8 +5,12 @@
       "name": "Mohammed Wael",
       "role": "Web Developer",
       "roleAr": "مطور المنصة",
+      "badge": {
+        "text": "Owner",
+        "textAr": "المالك"
+      },
       "bio": "مطور المنصة والمسؤول عن تنظيم المصادر.",
-      "bioEn": "Platform developer and study materials organizer.",
+      "bioEn": "Platform developer and study materials organizer. \n ",
       "order": 1,
       "photo": "/contributors/mohammed-wael.png",
       "matchNames": ["M. Wael", "Mohammed Wael", "Mohmmed Wael"],
@@ -51,16 +55,19 @@
     {
       "id": "mazen-yasin",
       "name": "Mazen Yasin",
-      "role": "Content Advisor",
-      "roleAr": "مشرف محتوى",
-      "bio": "مشرف المحتوى ومراجعة المصادر.",
-      "bioEn": "Content advisor and study resource reviewer.",
+      "role": "Web Developer and Content Advisor",
+      "roleAr": "مشرف محتوى ومطور المنصة",
+      "bio": "مطور المنصة والمسؤول عن تنظيم المصادر. \n  &#x1F919 &#x1F919أنا اللي ضيفت ميزة الاقتباسات :) ",
+      "bioEn": "Platform developer and study materials organizer. \n I added the quote thing.. &#x1F919 &#x1F919",
       "order": 4,
       "photo": "/contributors/mazen-yasin.jpg",
       "matchNames": ["Mazen Yasin"],
       "contacts": {
         "whatsapp": [
           { "label": "واتساب", "value": "+20 10 30811700", "href": "https://wa.me/201030811700" }
+        ],
+        "instagram": [
+          { "label": "إنستغرام", "value": "Mazen-Yasin", "href": "https://instagram.com/_MazenYasin" }
         ]
       }
     }

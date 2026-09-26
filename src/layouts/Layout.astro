@@ -61,6 +61,60 @@ const {
     </script>
   </head>
   <body class="min-h-screen flex flex-col bg-zinc-50/60 dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100 antialiased selection:bg-emerald-500 selection:text-white">
+    <div
+      id="welcome-quote-modal"
+      class="fixed inset-0 z-50 hidden items-center justify-center bg-zinc-950/60 p-4 backdrop-blur-sm"
+      aria-hidden="true"
+    >
+      <div class="welcome-quote-panel w-full max-w-lg rounded-2xl border border-emerald-200/80 bg-white p-6 shadow-2xl dark:border-zinc-700 dark:bg-zinc-900">
+        <div class="flex items-start justify-between gap-4">
+          <div class="flex-1">
+            <p id="welcome-quote-header" class="text-[10px] font-bold uppercase tracking-[0.24em] text-emerald-600 dark:text-emerald-400">
+              Daily reminder
+            </p>
+            <h2 id="welcome-quote-title" class="mt-2 text-xl font-extrabold text-zinc-900 dark:text-zinc-50">
+              Study with purpose
+            </h2>
+          </div>
+          <button
+            id="welcome-quote-close"
+            type="button"
+            aria-label="Close quote"
+            class="inline-flex h-8 w-8 items-center justify-center rounded-full text-lg text-zinc-500 transition hover:bg-zinc-100 hover:text-zinc-900 dark:hover:bg-zinc-800 dark:hover:text-zinc-50"
+          >
+            ×
+          </button>
+        </div>
+
+        <div id="welcome-quote-image-wrapper" class="mt-5 flex items-center justify-center">
+          <img
+            id="welcome-quote-image"
+            src="/images/quotes/doctor-study.svg"
+            alt="Quote illustration"
+            class="h-40 w-40 rounded-2xl object-cover shadow-sm sm:h-48 sm:w-48 md:h-56 md:w-56"
+          />
+        </div>
+
+        <blockquote id="welcome-quote-text" class="mt-5 text-lg leading-relaxed text-zinc-700 dark:text-zinc-300 sm:text-xl">
+          “The best way to predict the future is to study what matters today.”
+        </blockquote>
+
+        <p id="welcome-quote-author" class="mt-3 text-xs font-medium text-zinc-500 dark:text-zinc-400">
+          — A gentle reminder for every med student on the journey ahead
+        </p>
+
+        <div class="mt-6 flex justify-end">
+          <button
+            id="welcome-quote-continue"
+            type="button"
+            class="inline-flex items-center justify-center rounded-xl bg-emerald-600 px-4 py-2 text-sm font-bold text-white transition hover:bg-emerald-700"
+          >
+            Continue
+          </button>
+        </div>
+      </div>
+    </div>
+
     <Navbar />
 
     <main class="flex-1 w-full max-w-6xl mx-auto px-4 sm:px-6 py-6">
@@ -78,13 +132,114 @@ const {
       import { registerServiceWorker } from '../utils/pwa';
       import { initLanguageClient } from '../utils/i18n';
       import { initStudiedMaterials } from '../utils/studied';
+      import welcomeQuotes from '../data/welcome-quotes.json';
+
+      const WELCOME_QUOTE_KEY = 'asu-med-welcome-quote-dismissed';
+
+      function initWelcomeQuote(): void {
+        const modal = document.getElementById('welcome-quote-modal');
+        const quoteHeader = document.getElementById('welcome-quote-header');
+        const quoteTitle = document.getElementById('welcome-quote-title');
+        const quoteImage = document.getElementById('welcome-quote-image') as HTMLImageElement | null;
+        const quoteText = document.getElementById('welcome-quote-text');
+        const quoteAuthor = document.getElementById('welcome-quote-author');
+
+        if (!modal || !quoteHeader || !quoteTitle || !quoteText || !quoteAuthor) return;
+
+        const isDismissed = window.sessionStorage.getItem(WELCOME_QUOTE_KEY) === 'true';
+        if (isDismissed) {
+          modal.classList.add('hidden');
+          modal.setAttribute('aria-hidden', 'true');
+          return;
+        }
+
+        const yearModal = document.getElementById('multistage-modal');
+        const isAnyModalOpen = !!document.querySelector(
+          '[data-modal-open="true"], #multistage-modal:not(.hidden), .is-open[role="dialog"]'
+        );
+
+        if (isAnyModalOpen || (yearModal && yearModal.getAttribute('data-modal-open') === 'true')) {
+          modal.classList.add('hidden');
+          modal.setAttribute('aria-hidden', 'true');
+          return;
+        }
+
+        const randomQuote = welcomeQuotes[Math.floor(Math.random() * welcomeQuotes.length)];
+
+        const hasHeader = Boolean(randomQuote.header && randomQuote.header.trim());
+        const hasTitle = Boolean(randomQuote.title && randomQuote.title.trim());
+        const hasText = Boolean(randomQuote.text && randomQuote.text.trim());
+        const hasAuthor = Boolean(randomQuote.author && randomQuote.author.trim());
+
+        quoteHeader.textContent = hasHeader ? randomQuote.header : 'Daily reminder';
+        quoteTitle.textContent = hasTitle ? randomQuote.title : 'Study with purpose';
+        quoteText.textContent = hasText ? `“${randomQuote.text}”` : '';
+        quoteText.style.display = hasText ? 'block' : 'none';
+        quoteAuthor.textContent = hasAuthor ? `— ${randomQuote.author}` : '';
+        quoteAuthor.style.display = hasAuthor ? 'block' : 'none';
+
+        const hasImage = Boolean(randomQuote.image && randomQuote.image.trim());
+
+        if (quoteImage) {
+          const imageWrapper = document.getElementById('welcome-quote-image-wrapper');
+
+          if (imageWrapper) {
+            imageWrapper.style.display = hasImage ? 'flex' : 'none';
+          }
+
+          quoteImage.src = hasImage ? randomQuote.image : '/images/quotes/doctor-study.svg';
+          quoteImage.alt = randomQuote.title || 'Quote illustration';
+        }
+
+        const showModal = () => {
+          const otherModalOpen = !!document.querySelector(
+            '[data-modal-open="true"], #multistage-modal:not(.hidden), .is-open[role="dialog"]'
+          );
+
+          if (otherModalOpen) {
+            modal.classList.add('hidden');
+            modal.setAttribute('aria-hidden', 'true');
+            return;
+          }
+
+          modal.classList.remove('hidden');
+          modal.classList.add('flex');
+          modal.setAttribute('aria-hidden', 'false');
+        };
+
+        const dismissModal = () => {
+          modal.classList.add('hidden');
+          modal.classList.remove('flex');
+          modal.setAttribute('aria-hidden', 'true');
+          window.sessionStorage.setItem(WELCOME_QUOTE_KEY, 'true');
+          window.dispatchEvent(new CustomEvent('welcome-quote-dismissed'));
+        };
+
+        if (document.readyState === 'complete') {
+          showModal();
+        } else {
+          window.addEventListener('load', showModal, { once: true });
+        }
+
+        modal.addEventListener('click', (event) => {
+          if (event.target === modal) {
+            dismissModal();
+          }
+        });
+
+        document.getElementById('welcome-quote-close')?.addEventListener('click', dismissModal);
+        document.getElementById('welcome-quote-continue')?.addEventListener('click', dismissModal);
+      }
 
       initLanguageClient();
       initStudiedMaterials();
       registerServiceWorker();
+      initWelcomeQuote();
+
       document.addEventListener('astro:after-swap', () => {
         initLanguageClient();
         initStudiedMaterials();
+        initWelcomeQuote();
       });
     </script>
 

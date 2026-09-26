@@ -119,7 +119,7 @@ const searchHref = `/search?q=${encodeURIComponent(contributor.name)}`;
           </span>
           {note && (
             <p
-              class="text-[11px] text-zinc-500 dark:text-zinc-400 line-clamp-1 mt-0.5"
+              class="text-[11px] text-zinc-500 dark:text-zinc-400 line-clamp-1 mt-0.5 whitespace-pre-line"
               data-i18n-contributor-note
               data-note-en={noteEn || note}
               data-note-ar={note}
@@ -173,11 +173,17 @@ const searchHref = `/search?q=${encodeURIComponent(contributor.name)}`;
       <div class="mb-3.5">
         <h4 class="text-[10px] font-bold uppercase tracking-wider text-zinc-400 dark:text-zinc-500 mb-1.5" data-i18n="contributors.academicYears">السنوات الدراسية</h4>
         <div class="flex flex-wrap gap-1.5">
-          {yearEntries.map(([year, count]) => (
-            <span class="text-[11px] font-medium px-2 py-0.5 rounded-md bg-zinc-100 dark:bg-zinc-800/80 text-zinc-700 dark:text-zinc-300 border border-zinc-200/60 dark:border-zinc-700/50">
-              <span data-i18n="contributors.yearPrefix" data-i18n-params={JSON.stringify({ y: year })}>سنة {year}:</span> <strong class="font-bold text-zinc-900 dark:text-zinc-100">{count}</strong>
-            </span>
-          ))}
+          {yearEntries.map(([year, count]) => {
+            const isReferenceBucket = year === 'references';
+            return (
+              <span class="text-[11px] font-medium px-2 py-0.5 rounded-md bg-zinc-100 dark:bg-zinc-800/80 text-zinc-700 dark:text-zinc-300 border border-zinc-200/60 dark:border-zinc-700/50">
+                <span data-i18n={isReferenceBucket ? 'categories.references' : 'nav.year'} data-i18n-params={isReferenceBucket ? undefined : JSON.stringify({ y: year })}>
+                  {isReferenceBucket ? 'References' : `Year ${year}`}
+                </span>
+                : <strong class="font-bold text-zinc-900 dark:text-zinc-100">{count}</strong>
+              </span>
+            );
+          })}
         </div>
       </div>
     )}
