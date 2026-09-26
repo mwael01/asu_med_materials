@@ -17,6 +17,7 @@ The all-in-one directory for Ain Shams University (FOM-ASU) medical students to 
 - **Direct Resource Submission**: Fast on-page form for students to submit new materials directly through the serverless Google Sheets integration without leaving the website.
 - **Student Feedback & Suggestions (الآراء والملاحظات)**: Dedicated form (`/feedback`) connecting directly to Google Sheets via serverless webhooks for ideas, broken link reports, and technical issues.
 - **Offline & PWA Ready**: Bookmark favorite resources locally and access them without an active connection.
+- **Quote of the day popup**: A popup with a quote or a meme for the users.
 
 ---
 
