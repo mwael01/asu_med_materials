@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "ASU Med Materials Firestore Schema",
   "version": "1.0.0",
-  "projectId": "medmaterials",
+  "projectId": "asumedmaterials",
   "database": "(default)",
   "lastSyncedAt": "2026-09-28T21:13:22.692Z",
   "collections": {

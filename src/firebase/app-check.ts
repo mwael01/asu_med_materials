@@ -18,6 +18,11 @@ export function initAppCheck(): AppCheck | null {
   if (typeof window === 'undefined') return null;
   if (appCheckInstance) return appCheckInstance;
 
+  // Allow completely bypassing App Check during local debugging
+  if (import.meta.env.PUBLIC_DISABLE_APP_CHECK === 'true') {
+    return null;
+  }
+
   const app = getFirebaseApp();
   if (!app) return null;
 
