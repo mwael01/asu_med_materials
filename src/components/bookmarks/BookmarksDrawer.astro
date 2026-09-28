@@ -117,6 +117,7 @@ const rawModules = await getAllModules();
 <script>
   import { getMaterialEnglishTitle } from '../../i18n/materialsTranslations';
   import { getStoredBookmarkIds, saveBookmarkIds, getStoredStudiedIds } from '../../utils/storage';
+  import { syncBookmarkToggle } from '../../utils/userSync';
   import { getCurrentLanguage, t } from '../../utils/i18n';
   import type { MaterialItem, ModuleInfo } from '../../types/materials';
 
@@ -218,7 +219,10 @@ const rawModules = await getAllModules();
           } else {
             updated = [...current, matId];
           }
+
+          const isNewlyAdded = index < 0;
           saveBookmarkIds(updated);
+          syncBookmarkToggle(matId, isNewlyAdded);
           renderSmartBookmarks();
 
           const showFn = (window as any).showToast;
@@ -294,19 +298,31 @@ const rawModules = await getAllModules();
       const unstudiedBookmarked = bookmarked.filter((m) => !studiedIds.includes(m.id));
 
       // Update card bookmark buttons in current document
-      document.querySelectorAll('[data-material-id]').forEach((card) => {
-        const matId = card.getAttribute('data-material-id');
+      document.querySelectorAll<HTMLElement>('.bookmark-btn[data-id]').forEach((btn) => {
+        const matId = btn.getAttribute('data-id');
         const isSaved = matId ? ids.includes(matId) : false;
-        const btn = card.querySelector('.bookmark-btn');
-        const emptyIcon = btn?.querySelector('.bookmark-icon-empty');
-        const filledIcon = btn?.querySelector('.bookmark-icon-filled');
+        const emptyIcon = btn.querySelector('.bookmark-icon-empty');
+        const filledIcon = btn.querySelector('.bookmark-icon-filled');
+        const countEl = btn.querySelector<HTMLElement>('.bookmark-count');
 
         if (isSaved) {
           emptyIcon?.classList.add('hidden');
           filledIcon?.classList.remove('hidden');
+          btn.classList.add('text-amber-500', 'dark:text-amber-400');
+          btn.classList.remove('text-zinc-400');
+          if (countEl) {
+            countEl.classList.add('text-amber-600', 'dark:text-amber-400');
+            countEl.classList.remove('text-zinc-500', 'dark:text-zinc-400');
+          }
         } else {
           emptyIcon?.classList.remove('hidden');
           filledIcon?.classList.add('hidden');
+          btn.classList.remove('text-amber-500', 'dark:text-amber-400');
+          btn.classList.add('text-zinc-400');
+          if (countEl) {
+            countEl.classList.remove('text-amber-600', 'dark:text-amber-400');
+            countEl.classList.add('text-zinc-500', 'dark:text-zinc-400');
+          }
         }
       });
 

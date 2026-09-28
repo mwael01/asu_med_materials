@@ -81,16 +81,19 @@ const {
       import { initLanguageClient } from '../utils/i18n';
       import { initStudiedMaterials } from '../utils/studied';
       import { initAppCheck } from '../firebase/app-check';
+      import { initUserLibrarySync } from '../utils/userSync';
 
       initLanguageClient();
       initStudiedMaterials();
       registerServiceWorker();
       initAppCheck();
+      initUserLibrarySync();
 
       document.addEventListener('astro:after-swap', () => {
         initLanguageClient();
         initStudiedMaterials();
         initAppCheck();
+        initUserLibrarySync();
       });
     </script>
 

@@ -8,7 +8,12 @@ import {
   getDoc,
   getDocs,
   setDoc,
+  updateDoc,
   deleteDoc,
+  increment,
+  arrayUnion,
+  arrayRemove,
+  onSnapshot,
   query,
   where,
   type Firestore
@@ -125,6 +130,36 @@ export async function saveMaterialToFirestore(material: MaterialItem): Promise<b
 }
 
 /**
+ * Atomically increments or decrements the bookmark/love counter for a material in Firestore.
+ */
+export async function incrementMaterialBookmarkCount(materialId: string, delta: 1 | -1): Promise<number> {
+  const db = getFirestoreDb();
+  if (!db || !materialId) return 0;
+
+  try {
+    const matRef = doc(db, MATERIALS_COLLECTION, materialId);
+    await updateDoc(matRef, {
+      bookmarksCount: increment(delta)
+    });
+    return delta;
+  } catch {
+    try {
+      const matRef = doc(db, MATERIALS_COLLECTION, materialId);
+      const snap = await getDoc(matRef);
+      if (snap.exists()) {
+        const cur = (snap.data()?.bookmarksCount as number) || 0;
+        const next = Math.max(0, cur + delta);
+        await setDoc(matRef, { bookmarksCount: next }, { merge: true });
+        return next;
+      }
+    } catch (innerErr) {
+      console.warn(`[Firestore] Failed to update bookmark count for material ${materialId}:`, innerErr);
+    }
+    return 0;
+  }
+}
+
+/**
  * Retrieves a user profile by UID.
  */
 export async function getUserProfileByUid(uid: string): Promise<UserProfile | null> {
@@ -211,6 +246,107 @@ export async function upsertUserProfile(profile: UserProfile): Promise<boolean> 
     console.error('[Firestore] Failed to save user profile:', err);
     return false;
   }
+}
+
+/**
+ * Synchronizes user bookmarks and/or completed materials to Firestore.
+ */
+export async function syncUserLibraryToFirestore(
+  uid: string,
+  payload: { bookmarks?: string[]; completedMaterials?: string[] }
+): Promise<boolean> {
+  const db = getFirestoreDb();
+  if (!db || !uid) return false;
+
+  try {
+    const userDocRef = doc(db, USERS_COLLECTION, uid);
+    const updatePayload: Record<string, any> = {
+      updatedAt: new Date().toISOString()
+    };
+    if (payload.bookmarks) {
+      updatePayload.bookmarks = payload.bookmarks;
+    }
+    if (payload.completedMaterials) {
+      updatePayload.completedMaterials = payload.completedMaterials;
+    }
+    await setDoc(userDocRef, updatePayload, { merge: true });
+    return true;
+  } catch (err) {
+    console.error(`[Firestore] Failed to sync user library for ${uid}:`, err);
+    return false;
+  }
+}
+
+/**
+ * Toggles a single bookmark item for a user in Firestore using arrayUnion/arrayRemove.
+ */
+export async function syncSingleUserBookmark(
+  uid: string,
+  materialId: string,
+  isAdded: boolean
+): Promise<boolean> {
+  const db = getFirestoreDb();
+  if (!db || !uid || !materialId) return false;
+
+  try {
+    const userDocRef = doc(db, USERS_COLLECTION, uid);
+    await updateDoc(userDocRef, {
+      bookmarks: isAdded ? arrayUnion(materialId) : arrayRemove(materialId),
+      updatedAt: new Date().toISOString()
+    });
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Toggles a single completed material item for a user in Firestore using arrayUnion/arrayRemove.
+ */
+export async function syncSingleUserStudied(
+  uid: string,
+  materialId: string,
+  isStudied: boolean
+): Promise<boolean> {
+  const db = getFirestoreDb();
+  if (!db || !uid || !materialId) return false;
+
+  try {
+    const userDocRef = doc(db, USERS_COLLECTION, uid);
+    await updateDoc(userDocRef, {
+      completedMaterials: isStudied ? arrayUnion(materialId) : arrayRemove(materialId),
+      updatedAt: new Date().toISOString()
+    });
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Listens in real-time to changes on the user's profile document (for multi-device sync).
+ */
+export function listenToUserProfile(
+  uid: string,
+  callback: (profile: UserProfile | null) => void
+): () => void {
+  const db = getFirestoreDb();
+  if (!db || !uid) return () => {};
+
+  const userDocRef = doc(db, USERS_COLLECTION, uid);
+  return onSnapshot(
+    userDocRef,
+    (snap) => {
+      if (snap.exists()) {
+        callback(snap.data() as UserProfile);
+      } else {
+        callback(null);
+      }
+    },
+    (err) => {
+      console.warn(`[Firestore] User profile subscription error for ${uid}:`, err);
+    }
+  );
 }
 
 /**

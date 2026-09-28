@@ -1,4 +1,5 @@
 import { getStoredStudiedIds, toggleItemStudied } from './storage';
+import { syncStudiedToggle } from './userSync';
 import { getCurrentLanguage, t } from './i18n';
 
 /**
@@ -176,6 +177,7 @@ function handleStudiedClick(e: Event): void {
   if (!matId) return;
 
   const isNowStudied = toggleItemStudied(matId);
+  syncStudiedToggle(matId, isNowStudied);
 
   const showFn = (window as any).showToast;
   if (typeof showFn === 'function') {

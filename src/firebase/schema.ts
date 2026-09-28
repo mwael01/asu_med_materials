@@ -44,6 +44,7 @@ export interface MaterialDocument {
   createdAt?: string;
   playlistId?: string;
   videos?: PlaylistItem[];
+  bookmarksCount?: number;
 }
 
 /**
@@ -75,6 +76,8 @@ export interface UserDocument {
   academicYear?: AcademicYear;
   role?: UserRole;
   contributionsCount?: number;
+  bookmarks?: string[];
+  completedMaterials?: string[];
   createdAt: string;
   updatedAt?: string;
 }
@@ -191,6 +194,7 @@ export const materialConverter: FirestoreDataConverter<MaterialItem> = {
       createdAt: material.createdAt || new Date().toISOString(),
       playlistId: material.playlistId || null,
       videos: Array.isArray(material.videos) ? material.videos : null,
+      bookmarksCount: typeof material.bookmarksCount === 'number' ? material.bookmarksCount : 0,
     };
   },
   fromFirestore(
@@ -216,6 +220,7 @@ export const materialConverter: FirestoreDataConverter<MaterialItem> = {
       createdAt: data.createdAt || undefined,
       playlistId: data.playlistId || undefined,
       videos: Array.isArray(data.videos) ? data.videos : undefined,
+      bookmarksCount: typeof data.bookmarksCount === 'number' ? data.bookmarksCount : 0,
     };
   }
 };
@@ -270,6 +275,8 @@ export const userConverter: FirestoreDataConverter<UserProfile> = {
       academicYear: profile.academicYear || null,
       role: profile.role || 'student',
       contributionsCount: profile.contributionsCount || 0,
+      bookmarks: Array.isArray(profile.bookmarks) ? profile.bookmarks : [],
+      completedMaterials: Array.isArray(profile.completedMaterials) ? profile.completedMaterials : [],
       createdAt: profile.createdAt || new Date().toISOString(),
       updatedAt: profile.updatedAt || new Date().toISOString()
     };
@@ -288,6 +295,8 @@ export const userConverter: FirestoreDataConverter<UserProfile> = {
       academicYear: data.academicYear || undefined,
       role: data.role || 'student',
       contributionsCount: data.contributionsCount || 0,
+      bookmarks: Array.isArray(data.bookmarks) ? data.bookmarks : [],
+      completedMaterials: Array.isArray(data.completedMaterials) ? data.completedMaterials : [],
       createdAt: data.createdAt || new Date().toISOString(),
       updatedAt: data.updatedAt || undefined,
     };

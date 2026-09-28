@@ -11,6 +11,8 @@ export interface UserProfile {
   academicYear?: AcademicYear; // Academic year 1..5
   role?: UserRole;
   contributionsCount?: number;
+  bookmarks?: string[];          // Material IDs bookmarked by user
+  completedMaterials?: string[]; // Material IDs marked as completed / studied by user
   createdAt: string;
   updatedAt?: string;
 }

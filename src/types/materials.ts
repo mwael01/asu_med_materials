@@ -58,6 +58,7 @@ export interface MaterialItem {
   createdAt?: string;
   playlistId?: string; // YouTube playlist ID if applicable
   videos?: PlaylistItem[]; // Individual videos for multi-part video series
+  bookmarksCount?: number; // Total number of students who bookmarked/loved this material
 }
 
 export interface FilterOptions {
