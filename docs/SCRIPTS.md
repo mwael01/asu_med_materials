@@ -75,23 +75,7 @@ node scripts/parse-materials-dump.js --issue 15
 
 ---
 
-## 4. Google Sheets Submissions Webhook
-
-- **Location**: [`scripts/google-sheets-submissions.js`](file:///workspaces/asu_med_materials/scripts/google-sheets-submissions.js)
-- **Purpose**: Standalone serverless Google Apps Script webhook that receives student contributions submitted via `/contribute` and appends them into a private Google Sheet for review.
-- **Setup & Deployment**: Full step-by-step deployment guide, authorization steps, and environment variable configuration are documented directly inside the code comments of [`scripts/google-sheets-submissions.js`](file:///workspaces/asu_med_materials/scripts/google-sheets-submissions.js).
-
----
-
-## 5. Google Sheets Feedback Webhook
-
-- **Location**: [`scripts/google-sheets-feedback.js`](file:///workspaces/asu_med_materials/scripts/google-sheets-feedback.js)
-- **Purpose**: Standalone serverless Google Apps Script webhook that receives student feedback, feature suggestions, broken link reports, and bugs submitted via `/feedback` and appends them into your Google Sheet.
-- **Setup & Deployment**: Full step-by-step deployment guide, authorization steps, and environment variable configuration are documented directly inside the code comments of [`scripts/google-sheets-feedback.js`](file:///workspaces/asu_med_materials/scripts/google-sheets-feedback.js) and [`docs/FEEDBACK_SETUP.md`](file:///workspaces/asu_med_materials/docs/FEEDBACK_SETUP.md).
-
----
-
-## 6. PWA Icon Generator
+## 4. PWA Icon Generator
 
 - **Location**: [`scripts/generate-icons.mjs`](file:///workspaces/asu_med_materials/scripts/generate-icons.mjs)
 - **Purpose**: Generates the required PNG icons for PWA installability (`icon-192.png`, `icon-512.png`, `icon-maskable-512.png`) from the project's SVG favicon.

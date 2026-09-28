@@ -95,14 +95,30 @@ try {
     submissionsCount = subsSnap.size;
   } catch {}
 
+  // 6. Fetch feedback count
+  let feedbackCount = 0;
+  try {
+    const fbSnap = await getDocs(collection(db, 'feedback'));
+    feedbackCount = fbSnap.size;
+  } catch {}
+
+  // 7. Fetch admin_logs count
+  let adminLogsCount = 0;
+  try {
+    const logsSnap = await getDocs(collection(db, 'admin_logs'));
+    adminLogsCount = logsSnap.size;
+  } catch {}
+
   console.log(`📊 Remote Collections Status:`);
   console.log(`   - materials:    ${materials.length} documents`);
   console.log(`   - modules:      ${modules.length} documents`);
   console.log(`   - contributors: ${contribSnap.size} documents (${authors.length} authors, ${contributorProfiles.length} profiles)`);
   console.log(`   - users:        ${usersCount} documents`);
   console.log(`   - submissions:  ${submissionsCount} documents`);
+  console.log(`   - feedback:     ${feedbackCount} documents`);
+  console.log(`   - admin_logs:   ${adminLogsCount} documents`);
 
-  // 6. Update firebase/schema.json
+  // 8. Update firebase/schema.json
   const schemaPath = resolve(__dirname, '../firebase/schema.json');
   if (existsSync(schemaPath)) {
     const schema = JSON.parse(readFileSync(schemaPath, 'utf8'));
@@ -112,6 +128,18 @@ try {
     if (schema.collections?.contributors) schema.collections.contributors.totalDocuments = contribSnap.size;
     if (schema.collections?.users) schema.collections.users.totalDocuments = usersCount;
     if (schema.collections?.submissions) schema.collections.submissions.totalDocuments = submissionsCount;
+    if (schema.collections) {
+      if (!schema.collections.feedback) {
+        schema.collections.feedback = { totalDocuments: feedbackCount };
+      } else {
+        schema.collections.feedback.totalDocuments = feedbackCount;
+      }
+      if (!schema.collections.admin_logs) {
+        schema.collections.admin_logs = { totalDocuments: adminLogsCount };
+      } else {
+        schema.collections.admin_logs.totalDocuments = adminLogsCount;
+      }
+    }
 
     writeFileSync(schemaPath, JSON.stringify(schema, null, 2), 'utf8');
     console.log(`✅ Updated firebase/schema.json with latest metadata.`);

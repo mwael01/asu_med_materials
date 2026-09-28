@@ -8,14 +8,20 @@ import {
   getDoc,
   getDocs,
   setDoc,
+  deleteDoc,
   query,
   where,
   type Firestore
 } from 'firebase/firestore';
 import { getFirebaseApp } from './config';
 import type { MaterialItem, AcademicYear, ModuleInfo } from '../types/materials';
-import type { UserProfile } from '../types/profile';
-import type { ContributorDocument } from './schema';
+import type { UserProfile, UserRole } from '../types/profile';
+import type {
+  ContributorDocument,
+  SubmissionDocument,
+  FeedbackDocument,
+  AdminLogDocument
+} from './schema';
 import type { AuthorEntry, ContributorProfile } from '../types/contributors';
 
 let firestoreInstance: Firestore | null = null;
@@ -384,5 +390,416 @@ export async function saveContributorToFirestore(contributor: ContributorDocumen
     return false;
   }
 }
+
+// ==============================================================================
+// 1. Material Submissions (Pure Firestore)
+// ==============================================================================
+const SUBMISSIONS_COLLECTION = 'submissions';
+
+/**
+ * Saves a student material submission directly to Firestore.
+ */
+export async function saveSubmissionToFirestore(sub: SubmissionDocument): Promise<string | null> {
+  const db = getFirestoreDb();
+  if (!db) return null;
+
+  try {
+    const subId = sub.id || `sub_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
+    const docRef = doc(db, SUBMISSIONS_COLLECTION, subId);
+    const payload: SubmissionDocument = {
+      ...sub,
+      id: subId,
+      timestamp: sub.timestamp || new Date().toISOString(),
+      status: sub.status || 'pending'
+    };
+    await setDoc(docRef, payload, { merge: true });
+    return subId;
+  } catch (err) {
+    console.error('[Firestore] Failed to save submission:', err);
+    return null;
+  }
+}
+
+/**
+ * Fetches submissions from Firestore, optionally filtered by status.
+ */
+export async function fetchSubmissionsFromFirestore(
+  status?: 'pending' | 'approved' | 'rejected'
+): Promise<SubmissionDocument[]> {
+  const db = getFirestoreDb();
+  if (!db) return [];
+
+  try {
+    const coll = collection(db, SUBMISSIONS_COLLECTION);
+    const q = status ? query(coll, where('status', '==', status)) : query(coll);
+    const snap = await getDocs(q);
+    const results: SubmissionDocument[] = [];
+    snap.forEach((d) => {
+      results.push(d.data() as SubmissionDocument);
+    });
+
+    results.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+    return results;
+  } catch (err) {
+    console.warn('[Firestore] Failed to fetch submissions:', err);
+    return [];
+  }
+}
+
+/**
+ * Updates submission status and logs the action if an acting admin is provided.
+ */
+export async function updateSubmissionStatus(
+  id: string,
+  status: 'approved' | 'rejected',
+  actingAdmin?: UserProfile
+): Promise<boolean> {
+  const db = getFirestoreDb();
+  if (!db) return false;
+
+  try {
+    const docRef = doc(db, SUBMISSIONS_COLLECTION, id);
+    await setDoc(docRef, { status }, { merge: true });
+
+    if (actingAdmin) {
+      await logAdminAction({
+        adminUid: actingAdmin.uid,
+        adminName: actingAdmin.displayName,
+        adminUsername: actingAdmin.username,
+        action: status === 'approved' ? 'approve_submission' : 'reject_submission',
+        targetId: id,
+        details: `Updated submission ${id} status to ${status}`
+      });
+    }
+    return true;
+  } catch (err) {
+    console.error(`[Firestore] Failed to update submission ${id}:`, err);
+    return false;
+  }
+}
+
+/**
+ * Deletes a submission document from Firestore.
+ */
+export async function deleteSubmissionFromFirestore(
+  id: string,
+  actingAdmin?: UserProfile
+): Promise<boolean> {
+  const db = getFirestoreDb();
+  if (!db) return false;
+
+  try {
+    const docRef = doc(db, SUBMISSIONS_COLLECTION, id);
+    await deleteDoc(docRef);
+
+    if (actingAdmin) {
+      await logAdminAction({
+        adminUid: actingAdmin.uid,
+        adminName: actingAdmin.displayName,
+        adminUsername: actingAdmin.username,
+        action: 'reject_submission',
+        targetId: id,
+        details: `Deleted submission document ${id}`
+      });
+    }
+    return true;
+  } catch (err) {
+    console.error(`[Firestore] Failed to delete submission ${id}:`, err);
+    return false;
+  }
+}
+
+// ==============================================================================
+// 2. Student Feedback (Pure Firestore)
+// ==============================================================================
+const FEEDBACK_COLLECTION = 'feedback';
+
+/**
+ * Saves student feedback directly to Firestore.
+ */
+export async function saveFeedbackToFirestore(feedback: FeedbackDocument): Promise<string | null> {
+  const db = getFirestoreDb();
+  if (!db) return null;
+
+  try {
+    const fbId = feedback.id || `fb_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
+    const docRef = doc(db, FEEDBACK_COLLECTION, fbId);
+    const payload: FeedbackDocument = {
+      ...feedback,
+      id: fbId,
+      status: feedback.status || 'new',
+      timestamp: feedback.timestamp || new Date().toISOString()
+    };
+    await setDoc(docRef, payload, { merge: true });
+    return fbId;
+  } catch (err) {
+    console.error('[Firestore] Failed to save feedback:', err);
+    return null;
+  }
+}
+
+/**
+ * Fetches all student feedback from Firestore.
+ */
+export async function fetchFeedbackFromFirestore(): Promise<FeedbackDocument[]> {
+  const db = getFirestoreDb();
+  if (!db) return [];
+
+  try {
+    const coll = collection(db, FEEDBACK_COLLECTION);
+    const snap = await getDocs(coll);
+    const results: FeedbackDocument[] = [];
+    snap.forEach((d) => {
+      results.push(d.data() as FeedbackDocument);
+    });
+
+    results.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+    return results;
+  } catch (err) {
+    console.warn('[Firestore] Failed to fetch feedback:', err);
+    return [];
+  }
+}
+
+/**
+ * Updates feedback status (e.g. marked as reviewed) and logs the action.
+ */
+export async function updateFeedbackStatus(
+  id: string,
+  status: 'new' | 'reviewed',
+  actingAdmin?: UserProfile
+): Promise<boolean> {
+  const db = getFirestoreDb();
+  if (!db) return false;
+
+  try {
+    const docRef = doc(db, FEEDBACK_COLLECTION, id);
+    await setDoc(docRef, { status }, { merge: true });
+
+    if (actingAdmin) {
+      await logAdminAction({
+        adminUid: actingAdmin.uid,
+        adminName: actingAdmin.displayName,
+        adminUsername: actingAdmin.username,
+        action: 'resolve_feedback',
+        targetId: id,
+        details: `Marked feedback ${id} as ${status}`
+      });
+    }
+    return true;
+  } catch (err) {
+    console.error(`[Firestore] Failed to update feedback ${id}:`, err);
+    return false;
+  }
+}
+
+/**
+ * Deletes a feedback document from Firestore.
+ */
+export async function deleteFeedbackFromFirestore(
+  id: string,
+  actingAdmin?: UserProfile
+): Promise<boolean> {
+  const db = getFirestoreDb();
+  if (!db) return false;
+
+  try {
+    const docRef = doc(db, FEEDBACK_COLLECTION, id);
+    await deleteDoc(docRef);
+
+    if (actingAdmin) {
+      await logAdminAction({
+        adminUid: actingAdmin.uid,
+        adminName: actingAdmin.displayName,
+        adminUsername: actingAdmin.username,
+        action: 'delete_feedback',
+        targetId: id,
+        details: `Deleted feedback ${id}`
+      });
+    }
+    return true;
+  } catch (err) {
+    console.error(`[Firestore] Failed to delete feedback ${id}:`, err);
+    return false;
+  }
+}
+
+// ==============================================================================
+// 3. Admin Team Management & 25 Limit
+// ==============================================================================
+export const MAX_ADMIN_COUNT = 25;
+
+/**
+ * Counts current active administrators in the platform.
+ */
+export async function getAdminCount(): Promise<number> {
+  const db = getFirestoreDb();
+  if (!db) return 0;
+
+  try {
+    const usersRef = collection(db, USERS_COLLECTION);
+    const q = query(usersRef, where('role', '==', 'admin'));
+    const snap = await getDocs(q);
+    return snap.size;
+  } catch (err) {
+    console.warn('[Firestore] Failed to count admins:', err);
+    return 0;
+  }
+}
+
+/**
+ * Fetches all admins and contributors.
+ */
+export async function fetchAdminsAndContributors(): Promise<{
+  admins: UserProfile[];
+  contributors: UserProfile[];
+}> {
+  const db = getFirestoreDb();
+  if (!db) return { admins: [], contributors: [] };
+
+  try {
+    const usersRef = collection(db, USERS_COLLECTION);
+    const snap = await getDocs(usersRef);
+    const admins: UserProfile[] = [];
+    const contributors: UserProfile[] = [];
+
+    snap.forEach((d) => {
+      const u = d.data() as UserProfile;
+      if (u.role === 'admin') {
+        admins.push(u);
+      } else if (u.role === 'contributor') {
+        contributors.push(u);
+      }
+    });
+
+    admins.sort((a, b) => (b.contributionsCount || 0) - (a.contributionsCount || 0));
+    contributors.sort((a, b) => (b.contributionsCount || 0) - (a.contributionsCount || 0));
+    return { admins, contributors };
+  } catch (err) {
+    console.warn('[Firestore] Failed to fetch team:', err);
+    return { admins: [], contributors: [] };
+  }
+}
+
+/**
+ * Searches user profile by handle (@username) or UID.
+ */
+export async function searchUserByUsernameOrUid(queryText: string): Promise<UserProfile | null> {
+  const cleaned = queryText.trim().toLowerCase().replace(/^@/, '');
+  if (!cleaned) return null;
+
+  // First try direct UID lookup
+  const byUid = await getUserProfileByUid(cleaned);
+  if (byUid) return byUid;
+
+  // Next try username lookup
+  return getUserProfileByUsername(cleaned);
+}
+
+/**
+ * Updates a user's role while strictly enforcing the 25-admin limit and logging the change.
+ */
+export async function updateUserRole(
+  uid: string,
+  newRole: UserRole,
+  actingAdmin?: UserProfile
+): Promise<{ success: boolean; error?: string }> {
+  const db = getFirestoreDb();
+  if (!db) return { success: false, error: 'Database not available' };
+
+  try {
+    const userDocRef = doc(db, USERS_COLLECTION, uid);
+    const userSnap = await getDoc(userDocRef);
+    if (!userSnap.exists()) {
+      return { success: false, error: 'User not found' };
+    }
+
+    const targetUser = userSnap.data() as UserProfile;
+
+    // Check 25 Admin Limit
+    if (newRole === 'admin' && targetUser.role !== 'admin') {
+      const currentCount = await getAdminCount();
+      if (currentCount >= MAX_ADMIN_COUNT) {
+        return {
+          success: false,
+          error: `تم الوصول للحد الأقصى للمسؤولين (${MAX_ADMIN_COUNT} مسؤولاً). يرجى خفض رتبة أحد المسؤولين الحاليين قبل إضافة مسؤول جديد.`
+        };
+      }
+    }
+
+    await setDoc(userDocRef, { role: newRole, updatedAt: new Date().toISOString() }, { merge: true });
+
+    if (actingAdmin) {
+      await logAdminAction({
+        adminUid: actingAdmin.uid,
+        adminName: actingAdmin.displayName,
+        adminUsername: actingAdmin.username,
+        action: newRole === 'admin' ? 'promote_admin' : 'demote_admin',
+        targetId: uid,
+        targetTitle: targetUser.displayName || targetUser.username,
+        details: `Changed role of @${targetUser.username} to ${newRole}`
+      });
+    }
+
+    return { success: true };
+  } catch (err: any) {
+    console.error(`[Firestore] Failed to update role for ${uid}:`, err);
+    return { success: false, error: err?.message || 'Failed to update role' };
+  }
+}
+
+// ==============================================================================
+// 4. Admin Activity Audit Logs
+// ==============================================================================
+const ADMIN_LOGS_COLLECTION = 'admin_logs';
+
+/**
+ * Records an immutable admin action log.
+ */
+export async function logAdminAction(
+  logData: Omit<AdminLogDocument, 'id' | 'timestamp'>
+): Promise<boolean> {
+  const db = getFirestoreDb();
+  if (!db) return false;
+
+  try {
+    const logId = `log_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
+    const docRef = doc(db, ADMIN_LOGS_COLLECTION, logId);
+    const payload: AdminLogDocument = {
+      ...logData,
+      id: logId,
+      timestamp: new Date().toISOString()
+    };
+    await setDoc(docRef, payload);
+    return true;
+  } catch (err) {
+    console.warn('[Firestore] Failed to record admin log:', err);
+    return false;
+  }
+}
+
+/**
+ * Fetches recent admin activity logs for display in the dashboard.
+ */
+export async function fetchRecentAdminLogs(limitCount: number = 50): Promise<AdminLogDocument[]> {
+  const db = getFirestoreDb();
+  if (!db) return [];
+
+  try {
+    const coll = collection(db, ADMIN_LOGS_COLLECTION);
+    const snap = await getDocs(coll);
+    const results: AdminLogDocument[] = [];
+    snap.forEach((d) => {
+      results.push(d.data() as AdminLogDocument);
+    });
+
+    results.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+    return results.slice(0, limitCount);
+  } catch (err) {
+    console.warn('[Firestore] Failed to fetch admin logs:', err);
+    return [];
+  }
+}
+
 
 

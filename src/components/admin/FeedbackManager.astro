@@ -1,0 +1,211 @@
+---
+// FeedbackManager.astro
+---
+
+<div class="space-y-4 text-start">
+  <div class="flex items-center justify-between border-b border-zinc-200 dark:border-zinc-800 pb-3">
+    <div class="text-xs font-bold text-zinc-900 dark:text-zinc-100 flex items-center gap-1.5">
+      <span>رسائل وملاحظات الطلاب</span>
+      <span id="fb-count-badge" class="px-2 py-0.5 rounded-full text-[10px] bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800/40"></span>
+    </div>
+
+    <button
+      type="button"
+      id="fb-refresh-btn"
+      class="text-xs text-zinc-500 hover:text-emerald-600 dark:hover:text-emerald-400 flex items-center gap-1 cursor-pointer font-medium"
+      title="تحديث"
+    >
+      <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" />
+      </svg>
+      <span>تحديث</span>
+    </button>
+  </div>
+
+  <!-- Loading State -->
+  <div id="fb-loading" class="py-10 text-center text-xs text-zinc-400">
+    <div class="w-6 h-6 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin mx-auto mb-2"></div>
+    <span>جاري تحميل الملاحظات...</span>
+  </div>
+
+  <!-- Empty State -->
+  <div id="fb-empty" class="hidden py-10 text-center space-y-1">
+    <p class="text-xs font-bold text-zinc-700 dark:text-zinc-300" data-i18n="admin.noFeedback">
+      No user feedback submitted yet.
+    </p>
+    <p class="text-[11px] text-zinc-400">أي بلاغات عن روابط أو اقتراحات من صفحة الآراء ستظهر هنا فوراً.</p>
+  </div>
+
+  <!-- Feedback List -->
+  <div id="fb-list" class="space-y-3"></div>
+</div>
+
+<script>
+  import {
+    fetchFeedbackFromFirestore,
+    updateFeedbackStatus,
+    deleteFeedbackFromFirestore
+  } from '../../firebase/firestore';
+  import { getCachedUserProfile } from '../../firebase/auth';
+  import { showToast } from '../../utils/toast';
+  import type { FeedbackDocument, FeedbackStatus } from '../../firebase/schema';
+
+  function initFeedbackManager() {
+    const listEl = document.getElementById('fb-list');
+    const loadingEl = document.getElementById('fb-loading');
+    const emptyEl = document.getElementById('fb-empty');
+    const refreshBtn = document.getElementById('fb-refresh-btn');
+    const countBadge = document.getElementById('fb-count-badge');
+
+    let allFeedback: FeedbackDocument[] = [];
+
+    async function loadFeedback() {
+      if (!listEl) return;
+      loadingEl?.classList.remove('hidden');
+      emptyEl?.classList.add('hidden');
+      listEl.innerHTML = '';
+
+      allFeedback = await fetchFeedbackFromFirestore();
+      loadingEl?.classList.add('hidden');
+
+      if (countBadge) {
+        countBadge.textContent = `${allFeedback.length}`;
+      }
+
+      renderList();
+    }
+
+    function renderList() {
+      if (!listEl) return;
+      listEl.innerHTML = '';
+
+      if (allFeedback.length === 0) {
+        emptyEl?.classList.remove('hidden');
+        return;
+      }
+      emptyEl?.classList.add('hidden');
+
+      allFeedback.forEach((fb) => {
+        const card = document.createElement('div');
+        card.className =
+          'p-4 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-2xs space-y-2.5 transition-all';
+
+        const dateStr = fb.timestamp ? new Date(fb.timestamp).toLocaleDateString('ar-EG', { dateStyle: 'medium' }) : '';
+
+        // Category Badge
+        let catText = 'رأي عام';
+        let catColor = 'bg-zinc-100 text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300';
+        if (fb.category === 'suggestion') {
+          catText = '💡 اقتراح فكرة';
+          catColor = 'bg-sky-50 dark:bg-sky-950/60 text-sky-700 dark:text-sky-300 border border-sky-200 dark:border-sky-800/40';
+        } else if (fb.category === 'content_issue') {
+          catText = '🔗 رابط أو محتوى ناقص';
+          catColor = 'bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800/40';
+        } else if (fb.category === 'bug') {
+          catText = '🐛 مشكلة تقنية';
+          catColor = 'bg-rose-50 dark:bg-rose-950/60 text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-800/40';
+        }
+
+        const isReviewed = fb.status === 'reviewed';
+
+        card.innerHTML = `
+          <div class="flex items-start justify-between gap-2">
+            <div class="flex items-center gap-2">
+              <span class="text-[10px] px-2 py-0.5 rounded-md font-bold ${catColor}">${catText}</span>
+              ${
+                isReviewed
+                  ? `<span class="text-[10px] px-2 py-0.5 rounded-md font-semibold bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800/40">✓ تمت المراجعة</span>`
+                  : `<span class="text-[10px] px-2 py-0.5 rounded-md font-semibold bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800/40">جديد</span>`
+              }
+            </div>
+            <span class="text-[10px] text-zinc-400">${dateStr}</span>
+          </div>
+
+          <div class="p-3 rounded-lg bg-zinc-50 dark:bg-zinc-800/60 text-xs text-zinc-800 dark:text-zinc-200 leading-relaxed font-sans select-text">
+            ${escapeHtml(fb.message)}
+          </div>
+
+          <div class="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-zinc-100 dark:border-zinc-800/80 text-[11px] text-zinc-500">
+            <div class="flex flex-wrap items-center gap-2">
+              <span>المرسل: <strong>${escapeHtml(fb.senderName || 'فاعل خير')}</strong></span>
+              ${fb.contact ? `<span>• تواصل: <strong class="text-emerald-600 dark:text-emerald-400 select-all">${escapeHtml(fb.contact)}</strong></span>` : ''}
+              ${fb.year && fb.year !== 'general' ? `<span>• سنة ${fb.year}</span>` : ''}
+            </div>
+
+            <div class="flex items-center gap-2">
+              <button
+                type="button"
+                class="fb-toggle-btn px-2.5 py-1 rounded-lg text-xs font-semibold ${
+                  isReviewed
+                    ? 'text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-200'
+                    : 'bg-emerald-600 text-white hover:bg-emerald-700 shadow-2xs'
+                } transition-all cursor-pointer"
+                data-id="${fb.id}"
+                data-status="${isReviewed ? 'new' : 'reviewed'}"
+              >
+                ${isReviewed ? 'تحديد كجديد' : '✓ تحديد كتمت المراجعة'}
+              </button>
+
+              <button
+                type="button"
+                class="fb-delete-btn p-1.5 rounded-lg text-zinc-400 hover:text-rose-600 dark:hover:text-rose-400 transition-all cursor-pointer"
+                data-id="${fb.id}"
+                title="حذف"
+              >
+                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0"/></svg>
+              </button>
+            </div>
+          </div>
+        `;
+
+        listEl.appendChild(card);
+      });
+
+      attachCardHandlers();
+    }
+
+    function attachCardHandlers() {
+      if (!listEl) return;
+      listEl.querySelectorAll('.fb-toggle-btn').forEach((btn) => {
+        btn.addEventListener('click', async () => {
+          const id = btn.getAttribute('data-id');
+          const nextStatus = (btn.getAttribute('data-status') as FeedbackStatus) || 'reviewed';
+          if (!id) return;
+          const adminUser = getCachedUserProfile();
+          await updateFeedbackStatus(id, nextStatus, adminUser || undefined);
+          showToast(nextStatus === 'reviewed' ? 'تم تحديد الملاحظة كمراجعة' : 'تم إعادة تعيين الملاحظة', 'success');
+          await loadFeedback();
+        });
+      });
+
+      listEl.querySelectorAll('.fb-delete-btn').forEach((btn) => {
+        btn.addEventListener('click', async () => {
+          const id = btn.getAttribute('data-id');
+          if (!id) return;
+          if (!confirm('هل تريد بالتأكيد حذف هذه الرسالة؟')) return;
+          const adminUser = getCachedUserProfile();
+          await deleteFeedbackFromFirestore(id, adminUser || undefined);
+          showToast('تم حذف الرسالة.', 'info');
+          await loadFeedback();
+        });
+      });
+    }
+
+    refreshBtn?.addEventListener('click', loadFeedback);
+
+    function escapeHtml(str: string): string {
+      if (!str) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
+    loadFeedback();
+  }
+
+  initFeedbackManager();
+  document.addEventListener('astro:after-swap', initFeedbackManager);
+</script>

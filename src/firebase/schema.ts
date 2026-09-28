@@ -16,6 +16,8 @@ export const COLLECTIONS = {
   MODULES: 'modules',
   USERS: 'users',
   SUBMISSIONS: 'submissions',
+  FEEDBACK: 'feedback',
+  ADMIN_LOGS: 'admin_logs',
   CONTRIBUTORS: 'contributors'
 } as const;
 
@@ -99,7 +101,51 @@ export interface SubmissionDocument {
 }
 
 /**
- * 5. Contributor & Team Document Schema in Firestore
+ * 5. Student Feedback Document Schema in Firestore
+ */
+export type FeedbackCategory = 'suggestion' | 'content_issue' | 'bug' | 'general';
+export type FeedbackStatus = 'new' | 'reviewed';
+
+export interface FeedbackDocument {
+  id: string;
+  category: FeedbackCategory;
+  message: string;
+  year?: AcademicYear | 'general';
+  moduleId?: string;
+  senderName?: string;
+  senderUid?: string;
+  contact?: string; // Telegram / WhatsApp / Email
+  pageUrl?: string;
+  status: FeedbackStatus;
+  timestamp: string;
+}
+
+/**
+ * 6. Admin Action Audit Log Schema in Firestore
+ */
+export type AdminActionType =
+  | 'publish_material'
+  | 'approve_submission'
+  | 'reject_submission'
+  | 'resolve_feedback'
+  | 'delete_feedback'
+  | 'promote_admin'
+  | 'demote_admin';
+
+export interface AdminLogDocument {
+  id: string;
+  adminUid: string;
+  adminName: string;
+  adminUsername: string;
+  action: AdminActionType;
+  targetId?: string;
+  targetTitle?: string;
+  details?: string;
+  timestamp: string;
+}
+
+/**
+ * 7. Contributor & Team Document Schema in Firestore
  */
 export interface ContributorDocument {
   id: string;
@@ -327,6 +373,66 @@ export const contributorConverter: FirestoreDataConverter<ContributorDocument> =
       note: data.note || undefined,
       noteEn: data.noteEn || undefined,
       year: data.year ?? undefined,
+    };
+  }
+};
+
+/**
+ * Firestore Data Converter for Feedback Documents.
+ */
+export const feedbackConverter: FirestoreDataConverter<FeedbackDocument> = {
+  toFirestore(fb: FeedbackDocument): DocumentData {
+    return {
+      ...fb,
+      timestamp: fb.timestamp || new Date().toISOString()
+    };
+  },
+  fromFirestore(
+    snapshot: QueryDocumentSnapshot,
+    options?: SnapshotOptions
+  ): FeedbackDocument {
+    const data = snapshot.data(options);
+    return {
+      id: snapshot.id,
+      category: data.category || 'general',
+      message: data.message || '',
+      year: data.year || 'general',
+      moduleId: data.moduleId || undefined,
+      senderName: data.senderName || 'فاعل خير',
+      senderUid: data.senderUid || undefined,
+      contact: data.contact || undefined,
+      pageUrl: data.pageUrl || undefined,
+      status: data.status || 'new',
+      timestamp: data.timestamp || new Date().toISOString(),
+    };
+  }
+};
+
+/**
+ * Firestore Data Converter for Admin Activity Log Documents.
+ */
+export const adminLogConverter: FirestoreDataConverter<AdminLogDocument> = {
+  toFirestore(log: AdminLogDocument): DocumentData {
+    return {
+      ...log,
+      timestamp: log.timestamp || new Date().toISOString()
+    };
+  },
+  fromFirestore(
+    snapshot: QueryDocumentSnapshot,
+    options?: SnapshotOptions
+  ): AdminLogDocument {
+    const data = snapshot.data(options);
+    return {
+      id: snapshot.id,
+      adminUid: data.adminUid || '',
+      adminName: data.adminName || 'Admin',
+      adminUsername: data.adminUsername || 'admin',
+      action: data.action || 'publish_material',
+      targetId: data.targetId || undefined,
+      targetTitle: data.targetTitle || undefined,
+      details: data.details || undefined,
+      timestamp: data.timestamp || new Date().toISOString(),
     };
   }
 };

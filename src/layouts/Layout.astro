@@ -59,6 +59,8 @@ const {
         } catch (e) {}
       })();
     </script>
+    <!-- Google reCAPTCHA Enterprise for Firebase App Check -->
+    <script src="https://www.google.com/recaptcha/enterprise.js?render=6LcmYdQtAAAAADm7iH3OYMYvLHHo4dYARdzT2AHl" async defer></script>
   </head>
   <body class="min-h-screen flex flex-col bg-zinc-50/60 dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100 antialiased selection:bg-emerald-500 selection:text-white">
     <Navbar />
@@ -73,19 +75,22 @@ const {
     <PwaInstallToast />
     <Footer />
 
-    <!-- Service Worker registration, studied materials, & i18n client synchronization -->
+    <!-- Service Worker registration, studied materials, App Check, & i18n client synchronization -->
     <script>
       import { registerServiceWorker } from '../utils/pwa';
       import { initLanguageClient } from '../utils/i18n';
       import { initStudiedMaterials } from '../utils/studied';
+      import { initAppCheck } from '../firebase/app-check';
 
       initLanguageClient();
       initStudiedMaterials();
       registerServiceWorker();
+      initAppCheck();
 
       document.addEventListener('astro:after-swap', () => {
         initLanguageClient();
         initStudiedMaterials();
+        initAppCheck();
       });
     </script>
 
