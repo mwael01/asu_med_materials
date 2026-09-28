@@ -1,6 +1,9 @@
 ---
-import { materialsData } from '../../data/materials';
-import { modulesData } from '../../data/modules';
+import { getAllMaterials } from '../../data/materials';
+import { getAllModules } from '../../data/modules';
+
+const rawMaterials = await getAllMaterials();
+const rawModules = await getAllModules();
 ---
 
 <!-- Smart Bookmarks Slide-over Drawer (RTL Friendly) -->
@@ -106,7 +109,7 @@ import { modulesData } from '../../data/modules';
   aria-hidden="true"
 ></div>
 
-<script define:vars={{ rawMaterials: materialsData, rawModules: modulesData }}>
+<script define:vars={{ rawMaterials, rawModules }}>
   window.__ALL_MATERIALS = rawMaterials;
   window.__ALL_MODULES = rawModules;
 </script>

@@ -6,7 +6,8 @@ import ResourceGrid from '../components/materials/ResourceGrid.astro';
 import { getAllMaterials } from '../data/materials';
 import { getMaterialEnglishTitle, getMaterialEnglishDesc } from '../i18n/materialsTranslations';
 
-const allMaterials = getAllMaterials().map((m) => ({
+const rawMaterials = await getAllMaterials();
+const allMaterials = rawMaterials.map((m) => ({
   ...m,
   titleEn: getMaterialEnglishTitle(m.id, m.title),
   descEn: m.description ? getMaterialEnglishDesc(m.id, m.description) : undefined,

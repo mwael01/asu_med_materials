@@ -11,7 +11,6 @@
     "preview": "astro preview",
     "astro": "astro",
     "seed:firestore": "node scripts/seed-firestore.mjs",
-    "schema:pull": "node scripts/pull-firestore.mjs",
     "schema:sync": "node scripts/sync-firebase-schema.mjs"
   },
   "dependencies": {
@@ -30,6 +29,7 @@
     "protobufjs": true
   },
   "devDependencies": {
+    "@astrojs/vercel": "^11.0.11",
     "sharp": "^0.35.4"
   }
 }

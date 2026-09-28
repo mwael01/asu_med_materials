@@ -3,24 +3,21 @@ import Layout from '../../layouts/Layout.astro';
 import ResourceCard from '../../components/materials/ResourceCard.astro';
 import FilterToolbar from '../../components/search/FilterToolbar.astro';
 import SubjectSelectionCards from '../../components/materials/SubjectSelectionCards.astro';
-import { modulesData } from '../../data/modules';
+import { getModuleById } from '../../data/modules';
 import { getMaterialsByModule } from '../../data/materials';
 import { subjectToSlug } from '../../utils/slug';
-import type { ModuleInfo } from '../../types/materials';
 
-export function getStaticPaths() {
-  return modulesData.map((mod) => ({
-    params: { id: mod.id },
-    props: { module: mod }
-  }));
+const { id } = Astro.params;
+if (!id) {
+  return Astro.redirect('/404');
 }
 
-interface Props {
-  module: ModuleInfo;
+const module = await getModuleById(id);
+if (!module) {
+  return Astro.redirect('/404');
 }
 
-const { module } = Astro.props;
-const moduleMaterials = getMaterialsByModule(module.id);
+const moduleMaterials = await getMaterialsByModule(module.id);
 
 // Compute counts per subject
 const materialCounts: Record<string, number> = {};

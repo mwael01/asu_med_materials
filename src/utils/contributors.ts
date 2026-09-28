@@ -1,19 +1,41 @@
-import { materialsData } from '../data/materials';
-import contributorsFile from '../data/contributors.json';
+import { getAllMaterials } from '../data/materials';
+import { fetchContributorsFromFirestore } from '../firebase/firestore';
 import type {
   AuthorEntry,
   ContributorProfile,
   ContributorStats,
-  ContributorsFile,
 } from '../types/contributors';
 
-const data = contributorsFile as ContributorsFile;
+let contributorsCache: {
+  authors: AuthorEntry[];
+  contributorProfiles: ContributorProfile[];
+  timestamp: number;
+} | null = null;
 
-export function getAuthors(): AuthorEntry[] {
+const CACHE_TTL_MS = 15_000;
+
+async function getLiveContributorsData() {
+  const now = Date.now();
+  if (contributorsCache && now - contributorsCache.timestamp < CACHE_TTL_MS) {
+    return contributorsCache;
+  }
+
+  const data = await fetchContributorsFromFirestore();
+  if (data && (data.authors.length > 0 || data.contributorProfiles.length > 0)) {
+    contributorsCache = { ...data, timestamp: now };
+    return contributorsCache;
+  }
+
+  return contributorsCache || { authors: [], contributorProfiles: [], timestamp: now };
+}
+
+export async function getAuthors(): Promise<AuthorEntry[]> {
+  const data = await getLiveContributorsData();
   return [...data.authors].sort((a, b) => a.order - b.order);
 }
 
-export function getContributorProfiles(): ContributorProfile[] {
+export async function getContributorProfiles(): Promise<ContributorProfile[]> {
+  const data = await getLiveContributorsData();
   return data.contributorProfiles;
 }
 
@@ -31,11 +53,12 @@ function namesOf(value: string | string[] | undefined): string[] {
  * (whoever prepared the material). `addedBy` is intentionally ignored.
  * Sorted descending by total contributions.
  */
-export function getAllContributors(): ContributorStats[] {
+export async function getAllContributors(): Promise<ContributorStats[]> {
   const grouped = new Map<string, ContributorStats>();
   const subjectSets = new Map<string, Set<string>>();
+  const materials = await getAllMaterials();
 
-  for (const material of materialsData) {
+  for (const material of materials) {
     for (const authorName of namesOf(material.author)) {
       const trimmed = authorName.trim();
       if (!trimmed) continue;
@@ -67,7 +90,7 @@ export function getAllContributors(): ContributorStats[] {
     entry.subjects = subjectSets.get(key)?.size ?? 0;
   }
 
-  const profiles = getContributorProfiles();
+  const profiles = await getContributorProfiles();
   for (const profile of profiles) {
     const keys = [profile.name, ...profile.matchNames].map(normalizeName);
     const existingKey = keys.find((k) => grouped.has(k));
@@ -102,11 +125,12 @@ export const getContentCreators = getAllContributors;
  * (students/contributors who collected, shared, and added materials to the website).
  * Sorted descending by total contributions.
  */
-export function getResourceContributors(): ContributorStats[] {
+export async function getResourceContributors(): Promise<ContributorStats[]> {
   const grouped = new Map<string, ContributorStats>();
   const subjectSets = new Map<string, Set<string>>();
+  const materials = await getAllMaterials();
 
-  for (const material of materialsData) {
+  for (const material of materials) {
     for (const adderName of namesOf(material.addedBy)) {
       const trimmed = adderName.trim();
       if (!trimmed) continue;
@@ -139,7 +163,7 @@ export function getResourceContributors(): ContributorStats[] {
   }
 
   // 1. Link with ContributorProfiles if matched
-  const profiles = getContributorProfiles();
+  const profiles = await getContributorProfiles();
   for (const profile of profiles) {
     const keys = [profile.name, ...profile.matchNames].map(normalizeName);
     const existingKey = keys.find((k) => grouped.has(k));
@@ -153,7 +177,7 @@ export function getResourceContributors(): ContributorStats[] {
   }
 
   // 2. Link with Authors if matched and doesn't already have profile
-  const authors = getAuthors();
+  const authors = await getAuthors();
   for (const author of authors) {
     const matchNames = [author.name, ...(author.matchNames ?? [])];
     const keys = matchNames.map(normalizeName);
@@ -180,10 +204,12 @@ export function getResourceContributors(): ContributorStats[] {
   );
 }
 
-export function getContributorByName(name: string): ContributorStats | undefined {
+export async function getContributorByName(name: string): Promise<ContributorStats | undefined> {
   const key = normalizeName(name);
-  return getAllContributors().find((c) => normalizeName(c.name) === key)
-    || getResourceContributors().find((c) => normalizeName(c.name) === key);
+  const allContributors = await getAllContributors();
+  const resourceContributors = await getResourceContributors();
+  return allContributors.find((c) => normalizeName(c.name) === key)
+    || resourceContributors.find((c) => normalizeName(c.name) === key);
 }
 
 export function getInitials(name: string): string {

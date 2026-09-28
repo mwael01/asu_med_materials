@@ -1,6 +1,5 @@
 import type { ModuleInfo } from '../types/materials';
-import modulesSnapshot from '../firebase/schema/modules-cache.json';
-import { fetchModulesFromFirestore } from '../firebase/firestore';
+import { fetchModulesFromFirestore, getModuleByIdFromFirestore } from '../firebase/firestore';
 
 export const REFERENCE_BOOK_SUBJECTS: string[] = [
   'Anatomy',
@@ -14,33 +13,41 @@ export const REFERENCE_BOOK_SUBJECTS: string[] = [
   'Terminology'
 ];
 
-/**
- * Local Firestore schema snapshot of curriculum modules for zero-failure SSG builds,
- * instant guest access, and fallback when offline.
- */
-export const modulesData: ModuleInfo[] = modulesSnapshot as ModuleInfo[];
-
-export function getModulesByYear(year: number): ModuleInfo[] {
-  return modulesData.filter((m) => m.year === year);
-}
-
-export function getModuleById(id: string): ModuleInfo | undefined {
-  return modulesData.find((m) => m.id === id);
-}
+let modulesMemoryCache: { data: ModuleInfo[]; timestamp: number } | null = null;
+const CACHE_TTL_MS = 15_000; // 15 seconds
 
 /**
- * Client-side dynamic modules retriever:
- * Fetches updated modules from Cloud Firestore (IndexedDB cache).
- * Falls back to local snapshot if offline or network unavailable.
+ * Fetches all curriculum modules directly from Cloud Firestore (single source of truth).
  */
-export async function getDynamicModules(year?: number): Promise<ModuleInfo[]> {
-  try {
-    const firestoreModules = await fetchModulesFromFirestore(year as any);
-    if (firestoreModules && firestoreModules.length > 0) {
-      return firestoreModules;
-    }
-  } catch (e) {
-    console.warn('[Modules] Falling back to local snapshot:', e);
+export async function getAllModules(): Promise<ModuleInfo[]> {
+  const now = Date.now();
+  if (modulesMemoryCache && now - modulesMemoryCache.timestamp < CACHE_TTL_MS) {
+    return modulesMemoryCache.data;
   }
-  return year ? getModulesByYear(year) : modulesData;
+
+  const modules = await fetchModulesFromFirestore();
+  if (modules && modules.length > 0) {
+    modulesMemoryCache = { data: modules, timestamp: now };
+    return modules;
+  }
+
+  return modulesMemoryCache?.data || [];
+}
+
+/**
+ * Filter curriculum modules by academic year directly from Firestore.
+ */
+export async function getModulesByYear(year: number): Promise<ModuleInfo[]> {
+  const modules = await getAllModules();
+  return modules.filter((m) => m.year === year);
+}
+
+/**
+ * Fetch a single module by ID from Cloud Firestore.
+ */
+export async function getModuleById(id: string): Promise<ModuleInfo | null> {
+  const mod = await getModuleByIdFromFirestore(id);
+  if (mod) return mod;
+  const all = await getAllModules();
+  return all.find((m) => m.id === id) || null;
 }

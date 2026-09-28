@@ -4,12 +4,12 @@ import SearchBar from '../components/search/SearchBar.astro';
 import ModuleCard from '../components/materials/ModuleCard.astro';
 import ResourceCard from '../components/materials/ResourceCard.astro';
 import { getAllMaterials } from '../data/materials';
-import { modulesData } from '../data/modules';
+import { getAllModules } from '../data/modules';
 import { subjectToSlug } from '../utils/slug';
 import type { MaterialItem, ModuleInfo } from '../types/materials';
 
-const allMaterials = getAllMaterials();
-const allModules = modulesData;
+const allMaterials = await getAllMaterials();
+const allModules = await getAllModules();
 
 // Organize materials into Module > Subject groups for the student's personal library
 interface LibrarySubjectGroup {

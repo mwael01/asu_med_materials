@@ -4,9 +4,9 @@ import AuthorCard from '../components/contributors/AuthorCard.astro';
 import ContributorCard from '../components/contributors/ContributorCard.astro';
 import { getAllContributors, getAuthors, getResourceContributors } from '../utils/contributors';
 
-const contributors = getAllContributors();
-const resourceContributors = getResourceContributors();
-const authors = getAuthors();
+const contributors = await getAllContributors();
+const resourceContributors = await getResourceContributors();
+const authors = await getAuthors();
 const CREATORS_INITIAL_LIMIT = 12;
 ---
 

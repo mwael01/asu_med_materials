@@ -1,26 +1,22 @@
 ---
 import Layout from '../../layouts/Layout.astro';
 import TypeBadge from '../../components/materials/TypeBadge.astro';
-import { getAllPlaylists } from '../../data/materials';
+import { getPlaylistById } from '../../data/materials';
 import { getModuleById } from '../../data/modules';
 import { subjectToSlug } from '../../utils/slug';
 import { getMaterialEnglishTitle, getMaterialEnglishDesc } from '../../i18n/materialsTranslations';
-import type { MaterialItem } from '../../types/materials';
 
-export function getStaticPaths() {
-  const playlists = getAllPlaylists();
-  return playlists.map((item) => ({
-    params: { id: item.id },
-    props: { playlist: item }
-  }));
+const { id } = Astro.params;
+if (!id) {
+  return Astro.redirect('/playlists');
 }
 
-interface Props {
-  playlist: MaterialItem;
+const playlist = await getPlaylistById(id);
+if (!playlist) {
+  return Astro.redirect('/playlists');
 }
 
-const { playlist } = Astro.props;
-const moduleInfo = playlist.moduleId ? getModuleById(playlist.moduleId) : undefined;
+const moduleInfo = playlist.moduleId ? await getModuleById(playlist.moduleId) : undefined;
 
 const titleEn = getMaterialEnglishTitle(playlist.id, playlist.title);
 const descEn = playlist.description ? getMaterialEnglishDesc(playlist.id, playlist.description) : undefined;

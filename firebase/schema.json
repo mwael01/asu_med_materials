@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "projectId": "medmaterials",
   "database": "(default)",
-  "lastSyncedAt": "2026-09-28T20:39:01.115Z",
+  "lastSyncedAt": "2026-09-28T21:13:22.692Z",
   "collections": {
     "materials": {
       "collectionName": "materials",

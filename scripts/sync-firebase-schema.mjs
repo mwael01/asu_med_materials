@@ -1,14 +1,10 @@
 #!/usr/bin/env node
 /**
- * Schema Synchronization Script: Cloud Firestore <-> firebase/schema.json & Local Caches
+ * Schema Synchronization Script: Cloud Firestore <-> firebase/schema.json
  *
- * Connects to remote Firestore, inspects collection counts, pulls latest live documents,
+ * Connects to remote Firestore, inspects collection counts, pulls latest live metadata,
  * and updates:
  *   - firebase/schema.json (metadata, counts, lastSyncedAt)
- *   - src/firebase/schema/materials-cache.json
- *   - src/firebase/schema/modules-cache.json
- *   - src/firebase/schema/contributors-cache.json
- *   - src/data/contributors.json (sync mirror)
  *
  * Usage:
  *   node scripts/sync-firebase-schema.mjs
@@ -119,28 +115,6 @@ try {
 
     writeFileSync(schemaPath, JSON.stringify(schema, null, 2), 'utf8');
     console.log(`✅ Updated firebase/schema.json with latest metadata.`);
-  }
-
-  // 7. Update local schema caches
-  const schemaDir = resolve(__dirname, '../src/firebase/schema');
-
-  if (materials.length > 0) {
-    writeFileSync(resolve(schemaDir, 'materials-cache.json'), JSON.stringify(materials, null, 2), 'utf8');
-    console.log(`✅ Refreshed src/firebase/schema/materials-cache.json (${materials.length} items).`);
-  }
-
-  if (modules.length > 0) {
-    writeFileSync(resolve(schemaDir, 'modules-cache.json'), JSON.stringify(modules, null, 2), 'utf8');
-    console.log(`✅ Refreshed src/firebase/schema/modules-cache.json (${modules.length} items).`);
-  }
-
-  if (authors.length > 0 || contributorProfiles.length > 0) {
-    const contribOutput = { authors, contributorProfiles };
-    writeFileSync(resolve(schemaDir, 'contributors-cache.json'), JSON.stringify(contribOutput, null, 2), 'utf8');
-    // Also update data mirror
-    const dataContribPath = resolve(__dirname, '../src/data/contributors.json');
-    writeFileSync(dataContribPath, JSON.stringify(contribOutput, null, 2), 'utf8');
-    console.log(`✅ Refreshed src/firebase/schema/contributors-cache.json and src/data/contributors.json (${authors.length} authors, ${contributorProfiles.length} profiles).`);
   }
 
   console.log('🎉 Schema synchronization completed successfully!');

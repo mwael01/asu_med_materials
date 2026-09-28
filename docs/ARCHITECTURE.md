@@ -10,13 +10,14 @@ ASU Med Materials is a lightweight, static-first web portal built with [Astro](h
 
 ### Key Technical Pillars
 
-- **Zero-runtime Static Core**: Fast load times on mobile connections inside hospital and university campuses.
+- **Dynamic On-Demand Server Core**: Server-side rendering (SSR) powered by Astro (`output: 'server'`) with `@astrojs/vercel`, serving fresh dynamic content on every request while maintaining lightning-fast edge performance.
+- **Cloud Firestore Single Source of Truth**: All study materials, curriculum modules, and contributors live in Cloud Firestore. Local JSON cache snapshots have been eliminated to ensure real-time consistency.
+- **In-Memory Server Request Deduplication**: A lightweight 15-second TTL in-memory cache deduplicates repetitive Firestore queries within and across concurrent SSR requests.
 - **Arabic-First with Technical English**: Arabic RTL interface for clear local usability, paired with standard English terminology for subjects (Anatomy, Histology, etc.), channel names, and drive labels.
 - **Multistage Year & Module Selection**: Students are guided on first visit through a two-stage prompt (Year & Module) saved locally in `localStorage` for personalized, instant access.
 - **Structured Grouped Categorization**: Materials are grouped by functional learning category (Central Drives, Lectures, Practical Labs & OSPE, Summaries, and Past Exams).
 - **Default White Theme**: Clean high-contrast white theme by default, with an optional dark mode toggle saved in `localStorage`.
-- **Git-driven Content Management**: Materials are stored in typed JSON / data files within the repository, allowing easy peer contributions and version control.
-- **Offline Bookmarks & PWA**: Saved client-side in `localStorage` (`asumed_bookmarks`) with web app manifest support.
+- **Offline Bookmarks & PWA**: Saved client-side in `localStorage` (`asumed_bookmarks`) with web app manifest and multi-tab IndexedDB cache support.
 
 ---
 
@@ -42,25 +43,15 @@ asu_med_materials/
 │   │   ├── navigation/          # Navbar.astro, Footer.astro
 │   │   ├── search/              # SearchBar.astro, FilterToolbar.astro
 │   │   └── selection/           # MultistageSelector.astro (Two-stage Year/Module modal)
-│   ├── data/                    # Structured study materials & curriculum data
-│   │   ├── modules.ts           # Year and module metadata (MED101-MED504)
-│   │   ├── contributors.json    # Site team authors + contributor profile overrides
+│   ├── data/                    # Dynamic data query functions & caching
+│   │   ├── modules.ts           # Firestore module queries (getAllModules, getModuleById)
 │   │   ├── materials.ts         # Facade re-exporting from ./materials/index
-│   │   └── materials/           # Modular study materials database
-│   │       ├── index.ts         # Unified materials aggregator and query functions
-│   │       └── blood/           # Year 2 - Blood & Lymphatic System (MED201)
-│   │           ├── blood.ts     # Aggregates all blood subject JSON files
-│   │           ├── central/central.json
-│   │           ├── anatomy/anatomy.json
-│   │           ├── physiology/physiology.json
-│   │           ├── histology/histology.json
-│   │           ├── biochemistry/biochemistry.json
-│   │           ├── pharmacology/pharmacology.json
-│   │           ├── pathology/pathology.json
-│   │           ├── parasitology/parasitology.json
-│   │           ├── microbiology/microbiology.json
-│   │           ├── clinical/clinical.json
-│   │           └── exams/exams.json
+│   │   └── materials/           # Modular study materials loaders
+│   │       └── index.ts         # Firestore materials queries with 15s in-memory deduplication
+│   ├── firebase/                # Firebase client, converters & schema types
+│   │   ├── client.ts            # Firebase app, auth, firestore (IndexedDB cache), storage
+│   │   ├── firestore.ts         # Firestore data access & converters
+│   │   └── schema.ts            # Strongly typed schema interfaces
 │   ├── i18n/                    # Centralized bilingual dictionaries
 │   │   └── translations.ts      # Canonical Arabic & English key-value dictionaries
 │   ├── layouts/                 # Base page layouts
@@ -217,21 +208,21 @@ export interface MaterialItem {
 
 10. **Firebase Integration, Offline-First Persistence & Student Profiles**:
    - **Cloud Firestore**: Configured with modular SDK v12 `persistentLocalCache` and `persistentMultipleTabManager` for multi-tab IndexedDB offline persistence. Materials, curriculum modules, contributor data, and student profiles queried online are cached directly in IndexedDB for immediate offline access.
-   - **Dual-Layer Offline Persistence**: 
-     1. *Static SSG Baseline*: Build time reads bundled local schema snapshots (`src/firebase/schema/materials-cache.json`, `modules-cache.json`, `contributors-cache.json`) so `pnpm build` never fails even in offline or unconfigured CI/CD environments.
-     2. *Client IndexedDB Firestore Cache*: Dynamically synchronizes online additions while serving 100% offline from local cache with zero latency.
-     3. *Service Worker*: Pre-caches `/profile`, core assets, and static pages in `public/sw.js`.
+   - **Offline-First Persistence Architecture**:
+     1. *Dynamic SSR on Vercel*: On-demand server rendering queries Firestore directly with 15s in-memory request deduplication, eliminating static snapshot rebuilds and stale data.
+     2. *Client IndexedDB Firestore Cache*: Modular Firebase SDK v12 with `persistentLocalCache` and `persistentMultipleTabManager` caches queries across tabs for instant offline retrieval without network roundtrips.
+     3. *Service Worker*: Pre-caches `/profile`, core assets, and shell pages in `public/sw.js`.
    - **Dynamic Collections & Local Schema Architecture**:
-     - `materials`: 163+ medical study drives, playlists, exam papers, and textbooks across academic years.
-     - `modules`: Curriculum modules (e.g. `year2-blood`, `year1-reference-books`) stored dynamically in Firestore with bilingual descriptions and subjects, fetched via `getDynamicModules()`.
+     - `materials`: 163+ medical study drives, playlists, exam papers, and textbooks across academic years, queried on-demand.
+     - `modules`: Curriculum modules stored dynamically in Firestore with bilingual descriptions and subjects, fetched via `getAllModules()`.
      - `contributors`: Platform team authors and community contributors dynamically managed with roles and badges.
      - `users`: Medical student profiles with custom handles and contribution counts.
      - `submissions`: Pending and approved peer material submissions.
    - **Schema Specification & Synchronization**:
-     - [`firebase/schema.json`](file:///home/mwael/work/asu_med_materials/firebase/schema.json): Canonical JSON schema defining document types, constraints, and live document counts.
+     - [`firebase/schema.json`](file:///home/mwael/work/asu_med_materials/firebase/schema.json): Canonical JSON schema defining document types, constraints, and live document counts (local contract for syntax validation).
      - [`src/firebase/schema.ts`](file:///home/mwael/work/asu_med_materials/src/firebase/schema.ts): Strongly typed TypeScript interfaces and `FirestoreDataConverter` implementations (`materialConverter`, `moduleConverter`, `contributorConverter`, `userConverter`, `submissionConverter`).
-     - [`scripts/sync-firebase-schema.mjs`](file:///home/mwael/work/asu_med_materials/scripts/sync-firebase-schema.mjs) (`pnpm run schema:sync`): Synchronizes live Firestore collection states and document counts with `firebase/schema.json` and updates local cache files.
-     - [`scripts/seed-firestore.mjs`](file:///home/mwael/work/asu_med_materials/scripts/seed-firestore.mjs): Uploads local materials, modules, and contributors to Cloud Firestore.
+     - [`scripts/sync-firebase-schema.mjs`](file:///home/mwael/work/asu_med_materials/scripts/sync-firebase-schema.mjs) (`pnpm run schema:sync`): Synchronizes live Firestore collection states and document counts with `firebase/schema.json`.
+     - [`scripts/seed-firestore.mjs`](file:///home/mwael/work/asu_med_materials/scripts/seed-firestore.mjs): Uploads initial/seed materials, modules, and contributors to Cloud Firestore.
    - **Zero-Friction Guest Mode**: Visitors can browse, search, use bookmarks, track completed materials, and submit resources completely offline without creating an account.
    - **Firebase Authentication**: Supports one-click Google Sign-In and Email/Password registration. Profiles are cached locally in `localStorage` for zero-delay UI rendering on page load.
    - **Firebase Storage**: Securely handles avatar image uploads (`avatars/{userId}_{timestamp}.ext`) with strict MIME type and 2.5 MB size validation.
