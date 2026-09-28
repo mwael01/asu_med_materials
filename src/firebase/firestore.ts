@@ -63,6 +63,31 @@ export function getFirestoreDb(): Firestore | null {
   return firestoreInstance;
 }
 
+/**
+ * Recursively strips keys with undefined values from objects before writing to Cloud Firestore.
+ * Firestore strictly rejects documents containing undefined field values.
+ */
+export function sanitizeFirestorePayload<T extends Record<string, any>>(obj: T): T {
+  if (!obj || typeof obj !== 'object') return obj;
+  const result: any = Array.isArray(obj) ? [] : {};
+
+  for (const [key, value] of Object.entries(obj)) {
+    if (value !== undefined) {
+      if (value !== null && typeof value === 'object' && !Array.isArray(value) && !(value instanceof Date)) {
+        result[key] = sanitizeFirestorePayload(value);
+      } else if (Array.isArray(value)) {
+        result[key] = value
+          .filter((item) => item !== undefined)
+          .map((item) => (typeof item === 'object' && item !== null ? sanitizeFirestorePayload(item) : item));
+      } else {
+        result[key] = value;
+      }
+    }
+  }
+
+  return result;
+}
+
 // Collections
 const MATERIALS_COLLECTION = 'materials';
 const USERS_COLLECTION = 'users';
@@ -121,7 +146,7 @@ export async function saveMaterialToFirestore(material: MaterialItem): Promise<b
 
   try {
     const docRef = doc(db, MATERIALS_COLLECTION, material.id);
-    await setDoc(docRef, material, { merge: true });
+    await setDoc(docRef, sanitizeFirestorePayload(material), { merge: true });
     return true;
   } catch (err) {
     console.error('[Firestore] Failed to save material:', err);
@@ -240,7 +265,7 @@ export async function upsertUserProfile(profile: UserProfile): Promise<boolean> 
       username: profile.username.trim().toLowerCase().replace(/^@/, ''),
       updatedAt: new Date().toISOString()
     };
-    await setDoc(userDocRef, payload, { merge: true });
+    await setDoc(userDocRef, sanitizeFirestorePayload(payload), { merge: true });
     return true;
   } catch (err) {
     console.error('[Firestore] Failed to save user profile:', err);
@@ -269,7 +294,7 @@ export async function syncUserLibraryToFirestore(
     if (payload.completedMaterials) {
       updatePayload.completedMaterials = payload.completedMaterials;
     }
-    await setDoc(userDocRef, updatePayload, { merge: true });
+    await setDoc(userDocRef, sanitizeFirestorePayload(updatePayload), { merge: true });
     return true;
   } catch (err) {
     console.error(`[Firestore] Failed to sync user library for ${uid}:`, err);
@@ -446,7 +471,7 @@ export async function saveModuleToFirestore(mod: ModuleInfo): Promise<boolean> {
 
   try {
     const docRef = doc(db, MODULES_COLLECTION, mod.id);
-    await setDoc(docRef, mod, { merge: true });
+    await setDoc(docRef, sanitizeFirestorePayload(mod), { merge: true });
     return true;
   } catch (err) {
     console.error(`[Firestore] Failed to save module ${mod.id}:`, err);
@@ -519,7 +544,7 @@ export async function saveContributorToFirestore(contributor: ContributorDocumen
 
   try {
     const docRef = doc(db, CONTRIBUTORS_COLLECTION, contributor.id);
-    await setDoc(docRef, contributor, { merge: true });
+    await setDoc(docRef, sanitizeFirestorePayload(contributor), { merge: true });
     return true;
   } catch (err) {
     console.error(`[Firestore] Failed to save contributor ${contributor.id}:`, err);
@@ -545,10 +570,11 @@ export async function saveSubmissionToFirestore(sub: SubmissionDocument): Promis
     const payload: SubmissionDocument = {
       ...sub,
       id: subId,
+      title: sub.title || 'مساهمة طلابية جديدة',
       timestamp: sub.timestamp || new Date().toISOString(),
       status: sub.status || 'pending'
     };
-    await setDoc(docRef, payload, { merge: true });
+    await setDoc(docRef, sanitizeFirestorePayload(payload), { merge: true });
     return subId;
   } catch (err) {
     console.error('[Firestore] Failed to save submission:', err);
@@ -666,7 +692,7 @@ export async function saveFeedbackToFirestore(feedback: FeedbackDocument): Promi
       status: feedback.status || 'new',
       timestamp: feedback.timestamp || new Date().toISOString()
     };
-    await setDoc(docRef, payload, { merge: true });
+    await setDoc(docRef, sanitizeFirestorePayload(payload), { merge: true });
     return fbId;
   } catch (err) {
     console.error('[Firestore] Failed to save feedback:', err);
@@ -906,7 +932,7 @@ export async function logAdminAction(
       id: logId,
       timestamp: new Date().toISOString()
     };
-    await setDoc(docRef, payload);
+    await setDoc(docRef, sanitizeFirestorePayload(payload));
     return true;
   } catch (err) {
     console.warn('[Firestore] Failed to record admin log:', err);

@@ -58,10 +58,14 @@ export async function submitMaterial(payload: MaterialSubmission): Promise<Submi
       cachedProfile?.username ||
       'فاعل خير';
 
+    const title =
+      (payload.mode === 'single' ? payload.title : payload.notes) ||
+      (urls[0] ? 'مساهمة طلابية' : 'مساهمة جديدة');
+
     const subDoc: SubmissionDocument = {
       id: `sub_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
       mode: payload.mode,
-      title: payload.mode === 'single' ? payload.title : payload.notes,
+      title: title.trim() || 'مساهمة جديدة',
       url: payload.mode === 'single' ? payload.url : urls[0] || undefined,
       content: payload.mode === 'dump' ? payload.content : payload.url,
       urls,
