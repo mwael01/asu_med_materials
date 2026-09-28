@@ -1,89 +1,24 @@
 import type { ModuleInfo } from '../types/materials';
-import { referenceBooksMaterials } from './materials/reference/reference-books';
+import modulesSnapshot from '../firebase/schema/modules-cache.json';
+import { fetchModulesFromFirestore } from '../firebase/firestore';
 
-const getReferenceBookSubjects = (): string[] =>
-  Array.from(
-    new Set(
-      referenceBooksMaterials
-        .filter((item) => item.subject && /^year\d+-reference-books$/.test(item.moduleId ?? ''))
-        .map((item) => item.subject as string)
-    )
-  );
-
-export const modulesData: ModuleInfo[] = [
-  // Year 2 - Blood & Lymphatic System
-  {
-    id: 'year2-blood',
-    code: 'MED201',
-    title: 'Blood & Lymphatic System',
-    titleAr: 'موديول الدم والجهاز الليمفاوي (Blood)',
-    year: 2,
-    semester: 1,
-    subjects: [
-      'Anatomy',
-      'Physiology',
-      'Histology',
-      'Biochemistry',
-      'Pharmacology',
-      'Pathology',
-      'Parasitology',
-      'Microbiology',
-      'Clinical'
-    ],
-    description: 'Anatomy, physiology, histology, biochemistry, pharmacology, pathology, parasitology, microbiology, and clinical aspects of blood and lymphoid organs.',
-    descriptionAr: 'تشريح، وظائف، هستولوجي، كيمياء حيوية، فارما، باثولوجي، طفيليات، ميكروبيولوجي، وعيادات أمراض الدم والنزف.'
-  },
-  {
-    id: 'year1-reference-books',
-    code: 'REF101',
-    title: 'Reference Books',
-    titleAr: 'الكتب المرجعية',
-    year: 1,
-    subjects: getReferenceBookSubjects(),
-    description: 'Cross-subject medical reference books and standard textbooks used across anatomy, physiology, histology, pathology, and clinical study.',
-    descriptionAr: 'كتب مرجعية طبية واسعة الاستخدام في التشريح، الفسيولوجيا، الأنسجة، الباثولوجي، والمواد السريرية.'
-  },
-  {
-    id: 'year2-reference-books',
-    code: 'REF201',
-    title: 'Reference Books',
-    titleAr: 'الكتب المرجعية',
-    year: 2,
-    subjects: getReferenceBookSubjects(),
-    description: 'Cross-subject medical reference books and standard textbooks used across anatomy, physiology, histology, pathology, and clinical study.',
-    descriptionAr: 'كتب مرجعية طبية واسعة الاستخدام في التشريح، الفسيولوجيا، الأنسجة، الباثولوجي، والمواد السريرية.'
-  },
-  {
-    id: 'year3-reference-books',
-    code: 'REF301',
-    title: 'Reference Books',
-    titleAr: 'الكتب المرجعية',
-    year: 3,
-    subjects: getReferenceBookSubjects(),
-    description: 'Cross-subject medical reference books and standard textbooks used across anatomy, physiology, histology, pathology, and clinical study.',
-    descriptionAr: 'كتب مرجعية طبية واسعة الاستخدام في التشريح، الفسيولوجيا، الأنسجة، الباثولوجي، والمواد السريرية.'
-  },
-  {
-    id: 'year4-reference-books',
-    code: 'REF401',
-    title: 'Reference Books',
-    titleAr: 'الكتب المرجعية',
-    year: 4,
-    subjects: getReferenceBookSubjects(),
-    description: 'Cross-subject medical reference books and standard textbooks used across anatomy, physiology, histology, pathology, and clinical study.',
-    descriptionAr: 'كتب مرجعية طبية واسعة الاستخدام في التشريح، الفسيولوجيا، الأنسجة، الباثولوجي، والمواد السريرية.'
-  },
-  {
-    id: 'year5-reference-books',
-    code: 'REF501',
-    title: 'Reference Books',
-    titleAr: 'الكتب المرجعية',
-    year: 5,
-    subjects: getReferenceBookSubjects(),
-    description: 'Cross-subject medical reference books and standard textbooks used across anatomy, physiology, histology, pathology, and clinical study.',
-    descriptionAr: 'كتب مرجعية طبية واسعة الاستخدام في التشريح، الفسيولوجيا، الأنسجة، الباثولوجي، والمواد السريرية.'
-  }
+export const REFERENCE_BOOK_SUBJECTS: string[] = [
+  'Anatomy',
+  'Physiology',
+  'Histology',
+  'Biochemistry',
+  'Pharmacology',
+  'Pathology',
+  'Cell Biology',
+  'Embryology',
+  'Terminology'
 ];
+
+/**
+ * Local Firestore schema snapshot of curriculum modules for zero-failure SSG builds,
+ * instant guest access, and fallback when offline.
+ */
+export const modulesData: ModuleInfo[] = modulesSnapshot as ModuleInfo[];
 
 export function getModulesByYear(year: number): ModuleInfo[] {
   return modulesData.filter((m) => m.year === year);
@@ -91,4 +26,21 @@ export function getModulesByYear(year: number): ModuleInfo[] {
 
 export function getModuleById(id: string): ModuleInfo | undefined {
   return modulesData.find((m) => m.id === id);
+}
+
+/**
+ * Client-side dynamic modules retriever:
+ * Fetches updated modules from Cloud Firestore (IndexedDB cache).
+ * Falls back to local snapshot if offline or network unavailable.
+ */
+export async function getDynamicModules(year?: number): Promise<ModuleInfo[]> {
+  try {
+    const firestoreModules = await fetchModulesFromFirestore(year as any);
+    if (firestoreModules && firestoreModules.length > 0) {
+      return firestoreModules;
+    }
+  } catch (e) {
+    console.warn('[Modules] Falling back to local snapshot:', e);
+  }
+  return year ? getModulesByYear(year) : modulesData;
 }

@@ -7,6 +7,7 @@ export interface TranslationsSchema {
     search: string;
     contribute: string;
     contributors: string;
+    profile: string;
     changeYear: string;
     chooseYear: string;
     changeYearTitle: string;

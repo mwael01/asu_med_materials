@@ -1,0 +1,471 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "ASU Med Materials Firestore Schema",
+  "version": "1.0.0",
+  "projectId": "medmaterials",
+  "database": "(default)",
+  "lastSyncedAt": "2026-09-28T20:39:01.115Z",
+  "collections": {
+    "materials": {
+      "collectionName": "materials",
+      "description": "Comprehensive catalog of medical study materials, batch drives, playlists, exam papers, and textbooks across all five academic years.",
+      "idField": "id",
+      "totalDocuments": 163,
+      "indexes": [
+        {
+          "fields": [
+            "year",
+            "moduleId"
+          ]
+        },
+        {
+          "fields": [
+            "moduleId",
+            "subject"
+          ]
+        },
+        {
+          "fields": [
+            "type"
+          ]
+        }
+      ],
+      "fields": {
+        "id": {
+          "type": "string",
+          "required": true,
+          "description": "Unique identifier for the study material (e.g. bld-anat-wahdan)"
+        },
+        "title": {
+          "type": "string",
+          "required": true,
+          "description": "Primary resource title in Arabic or English"
+        },
+        "titleEn": {
+          "type": "string",
+          "required": false,
+          "description": "English translation or transliteration of the title"
+        },
+        "description": {
+          "type": "string",
+          "required": false,
+          "description": "Contextual description, topics covered, or playlist details"
+        },
+        "descriptionEn": {
+          "type": "string",
+          "required": false,
+          "description": "English translated description"
+        },
+        "url": {
+          "type": "string",
+          "required": true,
+          "format": "uri",
+          "description": "Direct external URL (Google Drive, Telegram, YouTube, etc.)"
+        },
+        "type": {
+          "type": "string",
+          "required": true,
+          "enum": [
+            "drive",
+            "telegram",
+            "youtube",
+            "playlist",
+            "whatsapp",
+            "book",
+            "summary",
+            "exam",
+            "website",
+            "other"
+          ],
+          "description": "Format and platform category of the resource"
+        },
+        "category": {
+          "type": "string",
+          "required": false,
+          "enum": [
+            "central",
+            "lectures",
+            "practical",
+            "summaries",
+            "exams",
+            "references"
+          ],
+          "description": "Learning phase or curriculum categorization"
+        },
+        "year": {
+          "type": "integer",
+          "required": true,
+          "enum": [
+            1,
+            2,
+            3,
+            4,
+            5
+          ],
+          "description": "Faculty of Medicine academic year"
+        },
+        "moduleId": {
+          "type": "string",
+          "required": false,
+          "description": "Associated module code (e.g. year2-blood, year1-foundation, year2-reference-books)"
+        },
+        "subject": {
+          "type": "string",
+          "required": false,
+          "description": "Academic discipline (e.g. Anatomy, Physiology, Histology, Biochemistry)"
+        },
+        "author": {
+          "type": [
+            "string",
+            "array"
+          ],
+          "required": false,
+          "description": "Professor, doctor, or channel author who created the material"
+        },
+        "addedBy": {
+          "type": [
+            "string",
+            "array"
+          ],
+          "required": false,
+          "description": "Student or contributor username/name who submitted it"
+        },
+        "tags": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "required": true,
+          "description": "Search keyword tags"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "required": false,
+          "description": "ISO timestamp of addition"
+        },
+        "playlistId": {
+          "type": "string",
+          "required": false,
+          "description": "YouTube playlist ID if multi-video collection"
+        },
+        "videos": {
+          "type": "array",
+          "required": false,
+          "description": "Discrete chapter videos in playlist",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "title": {
+                "type": "string"
+              },
+              "youtubeId": {
+                "type": "string"
+              },
+              "url": {
+                "type": "string"
+              },
+              "duration": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "id",
+              "title"
+            ]
+          }
+        }
+      }
+    },
+    "users": {
+      "collectionName": "users",
+      "description": "Medical student user profiles with personalized avatars, public handles, and study stats.",
+      "idField": "uid",
+      "fields": {
+        "uid": {
+          "type": "string",
+          "required": true,
+          "description": "Firebase Authentication User ID"
+        },
+        "username": {
+          "type": "string",
+          "required": true,
+          "pattern": "^[a-z0-9_-]{3,25}$",
+          "description": "Unique public handle used for shareable profile links (/profile?u=username)"
+        },
+        "displayName": {
+          "type": "string",
+          "required": true,
+          "description": "Full student name displayed on cards and profile"
+        },
+        "photoURL": {
+          "type": "string",
+          "required": false,
+          "format": "uri",
+          "description": "Profile picture URL hosted in Firebase Storage"
+        },
+        "bio": {
+          "type": "string",
+          "required": false,
+          "description": "Student biography or academic goals"
+        },
+        "academicYear": {
+          "type": "integer",
+          "required": false,
+          "enum": [
+            1,
+            2,
+            3,
+            4,
+            5
+          ],
+          "description": "Current academic year in med school"
+        },
+        "role": {
+          "type": "string",
+          "required": false,
+          "enum": [
+            "student",
+            "contributor",
+            "admin"
+          ],
+          "default": "student"
+        },
+        "contributionsCount": {
+          "type": "integer",
+          "required": false,
+          "default": 0
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "required": true
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "required": false
+        }
+      },
+      "totalDocuments": 1
+    },
+    "submissions": {
+      "collectionName": "submissions",
+      "description": "Student material contributions and pending peer submissions.",
+      "idField": "id",
+      "fields": {
+        "id": {
+          "type": "string",
+          "required": true
+        },
+        "mode": {
+          "type": "string",
+          "enum": [
+            "single",
+            "dump"
+          ],
+          "required": true
+        },
+        "title": {
+          "type": "string",
+          "required": false
+        },
+        "url": {
+          "type": "string",
+          "required": false
+        },
+        "content": {
+          "type": "string",
+          "required": false
+        },
+        "urls": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "required": true
+        },
+        "contributor": {
+          "type": "string",
+          "required": true
+        },
+        "contributorUid": {
+          "type": "string",
+          "required": false
+        },
+        "year": {
+          "type": [
+            "integer",
+            "string"
+          ],
+          "required": true
+        },
+        "moduleId": {
+          "type": "string",
+          "required": false
+        },
+        "subject": {
+          "type": "string",
+          "required": false
+        },
+        "type": {
+          "type": "string",
+          "required": false
+        },
+        "notes": {
+          "type": "string",
+          "required": false
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "pending",
+            "approved",
+            "rejected"
+          ],
+          "default": "pending"
+        },
+        "timestamp": {
+          "type": "string",
+          "format": "date-time",
+          "required": true
+        }
+      },
+      "totalDocuments": 0
+    },
+    "modules": {
+      "collectionName": "modules",
+      "description": "Medical curriculum modules across all academic years including codes, subjects, and bilingual metadata.",
+      "idField": "id",
+      "totalDocuments": 6,
+      "fields": {
+        "id": {
+          "type": "string",
+          "required": true,
+          "description": "Module unique identifier (e.g. year2-blood, year1-reference-books)"
+        },
+        "code": {
+          "type": "string",
+          "required": true,
+          "description": "Academic course code (e.g. MED201, REF101)"
+        },
+        "title": {
+          "type": "string",
+          "required": true,
+          "description": "English module name"
+        },
+        "titleAr": {
+          "type": "string",
+          "required": false,
+          "description": "Arabic module name"
+        },
+        "year": {
+          "type": "integer",
+          "required": true,
+          "enum": [
+            1,
+            2,
+            3,
+            4,
+            5
+          ],
+          "description": "Academic year"
+        },
+        "semester": {
+          "type": "integer",
+          "required": false,
+          "enum": [
+            1,
+            2
+          ]
+        },
+        "subjects": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "required": true,
+          "description": "Subjects included in this curriculum module"
+        },
+        "description": {
+          "type": "string",
+          "required": false
+        },
+        "descriptionAr": {
+          "type": "string",
+          "required": false
+        }
+      }
+    },
+    "contributors": {
+      "collectionName": "contributors",
+      "description": "Platform team authors and dedicated student resource contributors curating and uploading materials.",
+      "idField": "id",
+      "totalDocuments": 6,
+      "fields": {
+        "id": {
+          "type": "string",
+          "required": true
+        },
+        "kind": {
+          "type": "string",
+          "enum": [
+            "author",
+            "contributorProfile"
+          ],
+          "required": true
+        },
+        "name": {
+          "type": "string",
+          "required": true
+        },
+        "role": {
+          "type": "string",
+          "required": false
+        },
+        "roleAr": {
+          "type": "string",
+          "required": false
+        },
+        "bio": {
+          "type": "string",
+          "required": false
+        },
+        "bioEn": {
+          "type": "string",
+          "required": false
+        },
+        "photo": {
+          "type": "string",
+          "required": false
+        },
+        "order": {
+          "type": "integer",
+          "required": false
+        },
+        "matchNames": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "required": true
+        },
+        "contacts": {
+          "type": "object",
+          "required": false
+        },
+        "note": {
+          "type": "string",
+          "required": false
+        },
+        "noteEn": {
+          "type": "string",
+          "required": false
+        }
+      }
+    }
+  }
+}

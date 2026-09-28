@@ -1,16 +1,16 @@
 import type { MaterialItem, AcademicYear } from '../../types/materials';
 import { subjectToSlug } from '../../utils/slug';
-import { bloodMaterials } from './blood/blood';
-import { referenceBooksMaterials } from './reference/reference-books';
+import firestoreSnapshot from '../../firebase/schema/materials-cache.json';
+import { fetchMaterialsFromFirestore } from '../../firebase/firestore';
 
 /**
- * Unified Study Materials Database for ASU Med Materials.
- * Aggregates all modular curriculum data.
+ * Local Firestore schema snapshot of study materials for zero-failure SSG builds,
+ * instant guest access, and fallback when offline.
  */
-export const materialsData: MaterialItem[] = [
-  ...bloodMaterials,
-  ...referenceBooksMaterials,
-];
+export const staticMaterialsData: MaterialItem[] = firestoreSnapshot as MaterialItem[];
+
+// Default export maintained for existing static route imports
+export const materialsData: MaterialItem[] = staticMaterialsData;
 
 export function getAllMaterials(): MaterialItem[] {
   return materialsData;
@@ -59,4 +59,31 @@ export function getPlaylistById(id: string): MaterialItem | undefined {
 
 export function getMaterialById(id: string): MaterialItem | undefined {
   return materialsData.find((item) => item.id === id);
+}
+
+/**
+ * Client-side dynamic materials retriever:
+ * Fetches updated/cached materials from Cloud Firestore (IndexedDB cache).
+ * Falls back to local Firestore snapshot if offline or network unavailable.
+ */
+export async function getDynamicMaterials(year?: AcademicYear): Promise<MaterialItem[]> {
+  try {
+    const firestoreMaterials = await fetchMaterialsFromFirestore(year);
+    if (firestoreMaterials && firestoreMaterials.length > 0) {
+      const map = new Map<string, MaterialItem>();
+      for (const m of staticMaterialsData) {
+        if (!year || m.year === year || isReferenceModuleId(m.moduleId)) {
+          map.set(m.id, m);
+        }
+      }
+      for (const m of firestoreMaterials) {
+        map.set(m.id, m);
+      }
+      return Array.from(map.values());
+    }
+  } catch (e) {
+    console.warn('[Materials] Falling back to local Firestore snapshot:', e);
+  }
+
+  return year ? getMaterialsByYear(year) : getAllMaterials();
 }

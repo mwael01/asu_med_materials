@@ -1,0 +1,36 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // 1. Study Materials: Anyone can read (guest & offline access), write restricted
+    match /materials/{materialId} {
+      allow read: if true;
+      allow write: if request.auth != null;
+    }
+
+    // 2. User Profiles: Anyone can view public profile, owner can edit
+    match /users/{userId} {
+      allow read: if true;
+      allow create: if request.auth != null && request.auth.uid == userId;
+      allow update, delete: if request.auth != null && request.auth.uid == userId;
+    }
+
+    // 3. Submissions: Any authenticated or guest user can submit, only admins manage
+    match /submissions/{submissionId} {
+      allow create: if true;
+      allow read, update, delete: if request.auth != null;
+    }
+
+    // 4. Curriculum Modules: Public read for guests and offline cache, authenticated write
+    match /modules/{moduleId} {
+      allow read: if true;
+      allow write: if request.auth != null;
+    }
+
+    // 5. Contributors & Team: Public read, authenticated write
+    match /contributors/{contributorId} {
+      allow read: if true;
+      allow write: if request.auth != null;
+    }
+  }
+}

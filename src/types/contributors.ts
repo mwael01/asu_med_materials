@@ -10,6 +10,7 @@ export interface PersonContacts {
   github?: ContactLink[];
   linkedin?: ContactLink[];
   instagram?: ContactLink[];
+  linktree?: ContactLink[];
 }
 
 export interface AuthorEntry {
@@ -21,6 +22,10 @@ export interface AuthorEntry {
   bioEn?: string;
   photo?: string;
   order: number;
+  badge?: {
+    text: string;
+    textAr?: string;
+  };
   matchNames?: string[];
   contacts?: PersonContacts;
 }

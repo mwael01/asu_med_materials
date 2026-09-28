@@ -160,7 +160,7 @@ const targetAttr = isPlaylist ? '_self' : '_blank';
           class="text-zinc-400 dark:text-zinc-500 truncate max-w-[150px]"
           title={fullAddedByTooltip}
         >
-          &bull; <span data-i18n="card.addedBy">Added by:</span> {displayedAddedByText}
+          &bull; <span data-i18n="card.addedBy">Added by:</span> <a href={`/profile?u=${encodeURIComponent(rawAddedBy[0])}`} class="hover:text-emerald-600 dark:hover:text-emerald-400 hover:underline">{displayedAddedByText}</a>
         </span>
       )}
     </div>

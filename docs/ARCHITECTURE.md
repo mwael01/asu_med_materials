@@ -215,6 +215,34 @@ export interface MaterialItem {
    - Automatically pre-selects the student's academic year from `localStorage.getItem('asumed_user_year')` and filters related modules for instant submission.
    - Provides local development fallback mocking successful responses when no webhook is configured.
 
+10. **Firebase Integration, Offline-First Persistence & Student Profiles**:
+   - **Cloud Firestore**: Configured with modular SDK v12 `persistentLocalCache` and `persistentMultipleTabManager` for multi-tab IndexedDB offline persistence. Materials, curriculum modules, contributor data, and student profiles queried online are cached directly in IndexedDB for immediate offline access.
+   - **Dual-Layer Offline Persistence**: 
+     1. *Static SSG Baseline*: Build time reads bundled local schema snapshots (`src/firebase/schema/materials-cache.json`, `modules-cache.json`, `contributors-cache.json`) so `pnpm build` never fails even in offline or unconfigured CI/CD environments.
+     2. *Client IndexedDB Firestore Cache*: Dynamically synchronizes online additions while serving 100% offline from local cache with zero latency.
+     3. *Service Worker*: Pre-caches `/profile`, core assets, and static pages in `public/sw.js`.
+   - **Dynamic Collections & Local Schema Architecture**:
+     - `materials`: 163+ medical study drives, playlists, exam papers, and textbooks across academic years.
+     - `modules`: Curriculum modules (e.g. `year2-blood`, `year1-reference-books`) stored dynamically in Firestore with bilingual descriptions and subjects, fetched via `getDynamicModules()`.
+     - `contributors`: Platform team authors and community contributors dynamically managed with roles and badges.
+     - `users`: Medical student profiles with custom handles and contribution counts.
+     - `submissions`: Pending and approved peer material submissions.
+   - **Schema Specification & Synchronization**:
+     - [`firebase/schema.json`](file:///home/mwael/work/asu_med_materials/firebase/schema.json): Canonical JSON schema defining document types, constraints, and live document counts.
+     - [`src/firebase/schema.ts`](file:///home/mwael/work/asu_med_materials/src/firebase/schema.ts): Strongly typed TypeScript interfaces and `FirestoreDataConverter` implementations (`materialConverter`, `moduleConverter`, `contributorConverter`, `userConverter`, `submissionConverter`).
+     - [`scripts/sync-firebase-schema.mjs`](file:///home/mwael/work/asu_med_materials/scripts/sync-firebase-schema.mjs) (`pnpm run schema:sync`): Synchronizes live Firestore collection states and document counts with `firebase/schema.json` and updates local cache files.
+     - [`scripts/seed-firestore.mjs`](file:///home/mwael/work/asu_med_materials/scripts/seed-firestore.mjs): Uploads local materials, modules, and contributors to Cloud Firestore.
+   - **Zero-Friction Guest Mode**: Visitors can browse, search, use bookmarks, track completed materials, and submit resources completely offline without creating an account.
+   - **Firebase Authentication**: Supports one-click Google Sign-In and Email/Password registration. Profiles are cached locally in `localStorage` for zero-delay UI rendering on page load.
+   - **Firebase Storage**: Securely handles avatar image uploads (`avatars/{userId}_{timestamp}.ext`) with strict MIME type and 2.5 MB size validation.
+   - **Unified Shareable Profile Route (`/profile`)**:
+     - `/profile` (Logged-in): Student dashboard to edit display name, unique `@username` handle, academic year, bio, and upload avatar pictures.
+     - `/profile?u=username`: Shareable public profile card showcasing student bio, academic year badge, and list of study materials contributed.
+     - `/profile` (Guest): Welcoming guest card explaining offline capabilities with fast sign-in options.
+   - **Security & Environment Architecture**:
+     - Client-exposed variables strictly prefixed with `PUBLIC_FIREBASE_*` in `.env.local` and documented in `.env.example`.
+     - Security rules version-controlled under `firebase/firestore.rules` and `firebase/storage.rules`.
+
 ---
 
 ## 5. Coding & Quality Standards
