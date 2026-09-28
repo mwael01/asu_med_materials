@@ -7,6 +7,7 @@ import MultistageSelector from '../components/selection/MultistageSelector.astro
 import Toast from '../components/common/Toast.astro';
 import PwaInstallToast from '../components/pwa/PwaInstallToast.astro';
 import Analytics from '@vercel/analytics/astro';
+import { RECAPTCHA_ENTERPRISE_SITE_KEY } from '../firebase/app-check';
 
 interface Props {
   title?: string;
@@ -60,7 +61,9 @@ const {
       })();
     </script>
     <!-- Google reCAPTCHA Enterprise for Firebase App Check -->
-    <script src="https://www.google.com/recaptcha/enterprise.js?render=6LcmYdQtAAAAADm7iH3OYMYvLHHo4dYARdzT2AHl" async defer></script>
+    {RECAPTCHA_ENTERPRISE_SITE_KEY && (
+      <script src={`https://www.google.com/recaptcha/enterprise.js?render=${RECAPTCHA_ENTERPRISE_SITE_KEY}`} async defer></script>
+    )}
   </head>
   <body class="min-h-screen flex flex-col bg-zinc-50/60 dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100 antialiased selection:bg-emerald-500 selection:text-white">
     <Navbar />

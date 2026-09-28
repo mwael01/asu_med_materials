@@ -36,4 +36,4 @@ Administrators can review and manage everything directly from the web interface 
 
 ## 3. App Check & Security
 
-The platform utilizes **Firebase App Check** with **reCAPTCHA Enterprise** (`6LcmYdQtAAAAADm7iH3OYMYvLHHo4dYARdzT2AHl`) to protect Firestore and AI endpoints from unauthorized bot abuse.
+The platform utilizes **Firebase App Check** with **reCAPTCHA Enterprise** (configured via `PUBLIC_RECAPTCHA_ENTERPRISE_SITE_KEY` in `.env.local`) to protect Firestore and AI endpoints from unauthorized bot abuse.

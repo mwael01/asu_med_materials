@@ -5,8 +5,7 @@ import { getFirebaseApp } from './config';
  * reCAPTCHA Enterprise Site Key for ASU Med Materials App Check.
  */
 export const RECAPTCHA_ENTERPRISE_SITE_KEY =
-  import.meta.env.PUBLIC_RECAPTCHA_ENTERPRISE_SITE_KEY ||
-  '6LcmYdQtAAAAADm7iH3OYMYvLHHo4dYARdzT2AHl';
+  import.meta.env.PUBLIC_RECAPTCHA_ENTERPRISE_SITE_KEY || '';
 
 let appCheckInstance: AppCheck | null = null;
 
@@ -20,6 +19,11 @@ export function initAppCheck(): AppCheck | null {
 
   // Allow completely bypassing App Check during local debugging
   if (import.meta.env.PUBLIC_DISABLE_APP_CHECK === 'true') {
+    return null;
+  }
+
+  // If site key is not configured in environment, skip gracefully
+  if (!RECAPTCHA_ENTERPRISE_SITE_KEY) {
     return null;
   }
 
