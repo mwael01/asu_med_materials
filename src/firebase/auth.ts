@@ -92,18 +92,38 @@ export function onAuthChange(
           return;
         }
 
-        // Try reading cached profile first, then sync with Firestore
-        let profile = getCachedUserProfile();
-        if (!profile || profile.uid !== firebaseUser.uid) {
-          try {
-            profile = await getUserProfileByUid(firebaseUser.uid);
-          } catch (e) {
-            console.warn('[Auth] Failed to load profile from Firestore:', e);
-          }
+        const cached = getCachedUserProfile();
+        let currentProfile: UserProfile | null = cached;
+
+        // 1. Instant zero-flash render from local cache if UID matches
+        if (cached && cached.uid === firebaseUser.uid) {
+          callback(firebaseUser, cached);
         }
 
-        // If profile doesn't exist in Firestore yet (e.g. first Google sign in), generate initial profile
-        if (!profile) {
+        // 2. Always fetch fresh profile from Firestore to detect role updates (e.g. promoted to admin)
+        try {
+          const remoteProfile = await getUserProfileByUid(firebaseUser.uid);
+          if (remoteProfile) {
+            const hasChanged =
+              !cached ||
+              cached.uid !== remoteProfile.uid ||
+              cached.role !== remoteProfile.role ||
+              cached.displayName !== remoteProfile.displayName ||
+              cached.photoURL !== remoteProfile.photoURL ||
+              cached.username !== remoteProfile.username;
+
+            setCachedUserProfile(remoteProfile);
+            if (hasChanged) {
+              callback(firebaseUser, remoteProfile);
+            }
+            return;
+          }
+        } catch (e) {
+          console.warn('[Auth] Failed to sync latest profile from Firestore:', e);
+        }
+
+        // 3. If profile doesn't exist in Firestore yet (e.g. first Google sign in), generate initial profile
+        if (!currentProfile || currentProfile.uid !== firebaseUser.uid) {
           try {
             const generatedUsername = (
               firebaseUser.displayName?.toLowerCase().replace(/\s+/g, '_').replace(/[^a-z0-9_]/g, '') ||
@@ -113,7 +133,7 @@ export function onAuthChange(
             const available = await checkUsernameAvailable(generatedUsername, firebaseUser.uid);
             const finalUsername = available ? generatedUsername : `${generatedUsername}_${Date.now().toString(36).slice(-4)}`;
 
-            profile = {
+            currentProfile = {
               uid: firebaseUser.uid,
               username: finalUsername,
               displayName: firebaseUser.displayName || 'ASU Med Student',
@@ -121,10 +141,10 @@ export function onAuthChange(
               createdAt: new Date().toISOString()
             };
 
-            await upsertUserProfile(profile);
+            await upsertUserProfile(currentProfile);
           } catch (e) {
             console.warn('[Auth] Fallback profile generated in-memory:', e);
-            profile = {
+            currentProfile = {
               uid: firebaseUser.uid,
               username: firebaseUser.displayName?.toLowerCase().replace(/\s+/g, '_') || 'student',
               displayName: firebaseUser.displayName || 'ASU Med Student',
@@ -132,10 +152,10 @@ export function onAuthChange(
               createdAt: new Date().toISOString()
             };
           }
-        }
 
-        setCachedUserProfile(profile);
-        callback(firebaseUser, profile);
+          setCachedUserProfile(currentProfile);
+          callback(firebaseUser, currentProfile);
+        }
       } catch (outerErr) {
         console.warn('[Auth] Error in onAuthStateChanged callback:', outerErr);
         callback(firebaseUser, getCachedUserProfile());

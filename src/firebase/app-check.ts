@@ -31,8 +31,8 @@ export function initAppCheck(): AppCheck | null {
   if (!app) return null;
 
   try {
-    // In local development, enable debug token so localhost is never blocked
-    if (import.meta.env.DEV) {
+    // In local development or when an App Check debug token is provided in environment:
+    if (import.meta.env.DEV || import.meta.env.PUBLIC_FIREBASE_APPCHECK_DEBUG_TOKEN) {
       // @ts-ignore
       self.FIREBASE_APPCHECK_DEBUG_TOKEN =
         import.meta.env.PUBLIC_FIREBASE_APPCHECK_DEBUG_TOKEN || true;
