@@ -298,8 +298,8 @@ const rawModules = await getAllModules();
     function renderSmartBookmarks(): void {
       const ids = getStoredBookmarkIds();
       const studiedIds = getStoredStudiedIds();
-      const allMaterials: MaterialItem[] = (window as any).__ALL_MATERIALS || [];
-      const allModules: ModuleInfo[] = (window as any).__ALL_MODULES || [];
+      const allMaterials: MaterialItem[] = (window as unknown as { __ALL_MATERIALS?: MaterialItem[] }).__ALL_MATERIALS || [];
+      const allModules: ModuleInfo[] = (window as unknown as { __ALL_MODULES?: ModuleInfo[] }).__ALL_MODULES || [];
       const isAr = getCurrentLanguage() === 'ar';
 
       const bookmarked = allMaterials.filter((m) => ids.includes(m.id));

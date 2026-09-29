@@ -51,8 +51,28 @@ export function registerServiceWorker(): void {
     navigator.serviceWorker
       .register('/sw.js', { scope: '/' })
       .then((reg) => {
-        // Check for service worker updates periodically
+        // Check for service worker updates
         reg.update();
+
+        // Listen for new service worker installation
+        reg.addEventListener('updatefound', () => {
+          const newWorker = reg.installing;
+          if (!newWorker) return;
+
+          newWorker.addEventListener('statechange', () => {
+            if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+              // New version available, notify the app
+              window.dispatchEvent(new CustomEvent('sw-update-available'));
+            }
+          });
+        });
+
+        // Listen for messages from the service worker
+        navigator.serviceWorker.addEventListener('message', (event) => {
+          if (event.data?.type === 'SKIP_WAITING') {
+            window.location.reload();
+          }
+        });
       })
       .catch((err) => {
         console.warn('Service worker registration failed:', err);

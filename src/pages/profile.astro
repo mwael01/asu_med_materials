@@ -568,6 +568,7 @@ const allMaterials = await getAllMaterials();
     getCachedUserProfile
   } from '../firebase/auth';
   import { escapeHtml } from '../utils/sanitize';
+  import type { User } from 'firebase/auth';
 
   let unsubscribeAuth: (() => void) | null = null;
   import {
@@ -594,7 +595,7 @@ const allMaterials = await getAllMaterials();
     const targetUsername = urlParams.get('u');
     const targetUid = urlParams.get('id');
 
-    let currentUser: any = null;
+    let currentUser: User | null = null;
     let currentProfile: UserProfile | null = getCachedUserProfile();
 
     function showSection(section: 'loading' | 'guest' | 'my-profile' | 'public'): void {

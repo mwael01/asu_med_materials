@@ -159,6 +159,7 @@ const allMaterials = rawMaterials.map((m) => ({
   } from '../utils/search';
   import { getUserStoredYear } from '../utils/storage';
   import { getCurrentLanguage } from '../utils/i18n';
+  import type { MaterialItem, ModuleInfo } from '../types/materials';
 
   function initSearchPage(): void {
     const input = document.getElementById('site-search-input') as HTMLInputElement | null;
@@ -183,8 +184,8 @@ const allMaterials = rawMaterials.map((m) => ({
       if (id) cardMap.set(id, card);
     });
 
-    const allItems: any[] = (window as any).__ALL_SEARCH_MATERIALS || [];
-    const moduleMetaMap: Record<string, any> = (window as any).__ALL_MODULE_META || {};
+    const allItems: MaterialItem[] = (window as unknown as { __ALL_SEARCH_MATERIALS?: MaterialItem[] }).__ALL_SEARCH_MATERIALS || [];
+    const moduleMetaMap: Record<string, ModuleInfo> = (window as unknown as { __ALL_MODULE_META?: Record<string, ModuleInfo> }).__ALL_MODULE_META || {};
 
     // Build SearchDocument index once in memory
     const searchDocs: SearchDocument[] = allItems.map((m) =>
