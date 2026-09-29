@@ -1,0 +1,451 @@
+---
+---
+<div class="space-y-6 text-zinc-800 dark:text-zinc-200">
+  <!-- Add Module Section -->
+  <div class="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl shadow-sm p-5">
+    <div class="flex justify-between items-center mb-4">
+      <h2 class="text-lg font-semibold">إدارة الموديولات</h2>
+      <button id="amm-toggle-add-btn" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-sm font-medium transition-colors cursor-pointer">
+        + إضافة موديول جديد
+      </button>
+    </div>
+
+    <form id="amm-add-form" class="hidden space-y-4 pt-4 border-t border-zinc-100 dark:border-zinc-800">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <label class="block text-xs font-medium text-zinc-500 mb-1">كود الموديول (Code)</label>
+          <input type="text" id="amm-input-code" required class="w-full px-3 py-2 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 text-start" placeholder="مثال: MED101" />
+        </div>
+        <div>
+          <label class="block text-xs font-medium text-zinc-500 mb-1">الاسم بالإنجليزية (Title)</label>
+          <input type="text" id="amm-input-title" required class="w-full px-3 py-2 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 text-start" placeholder="e.g. Anatomy" />
+        </div>
+        <div>
+          <label class="block text-xs font-medium text-zinc-500 mb-1">الاسم بالعربية (Title Ar)</label>
+          <input type="text" id="amm-input-title-ar" class="w-full px-3 py-2 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 text-start" placeholder="مثال: التشريح" />
+        </div>
+        <div>
+          <label class="block text-xs font-medium text-zinc-500 mb-1">الفرقة الدراسية (Year)</label>
+          <select id="amm-input-year" required class="w-full px-3 py-2 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
+            <option value="1">الفرقة الأولى</option>
+            <option value="2">الفرقة الثانية</option>
+            <option value="3">الفرقة الثالثة</option>
+            <option value="4">الفرقة الرابعة</option>
+            <option value="5">الفرقة الخامسة</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-xs font-medium text-zinc-500 mb-1">الفصل الدراسي (Semester) - اختياري</label>
+          <select id="amm-input-semester" class="w-full px-3 py-2 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
+            <option value="">غير محدد</option>
+            <option value="1">الترم الأول</option>
+            <option value="2">الترم الثاني</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-xs font-medium text-zinc-500 mb-1">المواد (Subjects) - مفصولة بفاصلة</label>
+          <input type="text" id="amm-input-subjects" class="w-full px-3 py-2 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 text-start" placeholder="anatomy, physiology" />
+        </div>
+        <div class="md:col-span-2">
+          <label class="block text-xs font-medium text-zinc-500 mb-1">الوصف (Description)</label>
+          <textarea id="amm-input-desc" rows="2" class="w-full px-3 py-2 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 text-start"></textarea>
+        </div>
+        <div class="md:col-span-2">
+          <label class="block text-xs font-medium text-zinc-500 mb-1">الوصف بالعربية (Description Ar)</label>
+          <textarea id="amm-input-desc-ar" rows="2" class="w-full px-3 py-2 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 text-start"></textarea>
+        </div>
+      </div>
+      <div class="flex justify-end gap-2 mt-4">
+        <button type="button" id="amm-cancel-add-btn" class="px-4 py-2 bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-700 rounded-xl text-sm font-medium transition-colors cursor-pointer">
+          إلغاء
+        </button>
+        <button type="submit" id="amm-submit-add-btn" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-sm font-medium transition-colors flex items-center justify-center cursor-pointer">
+          حفظ الموديول
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Filters -->
+  <div class="flex flex-wrap gap-2" id="amm-year-filters">
+    <button data-year="all" class="amm-filter-btn px-4 py-1.5 rounded-full text-sm font-medium bg-zinc-800 dark:bg-zinc-100 text-white dark:text-zinc-900 cursor-pointer">الكل</button>
+    <button data-year="1" class="amm-filter-btn px-4 py-1.5 rounded-full text-sm font-medium bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200 dark:hover:bg-zinc-700 cursor-pointer">الفرقة الأولى</button>
+    <button data-year="2" class="amm-filter-btn px-4 py-1.5 rounded-full text-sm font-medium bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200 dark:hover:bg-zinc-700 cursor-pointer">الفرقة الثانية</button>
+    <button data-year="3" class="amm-filter-btn px-4 py-1.5 rounded-full text-sm font-medium bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200 dark:hover:bg-zinc-700 cursor-pointer">الفرقة الثالثة</button>
+    <button data-year="4" class="amm-filter-btn px-4 py-1.5 rounded-full text-sm font-medium bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200 dark:hover:bg-zinc-700 cursor-pointer">الفرقة الرابعة</button>
+    <button data-year="5" class="amm-filter-btn px-4 py-1.5 rounded-full text-sm font-medium bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200 dark:hover:bg-zinc-700 cursor-pointer">الفرقة الخامسة</button>
+  </div>
+
+  <!-- Loading State -->
+  <div id="amm-loading" class="flex justify-center py-10">
+    <svg class="animate-spin h-8 w-8 text-emerald-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+      <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+      <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+    </svg>
+  </div>
+
+  <!-- List Container -->
+  <div id="amm-list" class="grid grid-cols-1 md:grid-cols-2 gap-4 hidden">
+    <!-- Rendered via JS -->
+  </div>
+</div>
+
+<script>
+  import { fetchModulesFromFirestore, saveModuleToFirestore, deleteModuleFromFirestore, toggleModuleActive, logAdminAction } from '../../firebase/firestore';
+  import { getCachedUserProfile } from '../../firebase/auth';
+  import { showToast } from '../../utils/toast';
+  import type { ModuleInfo } from '../../types/materials';
+
+  function initModuleManager() {
+    let modules: ModuleInfo[] = [];
+    let currentFilter: string = 'all';
+    let editingId: string | null = null;
+
+    const listEl = document.getElementById('amm-list');
+    const loadingEl = document.getElementById('amm-loading');
+    
+    // Add form elements
+    const toggleAddBtn = document.getElementById('amm-toggle-add-btn');
+    const addForm = document.getElementById('amm-add-form') as HTMLFormElement;
+    const cancelAddBtn = document.getElementById('amm-cancel-add-btn');
+
+    if (!listEl || !loadingEl) return;
+
+    function escapeHtml(unsafe: string) {
+      if (!unsafe) return '';
+      return unsafe
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+    function generateId(year: number, title: string): string {
+      const slug = title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '');
+      return `year${year}-${slug}`;
+    }
+
+    async function loadModules() {
+      listEl!.classList.add('hidden');
+      loadingEl!.classList.remove('hidden');
+      
+      try {
+        modules = await fetchModulesFromFirestore();
+        renderModules();
+      } catch (err) {
+        console.error(err);
+        showToast('حدث خطأ أثناء تحميل الموديولات', 'error');
+      } finally {
+        loadingEl!.classList.add('hidden');
+        listEl!.classList.remove('hidden');
+      }
+    }
+
+    function renderModules() {
+      if (!listEl) return;
+      listEl.innerHTML = '';
+
+      const filtered = currentFilter === 'all' 
+        ? modules 
+        : modules.filter(m => m.year === parseInt(currentFilter));
+
+      if (filtered.length === 0) {
+        listEl.innerHTML = `<div class="col-span-full py-8 text-center text-zinc-500">لا توجد موديولات لعرضها.</div>`;
+        return;
+      }
+
+      filtered.forEach(mod => {
+        const isEditing = editingId === mod.id;
+        
+        if (isEditing) {
+          listEl.appendChild(createEditCard(mod));
+        } else {
+          listEl.appendChild(createViewCard(mod));
+        }
+      });
+    }
+
+    function createViewCard(mod: ModuleInfo): HTMLElement {
+      const el = document.createElement('div');
+      el.className = `p-4 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl shadow-2xs flex flex-col ${!mod.active ? 'opacity-70' : ''}`;
+      
+      const subjTags = (mod.subjects || []).map(s => 
+        `<span class="px-2 py-0.5 bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300 rounded-md text-[10px]">${escapeHtml(s.trim())}</span>`
+      ).join('');
+
+      el.innerHTML = `
+        <div class="flex justify-between items-start mb-2">
+          <div class="flex-1">
+            <div class="flex items-center gap-2 flex-wrap mb-1">
+              <h3 class="font-bold text-sm">${escapeHtml(mod.title)}</h3>
+              <span class="px-1.5 py-0.5 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 rounded text-[10px] font-medium tracking-wide uppercase">${escapeHtml(mod.code)}</span>
+              ${mod.semester ? `<span class="px-1.5 py-0.5 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 rounded text-[10px] font-medium">ترم ${mod.semester}</span>` : ''}
+            </div>
+            ${mod.titleAr ? `<p class="text-xs text-zinc-500 dark:text-zinc-400 mb-2">${escapeHtml(mod.titleAr)}</p>` : ''}
+          </div>
+          <div>
+            ${mod.active !== false 
+              ? `<span class="px-2 py-1 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 rounded-lg text-[10px] font-medium">مفعّل</span>`
+              : `<span class="px-2 py-1 bg-rose-100 dark:bg-rose-900/30 text-rose-700 dark:text-rose-400 rounded-lg text-[10px] font-medium">معطّل</span>`
+            }
+          </div>
+        </div>
+        
+        <div class="flex flex-wrap gap-1 mb-4 mt-1">
+          ${subjTags}
+        </div>
+        
+        <div class="mt-auto pt-3 border-t border-zinc-100 dark:border-zinc-800 flex justify-end gap-2">
+          <button data-action="toggle" data-id="${mod.id}" data-active="${mod.active !== false}" class="p-1.5 rounded-lg text-zinc-500 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors cursor-pointer" title="${mod.active !== false ? 'تعطيل' : 'تفعيل'}">
+            <svg class="w-4 h-4 ${mod.active !== false ? 'text-rose-500' : 'text-emerald-500'}" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              ${mod.active !== false 
+                ? '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />' 
+                : '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />'}
+            </svg>
+          </button>
+          <button data-action="edit" data-id="${mod.id}" class="p-1.5 rounded-lg text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors cursor-pointer" title="تعديل">
+            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+            </svg>
+          </button>
+          <button data-action="delete" data-id="${mod.id}" class="p-1.5 rounded-lg text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-900/20 transition-colors cursor-pointer" title="حذف">
+            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+            </svg>
+          </button>
+        </div>
+      `;
+
+      // Attach events
+      el.querySelector('[data-action="toggle"]')?.addEventListener('click', async (e) => {
+        const btn = e.currentTarget as HTMLButtonElement;
+        const id = btn.dataset.id!;
+        const isActive = btn.dataset.active === 'true';
+        
+        try {
+          const user = getCachedUserProfile();
+          await toggleModuleActive(id, !isActive, user || undefined);
+          showToast(`تم ${!isActive ? 'تفعيل' : 'تعطيل'} الموديول بنجاح`, 'success');
+          await loadModules();
+        } catch (err) {
+          console.error(err);
+          showToast('حدث خطأ', 'error');
+        }
+      });
+
+      el.querySelector('[data-action="edit"]')?.addEventListener('click', (e) => {
+        const btn = e.currentTarget as HTMLButtonElement;
+        editingId = btn.dataset.id!;
+        renderModules();
+      });
+
+      el.querySelector('[data-action="delete"]')?.addEventListener('click', async (e) => {
+        const btn = e.currentTarget as HTMLButtonElement;
+        const id = btn.dataset.id!;
+        if (confirm('هل أنت متأكد من حذف هذا الموديول؟ لن يتم حذف المواد المرتبطة به.')) {
+          try {
+            const user = getCachedUserProfile();
+            await deleteModuleFromFirestore(id, user || undefined);
+            showToast('تم حذف الموديول بنجاح', 'success');
+            await loadModules();
+          } catch (err) {
+            console.error(err);
+            showToast('حدث خطأ أثناء الحذف', 'error');
+          }
+        }
+      });
+
+      return el;
+    }
+
+    function createEditCard(mod: ModuleInfo): HTMLElement {
+      const el = document.createElement('div');
+      el.className = `p-4 bg-white dark:bg-zinc-900 border-2 border-emerald-500 rounded-2xl shadow-sm flex flex-col col-span-1 md:col-span-2`;
+      
+      const subjStr = (mod.subjects || []).join(', ');
+
+      el.innerHTML = `
+        <form id="edit-form-${mod.id}" class="space-y-4">
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <label class="block text-xs font-medium text-zinc-500 mb-1">كود الموديول</label>
+              <input type="text" name="code" required value="${escapeHtml(mod.code)}" class="w-full px-2 py-1.5 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-lg text-sm text-start" />
+            </div>
+            <div>
+              <label class="block text-xs font-medium text-zinc-500 mb-1">الاسم بالإنجليزية</label>
+              <input type="text" name="title" required value="${escapeHtml(mod.title)}" class="w-full px-2 py-1.5 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-lg text-sm text-start" />
+            </div>
+            <div>
+              <label class="block text-xs font-medium text-zinc-500 mb-1">الاسم بالعربية</label>
+              <input type="text" name="titleAr" value="${escapeHtml(mod.titleAr || '')}" class="w-full px-2 py-1.5 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-lg text-sm text-start" />
+            </div>
+            <div>
+              <label class="block text-xs font-medium text-zinc-500 mb-1">الفرقة</label>
+              <select name="year" required class="w-full px-2 py-1.5 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-lg text-sm">
+                <option value="1" ${mod.year === 1 ? 'selected' : ''}>الفرقة الأولى</option>
+                <option value="2" ${mod.year === 2 ? 'selected' : ''}>الفرقة الثانية</option>
+                <option value="3" ${mod.year === 3 ? 'selected' : ''}>الفرقة الثالثة</option>
+                <option value="4" ${mod.year === 4 ? 'selected' : ''}>الفرقة الرابعة</option>
+                <option value="5" ${mod.year === 5 ? 'selected' : ''}>الفرقة الخامسة</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-xs font-medium text-zinc-500 mb-1">الترم</label>
+              <select name="semester" class="w-full px-2 py-1.5 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-lg text-sm">
+                <option value="" ${!mod.semester ? 'selected' : ''}>غير محدد</option>
+                <option value="1" ${mod.semester === 1 ? 'selected' : ''}>الترم الأول</option>
+                <option value="2" ${mod.semester === 2 ? 'selected' : ''}>الترم الثاني</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-xs font-medium text-zinc-500 mb-1">المواد</label>
+              <input type="text" name="subjects" value="${escapeHtml(subjStr)}" class="w-full px-2 py-1.5 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-lg text-sm text-start" />
+            </div>
+            <div class="md:col-span-3">
+              <label class="block text-xs font-medium text-zinc-500 mb-1">الوصف</label>
+              <textarea name="description" rows="1" class="w-full px-2 py-1.5 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-lg text-sm text-start">${escapeHtml(mod.description || '')}</textarea>
+            </div>
+          </div>
+          <div class="flex justify-end gap-2 mt-4">
+            <button type="button" class="cancel-edit-btn px-3 py-1.5 bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 rounded-lg text-sm font-medium cursor-pointer">إلغاء</button>
+            <button type="submit" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-sm font-medium flex items-center cursor-pointer">
+              حفظ التعديلات
+            </button>
+          </div>
+        </form>
+      `;
+
+      el.querySelector('.cancel-edit-btn')?.addEventListener('click', () => {
+        editingId = null;
+        renderModules();
+      });
+
+      const form = el.querySelector('form');
+      form?.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const formData = new FormData(form);
+        
+        const year = parseInt(formData.get('year') as string);
+        const semesterVal = formData.get('semester') as string;
+        const subjVal = formData.get('subjects') as string;
+        const user = getCachedUserProfile();
+        
+        const updatedMod: ModuleInfo = {
+          ...mod,
+          code: formData.get('code') as string,
+          title: formData.get('title') as string,
+          titleAr: formData.get('titleAr') as string,
+          year: year as any,
+          semester: semesterVal ? parseInt(semesterVal) as 1 | 2 : undefined,
+          subjects: subjVal.split(',').map(s => s.trim()).filter(s => s),
+          description: formData.get('description') as string,
+        };
+
+        try {
+          await saveModuleToFirestore(updatedMod);
+          if (user) {
+            await logAdminAction({
+              adminUid: user.uid,
+              adminName: user.displayName,
+              adminUsername: user.username,
+              action: 'update_module',
+              targetId: updatedMod.id,
+              targetTitle: updatedMod.title,
+              details: `Updated module "${updatedMod.title}" (Year ${updatedMod.year})`
+            });
+          }
+          showToast('تم تعديل الموديول بنجاح', 'success');
+          editingId = null;
+          await loadModules();
+        } catch (err) {
+          console.error(err);
+          showToast('حدث خطأ أثناء حفظ التعديلات', 'error');
+        }
+      });
+
+      return el;
+    }
+
+    // Toggle Add Form
+    toggleAddBtn?.addEventListener('click', () => {
+      addForm.classList.toggle('hidden');
+    });
+
+    cancelAddBtn?.addEventListener('click', () => {
+      addForm.classList.add('hidden');
+      addForm.reset();
+    });
+
+    // Handle Add Form Submit
+    addForm?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const title = (document.getElementById('amm-input-title') as HTMLInputElement).value;
+      const year = parseInt((document.getElementById('amm-input-year') as HTMLSelectElement).value);
+      const semesterVal = (document.getElementById('amm-input-semester') as HTMLSelectElement).value;
+      const subjStr = (document.getElementById('amm-input-subjects') as HTMLInputElement).value;
+      
+      const newMod: ModuleInfo = {
+        id: generateId(year, title),
+        code: (document.getElementById('amm-input-code') as HTMLInputElement).value,
+        title: title,
+        titleAr: (document.getElementById('amm-input-title-ar') as HTMLInputElement).value,
+        year: year as any,
+        semester: semesterVal ? parseInt(semesterVal) as 1 | 2 : undefined,
+        subjects: subjStr.split(',').map(s => s.trim()).filter(s => s),
+        description: (document.getElementById('amm-input-desc') as HTMLTextAreaElement).value,
+        descriptionAr: (document.getElementById('amm-input-desc-ar') as HTMLTextAreaElement).value,
+        active: true
+      };
+
+      try {
+        await saveModuleToFirestore(newMod);
+        const user = getCachedUserProfile();
+        if (user) {
+          await logAdminAction({
+            adminUid: user.uid,
+            adminName: user.displayName,
+            adminUsername: user.username,
+            action: 'create_module',
+            targetId: newMod.id,
+            targetTitle: newMod.title,
+            details: `Created module "${newMod.title}" (Year ${newMod.year})`
+          });
+        }
+        showToast('تم إضافة الموديول بنجاح', 'success');
+        addForm.reset();
+        addForm.classList.add('hidden');
+        await loadModules();
+      } catch (err) {
+        console.error(err);
+        showToast('حدث خطأ أثناء الإضافة', 'error');
+      }
+    });
+
+    // Handle Filters
+    const filterBtns = document.querySelectorAll('.amm-filter-btn');
+    filterBtns.forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const target = e.currentTarget as HTMLButtonElement;
+        currentFilter = target.dataset.year!;
+        
+        // Update active styling
+        filterBtns.forEach(b => {
+          b.classList.remove('bg-zinc-800', 'dark:bg-zinc-100', 'text-white', 'dark:text-zinc-900');
+          b.classList.add('bg-zinc-100', 'dark:bg-zinc-800', 'text-zinc-600', 'dark:text-zinc-400');
+        });
+        target.classList.remove('bg-zinc-100', 'dark:bg-zinc-800', 'text-zinc-600', 'dark:text-zinc-400');
+        target.classList.add('bg-zinc-800', 'dark:bg-zinc-100', 'text-white', 'dark:text-zinc-900');
+        
+        editingId = null;
+        renderModules();
+      });
+    });
+
+    loadModules();
+  }
+
+  initModuleManager();
+  document.addEventListener('astro:after-swap', initModuleManager);
+</script>

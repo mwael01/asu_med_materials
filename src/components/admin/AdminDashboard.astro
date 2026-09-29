@@ -5,6 +5,8 @@ import SubmissionsManager from './SubmissionsManager.astro';
 import FeedbackManager from './FeedbackManager.astro';
 import AdminUserManager from './AdminUserManager.astro';
 import AdminActivityLogs from './AdminActivityLogs.astro';
+import AdminModuleManager from './AdminModuleManager.astro';
+import AdminMaterialManager from './AdminMaterialManager.astro';
 
 interface Props {
   modules: ModuleInfo[];
@@ -66,6 +68,24 @@ const { modules } = Astro.props;
 
     <button
       type="button"
+      data-tab="modules"
+      class="admin-nav-tab px-3.5 py-2 rounded-xl font-semibold text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-all cursor-pointer whitespace-nowrap flex items-center gap-1.5"
+    >
+      <span>📦</span>
+      <span data-i18n="admin.tabModules">إدارة الموديولات</span>
+    </button>
+
+    <button
+      type="button"
+      data-tab="materials"
+      class="admin-nav-tab px-3.5 py-2 rounded-xl font-semibold text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-all cursor-pointer whitespace-nowrap flex items-center gap-1.5"
+    >
+      <span>🗑️</span>
+      <span data-i18n="admin.tabMaterials">إدارة المواد</span>
+    </button>
+
+    <button
+      type="button"
       data-tab="feedback"
       class="admin-nav-tab px-3.5 py-2 rounded-xl font-semibold text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-all cursor-pointer whitespace-nowrap flex items-center gap-1.5"
     >
@@ -104,6 +124,16 @@ const { modules } = Astro.props;
       <SubmissionsManager />
     </div>
 
+    <!-- 3. Module Management -->
+    <div id="admin-view-modules" class="admin-view-section hidden">
+      <AdminModuleManager />
+    </div>
+
+    <!-- 4. Material Management -->
+    <div id="admin-view-materials" class="admin-view-section hidden">
+      <AdminMaterialManager />
+    </div>
+
     <!-- 3. Feedback -->
     <div id="admin-view-feedback" class="admin-view-section hidden">
       <FeedbackManager />
@@ -127,6 +157,8 @@ const { modules } = Astro.props;
     const sections = {
       direct: document.getElementById('admin-view-direct'),
       submissions: document.getElementById('admin-view-submissions'),
+      modules: document.getElementById('admin-view-modules'),
+      materials: document.getElementById('admin-view-materials'),
       feedback: document.getElementById('admin-view-feedback'),
       team: document.getElementById('admin-view-team'),
       logs: document.getElementById('admin-view-logs')

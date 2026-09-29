@@ -656,6 +656,112 @@ export async function saveModuleToFirestore(mod: ModuleInfo): Promise<boolean> {
   }
 }
 
+/**
+ * Deletes a module document from Firestore and logs the admin action.
+ */
+export async function deleteModuleFromFirestore(
+  moduleId: string,
+  actingAdmin?: UserProfile
+): Promise<boolean> {
+  const db = getFirestoreDb();
+  if (!db || !moduleId) return false;
+
+  try {
+    const docRef = doc(db, MODULES_COLLECTION, moduleId);
+    const snap = await getDoc(docRef);
+    const moduleData = snap.exists() ? (snap.data() as ModuleInfo) : null;
+
+    await deleteDoc(docRef);
+
+    if (actingAdmin) {
+      await logAdminAction({
+        adminUid: actingAdmin.uid,
+        adminName: actingAdmin.displayName,
+        adminUsername: actingAdmin.username,
+        action: 'delete_module',
+        targetId: moduleId,
+        targetTitle: moduleData?.title || moduleId,
+        details: `Deleted module "${moduleData?.title}" (Year ${moduleData?.year})`
+      });
+    }
+    return true;
+  } catch (err) {
+    console.error(`[Firestore] Failed to delete module ${moduleId}:`, err);
+    return false;
+  }
+}
+
+/**
+ * Toggles a module's active status in Firestore and logs the admin action.
+ */
+export async function toggleModuleActive(
+  moduleId: string,
+  active: boolean,
+  actingAdmin?: UserProfile
+): Promise<boolean> {
+  const db = getFirestoreDb();
+  if (!db || !moduleId) return false;
+
+  try {
+    const docRef = doc(db, MODULES_COLLECTION, moduleId);
+    const snap = await getDoc(docRef);
+    const moduleData = snap.exists() ? (snap.data() as ModuleInfo) : null;
+
+    await setDoc(docRef, { active, updatedAt: new Date().toISOString() }, { merge: true });
+
+    if (actingAdmin) {
+      await logAdminAction({
+        adminUid: actingAdmin.uid,
+        adminName: actingAdmin.displayName,
+        adminUsername: actingAdmin.username,
+        action: 'toggle_module',
+        targetId: moduleId,
+        targetTitle: moduleData?.title || moduleId,
+        details: `${active ? 'Activated' : 'Deactivated'} module "${moduleData?.title}"`
+      });
+    }
+    return true;
+  } catch (err) {
+    console.error(`[Firestore] Failed to toggle module ${moduleId}:`, err);
+    return false;
+  }
+}
+
+/**
+ * Deletes a material document from Firestore and logs the admin action.
+ */
+export async function deleteMaterialFromFirestore(
+  materialId: string,
+  actingAdmin?: UserProfile
+): Promise<boolean> {
+  const db = getFirestoreDb();
+  if (!db || !materialId) return false;
+
+  try {
+    const docRef = doc(db, MATERIALS_COLLECTION, materialId);
+    const snap = await getDoc(docRef);
+    const matData = snap.exists() ? (snap.data() as MaterialItem) : null;
+
+    await deleteDoc(docRef);
+
+    if (actingAdmin) {
+      await logAdminAction({
+        adminUid: actingAdmin.uid,
+        adminName: actingAdmin.displayName,
+        adminUsername: actingAdmin.username,
+        action: 'delete_material',
+        targetId: materialId,
+        targetTitle: matData?.title || materialId,
+        details: `Deleted material "${matData?.title}" (${matData?.type})`
+      });
+    }
+    return true;
+  } catch (err) {
+    console.error(`[Firestore] Failed to delete material ${materialId}:`, err);
+    return false;
+  }
+}
+
 const CONTRIBUTORS_COLLECTION = 'contributors';
 
 /**

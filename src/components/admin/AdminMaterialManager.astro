@@ -1,0 +1,348 @@
+---
+// AdminMaterialManager.astro
+---
+
+<div class="space-y-6 text-start" dir="rtl">
+  <!-- Search & Filter Bar -->
+  <div class="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl p-4 space-y-4">
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div class="space-y-1">
+        <label for="material-search" class="text-xs font-medium text-zinc-700 dark:text-zinc-300">بحث</label>
+        <input type="text" id="material-search" placeholder="ابحث بعنوان المادة..." class="w-full bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-lg px-3 py-2 text-sm text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-colors" />
+      </div>
+      <div class="space-y-1">
+        <label for="material-year" class="text-xs font-medium text-zinc-700 dark:text-zinc-300">الفرقة</label>
+        <select id="material-year" class="w-full bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-lg px-3 py-2 text-sm text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-colors cursor-pointer">
+          <option value="All">الكل</option>
+          <option value="1">الفرقة الأولى</option>
+          <option value="2">الفرقة الثانية</option>
+          <option value="3">الفرقة الثالثة</option>
+          <option value="4">الفرقة الرابعة</option>
+          <option value="5">الفرقة الخامسة</option>
+        </select>
+      </div>
+      <div class="space-y-1">
+        <label for="material-module" class="text-xs font-medium text-zinc-700 dark:text-zinc-300">الموديول</label>
+        <select id="material-module" class="w-full bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-lg px-3 py-2 text-sm text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-colors cursor-pointer">
+          <option value="All">الكل</option>
+        </select>
+      </div>
+      <div class="space-y-1">
+        <label for="material-type" class="text-xs font-medium text-zinc-700 dark:text-zinc-300">النوع</label>
+        <select id="material-type" class="w-full bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-lg px-3 py-2 text-sm text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-colors cursor-pointer">
+          <option value="All">الكل</option>
+          <option value="drive">Drive</option>
+          <option value="telegram">Telegram</option>
+          <option value="youtube">YouTube</option>
+          <option value="playlist">Playlist</option>
+          <option value="whatsapp">WhatsApp</option>
+          <option value="book">Book</option>
+          <option value="summary">Summary</option>
+          <option value="exam">Exam</option>
+          <option value="website">Website</option>
+          <option value="other">Other</option>
+        </select>
+      </div>
+    </div>
+    <div class="text-xs text-zinc-500 dark:text-zinc-400">
+      عدد النتائج: <span id="materials-count">0</span>
+    </div>
+  </div>
+
+  <!-- Materials List -->
+  <div class="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl p-4">
+    <div id="materials-loading" class="flex flex-col items-center justify-center py-8 space-y-3">
+      <svg class="animate-spin h-6 w-6 text-emerald-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+      </svg>
+      <span class="text-xs text-zinc-500 dark:text-zinc-400">جاري تحميل المواد...</span>
+    </div>
+    
+    <div id="materials-empty" class="hidden flex-col items-center justify-center py-8 text-center space-y-2">
+      <span class="text-sm text-zinc-600 dark:text-zinc-400">لا توجد مواد مطابقة للبحث.</span>
+    </div>
+
+    <div id="materials-list" class="hidden flex-col space-y-2">
+      <!-- Rows rendered here -->
+    </div>
+
+    <div class="mt-4 flex justify-center">
+      <button id="load-more-btn" class="hidden px-4 py-2 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 text-zinc-700 dark:text-zinc-300 text-xs font-medium rounded-lg transition-colors cursor-pointer">
+        تحميل المزيد
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+  import { fetchMaterialsFromFirestore, fetchModulesFromFirestore, deleteMaterialFromFirestore } from '../../firebase/firestore';
+  import { getCachedUserProfile } from '../../firebase/auth';
+  import { showToast } from '../../utils/toast';
+  import type { MaterialItem, ModuleInfo } from '../../types/materials';
+  
+  let allMaterials: MaterialItem[] = [];
+  let filteredMaterials: MaterialItem[] = [];
+  let allModules: ModuleInfo[] = [];
+  let currentPage = 1;
+  const ITEMS_PER_PAGE = 25;
+
+  function escapeHtml(unsafe: string) {
+    if (!unsafe) return '';
+    return unsafe
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#039;");
+  }
+
+  function getTypeColors(type: string): string {
+    const map: Record<string, string> = {
+      drive: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
+      telegram: 'bg-sky-100 text-sky-700 dark:bg-sky-900/30 dark:text-sky-400',
+      youtube: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400',
+      playlist: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400',
+      whatsapp: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400',
+      book: 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400',
+      summary: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400',
+      exam: 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400',
+      website: 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400',
+      other: 'bg-zinc-100 text-zinc-700 dark:bg-zinc-800 dark:text-zinc-400'
+    };
+    return map[type] || map['other'];
+  }
+
+  function formatDate(timestamp: any): string {
+    if (!timestamp) return '';
+    try {
+      const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
+      return date.toLocaleDateString('ar-EG');
+    } catch (e) {
+      return '';
+    }
+  }
+
+  function renderMaterialsList(append = false) {
+    const listEl = document.getElementById('materials-list');
+    const loadMoreBtn = document.getElementById('load-more-btn');
+    if (!listEl || !loadMoreBtn) return;
+
+    if (!append) {
+      listEl.innerHTML = '';
+    }
+
+    const startIdx = (currentPage - 1) * ITEMS_PER_PAGE;
+    const endIdx = startIdx + ITEMS_PER_PAGE;
+    const pageItems = filteredMaterials.slice(startIdx, endIdx);
+
+    if (pageItems.length === 0 && !append) {
+      listEl.classList.add('hidden');
+      document.getElementById('materials-empty')?.classList.remove('hidden');
+      document.getElementById('materials-loading')?.classList.add('hidden');
+      loadMoreBtn.classList.add('hidden');
+      return;
+    }
+
+    listEl.classList.remove('hidden');
+    document.getElementById('materials-empty')?.classList.add('hidden');
+    document.getElementById('materials-loading')?.classList.add('hidden');
+
+    pageItems.forEach(item => {
+      const row = document.createElement('div');
+      row.className = 'flex items-center justify-between p-3 bg-zinc-50 dark:bg-zinc-800/50 rounded-lg border border-zinc-100 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700 transition-colors';
+      row.id = `material-row-${item.id}`;
+      
+      const typeColors = getTypeColors(item.type);
+      const safeTitle = escapeHtml(item.title);
+      const safeYear = escapeHtml(item.year?.toString() || '');
+      const safeModule = escapeHtml(item.moduleId || item.subject || '');
+      const dateStr = formatDate(item.createdAt);
+
+      row.innerHTML = `
+        <div class="flex flex-col space-y-1 overflow-hidden">
+          <div class="flex items-center space-x-2 space-x-reverse">
+            <span class="text-sm font-bold text-zinc-900 dark:text-zinc-100 truncate max-w-[200px] sm:max-w-[300px] md:max-w-[400px]">${safeTitle}</span>
+            <span class="inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-medium ${typeColors}">
+              ${escapeHtml(item.type)}
+            </span>
+          </div>
+          <div class="flex items-center space-x-3 space-x-reverse text-[11px] text-zinc-500 dark:text-zinc-400">
+            ${safeYear ? `<span>الفرقة: ${safeYear}</span>` : ''}
+            ${safeModule ? `<span>الموديول: ${safeModule}</span>` : ''}
+            ${dateStr ? `<span>${dateStr}</span>` : ''}
+          </div>
+        </div>
+        <div class="flex items-center space-x-2 space-x-reverse shrink-0">
+          <a href="${escapeHtml(item.url)}" target="_blank" rel="noopener noreferrer" class="p-1.5 text-zinc-400 hover:text-emerald-500 transition-colors" title="فتح الرابط">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+            </svg>
+          </a>
+          <button class="delete-btn p-1.5 text-zinc-400 hover:text-rose-500 transition-colors cursor-pointer" data-id="${item.id}" data-title="${escapeHtml(item.title)}" title="حذف">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+            </svg>
+          </button>
+        </div>
+      `;
+      listEl.appendChild(row);
+    });
+
+    if (endIdx < filteredMaterials.length) {
+      loadMoreBtn.classList.remove('hidden');
+    } else {
+      loadMoreBtn.classList.add('hidden');
+    }
+
+    // Attach delete handlers
+    const deleteBtns = listEl.querySelectorAll('.delete-btn');
+    deleteBtns.forEach(btn => {
+      btn.addEventListener('click', async (e) => {
+        const target = e.currentTarget as HTMLButtonElement;
+        const id = target.getAttribute('data-id');
+        const title = target.getAttribute('data-title');
+        if (!id || !title) return;
+
+        if (confirm(`هل أنت متأكد من حذف هذه المادة؟ "${title}" — لا يمكن التراجع عن هذا الإجراء.`)) {
+          try {
+            target.disabled = true;
+            target.classList.add('opacity-50');
+            const adminUser = getCachedUserProfile();
+            if (!adminUser) {
+              showToast('يجب تسجيل الدخول كمسؤول', 'error');
+              return;
+            }
+            await deleteMaterialFromFirestore(id, adminUser);
+            
+            // Remove from UI immediately
+            document.getElementById(`material-row-${id}`)?.remove();
+            
+            // Remove from local arrays
+            allMaterials = allMaterials.filter(m => m.id !== id);
+            filteredMaterials = filteredMaterials.filter(m => m.id !== id);
+            
+            // Update count
+            const countEl = document.getElementById('materials-count');
+            if (countEl) countEl.textContent = filteredMaterials.length.toString();
+            
+            showToast('تم حذف المادة بنجاح', 'success');
+            
+            // Re-render if empty
+            if (filteredMaterials.length === 0) {
+               renderMaterialsList();
+            }
+          } catch (error) {
+            console.error('Error deleting material:', error);
+            showToast('حدث خطأ أثناء الحذف', 'error');
+            target.disabled = false;
+            target.classList.remove('opacity-50');
+          }
+        }
+      });
+    });
+  }
+
+  function filterMaterials() {
+    const searchInput = document.getElementById('material-search') as HTMLInputElement;
+    const yearSelect = document.getElementById('material-year') as HTMLSelectElement;
+    const moduleSelect = document.getElementById('material-module') as HTMLSelectElement;
+    const typeSelect = document.getElementById('material-type') as HTMLSelectElement;
+
+    if (!searchInput || !yearSelect || !moduleSelect || !typeSelect) return;
+
+    const query = searchInput.value.toLowerCase();
+    const year = yearSelect.value;
+    const mod = moduleSelect.value;
+    const type = typeSelect.value;
+
+    filteredMaterials = allMaterials.filter(item => {
+      const matchQuery = item.title.toLowerCase().includes(query) || (item.titleEn && item.titleEn.toLowerCase().includes(query));
+      const matchYear = year === 'All' || String(item.year) === year;
+      const matchModule = mod === 'All' || item.moduleId === mod || item.subject === mod;
+      const matchType = type === 'All' || item.type === type;
+      return matchQuery && matchYear && matchModule && matchType;
+    });
+
+    const countEl = document.getElementById('materials-count');
+    if (countEl) {
+      countEl.textContent = filteredMaterials.length.toString();
+    }
+
+    currentPage = 1;
+    renderMaterialsList();
+  }
+
+  function updateModuleDropdown() {
+    const yearSelect = document.getElementById('material-year') as HTMLSelectElement;
+    const moduleSelect = document.getElementById('material-module') as HTMLSelectElement;
+    if (!yearSelect || !moduleSelect) return;
+
+    const year = yearSelect.value;
+    moduleSelect.innerHTML = '<option value="All">الكل</option>';
+
+    const filteredModules = year === 'All' ? allModules : allModules.filter(m => String(m.year) === year);
+    
+    filteredModules.forEach(mod => {
+      const option = document.createElement('option');
+      option.value = mod.id;
+      option.textContent = escapeHtml(mod.title);
+      moduleSelect.appendChild(option);
+    });
+  }
+
+  async function initMaterialManager() {
+    const listEl = document.getElementById('materials-list');
+    if (!listEl) return;
+
+    document.getElementById('materials-loading')?.classList.remove('hidden');
+    document.getElementById('materials-empty')?.classList.add('hidden');
+    listEl.classList.add('hidden');
+    document.getElementById('load-more-btn')?.classList.add('hidden');
+
+    try {
+      [allMaterials, allModules] = await Promise.all([
+        fetchMaterialsFromFirestore(),
+        fetchModulesFromFirestore()
+      ]);
+      
+      // Sort materials by creation date descending if available
+      allMaterials.sort((a, b) => {
+        const da = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+        const db_ = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+        return db_ - da;
+      });
+
+      updateModuleDropdown();
+      filterMaterials();
+    } catch (error) {
+      console.error('Error fetching data:', error);
+      document.getElementById('materials-loading')?.classList.add('hidden');
+      showToast('حدث خطأ أثناء تحميل البيانات', 'error');
+    }
+
+    // Event Listeners
+    const searchInput = document.getElementById('material-search');
+    const yearSelect = document.getElementById('material-year');
+    const moduleSelect = document.getElementById('material-module');
+    const typeSelect = document.getElementById('material-type');
+    const loadMoreBtn = document.getElementById('load-more-btn');
+
+    searchInput?.addEventListener('input', filterMaterials);
+    yearSelect?.addEventListener('change', () => {
+      updateModuleDropdown();
+      filterMaterials();
+    });
+    moduleSelect?.addEventListener('change', filterMaterials);
+    typeSelect?.addEventListener('change', filterMaterials);
+
+    loadMoreBtn?.addEventListener('click', () => {
+      currentPage++;
+      renderMaterialsList(true);
+    });
+  }
+
+  // Initialize
+  initMaterialManager();
+  document.addEventListener('astro:after-swap', initMaterialManager);
+</script>

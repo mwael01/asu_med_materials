@@ -1,9 +1,9 @@
 ---
 import Layout from '../layouts/Layout.astro';
-import { getAllModules } from '../data/modules';
+import { getAllModulesIncludingInactive } from '../data/modules';
 import AdminDashboard from '../components/admin/AdminDashboard.astro';
 
-const modules = await getAllModules();
+const modules = await getAllModulesIncludingInactive();
 ---
 
 <Layout

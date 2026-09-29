@@ -38,6 +38,7 @@ export interface ModuleInfo {
   subjects: string[];
   description?: string;
   descriptionAr?: string;
+  active?: boolean; // defaults to true when undefined
 }
 
 export interface MaterialItem {

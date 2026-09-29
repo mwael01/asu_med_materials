@@ -17,7 +17,7 @@ let modulesMemoryCache: { data: ModuleInfo[]; timestamp: number } | null = null;
 const CACHE_TTL_MS = 15_000; // 15 seconds
 
 /**
- * Fetches all curriculum modules directly from Cloud Firestore (single source of truth).
+ * Fetches active curriculum modules from Cloud Firestore (filters out deactivated modules).
  */
 export async function getAllModules(): Promise<ModuleInfo[]> {
   const now = Date.now();
@@ -26,12 +26,21 @@ export async function getAllModules(): Promise<ModuleInfo[]> {
   }
 
   const modules = await fetchModulesFromFirestore();
-  if (modules && modules.length > 0) {
-    modulesMemoryCache = { data: modules, timestamp: now };
-    return modules;
+  // Filter out deactivated modules for public views
+  const activeModules = modules.filter(m => m.active !== false);
+  if (activeModules && activeModules.length > 0) {
+    modulesMemoryCache = { data: activeModules, timestamp: now };
+    return activeModules;
   }
 
   return modulesMemoryCache?.data || [];
+}
+
+/**
+ * Fetches ALL modules including inactive ones (for admin management).
+ */
+export async function getAllModulesIncludingInactive(): Promise<ModuleInfo[]> {
+  return fetchModulesFromFirestore();
 }
 
 /**

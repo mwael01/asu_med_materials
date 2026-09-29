@@ -62,6 +62,7 @@ export interface ModuleDocument {
   subjects: string[];
   description?: string;
   descriptionAr?: string;
+  active?: boolean;
   createdAt?: string;
   updatedAt?: string;
 }
@@ -136,7 +137,12 @@ export type AdminActionType =
   | 'resolve_feedback'
   | 'delete_feedback'
   | 'promote_admin'
-  | 'demote_admin';
+  | 'demote_admin'
+  | 'create_module'
+  | 'update_module'
+  | 'toggle_module'
+  | 'delete_module'
+  | 'delete_material';
 
 export interface AdminLogDocument {
   id: string;
@@ -248,6 +254,7 @@ export const moduleConverter: FirestoreDataConverter<ModuleInfo> = {
       subjects: Array.isArray(mod.subjects) ? mod.subjects : [],
       description: mod.description || null,
       descriptionAr: mod.descriptionAr || null,
+      active: mod.active !== false, // defaults to true
     };
   },
   fromFirestore(
@@ -265,6 +272,7 @@ export const moduleConverter: FirestoreDataConverter<ModuleInfo> = {
       subjects: Array.isArray(data.subjects) ? data.subjects : [],
       description: data.description || undefined,
       descriptionAr: data.descriptionAr || undefined,
+      active: data.active !== false, // defaults to true
     };
   }
 };
