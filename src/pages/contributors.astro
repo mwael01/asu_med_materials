@@ -362,7 +362,7 @@ const CREATORS_INITIAL_LIMIT = 12;
           if (admin.contacts && admin.contacts.length > 0) {
             const validContacts = admin.contacts.filter((c) => c.url && c.url.trim());
             if (validContacts.length > 0) {
-              contactsHtml = `<div class="mt-5 flex justify-center w-full"><div class="flex flex-wrap items-center justify-center gap-1.5">${validContacts.map((c) => renderContactPillMarkup(c, true)).join('')}</div></div>`;
+              contactsHtml = `<div class="mt-5 flex flex-wrap justify-center gap-1.5 w-full">${validContacts.map((c) => renderContactPillMarkup(c, true)).join('')}</div>`;
             }
           }
 

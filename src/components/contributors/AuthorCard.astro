@@ -48,7 +48,7 @@ const { author } = Astro.props;
   )}
 
   {author.contacts && (
-    <div class="mt-5 flex justify-center w-full">
+    <div class="mt-5 flex flex-wrap justify-center gap-1.5 w-full">
       <ContactButtons contacts={author.contacts} showLabels={true} />
     </div>
   )}
