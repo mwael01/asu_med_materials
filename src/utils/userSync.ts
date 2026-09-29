@@ -13,13 +13,68 @@ import {
   saveStudiedIds
 } from './storage';
 
+const SYNC_INTERVAL_MS = 60_000;
+
 let isListening = false;
 let unsubscribeProfileListener: (() => void) | null = null;
+let syncIntervalId: ReturnType<typeof setInterval> | null = null;
 let isUpdatingFromCloud = false;
+let currentUid: string | null = null;
+
+function mergeAndSync(uid: string, remoteProfile: { bookmarks?: string[]; completedMaterials?: string[] }): void {
+  if (isUpdatingFromCloud) return;
+
+  const cloudBookmarks: string[] = Array.isArray(remoteProfile.bookmarks) ? remoteProfile.bookmarks : [];
+  const cloudStudied: string[] = Array.isArray(remoteProfile.completedMaterials) ? remoteProfile.completedMaterials : [];
+
+  const localBookmarks = getStoredBookmarkIds();
+  const localStudied = getStoredStudiedIds();
+
+  const mergedBookmarks = Array.from(new Set([...cloudBookmarks, ...localBookmarks]));
+  const mergedStudied = Array.from(new Set([...cloudStudied, ...localStudied]));
+
+  const localBookmarksChanged =
+    mergedBookmarks.length !== localBookmarks.length ||
+    !localBookmarks.every((id) => mergedBookmarks.includes(id));
+
+  const localStudiedChanged =
+    mergedStudied.length !== localStudied.length ||
+    !localStudied.every((id) => mergedStudied.includes(id));
+
+  const cloudNeedsUpdate =
+    mergedBookmarks.length !== cloudBookmarks.length ||
+    mergedStudied.length !== cloudStudied.length;
+
+  if (localBookmarksChanged || localStudiedChanged) {
+    isUpdatingFromCloud = true;
+    try {
+      if (localBookmarksChanged) {
+        saveBookmarkIds(mergedBookmarks);
+      }
+      if (localStudiedChanged) {
+        saveStudiedIds(mergedStudied);
+      }
+    } finally {
+      setTimeout(() => {
+        isUpdatingFromCloud = false;
+      }, 300);
+    }
+  }
+
+  if (cloudNeedsUpdate) {
+    syncUserLibraryToFirestore(uid, {
+      bookmarks: mergedBookmarks,
+      completedMaterials: mergedStudied
+    }).catch((err) => {
+      console.warn('[Sync] Failed to push merged data to Firestore:', err);
+    });
+  }
+}
 
 /**
  * Initializes bidirectional cloud sync for bookmarks and completed materials.
  * When the user logs in, merges cloud data with local storage and listens for multi-device updates.
+ * Also sets up a 60-second periodic sync when the app is online.
  */
 export function initUserLibrarySync(): void {
   if (typeof window === 'undefined') return;
@@ -27,16 +82,22 @@ export function initUserLibrarySync(): void {
   isListening = true;
 
   onAuthChange(async (firebaseUser) => {
-    // 1. If user signed out, clean up listener
+    // 1. If user signed out, clean up listener and interval
     if (!firebaseUser) {
       if (unsubscribeProfileListener) {
         unsubscribeProfileListener();
         unsubscribeProfileListener = null;
       }
+      if (syncIntervalId) {
+        clearInterval(syncIntervalId);
+        syncIntervalId = null;
+      }
+      currentUid = null;
       return;
     }
 
     const uid = firebaseUser.uid;
+    currentUid = uid;
 
     // 2. Setup real-time listener for multi-device sync
     if (unsubscribeProfileListener) {
@@ -44,54 +105,32 @@ export function initUserLibrarySync(): void {
     }
 
     unsubscribeProfileListener = listenToUserProfile(uid, async (remoteProfile) => {
-      if (!remoteProfile || isUpdatingFromCloud) return;
-
-      const cloudBookmarks: string[] = Array.isArray(remoteProfile.bookmarks) ? remoteProfile.bookmarks : [];
-      const cloudStudied: string[] = Array.isArray(remoteProfile.completedMaterials) ? remoteProfile.completedMaterials : [];
-
-      const localBookmarks = getStoredBookmarkIds();
-      const localStudied = getStoredStudiedIds();
-
-      // Check if there are any differences
-      const mergedBookmarks = Array.from(new Set([...cloudBookmarks, ...localBookmarks]));
-      const mergedStudied = Array.from(new Set([...cloudStudied, ...localStudied]));
-
-      const localBookmarksChanged =
-        mergedBookmarks.length !== localBookmarks.length ||
-        !localBookmarks.every((id) => mergedBookmarks.includes(id));
-
-      const localStudiedChanged =
-        mergedStudied.length !== localStudied.length ||
-        !localStudied.every((id) => mergedStudied.includes(id));
-
-      const cloudNeedsUpdate =
-        mergedBookmarks.length !== cloudBookmarks.length ||
-        mergedStudied.length !== cloudStudied.length;
-
-      if (localBookmarksChanged || localStudiedChanged) {
-        isUpdatingFromCloud = true;
-        try {
-          if (localBookmarksChanged) {
-            saveBookmarkIds(mergedBookmarks);
-          }
-          if (localStudiedChanged) {
-            saveStudiedIds(mergedStudied);
-          }
-        } finally {
-          setTimeout(() => {
-            isUpdatingFromCloud = false;
-          }, 300);
-        }
-      }
-
-      // If local had offline items not present in remote, sync merged set back to Firestore
-      if (cloudNeedsUpdate) {
-        await syncUserLibraryToFirestore(uid, {
-          bookmarks: mergedBookmarks,
-          completedMaterials: mergedStudied
-        });
-      }
+      if (!remoteProfile) return;
+      mergeAndSync(uid, remoteProfile);
     });
+
+    // 3. Setup periodic sync (60s when online)
+    if (syncIntervalId) {
+      clearInterval(syncIntervalId);
+    }
+
+    syncIntervalId = setInterval(async () => {
+      if (!navigator.onLine || !currentUid) return;
+
+      try {
+        const { getDoc, doc } = await import('firebase/firestore');
+        const { getFirestoreDb } = await import('../firebase/firestore');
+        const db = getFirestoreDb();
+        if (!db) return;
+
+        const userDoc = await getDoc(doc(db, 'users', currentUid));
+        if (userDoc.exists()) {
+          mergeAndSync(currentUid, userDoc.data());
+        }
+      } catch (err) {
+        console.warn('[Sync] Periodic sync failed:', err);
+      }
+    }, SYNC_INTERVAL_MS);
   });
 }
 

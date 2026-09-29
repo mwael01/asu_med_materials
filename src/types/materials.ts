@@ -79,13 +79,5 @@ export interface UserPreferences {
   moduleId?: string;
 }
 
-export type FolderColor = 'emerald' | 'blue' | 'purple' | 'amber' | 'rose' | 'teal';
 
-export interface UserFolder {
-  id: string;
-  name: string;
-  color?: FolderColor;
-  materialIds: string[];
-  createdAt: number;
-}
 
