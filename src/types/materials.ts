@@ -55,6 +55,8 @@ export interface MaterialItem {
   subject?: string;
   author?: string | string[]; // Creator / Doctor / Teacher who prepared the materials
   addedBy?: string | string[]; // Contributor / Student who added it to the platform
+  contributorUid?: string; // Firebase Auth UID of the contributing user
+  contributorUsername?: string; // Username handle of the contributing user
   tags: string[];
   createdAt?: string;
   playlistId?: string; // YouTube playlist ID if applicable

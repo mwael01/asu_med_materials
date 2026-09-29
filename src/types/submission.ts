@@ -6,6 +6,8 @@ export interface QuickDumpSubmission {
   mode: 'dump';
   content: string; // The raw text block / WhatsApp message / multiple links
   contributor?: string; // Contributor name or team (optional)
+  contributorUid?: string; // UID of user if logged in
+  contributorUsername?: string; // Username of user if logged in
   year?: AcademicYear | 'general';
   moduleId?: string;
   notes?: string;
@@ -21,6 +23,8 @@ export interface DetailedSubmission {
   subject?: string;
   author?: string; // Content creator / Doctor / Lecturer
   addedBy?: string; // Student contributor
+  contributorUid?: string; // UID of user if logged in
+  contributorUsername?: string; // Username of user if logged in
   description?: string;
 }
 

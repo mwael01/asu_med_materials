@@ -374,6 +374,8 @@ const { modules } = Astro.props;
     saveMaterialsBulk,
     checkUrlExistsInFirestore,
     checkUrlsBatchInFirestore,
+    updateSubmissionStatus,
+    incrementUserContributionsCount,
     logAdminAction
   } from '../../firebase/firestore';
   import { getCachedUserProfile } from '../../firebase/auth';
@@ -387,6 +389,9 @@ const { modules } = Astro.props;
     isDuplicate: boolean;
     existingTitle?: string;
     selected: boolean;
+    contributor?: string;
+    contributorUid?: string;
+    contributorUsername?: string;
   }
 
   function initDirectMaterialForm() {
@@ -439,6 +444,9 @@ const { modules } = Astro.props;
 
     let stagedItems: StagedItem[] = [];
     let activeSourceSubmissionId: string | null = null;
+    let activeSourceContributor: string | null = null;
+    let activeSourceContributorUid: string | null = null;
+    let activeSourceContributorUsername: string | null = null;
     let urlCheckTimeout: any = null;
 
     // Filter modules based on year for single form
@@ -545,6 +553,7 @@ const { modules } = Astro.props;
           if (categorySelect && parsed.category) categorySelect.value = parsed.category;
           if (typeSelect && parsed.type) typeSelect.value = parsed.type;
           if (authorInput && parsed.author) authorInput.value = parsed.author;
+          if (contribInput && activeSourceContributor) contribInput.value = activeSourceContributor;
           if (descInput && parsed.description) descInput.value = parsed.description;
 
           aiNotice?.classList.remove('hidden');
@@ -559,7 +568,10 @@ const { modules } = Astro.props;
               stagedId: `stage_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
               isDuplicate,
               existingTitle: dup?.title,
-              selected: !isDuplicate // Automatically deselect duplicate links
+              selected: !isDuplicate, // Automatically deselect duplicate links
+              contributor: activeSourceContributor || undefined,
+              contributorUid: activeSourceContributorUid || undefined,
+              contributorUsername: activeSourceContributorUsername || undefined
             });
           }
 
@@ -889,7 +901,10 @@ const { modules } = Astro.props;
         stagedId: `staged_${Date.now()}`,
         isDuplicate: dupRes.exists,
         existingTitle: dupRes.existingMaterial?.title,
-        selected: !dupRes.exists
+        selected: !dupRes.exists,
+        contributor: activeSourceContributor || undefined,
+        contributorUid: activeSourceContributorUid || undefined,
+        contributorUsername: activeSourceContributorUsername || undefined
       });
 
       renderBulkStaging();
@@ -920,7 +935,9 @@ const { modules } = Astro.props;
         category: item.category,
         type: item.type,
         author: item.author,
-        addedBy: adminUser?.displayName || adminUser?.username || 'الإدارة',
+        addedBy: item.contributor || activeSourceContributor || adminUser?.displayName || adminUser?.username || 'الإدارة',
+        contributorUid: item.contributorUid || activeSourceContributorUid || adminUser?.uid,
+        contributorUsername: item.contributorUsername || activeSourceContributorUsername || adminUser?.username,
         description: item.description,
         tags: [item.subject, item.type].filter(Boolean) as string[],
         createdAt: new Date().toISOString()
@@ -943,9 +960,12 @@ const { modules } = Astro.props;
           stagedItems = stagedItems.filter((i) => !i.selected);
           renderBulkStaging();
 
-          // Reset source submission banner
+          // Reset source submission banner & contributor state
           if (activeSourceSubmissionId) {
             activeSourceSubmissionId = null;
+            activeSourceContributor = null;
+            activeSourceContributorUid = null;
+            activeSourceContributorUsername = null;
             subBanner?.classList.add('hidden');
           }
         } else if (result.skippedCount > 0) {
@@ -965,6 +985,9 @@ const { modules } = Astro.props;
     // Cancel source submission link
     subCancelBtn?.addEventListener('click', () => {
       activeSourceSubmissionId = null;
+      activeSourceContributor = null;
+      activeSourceContributorUid = null;
+      activeSourceContributorUsername = null;
       subBanner?.classList.add('hidden');
       showToast('تم إلغاء ربط المساهمة.', 'info');
     });
@@ -977,9 +1000,17 @@ const { modules } = Astro.props;
       if (!detail) return;
 
       activeSourceSubmissionId = detail.submissionId || null;
+      activeSourceContributor = detail.contributor || null;
+      activeSourceContributorUid = detail.contributorUid || null;
+      activeSourceContributorUsername = detail.contributorUsername || null;
+
       if (subBanner && subBannerText) {
-        subBannerText.textContent = `مراجعة مساهمة الطالب: ${detail.contributor || 'فاعل خير'}`;
+        subBannerText.textContent = `مراجعة مساهمة الطالب: ${detail.contributor || 'فاعل خير'}${detail.contributorUsername ? ` (@${detail.contributorUsername})` : ''}`;
         subBanner.classList.remove('hidden');
+      }
+
+      if (contribInput && detail.contributor) {
+        contribInput.value = detail.contributor;
       }
 
       if (aiInput) {
@@ -1033,7 +1064,9 @@ const { modules } = Astro.props;
         category: (categorySelect?.value || 'summaries') as MaterialCategory,
         type: (typeSelect?.value || 'drive') as ResourceType,
         author: authorInput?.value.trim() || undefined,
-        addedBy: contribInput?.value.trim() || adminUser?.displayName || adminUser?.username || 'الإدارة',
+        addedBy: contribInput?.value.trim() || activeSourceContributor || adminUser?.displayName || adminUser?.username || 'الإدارة',
+        contributorUid: activeSourceContributorUid || adminUser?.uid,
+        contributorUsername: activeSourceContributorUsername || adminUser?.username,
         description: descInput?.value.trim() || undefined,
         tags: [subjectInput?.value.trim(), typeSelect?.value].filter(Boolean) as string[],
         createdAt: new Date().toISOString()
@@ -1042,6 +1075,19 @@ const { modules } = Astro.props;
       try {
         const success = await saveMaterialToFirestore(newMaterial);
         if (success) {
+          if (newMaterial.contributorUid) {
+            await incrementUserContributionsCount(newMaterial.contributorUid, 1);
+          }
+
+          if (activeSourceSubmissionId) {
+            await updateSubmissionStatus(activeSourceSubmissionId, 'approved', adminUser || undefined);
+            activeSourceSubmissionId = null;
+            activeSourceContributor = null;
+            activeSourceContributorUid = null;
+            activeSourceContributorUsername = null;
+            subBanner?.classList.add('hidden');
+          }
+
           if (adminUser) {
             await logAdminAction({
               adminUid: adminUser.uid,

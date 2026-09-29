@@ -248,6 +248,9 @@ export async function saveMaterialsBulk(
       const docRef = doc(db, MATERIALS_COLLECTION, mat.id);
       await setDoc(docRef, sanitizeFirestorePayload(mat), { merge: true });
       savedCount++;
+      if (mat.contributorUid) {
+        await incrementUserContributionsCount(mat.contributorUid, 1);
+      }
     } catch (err: any) {
       console.error(`[Firestore] Failed to save material ${mat.id} in bulk:`, err);
       errors.push(`Material "${mat.title}": ${err?.message || 'Save failed'}`);
@@ -518,23 +521,54 @@ export function listenToUserProfile(
 }
 
 /**
+ * Increments or updates the contributions count for a user in Firestore.
+ */
+export async function incrementUserContributionsCount(uid: string, delta: number = 1): Promise<void> {
+  const db = getFirestoreDb();
+  if (!db || !uid) return;
+  try {
+    const userDocRef = doc(db, USERS_COLLECTION, uid);
+    await updateDoc(userDocRef, {
+      contributionsCount: increment(delta),
+      updatedAt: new Date().toISOString()
+    });
+  } catch (err) {
+    console.warn(`[Firestore] Failed to increment contributions count for ${uid}:`, err);
+  }
+}
+
+/**
  * Retrieves all materials contributed by a given user (by handle or UID).
  */
 export async function getUserContributions(usernameOrUid: string): Promise<MaterialItem[]> {
   const db = getFirestoreDb();
-  const target = usernameOrUid.trim().toLowerCase().replace(/^@/, '');
+  const rawTarget = usernameOrUid.trim();
+  const target = rawTarget.toLowerCase().replace(/^@/, '');
   if (!target) return [];
 
   if (!db) return [];
 
   try {
     const materialsRef = collection(db, MATERIALS_COLLECTION);
-    // Fetch materials and filter in-memory for flexible match across author/addedBy array
+    // Fetch materials and filter in-memory for flexible match across author/addedBy array or contributorUid/Username
     const snapshot = await getDocs(materialsRef);
     const contributions: MaterialItem[] = [];
 
     snapshot.forEach((snap) => {
       const mat = snap.data() as MaterialItem;
+      // 1. Direct UID match
+      if (mat.contributorUid && (mat.contributorUid === rawTarget || mat.contributorUid === target)) {
+        contributions.push(mat);
+        return;
+      }
+
+      // 2. Direct Username match
+      if (mat.contributorUsername && mat.contributorUsername.toLowerCase().replace(/^@/, '') === target) {
+        contributions.push(mat);
+        return;
+      }
+
+      // 3. Flexible match in addedBy array
       const addedByArr = Array.isArray(mat.addedBy)
         ? mat.addedBy
         : mat.addedBy
@@ -783,6 +817,30 @@ export async function fetchSubmissionsFromFirestore(
     return results;
   } catch (err) {
     console.warn('[Firestore] Failed to fetch submissions:', err);
+    return [];
+  }
+}
+
+/**
+ * Fetches all submissions created by a specific user (by UID), sorted newest first.
+ */
+export async function getUserSubmissions(uid: string): Promise<SubmissionDocument[]> {
+  const db = getFirestoreDb();
+  if (!db || !uid) return [];
+
+  try {
+    const coll = collection(db, SUBMISSIONS_COLLECTION);
+    const q = query(coll, where('contributorUid', '==', uid));
+    const snap = await getDocs(q);
+    const results: SubmissionDocument[] = [];
+    snap.forEach((d) => {
+      results.push(d.data() as SubmissionDocument);
+    });
+
+    results.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+    return results;
+  } catch (err) {
+    console.warn(`[Firestore] Failed to fetch submissions for user ${uid}:`, err);
     return [];
   }
 }

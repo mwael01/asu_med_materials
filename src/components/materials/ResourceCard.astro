@@ -33,9 +33,13 @@ const rawAddedBy: string[] = Array.isArray(material.addedBy)
   ? material.addedBy
   : material.addedBy
     ? [material.addedBy]
-    : [];
+    : material.contributorUsername
+      ? [`@${material.contributorUsername}`]
+      : [];
 const displayedAddedByText = rawAddedBy.slice(0, maxVisible).join('، ');
 const fullAddedByTooltip = rawAddedBy.join('، ');
+const contributorProfileTarget = material.contributorUsername || rawAddedBy[0];
+const contributorProfileUrl = contributorProfileTarget ? `/profile?u=${encodeURIComponent(contributorProfileTarget)}` : undefined;
 
 const isPlaylist = material.type === 'playlist' || Boolean(material.playlistId) || Boolean(material.videos);
 const isReferenceMaterial = Boolean(material.moduleId && /^year\d+-reference-books$/.test(material.moduleId));
@@ -166,7 +170,11 @@ const targetAttr = isPlaylist ? '_self' : '_blank';
           class="text-zinc-400 dark:text-zinc-500 truncate max-w-[150px]"
           title={fullAddedByTooltip}
         >
-          &bull; <span data-i18n="card.addedBy">Added by:</span> <a href={`/profile?u=${encodeURIComponent(rawAddedBy[0])}`} class="hover:text-emerald-600 dark:hover:text-emerald-400 hover:underline">{displayedAddedByText}</a>
+          &bull; <span data-i18n="card.addedBy">Added by:</span> {contributorProfileUrl ? (
+            <a href={contributorProfileUrl} class="hover:text-emerald-600 dark:hover:text-emerald-400 hover:underline">{displayedAddedByText}</a>
+          ) : (
+            <span>{displayedAddedByText}</span>
+          )}
         </span>
       )}
     </div>

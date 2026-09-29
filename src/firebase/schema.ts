@@ -40,6 +40,8 @@ export interface MaterialDocument {
   subject?: string;
   author?: string | string[];
   addedBy?: string | string[];
+  contributorUid?: string;
+  contributorUsername?: string;
   tags: string[];
   createdAt?: string;
   playlistId?: string;
@@ -94,6 +96,7 @@ export interface SubmissionDocument {
   urls: string[];
   contributor: string;
   contributorUid?: string;
+  contributorUsername?: string;
   year: AcademicYear | 'general';
   moduleId?: string;
   subject?: string;
@@ -191,6 +194,8 @@ export const materialConverter: FirestoreDataConverter<MaterialItem> = {
       subject: material.subject || null,
       author: material.author || null,
       addedBy: material.addedBy || null,
+      contributorUid: material.contributorUid || null,
+      contributorUsername: material.contributorUsername || null,
       tags: Array.isArray(material.tags) ? material.tags : [],
       createdAt: material.createdAt || new Date().toISOString(),
       playlistId: material.playlistId || null,
@@ -217,6 +222,8 @@ export const materialConverter: FirestoreDataConverter<MaterialItem> = {
       subject: data.subject || undefined,
       author: data.author || undefined,
       addedBy: data.addedBy || undefined,
+      contributorUid: data.contributorUid || undefined,
+      contributorUsername: data.contributorUsername || undefined,
       tags: Array.isArray(data.tags) ? data.tags : [],
       createdAt: data.createdAt || undefined,
       playlistId: data.playlistId || undefined,
@@ -328,6 +335,7 @@ export const submissionConverter: FirestoreDataConverter<SubmissionDocument> = {
       urls: Array.isArray(data.urls) ? data.urls : [],
       contributor: data.contributor || 'فاعل خير',
       contributorUid: data.contributorUid,
+      contributorUsername: data.contributorUsername,
       year: data.year || 'general',
       moduleId: data.moduleId,
       subject: data.subject,

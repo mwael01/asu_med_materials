@@ -66,7 +66,8 @@
     updateSubmissionStatus,
     deleteSubmissionFromFirestore,
     saveMaterialToFirestore,
-    checkUrlsBatchInFirestore
+    checkUrlsBatchInFirestore,
+    incrementUserContributionsCount
   } from '../../firebase/firestore';
   import { getCachedUserProfile } from '../../firebase/auth';
   import { showToast } from '../../utils/toast';
@@ -170,7 +171,7 @@
                 }
               </div>
               <div class="text-[11px] text-zinc-400 mt-0.5 flex flex-wrap items-center gap-2">
-                <span>بواسطة: <strong>${escapeHtml(contributorName)}</strong></span>
+                <span>بواسطة: <strong>${escapeHtml(contributorName)}</strong>${sub.contributorUsername ? ` (@${escapeHtml(sub.contributorUsername)})` : ''}</span>
                 <span>•</span>
                 <span>${escapeHtml(displayYear)} ${escapeHtml(displayModule)}</span>
                 <span>•</span>
@@ -225,6 +226,8 @@
               class="sub-fill-ai-btn px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-100 dark:hover:bg-emerald-900/60 transition-all cursor-pointer flex items-center gap-1"
               data-id="${sub.id}"
               data-contributor="${encodeURIComponent(contributorName)}"
+              data-contributor-uid="${sub.contributorUid || ''}"
+              data-contributor-username="${sub.contributorUsername || ''}"
               data-content="${encodeURIComponent(rawContent)}"
               data-year="${sub.year || 2}"
               data-module="${sub.moduleId || ''}"
@@ -285,6 +288,8 @@
         btn.addEventListener('click', () => {
           const submissionId = btn.getAttribute('data-id') || '';
           const contributor = decodeURIComponent(btn.getAttribute('data-contributor') || '');
+          const contributorUid = btn.getAttribute('data-contributor-uid') || '';
+          const contributorUsername = btn.getAttribute('data-contributor-username') || '';
           const content = decodeURIComponent(btn.getAttribute('data-content') || '');
           const year = Number(btn.getAttribute('data-year')) || 2;
           const moduleId = btn.getAttribute('data-module') || '';
@@ -295,6 +300,8 @@
               detail: {
                 submissionId,
                 contributor,
+                contributorUid,
+                contributorUsername,
                 content,
                 year,
                 moduleId
@@ -337,12 +344,17 @@
             type: sub.type || 'drive',
             category: 'summaries',
             addedBy: sub.contributor || 'فاعل خير',
+            contributorUid: sub.contributorUid || undefined,
+            contributorUsername: sub.contributorUsername || undefined,
             description: sub.notes || undefined,
             tags: ['مساهمة طلابية'],
             createdAt: new Date().toISOString()
           };
 
           await saveMaterialToFirestore(newMat);
+          if (sub.contributorUid) {
+            await incrementUserContributionsCount(sub.contributorUid, 1);
+          }
           await updateSubmissionStatus(id, 'approved', adminUser || undefined);
           showToast('تم اعتماد ونشر المادة بنجاح!', 'success');
           await loadSubmissions();
