@@ -1589,16 +1589,19 @@ const allMaterials = await getAllMaterials();
       renderMyProfile(currentProfile);
     }
 
-    // Safety fallback: if Firebase Auth takes more than 1.2s (e.g. storage access blocked), never stay stuck on loading skeleton
+    let hasShownProfile = false;
+
+    // Safety fallback: if Firebase Auth takes more than 2.5s (e.g. storage access blocked), never stay stuck on loading skeleton
     const safetyTimer = setTimeout(() => {
       if (!loadingSkeleton?.classList.contains('hidden')) {
         if (currentProfile) {
+          hasShownProfile = true;
           renderMyProfile(currentProfile);
         } else {
           showSection('guest');
         }
       }
-    }, 1200);
+    }, 2500);
 
     // Subscribe to Auth state
     if (unsubscribeAuth) unsubscribeAuth();
@@ -1608,8 +1611,9 @@ const allMaterials = await getAllMaterials();
       currentProfile = profile;
 
       if (user && profile) {
+        hasShownProfile = true;
         renderMyProfile(profile);
-      } else {
+      } else if (!hasShownProfile) {
         showSection('guest');
       }
     });

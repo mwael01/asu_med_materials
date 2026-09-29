@@ -16,6 +16,7 @@ import type { UserProfile } from '../types/profile';
 import type { AcademicYear } from '../types/materials';
 
 let authInstance: Auth | null = null;
+let lastAuthenticatedUid: string | null = null;
 const CACHED_PROFILE_KEY = 'asumed_cached_profile';
 
 export function getFirebaseAuth(): Auth | null {
@@ -83,15 +84,20 @@ export function onAuthChange(
     auth,
     async (firebaseUser) => {
       try {
-        if (!firebaseUser) {
-          if (!hasFired) {
-            hasFired = true;
-            clearTimeout(fallbackTimer);
-            setCachedUserProfile(null);
-            callback(null, null);
-          }
+      if (!firebaseUser) {
+        if (lastAuthenticatedUid !== null) {
           return;
         }
+        if (!hasFired) {
+          hasFired = true;
+          clearTimeout(fallbackTimer);
+          setCachedUserProfile(null);
+          callback(null, null);
+        }
+        return;
+      }
+
+      lastAuthenticatedUid = firebaseUser.uid;
 
         const cached = getCachedUserProfile();
         let currentProfile: UserProfile | null = cached;
