@@ -4,74 +4,51 @@ This document outlines automated helper scripts designed to assist AI agents and
 
 ---
 
-## 1. YouTube Playlist Video Fetcher
+## 1. Cloud Firestore Schema Synchronizer
 
-- **Location**: [`scripts/fetch-youtube-playlist.js`](file:///workspaces/asu_med_materials/scripts/fetch-youtube-playlist.js)
-- **Purpose**: Fetches real video titles, YouTube video IDs, and URLs for any public YouTube playlist without requiring Google API credentials.
-- **Capabilities**:
-  - Parses modern YouTube web payloads (`lockupViewModel`) and legacy `playlistVideoRenderer`.
-  - Supports both direct playlist IDs (e.g. `PLIZNmuBMEjaMZmwn2FVmG8bYsmVs5n-_v`) and full YouTube playlist URLs.
-  - Generates structured metadata compatible with `MaterialVideoItem`.
-
-### Usage:
+- **Location**: [`scripts/sync-firebase-schema.mjs`](file:///workspaces/asu_med_materials/scripts/sync-firebase-schema.mjs)
+- **Purpose**: Inspects live remote Cloud Firestore collections, pulls accurate document counts and metadata, and synchronizes [`firebase/schema.json`](file:///workspaces/asu_med_materials/firebase/schema.json).
+- **Usage**:
 ```bash
-# Display formatted video list in terminal:
-node scripts/fetch-youtube-playlist.js <playlistId_or_URL>
-
-# Output raw JSON array:
-node scripts/fetch-youtube-playlist.js --json <playlistId_or_URL>
+node scripts/sync-firebase-schema.mjs
+# or via npm script:
+pnpm run schema:sync
 ```
 
 ---
 
-## 2. All Playlists Synchronizer
+## 2. All Playlists Synchronizer (Cloud Firestore)
 
 - **Location**: [`scripts/sync-all-playlists.js`](file:///workspaces/asu_med_materials/scripts/sync-all-playlists.js)
-- **Purpose**: Iterates over all playlist records defined across the modular JSON files in [`src/data/materials/`](file:///workspaces/asu_med_materials/src/data/materials/) that contain a `playlistId`, fetches their live lecture videos from YouTube without regex, and populates the `videos: [ ... ]` property with authentic video names and IDs.
-- **Capabilities**:
-  - Automatically discovers all `.json` subject files under `src/data/materials/`.
-  - Supports `--file <path>` to target a single JSON file.
-  - Safe JSON reading and writing without fragile text replacements.
-
-### Usage:
+- **Purpose**: Queries all playlist records directly in Cloud Firestore (`materials` collection) that have a `playlistId` or YouTube playlist link, fetches live lecture videos with authentic titles and video IDs without requiring Google API credentials, and updates the corresponding Firestore documents with the `videos` array.
+- **Usage**:
 ```bash
-# Sync all modular JSON files:
+# Sync all playlists missing video chapters in Firestore:
 node scripts/sync-all-playlists.js
 
-# Sync a specific subject file:
-node scripts/sync-all-playlists.js --file src/data/materials/blood/physiology/physiology.json
+# Sync a specific playlist document by its Firestore ID:
+node scripts/sync-all-playlists.js --id yr1-intro-physiology-m-fayez-practical
 ```
 
 ---
 
-## 3. Materials Dump Parser
+## 3. Module & Material Seeding Scripts
 
-- **Location**: [`scripts/parse-materials-dump.js`](file:///workspaces/asu_med_materials/scripts/parse-materials-dump.js)
-- **Purpose**: Parses raw WhatsApp messages, multi-link text blocks, or GitHub issues and extracts structured draft `MaterialItem` JSON objects ready to copy-paste into the respective `src/data/materials/<module>/<subject>/<subject>.json` file.
-- **Capabilities**:
-  - Automatically identifies URLs (Google Drive, Telegram channels, YouTube playlists/videos, WhatsApp groups, PDF downloads).
-  - Extracts title and context around each link from preceding or inline text.
-  - Generates unique slugs and tags.
-  - Can fetch GitHub issues directly using `--issue <issue_number>` to extract raw dumped content and contributor metadata.
-
-### Usage:
+- **Location**: [`scripts/seed-firestore.mjs`](file:///workspaces/asu_med_materials/scripts/seed-firestore.mjs)
+- **Purpose**: Seeds new curriculum modules and batch materials directly into Cloud Firestore (`modules` and `materials` collections).
+- **Usage**:
 ```bash
-# Parse a raw text or WhatsApp message string:
-node scripts/parse-materials-dump.js "درايف المحاضرات https://drive.google.com/... وقناة التليجرام https://t.me/..."
-
-# Parse from a text file:
-node scripts/parse-materials-dump.js --file ./message.txt --module year2-blood --year 2
-
-# Parse directly from a GitHub issue:
-node scripts/parse-materials-dump.js --issue 15
+node scripts/seed-firestore.mjs
 ```
 
 ---
 
 ## Instructions for AI Agents
-- When adding new YouTube playlists or series to `src/data/materials/<module>/<subject>/<subject>.json`, you may use these scripts to populate detailed video lectures automatically instead of manually typing each video ID.
+- **Single Source of Truth**: All study materials, curriculum modules, user profiles, and contributors live directly in Cloud Firestore. Never store or look for local JSON or static data files for materials.
+- When adding new YouTube playlists, use YouTube fetch helpers to populate the `videos` array with accurate chapter titles and IDs directly in Cloud Firestore.
 - Maintain error handling and rate-limiting timeouts between YouTube fetches to prevent network bans.
-- Always run static validation (`pnpm astro check && pnpm build`) after updating data files.
+- Always run `pnpm run schema:sync` after adding or modifying Firestore documents to keep `firebase/schema.json` synchronized.
+- Always run static validation (`pnpm astro check && pnpm build`) after code edits to ensure build and SSR integrity.
 
 ---
 

@@ -1,22 +1,57 @@
 #!/usr/bin/env node
 /**
  * Script to automatically populate `videos` for all playlists with `playlistId`
- * across the modular JSON files under `src/data/materials/`.
+ * directly in Cloud Firestore.
  *
  * Usage:
  *   node scripts/sync-all-playlists.js
- *   node scripts/sync-all-playlists.js --file src/data/materials/blood/physiology/physiology.json
+ *   node scripts/sync-all-playlists.js --id yr1-intro-physiology-m-fayez-practical
  *
- * This updates the corresponding JSON files with real video titles and IDs fetched from YouTube.
+ * This queries Cloud Firestore for playlist materials, fetches real video titles
+ * and IDs from YouTube, and updates the corresponding Firestore document.
  */
 
-import fs from 'node:fs';
-import path from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { initializeApp } from 'firebase/app';
+import { getFirestore, collection, getDocs, doc, updateDoc, getDoc } from 'firebase/firestore';
+import { readFileSync, existsSync } from 'fs';
+import { resolve, dirname } from 'path';
+import { fileURLToPath } from 'url';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-const materialsDir = path.resolve(__dirname, '../src/data/materials');
+const __dirname = dirname(fileURLToPath(import.meta.url));
+
+// Load .env.local or .env
+for (const envFile of ['.env.local', '.env']) {
+  const p = resolve(__dirname, `../${envFile}`);
+  if (existsSync(p)) {
+    const content = readFileSync(p, 'utf8');
+    for (const line of content.split('\n')) {
+      const trimmed = line.trim();
+      if (!trimmed || trimmed.startsWith('#')) continue;
+      const [key, ...rest] = trimmed.split('=');
+      const val = rest.join('=').replace(/^["']|["']$/g, '');
+      if (key && !process.env[key]) {
+        process.env[key] = val;
+      }
+    }
+  }
+}
+
+const firebaseConfig = {
+  apiKey: process.env.PUBLIC_FIREBASE_API_KEY,
+  authDomain: process.env.PUBLIC_FIREBASE_AUTH_DOMAIN,
+  projectId: process.env.PUBLIC_FIREBASE_PROJECT_ID,
+  storageBucket: process.env.PUBLIC_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: process.env.PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
+  appId: process.env.PUBLIC_FIREBASE_APP_ID,
+};
+
+if (!firebaseConfig.apiKey || !firebaseConfig.projectId) {
+  console.error('[Error] Firebase configuration missing in environment.');
+  process.exit(1);
+}
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
 
 function extractPlaylistId(input) {
   if (!input) return null;
@@ -36,8 +71,8 @@ async function fetchPlaylistVideos(playlistId) {
     headers: {
       'User-Agent':
         'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-      'Accept-Language': 'ar,en;q=0.9'
-    }
+      'Accept-Language': 'ar,en;q=0.9',
+    },
   });
 
   if (!res.ok) {
@@ -68,7 +103,7 @@ async function fetchPlaylistVideos(playlistId) {
                   id: `${cleanId}-${videos.length + 1}`,
                   title: title.trim(),
                   youtubeId: vidId,
-                  url: `https://youtu.be/${vidId}`
+                  url: `https://youtu.be/${vidId}`,
                 });
               }
             } else if (item.playlistVideoRenderer) {
@@ -81,7 +116,7 @@ async function fetchPlaylistVideos(playlistId) {
                   id: `${cleanId}-${videos.length + 1}`,
                   title: title.trim(),
                   youtubeId: vidId,
-                  url: `https://youtu.be/${vidId}`
+                  url: `https://youtu.be/${vidId}`,
                 });
               }
             }
@@ -103,7 +138,7 @@ async function fetchPlaylistVideos(playlistId) {
         id: `${cleanId}-${videos.length + 1}`,
         title: title.trim(),
         youtubeId: vidId,
-        url: `https://youtu.be/${vidId}`
+        url: `https://youtu.be/${vidId}`,
       });
     }
   }
@@ -111,87 +146,68 @@ async function fetchPlaylistVideos(playlistId) {
   return videos;
 }
 
-function getAllJsonFiles(dir) {
-  let results = [];
-  const list = fs.readdirSync(dir, { withFileTypes: true });
-  for (const entry of list) {
-    const fullPath = path.join(dir, entry.name);
-    if (entry.isDirectory()) {
-      results = results.concat(getAllJsonFiles(fullPath));
-    } else if (entry.isFile() && entry.name.endsWith('.json')) {
-      results.push(fullPath);
-    }
-  }
-  return results;
-}
-
 async function syncAllPlaylists() {
   const args = process.argv.slice(2);
-  let filesToProcess = [];
+  const idArgIndex = args.indexOf('--id');
+  const targetId = idArgIndex !== -1 ? args[idArgIndex + 1] : null;
 
-  const fileArgIndex = args.indexOf('--file');
-  if (fileArgIndex !== -1 && args[fileArgIndex + 1]) {
-    const customPath = path.resolve(process.cwd(), args[fileArgIndex + 1]);
-    if (!fs.existsSync(customPath)) {
-      throw new Error(`Specified file not found: ${customPath}`);
+  console.log('📡 Connecting to Cloud Firestore...');
+
+  let playlistsToProcess = [];
+
+  if (targetId) {
+    const docSnap = await getDoc(doc(db, 'materials', targetId));
+    if (!docSnap.exists()) {
+      throw new Error(`Specified material not found in Firestore: ${targetId}`);
     }
-    filesToProcess = [customPath];
+    playlistsToProcess = [{ id: docSnap.id, ...docSnap.data() }];
   } else {
-    filesToProcess = getAllJsonFiles(materialsDir);
+    const snap = await getDocs(collection(db, 'materials'));
+    playlistsToProcess = snap.docs
+      .map((d) => ({ id: d.id, ...d.data() }))
+      .filter((item) => item.type === 'playlist' || Boolean(item.playlistId) || (item.url && item.url.includes('list=')));
   }
 
-  console.log(`Scanning ${filesToProcess.length} JSON file(s) under materials directory...`);
+  console.log(`Found ${playlistsToProcess.length} playlist resource(s) in Cloud Firestore.`);
 
-  let totalUpdatedPlaylists = 0;
+  let totalUpdated = 0;
 
-  for (const filePath of filesToProcess) {
-    const relPath = path.relative(path.resolve(__dirname, '..'), filePath);
-    let items;
-    try {
-      const raw = fs.readFileSync(filePath, 'utf8');
-      items = JSON.parse(raw);
-    } catch (err) {
-      console.warn(`Skipping unparseable JSON file ${relPath}: ${err.message}`);
-      continue;
-    }
+  for (const item of playlistsToProcess) {
+    const pid = item.playlistId || extractPlaylistId(item.url);
+    if (!pid) continue;
 
-    if (!Array.isArray(items)) continue;
-
-    let fileChanged = false;
-
-    for (const item of items) {
-      if (item && item.type === 'playlist' && item.playlistId) {
-        const needsSync = !Array.isArray(item.videos) || item.videos.length === 0;
-        if (needsSync) {
-          console.log(`\nFetching videos for playlist ${item.id} (${item.playlistId}) in ${relPath}...`);
-          try {
-            const videos = await fetchPlaylistVideos(item.playlistId);
-            console.log(`  -> Found ${videos.length} videos`);
-            if (videos.length > 0) {
-              item.videos = videos;
-              fileChanged = true;
-              totalUpdatedPlaylists++;
-            }
-          } catch (err) {
-            console.error(`  -> Failed for ${item.id}:`, err.message);
-          }
-          // Small delay to avoid aggressive rate limiting
-          await new Promise((r) => setTimeout(r, 600));
+    const needsSync = !Array.isArray(item.videos) || item.videos.length === 0;
+    if (needsSync) {
+      console.log(`\nFetching videos for playlist '${item.id}' (${pid})...`);
+      try {
+        const videos = await fetchPlaylistVideos(pid);
+        console.log(`  -> Found ${videos.length} videos`);
+        if (videos.length > 0) {
+          await updateDoc(doc(db, 'materials', item.id), {
+            playlistId: pid,
+            videos,
+          });
+          totalUpdated++;
+          console.log(`  ✓ Updated Firestore document for '${item.id}'`);
         }
+      } catch (err) {
+        console.error(`  ❌ Failed for ${item.id}:`, err.message);
       }
-    }
-
-    if (fileChanged) {
-      fs.writeFileSync(filePath, JSON.stringify(items, null, 2) + '\n', 'utf8');
-      console.log(`Saved updates to ${relPath}`);
+      // Courteous rate-limiting timeout between YouTube fetches
+      await new Promise((r) => setTimeout(r, 600));
     }
   }
 
-  if (totalUpdatedPlaylists === 0) {
-    console.log('\nAll playlists are already fully synchronized! No missing video arrays found.');
+  if (totalUpdated === 0) {
+    console.log('\nAll playlists in Firestore are already fully synchronized!');
   } else {
-    console.log(`\nSuccessfully synchronized ${totalUpdatedPlaylists} playlist(s) across JSON files!`);
+    console.log(`\n🎉 Successfully synchronized ${totalUpdated} playlist(s) in Cloud Firestore!`);
   }
+
+  process.exit(0);
 }
 
-syncAllPlaylists().catch(console.error);
+syncAllPlaylists().catch((err) => {
+  console.error('Sync failed:', err);
+  process.exit(1);
+});
