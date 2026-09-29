@@ -162,6 +162,8 @@ const { modules } = Astro.props;
   import { getCachedUserProfile, onAuthChange } from '../../firebase/auth';
   import type { MaterialSubmission } from '../../types/submission';
 
+  let unsubscribeAuth: (() => void) | null = null;
+
   function initContributeForm(): void {
     const form = document.getElementById('unified-contribute-form') as HTMLFormElement | null;
     const formContainer = document.getElementById('contrib-form-container');
@@ -205,7 +207,8 @@ const { modules } = Astro.props;
     }
 
     syncContributeAuth();
-    onAuthChange(() => {
+    if (unsubscribeAuth) unsubscribeAuth();
+    unsubscribeAuth = onAuthChange(() => {
       syncContributeAuth();
     });
 
@@ -250,7 +253,8 @@ const { modules } = Astro.props;
     }
 
     contentEl.addEventListener('input', updateLinkCount);
-    window.addEventListener('asumed-language-changed', updateLinkCount);
+    const langAbort = new AbortController();
+    window.addEventListener('asumed-language-changed', updateLinkCount, { signal: langAbort.signal });
 
     // Form submission
     form.addEventListener('submit', async (e) => {

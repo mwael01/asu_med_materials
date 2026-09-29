@@ -567,6 +567,8 @@ const allMaterials = await getAllMaterials();
     setPermanentUsername,
     getCachedUserProfile
   } from '../firebase/auth';
+
+  let unsubscribeAuth: (() => void) | null = null;
   import {
     getUserProfileByUsername,
     getUserProfileByUid,
@@ -1539,7 +1541,8 @@ const allMaterials = await getAllMaterials();
     }, 1200);
 
     // Subscribe to Auth state
-    onAuthChange((user, profile) => {
+    if (unsubscribeAuth) unsubscribeAuth();
+    unsubscribeAuth = onAuthChange((user, profile) => {
       clearTimeout(safetyTimer);
       currentUser = user;
       currentProfile = profile;

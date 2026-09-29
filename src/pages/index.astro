@@ -359,6 +359,7 @@ if (generalMaterials.length > 0) {
   import { getCurrentLanguage } from '../utils/i18n';
   import { getCachedUserProfile, onAuthChange } from '../firebase/auth';
 
+  let unsubscribeAuth: (() => void) | null = null;
   let homePageAbortController: AbortController | null = null;
 
   function initHomePage(): void {
@@ -602,7 +603,8 @@ if (generalMaterials.length > 0) {
     syncYear();
     renderHomeLibrary();
 
-    onAuthChange(() => {
+    if (unsubscribeAuth) unsubscribeAuth();
+    unsubscribeAuth = onAuthChange(() => {
       syncHomeAuth();
       syncYear();
       renderHomeLibrary();

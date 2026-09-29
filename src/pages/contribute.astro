@@ -66,6 +66,8 @@ const modules = await getAllModulesIncludingInactive();
 <script>
   import { onAuthChange, getCachedUserProfile } from '../firebase/auth';
 
+  let unsubscribeAuth: (() => void) | null = null;
+
   function initContributeRouting() {
     const adminContainer = document.getElementById('admin-flow-container');
     const studentContainer = document.getElementById('student-flow-container');
@@ -100,7 +102,8 @@ const modules = await getAllModulesIncludingInactive();
     }
 
     // Auth change listener
-    onAuthChange((_user, profile) => {
+    if (unsubscribeAuth) unsubscribeAuth();
+    unsubscribeAuth = onAuthChange((_user, profile) => {
       isAdmin = Boolean(profile && profile.role === 'admin');
       applyView();
     });

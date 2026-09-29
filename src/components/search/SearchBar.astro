@@ -70,6 +70,7 @@ const isLarge = size === 'lg';
 
 <script>
   function initSearchShortcuts(): void {
+    const abort = new AbortController();
     window.addEventListener('keydown', (e) => {
       const activeEl = document.activeElement;
       const isInput = activeEl?.tagName === 'INPUT' || activeEl?.tagName === 'TEXTAREA';
@@ -79,7 +80,7 @@ const isLarge = size === 'lg';
         input?.focus();
         input?.select();
       }
-    });
+    }, { signal: abort.signal });
   }
 
   initSearchShortcuts();

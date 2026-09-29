@@ -166,6 +166,8 @@ const isYear = (y: number) => currentPath.startsWith(`/year/${y}`);
   import { getCurrentLanguage } from '../../utils/i18n';
   import { onAuthChange, getCachedUserProfile } from '../../firebase/auth';
 
+  let unsubscribeAuth: (() => void) | undefined;
+
   function syncNavYearBadge(): void {
     const badge = document.getElementById('nav-user-year-badge');
     if (!badge) return;
@@ -215,7 +217,8 @@ const isYear = (y: number) => currentPath.startsWith(`/year/${y}`);
 
   syncNavYearBadge();
   syncNavAuthState();
-  onAuthChange((_user) => {
+  if (unsubscribeAuth) unsubscribeAuth();
+  unsubscribeAuth = onAuthChange((_user) => {
     syncNavAuthState();
     syncNavYearBadge();
   });

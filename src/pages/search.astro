@@ -365,7 +365,8 @@ const allMaterials = rawMaterials.map((m) => ({
     }
 
     // Event listeners
-    window.addEventListener('asumed-language-changed', applyFilter);
+    const searchAbort = new AbortController();
+    window.addEventListener('asumed-language-changed', applyFilter, { signal: searchAbort.signal });
 
     input?.addEventListener('input', () => {
       currentQuery = input.value;
