@@ -9,10 +9,14 @@
  *
  * Uses exact matching only (no substring matching).
  * Dry-run by default. Use --apply to write changes to Firestore.
+ * Use --force to re-process materials that already have username fields set.
+ * Use --verbose to see detailed matching diagnostics.
  *
  * Usage:
  *   node scripts/migrate-usernames.mjs           # dry run
  *   node scripts/migrate-usernames.mjs --apply   # apply changes
+ *   node scripts/migrate-usernames.mjs --apply --force  # re-process all
+ *   node scripts/migrate-usernames.mjs --verbose        # detailed diagnostics
  */
 
 import { initializeApp } from 'firebase/app';
@@ -62,6 +66,8 @@ if (!firebaseConfig.apiKey || !firebaseConfig.projectId) {
 }
 
 const APPLY = process.argv.includes('--apply');
+const FORCE = process.argv.includes('--force');
+const VERBOSE = process.argv.includes('--verbose');
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
@@ -100,12 +106,19 @@ async function migrate() {
 
   console.log(`  Users: ${users.length}`);
   console.log(`  Contributors: ${contributors.length}`);
-  console.log(`  Materials: ${materials.length}\n`);
+  console.log(`  Materials: ${materials.length}`);
+  console.log(`  Force mode: ${FORCE}`);
+  console.log(`  Verbose mode: ${VERBOSE}\n`);
 
   // Build matchNames → user lookup using EXACT matching only
   const matchNameToUser = new Map();
   for (const contributor of contributors) {
     const matchNames = (contributor.matchNames || []).filter(isValidMatchName);
+
+    if (VERBOSE) {
+      console.log(`  Contributor: ${contributor.name} (${contributor.kind})`);
+      console.log(`    matchNames: ${JSON.stringify(matchNames)}`);
+    }
 
     for (const mn of matchNames) {
       const normalized = normalizeName(mn);
@@ -122,22 +135,38 @@ async function migrate() {
           matchName: mn,
           kind: contributor.kind,
         });
+        if (VERBOSE) {
+          console.log(`    ✓ "${mn}" → @${user.username} (${user.displayName})`);
+        }
+      } else if (VERBOSE) {
+        console.log(`    ✗ "${mn}" → no user match`);
       }
     }
   }
 
-  console.log(`  MatchName → User links: ${matchNameToUser.size}\n`);
+  console.log(`\n  MatchName → User links: ${matchNameToUser.size}\n`);
+
+  if (VERBOSE && matchNameToUser.size > 0) {
+    console.log('  MatchName → User map:');
+    for (const [key, value] of matchNameToUser) {
+      console.log(`    "${key}" → @${value.user.username} (${value.user.displayName}) [${value.kind}]`);
+    }
+    console.log('');
+  }
 
   // Find materials to migrate
   const toMigrate = [];
   const unmatched = new Set();
+  let skippedAlreadyMigrated = 0;
+  let skippedNoNames = 0;
 
   for (const material of materials) {
     const updates = {};
     let matched = false;
 
     // Match addedBy → added_by_username
-    if (!material.added_by_username && material.addedBy) {
+    const shouldProcessAddedBy = FORCE || !material.added_by_username;
+    if (shouldProcessAddedBy && material.addedBy) {
       const addedByNames = namesOf(material.addedBy);
       for (const name of addedByNames) {
         const normalized = normalizeName(name);
@@ -146,13 +175,17 @@ async function migrate() {
           updates.added_by_username = user.username;
           updates.addedBy = user.displayName;
           matched = true;
+          if (VERBOSE) {
+            console.log(`  ✓ addedBy "${name}" → @${user.username}`);
+          }
           break;
         }
       }
     }
 
     // Match author → creator_username
-    if (!material.creator_username && material.author) {
+    const shouldProcessAuthor = FORCE || !material.creator_username;
+    if (shouldProcessAuthor && material.author) {
       const authorNames = namesOf(material.author);
       for (const name of authorNames) {
         const normalized = normalizeName(name);
@@ -161,6 +194,9 @@ async function migrate() {
           updates.creator_username = user.username;
           updates.author = user.displayName;
           matched = true;
+          if (VERBOSE) {
+            console.log(`  ✓ author "${name}" → @${user.username}`);
+          }
           break;
         }
       }
@@ -173,13 +209,22 @@ async function migrate() {
         updates,
       });
     } else {
-      const addedByNames = namesOf(material.addedBy);
-      const authorNames = namesOf(material.author);
-      for (const name of [...addedByNames, ...authorNames]) {
-        unmatched.add(name.trim());
+      if (material.added_by_username || material.creator_username) {
+        skippedAlreadyMigrated++;
+      } else if (!material.addedBy && !material.author) {
+        skippedNoNames++;
+      } else {
+        const addedByNames = namesOf(material.addedBy);
+        const authorNames = namesOf(material.author);
+        for (const name of [...addedByNames, ...authorNames]) {
+          unmatched.add(name.trim());
+        }
       }
     }
   }
+
+  console.log(`  Skipped (already migrated): ${skippedAlreadyMigrated}`);
+  console.log(`  Skipped (no names): ${skippedNoNames}`);
 
   console.log(`  Materials to migrate: ${toMigrate.length}`);
   console.log(`  Unmatched names: ${unmatched.size}\n`);
