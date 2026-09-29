@@ -500,7 +500,7 @@ const allMaterials = await getAllMaterials();
   </div>
 
   <!-- Choose Permanent Username Modal (Shown for accounts without custom username) -->
-  <div id="modal-set-username" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-zinc-900/60 backdrop-blur-xs">
+  <div id="modal-set-username" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-zinc-900/60 backdrop-blur-xs" role="dialog" aria-modal="true" aria-labelledby="modal-username-title">
     <div class="w-full max-w-md p-6 rounded-2xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 shadow-xl space-y-4 text-start">
       <div class="flex items-center gap-2.5">
         <div class="w-10 h-10 rounded-xl bg-emerald-100 dark:bg-emerald-950/80 text-emerald-700 dark:text-emerald-300 flex items-center justify-center text-lg font-bold">
@@ -947,6 +947,7 @@ const allMaterials = await getAllMaterials();
         modal.classList.remove('hidden');
         modalInput.value = (profile.username || '').replace(/_[a-z0-9]{4}$/, '');
         modalInput.dispatchEvent(new Event('input'));
+        modalInput.focus();
       } else {
         modal?.classList.add('hidden');
       }
@@ -1407,6 +1408,30 @@ const allMaterials = await getAllMaterials();
       }
     });
 
+    // Focus trap and Escape key handling for username modal
+    const modalEl = document.getElementById('modal-set-username');
+    if (modalEl) {
+      modalEl.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+          modalEl.classList.add('hidden');
+          return;
+        }
+        if (e.key === 'Tab') {
+          const focusable = modalEl.querySelectorAll<HTMLElement>('button, input, [tabindex]:not([tabindex="-1"])');
+          if (focusable.length === 0) return;
+          const first = focusable[0];
+          const last = focusable[focusable.length - 1];
+          if (e.shiftKey && document.activeElement === first) {
+            e.preventDefault();
+            last.focus();
+          } else if (!e.shiftKey && document.activeElement === last) {
+            e.preventDefault();
+            first.focus();
+          }
+        }
+      });
+    }
+
     // Sign Out
     document.getElementById('btn-signout')?.addEventListener('click', async () => {
       await signOutUser();
@@ -1461,10 +1486,33 @@ const allMaterials = await getAllMaterials();
       e.preventDefault();
       authErrorMsg?.classList.add('hidden');
 
-      const email = (document.getElementById('auth-email') as HTMLInputElement)?.value;
+      const email = (document.getElementById('auth-email') as HTMLInputElement)?.value.trim();
       const pass = (document.getElementById('auth-password') as HTMLInputElement)?.value;
 
-      if (!email || !pass) return;
+      if (!email || !pass) {
+        if (authErrorMsg) {
+          authErrorMsg.textContent = 'Please enter both email and password.';
+          authErrorMsg.classList.remove('hidden');
+        }
+        return;
+      }
+
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(email)) {
+        if (authErrorMsg) {
+          authErrorMsg.textContent = 'Please enter a valid email address.';
+          authErrorMsg.classList.remove('hidden');
+        }
+        return;
+      }
+
+      if (pass.length < 6) {
+        if (authErrorMsg) {
+          authErrorMsg.textContent = 'Password must be at least 6 characters.';
+          authErrorMsg.classList.remove('hidden');
+        }
+        return;
+      }
 
       if (authSubmitBtn) {
         authSubmitBtn.setAttribute('disabled', 'true');

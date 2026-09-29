@@ -21,6 +21,7 @@ import {
 import { getFirebaseApp } from './config';
 import type { MaterialItem, AcademicYear, ModuleInfo } from '../types/materials';
 import type { UserProfile, UserRole } from '../types/profile';
+import { handleFirestoreError } from '../utils/firestoreErrors';
 import type {
   ContributorDocument,
   SubmissionDocument,
@@ -113,7 +114,7 @@ export async function fetchMaterialsFromFirestore(year?: AcademicYear): Promise<
     });
     return results;
   } catch (err) {
-    console.warn('[Firestore] Failed to fetch materials, falling back:', err);
+    handleFirestoreError('Failed to fetch materials', err);
     return [];
   }
 }
@@ -331,7 +332,7 @@ export async function getUserProfileByUid(uid: string): Promise<UserProfile | nu
     }
     return null;
   } catch (err) {
-    console.warn(`[Firestore] Failed to get user profile ${uid}:`, err);
+    handleFirestoreError(`Failed to get user profile ${uid}`, err);
     return null;
   }
 }
