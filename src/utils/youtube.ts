@@ -1,25 +1,18 @@
-/**
- * Helper script to fetch YouTube playlist videos (ID, Title, URL) without requiring an API key.
- * 
- * Supports YouTube's modern InnerTube `lockupViewModel` as well as classic `playlistVideoRenderer`.
- *
- * Usage:
- *   node scripts/fetch-youtube-playlist.js <playlistId_or_URL>
- *   node scripts/fetch-youtube-playlist.js --json <playlistId_or_URL>
- *
- * Examples:
- *   node scripts/fetch-youtube-playlist.js PLIZNmuBMEjaMZmwn2FVmG8bYsmVs5n-_v
- *   node scripts/fetch-youtube-playlist.js "https://www.youtube.com/playlist?list=PLFkJTdtzWoIaAWbijL3Pw4gVnxDjjPG8U"
- */
-
-export function extractPlaylistId(input) {
+export function extractPlaylistId(input: string): string | null {
   if (!input) return null;
   const match = input.match(/[?&]list=([^&]+)/);
   if (match) return match[1];
   return input.trim();
 }
 
-export async function fetchPlaylistVideos(playlistId) {
+export interface PlaylistVideo {
+  id: string;
+  title: string;
+  youtubeId: string;
+  url: string;
+}
+
+export async function fetchPlaylistVideos(playlistId: string): Promise<PlaylistVideo[]> {
   const cleanId = extractPlaylistId(playlistId);
   if (!cleanId) {
     throw new Error(`Invalid playlist ID or URL: ${playlistId}`);
@@ -39,9 +32,8 @@ export async function fetchPlaylistVideos(playlistId) {
   }
 
   const html = await res.text();
-  const videos = [];
+  const videos: PlaylistVideo[] = [];
 
-  // Parse ytInitialData JSON payload
   const start = html.indexOf('ytInitialData = ');
   if (start !== -1) {
     const jsonStart = start + 'ytInitialData = '.length;
@@ -83,12 +75,11 @@ export async function fetchPlaylistVideos(playlistId) {
           }
         }
       } catch (err) {
-        console.warn('JSON parse warning:', err.message);
+        console.warn('JSON parse warning:', err);
       }
     }
   }
 
-  // Regex fallback if JSON extraction found nothing
   if (videos.length === 0) {
     const regex = /"playlistVideoRenderer":\{"videoId":"([^"]+)".*?"title":\{"runs":\[\{"text":"([^"]+)"/g;
     let m;
@@ -105,32 +96,4 @@ export async function fetchPlaylistVideos(playlistId) {
   }
 
   return videos;
-}
-
-// CLI Execution Support
-if (process.argv[1]?.endsWith('fetch-youtube-playlist.js')) {
-  const args = process.argv.slice(2);
-  const isJson = args.includes('--json');
-  const target = args.find((a) => !a.startsWith('--'));
-
-  if (!target) {
-    console.error('Usage: node scripts/fetch-youtube-playlist.js [--json] <playlistId_or_URL>');
-    process.exit(1);
-  }
-
-  fetchPlaylistVideos(target)
-    .then((videos) => {
-      if (isJson) {
-        console.log(JSON.stringify(videos, null, 2));
-      } else {
-        console.log(`\nFetched ${videos.length} videos from playlist:`);
-        videos.forEach((v, i) => {
-          console.log(`[${i + 1}] ${v.title} (${v.youtubeId})`);
-        });
-      }
-    })
-    .catch((err) => {
-      console.error('Error fetching playlist:', err.message);
-      process.exit(1);
-    });
 }
