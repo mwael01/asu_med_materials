@@ -73,6 +73,11 @@ function namesOf(value) {
   return Array.isArray(value) ? value : [value];
 }
 
+function isValidMatchName(name) {
+  const normalized = normalizeName(name);
+  return normalized.length >= 2;
+}
+
 async function migrate() {
   console.log('\n📦 Fetching users, contributors, and materials...\n');
 
@@ -95,23 +100,23 @@ async function migrate() {
   console.log(`  Contributors: ${contributors.length}`);
   console.log(`  Materials: ${materials.length}\n`);
 
-  // Build matchNames → user lookup
-  // For each contributor doc, if ANY matchName matches a user,
-  // map ALL of that contributor's matchNames to that user.
+  // Build matchNames → user lookup using EXACT matching only
+  // Only match if the normalized name is >= 2 characters and exactly equals
+  // the user's displayName or username (no substring matching)
   const matchNameToUser = new Map();
   for (const contributor of contributors) {
-    const matchNames = contributor.matchNames || [];
-    const normalizedNames = matchNames.map(normalizeName);
+    const matchNames = (contributor.matchNames || []).filter(isValidMatchName);
 
-    // Find a user that matches any of this contributor's matchNames
-    const user = users.find((u) =>
-      normalizedNames.includes(normalizeName(u.displayName)) ||
-      normalizedNames.includes(normalizeName(u.username))
-    );
+    for (const mn of matchNames) {
+      const normalized = normalizeName(mn);
 
-    if (user) {
-      for (const mn of matchNames) {
-        const normalized = normalizeName(mn);
+      // Find a user whose displayName or username exactly matches this matchName
+      const user = users.find((u) =>
+        normalizeName(u.displayName) === normalized ||
+        normalizeName(u.username) === normalized
+      );
+
+      if (user) {
         matchNameToUser.set(normalized, { user, contributorId: contributor.id, matchName: mn });
       }
     }

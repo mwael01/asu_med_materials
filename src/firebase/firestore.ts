@@ -569,7 +569,7 @@ export async function getUserContributions(usernameOrUid: string): Promise<Mater
         return;
       }
 
-      // 3. Flexible match in addedBy array
+      // 3. Exact match in addedBy array (no substring matching)
       const addedByArr = Array.isArray(mat.addedBy)
         ? mat.addedBy
         : mat.addedBy
@@ -578,7 +578,7 @@ export async function getUserContributions(usernameOrUid: string): Promise<Mater
 
       const matches = addedByArr.some((c) => {
         const norm = c.toLowerCase().trim().replace(/^@/, '');
-        return norm === target || norm.includes(target);
+        return norm === target;
       });
 
       if (matches) {
