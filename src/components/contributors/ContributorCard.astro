@@ -1,7 +1,6 @@
 ---
 import type { ContributorStats } from '../../types/contributors';
 import { getInitials } from '../../utils/contributors';
-import { formatShortName } from '../../utils/format';
 
 interface Props {
   contributor: ContributorStats;
@@ -12,10 +11,9 @@ interface Props {
 }
 
 const { contributor, dialogId, rank, roleType = 'creator', nameMap } = Astro.props;
-const resolvedName = contributor.username && nameMap
+const displayName = contributor.username && nameMap
   ? (nameMap[contributor.username.toLowerCase()] || contributor.name)
   : contributor.name;
-const displayName = formatShortName(resolvedName);
 const typeEntries = Object.entries(contributor.byType).sort((a, b) => b[1] - a[1]).slice(0, 4);
 const yearEntries = Object.entries(contributor.byYear).sort((a, b) => Number(a[0]) - Number(b[0]));
 const searchHref = `/search?q=${encodeURIComponent(displayName)}`;
@@ -40,7 +38,7 @@ const searchHref = `/search?q=${encodeURIComponent(displayName)}`;
     <span class="flex-1 min-w-0">
       <span class="flex items-center gap-1.5">
         <span class="text-[11px] font-bold text-emerald-600 dark:text-emerald-400 shrink-0">#{rank}</span>
-        <span class="font-bold text-sm text-zinc-900 dark:text-zinc-100 truncate group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">
+        <span class="font-bold text-sm text-zinc-900 dark:text-zinc-100 truncate group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors" title={displayName}>
           {displayName}
         </span>
       </span>
@@ -72,7 +70,7 @@ const searchHref = `/search?q=${encodeURIComponent(displayName)}`;
           {getInitials(displayName)}
         </span>
         <div class="min-w-0">
-          <h3 class="font-bold text-sm text-zinc-900 dark:text-zinc-100 truncate">{displayName}</h3>
+          <h3 class="font-bold text-sm text-zinc-900 dark:text-zinc-100 truncate" title={displayName}>{displayName}</h3>
           <span
             class="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-600 dark:text-emerald-400 mt-0.5"
             data-i18n={roleType === 'resource' ? 'contributors.resourceRank' : 'contributors.rank'}
