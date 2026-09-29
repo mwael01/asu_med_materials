@@ -257,6 +257,8 @@ export interface TranslationsSchema {
     returnToAdmin: string;
     tabDirectAdd: string;
     tabSubmissions: string;
+    tabModules: string;
+    tabMaterials: string;
     tabFeedback: string;
     tabTeam: string;
     tabLogs: string;
