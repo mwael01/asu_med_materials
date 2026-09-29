@@ -170,18 +170,12 @@ const allMaterials = await getAllMaterials();
               <span id="my-avatar-initials" class="text-2xl font-black text-emerald-700 dark:text-emerald-400"></span>
             </div>
 
-            <!-- Upload input button -->
-            <label
-              for="avatar-file-input"
-              class="absolute -bottom-2 -right-2 p-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white shadow-md cursor-pointer transition-transform active:scale-95"
-              title="Upload new profile picture"
-            >
+            <!-- Avatar URL edit hint -->
+            <div class="absolute -bottom-2 -right-2 p-2 rounded-xl bg-emerald-600 text-white shadow-md" title="Set avatar via URL in the edit section below">
               <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z" />
-                <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0zM18.75 10.5h.008v.008h-.008V10.5z" />
+                <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L6.832 19.82a4.5 4.5 0 01-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 011.13-1.897L16.863 4.487zm0 0L19.5 7.125" />
               </svg>
-              <input type="file" id="avatar-file-input" accept="image/png,image/jpeg,image/webp" class="hidden" />
-            </label>
+            </div>
           </div>
 
           <!-- Profile Details Header -->
@@ -325,6 +319,19 @@ const allMaterials = await getAllMaterials();
               placeholder="e.g. Ain Shams Med Student | Contributing materials for Blood & CVS modules"
               class="w-full text-xs px-3 py-2 rounded-xl border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 focus:outline-none focus:ring-2 focus:ring-emerald-500 dark:text-zinc-100 leading-relaxed"
             ></textarea>
+          </div>
+
+          <div>
+            <label for="edit-avatar-url" class="block text-xs font-bold text-zinc-700 dark:text-zinc-300 mb-1">Profile Picture URL</label>
+            <input
+              type="url"
+              id="edit-avatar-url"
+              placeholder="https://example.com/your-image.jpg"
+              class="w-full text-xs px-3 py-2 rounded-xl border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 focus:outline-none focus:ring-2 focus:ring-emerald-500 dark:text-zinc-100"
+            />
+            <p class="text-[10px] text-zinc-400 dark:text-zinc-500 mt-1">
+              Upload your image to any hosting service (Imgur, Google Drive, etc.) and paste the direct link here.
+            </p>
           </div>
 
           <!-- Admin Role Description (Displayed on Core Team Card) -->
@@ -568,7 +575,6 @@ const allMaterials = await getAllMaterials();
     getUserContributions,
     getUserSubmissions
   } from '../firebase/firestore';
-  import { uploadAvatarImage } from '../firebase/storage';
   import type { UserProfile, UserContact, ContactPlatform } from '../types/profile';
   import { PLATFORM_REGISTRY, renderContactPillMarkup } from '../utils/contacts';
   import type { MaterialItem, AcademicYear } from '../types/materials';
@@ -1103,46 +1109,11 @@ const allMaterials = await getAllMaterials();
     copyMyShareBtn?.addEventListener('click', copyMyProfileLink);
     copyPreviewBtn?.addEventListener('click', copyMyProfileLink);
 
-    // Avatar Upload Handler (Firebase Storage)
-    const avatarInput = document.getElementById('avatar-file-input') as HTMLInputElement | null;
-    const uploadStatus = document.getElementById('avatar-upload-status');
-
-    avatarInput?.addEventListener('change', async (e) => {
-      const file = (e.target as HTMLInputElement).files?.[0];
-      if (!file || !currentProfile || !currentUser) return;
-
-      if (uploadStatus) {
-        uploadStatus.textContent = 'Uploading picture to Firebase Storage...';
-        uploadStatus.classList.remove('hidden');
-      }
-
-      try {
-        const downloadUrl = await uploadAvatarImage(currentUser.uid, file);
-        currentProfile.photoURL = downloadUrl;
-        await upsertUserProfile(currentProfile);
-
-        // Update image on page immediately
-        const myImg = document.getElementById('my-avatar-img') as HTMLImageElement | null;
-        const myInitials = document.getElementById('my-avatar-initials');
-        if (myImg) {
-          myImg.src = downloadUrl;
-          myImg.classList.remove('hidden');
-          myInitials?.classList.add('hidden');
-        }
-
-        if (uploadStatus) {
-          uploadStatus.textContent = 'Profile picture updated successfully!';
-          setTimeout(() => uploadStatus.classList.add('hidden'), 3000);
-        }
-        notify('Profile image updated!', 'success');
-      } catch (err: any) {
-        console.error(err);
-        if (uploadStatus) {
-          uploadStatus.textContent = err?.message || 'Failed to upload image';
-        }
-        notify(err?.message || 'Failed to upload image', 'error');
-      }
-    });
+    // Pre-fill avatar URL input with current value
+    const avatarUrlInput = document.getElementById('edit-avatar-url') as HTMLInputElement | null;
+    if (avatarUrlInput && currentProfile?.photoURL) {
+      avatarUrlInput.value = currentProfile.photoURL;
+    }
 
     // ─── Contact Links Editor Helpers ─────────────────────────────────
     function createContactRowElement(contact?: UserContact): HTMLElement {
@@ -1245,10 +1216,24 @@ const allMaterials = await getAllMaterials();
       const editName = (document.getElementById('edit-display-name') as HTMLInputElement)?.value.trim();
       const editYearVal = (document.getElementById('edit-academic-year') as HTMLSelectElement)?.value;
       const editBio = (document.getElementById('edit-bio') as HTMLTextAreaElement)?.value.trim();
+      const avatarUrl = (document.getElementById('edit-avatar-url') as HTMLInputElement)?.value.trim() || '';
 
       if (!editName) {
         notify('Full Name is required', 'error');
         return;
+      }
+
+      // Validate avatar URL if provided
+      if (avatarUrl) {
+        try {
+          const parsed = new URL(avatarUrl);
+          if (!['http:', 'https:'].includes(parsed.protocol)) {
+            throw new Error('Invalid URL');
+          }
+        } catch {
+          notify('Please enter a valid image URL (starting with http:// or https://)', 'error');
+          return;
+        }
       }
 
       const saveBtn = document.getElementById('btn-save-profile') as HTMLButtonElement | null;
@@ -1261,6 +1246,7 @@ const allMaterials = await getAllMaterials();
         currentProfile.displayName = editName;
         currentProfile.academicYear = editYearVal ? (parseInt(editYearVal, 10) as AcademicYear) : undefined;
         currentProfile.bio = editBio;
+        currentProfile.photoURL = avatarUrl || undefined;
         currentProfile.contacts = getEnteredContacts();
 
         if (currentProfile.role === 'admin') {

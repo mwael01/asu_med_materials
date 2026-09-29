@@ -205,7 +205,7 @@
           "type": "string",
           "required": false,
           "format": "uri",
-          "description": "Profile picture URL hosted in Firebase Storage"
+          "description": "User-provided profile picture URL (any image hosting service)"
         },
         "bio": {
           "type": "string",

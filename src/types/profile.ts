@@ -24,7 +24,7 @@ export interface UserProfile {
   username: string;       // Unique handle, e.g. "mohamed_wael" (used for /profile?u=username)
   hasCustomUsername?: boolean; // Whether the user has chosen their permanent unique username
   displayName: string;    // Display name, e.g. "Mohamed Wael"
-  photoURL?: string;      // Firebase Storage avatar URL
+  photoURL?: string;      // User-provided avatar URL (any image hosting service)
   bio?: string;           // Student bio or description
   academicYear?: AcademicYear; // Academic year 1..5
   role?: UserRole;
