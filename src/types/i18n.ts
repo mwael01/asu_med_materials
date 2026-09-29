@@ -31,6 +31,8 @@ export interface TranslationsSchema {
     myLibrary: string;
     myLibrarySubtitle: string;
     unstudiedOnly: string;
+    hideCompleted: string;
+    showCompleted: string;
     allModules: string;
     completedCount: string;
     allCompletedFilter: string;

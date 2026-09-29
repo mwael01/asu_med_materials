@@ -1117,6 +1117,17 @@ const allMaterials = await getAllMaterials();
         }
 
         await upsertUserProfile(currentProfile);
+
+        // Conserve user's updated academic year in localStorage and notify site components
+        if (currentProfile.academicYear) {
+          localStorage.setItem('asumed_user_year', String(currentProfile.academicYear));
+          window.dispatchEvent(
+            new CustomEvent('user-preferences-updated', {
+              detail: { year: currentProfile.academicYear }
+            })
+          );
+        }
+
         notify('Profile updated successfully!', 'success');
         renderMyProfile(currentProfile);
       } catch (err: any) {

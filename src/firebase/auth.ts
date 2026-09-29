@@ -110,9 +110,26 @@ export function onAuthChange(
               cached.role !== remoteProfile.role ||
               cached.displayName !== remoteProfile.displayName ||
               cached.photoURL !== remoteProfile.photoURL ||
-              cached.username !== remoteProfile.username;
+              cached.username !== remoteProfile.username ||
+              cached.academicYear !== remoteProfile.academicYear;
 
             setCachedUserProfile(remoteProfile);
+
+            // Conserve user academic year from profile
+            if (remoteProfile.academicYear) {
+              try {
+                const currentYear = localStorage.getItem('asumed_user_year');
+                if (currentYear !== String(remoteProfile.academicYear)) {
+                  localStorage.setItem('asumed_user_year', String(remoteProfile.academicYear));
+                  window.dispatchEvent(
+                    new CustomEvent('user-preferences-updated', {
+                      detail: { year: remoteProfile.academicYear }
+                    })
+                  );
+                }
+              } catch {}
+            }
+
             if (hasChanged) {
               callback(firebaseUser, remoteProfile);
             }
