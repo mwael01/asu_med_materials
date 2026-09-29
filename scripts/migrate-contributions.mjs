@@ -96,18 +96,22 @@ async function migrate() {
   console.log(`  Materials: ${materials.length}\n`);
 
   // Build matchNames → user lookup
+  // For each contributor doc, if ANY matchName matches a user,
+  // map ALL of that contributor's matchNames to that user.
   const matchNameToUser = new Map();
   for (const contributor of contributors) {
     const matchNames = contributor.matchNames || [];
-    for (const mn of matchNames) {
-      const normalized = normalizeName(mn);
-      // Find user by displayName or username matching this matchName
-      const user = users.find(
-        (u) =>
-          normalizeName(u.displayName) === normalized ||
-          normalizeName(u.username) === normalized
-      );
-      if (user) {
+    const normalizedNames = matchNames.map(normalizeName);
+
+    // Find a user that matches any of this contributor's matchNames
+    const user = users.find((u) =>
+      normalizedNames.includes(normalizeName(u.displayName)) ||
+      normalizedNames.includes(normalizeName(u.username))
+    );
+
+    if (user) {
+      for (const mn of matchNames) {
+        const normalized = normalizeName(mn);
         matchNameToUser.set(normalized, { user, contributorId: contributor.id, matchName: mn });
       }
     }
