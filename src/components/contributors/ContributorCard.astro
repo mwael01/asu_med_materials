@@ -7,10 +7,14 @@ interface Props {
   dialogId: string;
   rank: number;
   roleType?: 'creator' | 'resource';
+  photoMap?: Record<string, string>;
 }
 
-const { contributor, dialogId, rank, roleType = 'creator' } = Astro.props;
+const { contributor, dialogId, rank, roleType = 'creator', photoMap } = Astro.props;
 const displayName = contributor.name;
+const photoUrl = contributor.username && photoMap
+  ? photoMap[contributor.username.toLowerCase()]
+  : undefined;
 const typeEntries = Object.entries(contributor.byType).sort((a, b) => b[1] - a[1]).slice(0, 4);
 const yearEntries = Object.entries(contributor.byYear).sort((a, b) => Number(a[0]) - Number(b[0]));
 const searchHref = `/search?q=${encodeURIComponent(displayName)}`;
@@ -25,9 +29,22 @@ const searchHref = `/search?q=${encodeURIComponent(displayName)}`;
     aria-controls={dialogId}
     aria-haspopup="dialog"
   >
+    {photoUrl ? (
+      <img
+        src={photoUrl}
+        alt={displayName}
+        width="52"
+        height="52"
+        loading="lazy"
+        decoding="async"
+        class="rounded-full shrink-0 object-cover aspect-square"
+        style="width: 52px; height: 52px; min-width: 52px; min-height: 52px; max-width: 52px; max-height: 52px; border-radius: 50%;"
+        onerror="this.style.display='none';this.nextElementSibling.style.display='flex';"
+      />
+    ) : null}
     <span
       class="rounded-full bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900 flex items-center justify-center text-sm font-extrabold shrink-0 select-none aspect-square"
-      style="width: 52px; height: 52px; min-width: 52px; min-height: 52px; max-width: 52px; max-height: 52px; border-radius: 50%;"
+      style="width: 52px; height: 52px; min-width: 52px; min-height: 52px; max-width: 52px; max-height: 52px; border-radius: 50%; display: {photoUrl ? 'none' : 'flex'};"
       aria-hidden="true"
     >
       {getInitials(displayName)}
@@ -59,9 +76,22 @@ const searchHref = `/search?q=${encodeURIComponent(displayName)}`;
     <!-- Header with Initials + Name + Rank + Close Button -->
     <div class="flex items-start justify-between gap-3 mb-3.5">
       <div class="flex items-center gap-3 min-w-0">
+        {photoUrl ? (
+          <img
+            src={photoUrl}
+            alt={displayName}
+            width="52"
+            height="52"
+            loading="lazy"
+            decoding="async"
+            class="rounded-full shrink-0 object-cover aspect-square"
+            style="width: 52px; height: 52px; min-width: 52px; min-height: 52px; max-width: 52px; max-height: 52px; border-radius: 50%;"
+            onerror="this.style.display='none';this.nextElementSibling.style.display='flex';"
+          />
+        ) : null}
         <span
           class="rounded-full bg-emerald-600 text-white flex items-center justify-center text-lg font-black shrink-0 aspect-square"
-          style="width: 52px; height: 52px; min-width: 52px; min-height: 52px; max-width: 52px; max-height: 52px; border-radius: 50%;"
+          style="width: 52px; height: 52px; min-width: 52px; min-height: 52px; max-width: 52px; max-height: 52px; border-radius: 50%; display: {photoUrl ? 'none' : 'flex'};"
           aria-hidden="true"
         >
           {getInitials(displayName)}

@@ -793,22 +793,25 @@ export async function fetchAdminUsers(limitCount = 8): Promise<UserProfile[]> {
 }
 
 /**
- * Fetches a lightweight map of username → displayName for all users.
- * Used for resolving contributor usernames to display names in the UI.
+ * Fetches a lightweight map of username → { displayName, photoURL } for all users.
+ * Used for resolving contributor usernames to display names and photos in the UI.
  */
-export async function fetchAllUsernames(): Promise<Map<string, string>> {
+export async function fetchAllUsernames(): Promise<Map<string, { displayName: string; photoURL: string }>> {
   const db = getFirestoreDb();
   if (!db) return new Map();
 
   try {
     const usersRef = collection(db, USERS_COLLECTION);
     const snapshot = await getDocs(usersRef);
-    const map = new Map<string, string>();
+    const map = new Map<string, { displayName: string; photoURL: string }>();
 
     snapshot.forEach((docSnap) => {
       const data = docSnap.data() as UserProfile;
       if (data.username && data.displayName) {
-        map.set(data.username.toLowerCase(), data.displayName);
+        map.set(data.username.toLowerCase(), {
+          displayName: data.displayName,
+          photoURL: data.photoURL || ''
+        });
       }
     });
 

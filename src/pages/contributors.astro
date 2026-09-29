@@ -12,8 +12,10 @@ const adminUsers = await fetchAdminUsers(8);
 const usernameMap = await fetchAllUsernames();
 
 const nameMap: Record<string, string> = {};
-usernameMap.forEach((displayName, username) => {
+const photoMap: Record<string, string> = {};
+usernameMap.forEach(({ displayName, photoURL }, username) => {
   nameMap[username] = displayName;
+  if (photoURL) photoMap[username] = photoURL;
 });
 
 // Dynamic Core Team from website administrators (strictly limited to 8)
@@ -105,6 +107,7 @@ const CREATORS_INITIAL_LIMIT = 12;
             dialogId={`resource-dialog-${index}`}
             rank={index + 1}
             roleType="resource"
+            photoMap={photoMap}
           />
         ))}
       </div>
@@ -136,6 +139,7 @@ const CREATORS_INITIAL_LIMIT = 12;
                 dialogId={`creator-dialog-${index}`}
                 rank={index + 1}
                 roleType="creator"
+                photoMap={photoMap}
               />
             </div>
           ))}

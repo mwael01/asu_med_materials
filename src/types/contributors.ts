@@ -43,4 +43,5 @@ export interface ContributorStats {
   subjects: number;
   byType: Record<string, number>;
   byYear: Record<string, number>;
+  username?: string;
 }
