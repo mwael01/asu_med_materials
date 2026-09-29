@@ -72,15 +72,19 @@ Return strictly a valid JSON object (no markdown quotes, no explanations) adheri
       "type": "One of the valid resource types above",
       "category": "One of the valid categories above",
       "year": 1 | 2 | 3 | 4 | 5,
-      "semester": 1 | 2 (optional, infer from context if mentioned),
       "moduleId": "Matching module ID from the reference list above or best fit",
-      "moduleTitle": "Module title in Arabic if mentioned",
-      "moduleTitleEn": "Module title in English if mentioned",
-      "subject": "Subject name in Arabic if mentioned",
-      "subjectEn": "Subject name in English (e.g. 'Pathology', 'Physiology', 'Histology', 'Anatomy', 'Biochemistry', 'Pharmacology', 'Microbiology', 'Internal Medicine', 'Surgery', 'Pediatrics', 'Obstetrics & Gynecology')",
-      "author": "Doctor or creator name in Arabic if mentioned (e.g. 'د. شيرين')",
-      "authorEn": "Doctor or creator name in English if mentioned",
-      "tags": ["Array of 2-5 relevant keywords"]
+      "subject": "Subject name (e.g. 'Pathology', 'Physiology', 'Histology', 'Anatomy', 'Biochemistry', 'Pharmacology', 'Microbiology', 'Internal Medicine', 'Surgery', 'Pediatrics', 'Obstetrics & Gynecology')",
+      "author": "Doctor or creator name if mentioned (e.g. 'د. شيرين')",
+      "tags": ["Array of 2-5 relevant keywords"],
+      "videos": [
+        {
+          "id": "Unique video identifier",
+          "title": "Video title",
+          "youtubeId": "YouTube video ID",
+          "url": "Video URL",
+          "duration": "Video duration (optional)"
+        }
+      ]
     }
   ]
 }
@@ -91,7 +95,7 @@ IMPORTANT RULES:
 3. Extract ALL available information from the text - do not leave fields empty if the information is present.
 4. For YouTube playlist links (URLs containing 'list=' or 'playlist'), set type to "playlist" and extract the playlistId from the URL (the value after 'list=').
 5. For Google Drive links, set type to "drive" and use the URL as-is.
-6. Infer year, semester, module, and subject from context clues in the text.
+6. Infer year, module, and subject from context clues in the text.
 7. If the text is in Arabic, provide Arabic titles/descriptions. If in English, provide English ones. If mixed, provide both.
 8. For playlists, if individual video information is available in the text, populate the "videos" array with {id, title, youtubeId, url, duration} for each video.`;
 }
@@ -99,6 +103,9 @@ IMPORTANT RULES:
 /**
  * Normalizes and validates an individual extracted material object.
  */
+const VALID_TYPES: ResourceType[] = ['drive', 'telegram', 'youtube', 'playlist', 'whatsapp', 'book', 'summary', 'exam', 'website', 'other'];
+const VALID_CATEGORIES: MaterialCategory[] = ['central', 'lectures', 'practical', 'summaries', 'exams', 'references'];
+
 function normalizeParsedItem(
   item: any,
   rawMessage: string,
@@ -106,20 +113,17 @@ function normalizeParsedItem(
   fallbackUrl = ''
 ): ParsedAIMaterial {
   const url = (item?.url || fallbackUrl || '').trim();
-  const detectedType = item?.type || detectResourceType(url);
+  const detectedType = VALID_TYPES.includes(item?.type) ? item.type : detectResourceType(url);
 
-  // Validate academic year
   const validYear = (
     typeof item?.year === 'number' && item.year >= 1 && item.year <= 5
       ? item.year
       : 2
   ) as AcademicYear;
 
-  // Validate or match module
   const yearModules = modules.filter((m) => m.year === validYear);
   let matchedModule = modules.find((m) => m.id === item?.moduleId);
   if (!matchedModule) {
-    // Attempt match by subject
     if (item?.subject) {
       const subLower = String(item.subject).toLowerCase();
       matchedModule = yearModules.find((m) =>
@@ -131,10 +135,9 @@ function normalizeParsedItem(
     }
   }
 
-  const finalModuleId = matchedModule ? matchedModule.id : 'year2-blood';
+  const finalModuleId = matchedModule?.id || modules[0]?.id || '';
   const finalYear = (matchedModule?.year || validYear) as AcademicYear;
 
-  // Default clean title
   let title = (item?.title || '').trim();
   if (!title) {
     if (item?.author && item?.subject) {
@@ -149,6 +152,11 @@ function normalizeParsedItem(
     ? url.split('list=')[1]?.split('&')[0]
     : undefined;
 
+  const rawAuthor = item?.author;
+  const author = Array.isArray(rawAuthor)
+    ? rawAuthor.filter(Boolean).join('، ')
+    : typeof rawAuthor === 'string' ? rawAuthor.trim() : undefined;
+
   return {
     title,
     titleEn: item?.titleEn?.trim() || undefined,
@@ -157,16 +165,11 @@ function normalizeParsedItem(
     url,
     urls: url ? [url] : extractUrls(rawMessage),
     type: detectedType,
-    category: item?.category || (isPlaylist ? 'lectures' : 'summaries'),
+    category: VALID_CATEGORIES.includes(item?.category) ? item.category : (isPlaylist ? 'lectures' : 'summaries'),
     year: finalYear,
-    semester: item?.semester === 1 || item?.semester === 2 ? item.semester : undefined,
     moduleId: finalModuleId,
-    moduleTitle: item?.moduleTitle?.trim() || undefined,
-    moduleTitleEn: item?.moduleTitleEn?.trim() || undefined,
     subject: item?.subject?.trim() || 'عام',
-    subjectEn: item?.subjectEn?.trim() || undefined,
-    author: item?.author?.trim() || undefined,
-    authorEn: item?.authorEn?.trim() || undefined,
+    author,
     tags: Array.isArray(item?.tags) ? item.tags.filter(Boolean) : [],
     playlistId,
     videos: Array.isArray(item?.videos) ? item.videos : undefined
@@ -334,6 +337,15 @@ function parseSingleTextContext(
       : `مصدر ${subject !== 'عام' ? subject : matchedModule?.title || 'دراسي'}`;
   }
 
+  const isPlaylist = type === 'playlist';
+  const playlistId = isPlaylist && url.includes('list=')
+    ? url.split('list=')[1]?.split('&')[0]
+    : undefined;
+
+  const description = cleanLine.length > 5 && cleanLine.length < 200
+    ? cleanLine
+    : undefined;
+
   return {
     title,
     url,
@@ -341,9 +353,11 @@ function parseSingleTextContext(
     type,
     category,
     year,
-    moduleId: matchedModule ? matchedModule.id : 'year2-blood',
+    moduleId: matchedModule?.id || modules[0]?.id || '',
     subject,
     author,
+    description,
+    playlistId: isPlaylist ? playlistId : undefined,
     tags: [subject, type].filter((t) => t !== 'عام')
   };
 }
