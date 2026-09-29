@@ -1,59 +1,57 @@
 import type { MaterialItem, FilterOptions } from '../types/materials';
+import { createSearchDocument, scoreSearchDocument, tokenizeQuery } from './search';
 
 export function filterMaterials(
   materials: MaterialItem[],
   options: FilterOptions
 ): MaterialItem[] {
-  const query = options.query?.trim().toLowerCase() ?? '';
+  const query = options.query?.trim() ?? '';
+  const tokens = tokenizeQuery(query);
   const year = options.year;
   const type = options.type;
   const moduleId = options.moduleId;
   const subject = options.subject?.trim().toLowerCase();
 
-  return materials.filter((item) => {
+  const matchedItems: { item: MaterialItem; score: number }[] = [];
+
+  for (const item of materials) {
     // Filter by Academic Year
     if (year && year !== 'all' && item.year !== year) {
-      return false;
+      continue;
     }
 
     // Filter by Resource Type
     if (type && type !== 'all') {
       const isYouTubeMatch = type === 'youtube' && (item.type === 'youtube' || item.type === 'playlist');
       if (!isYouTubeMatch && item.type !== type) {
-        return false;
+        continue;
       }
     }
 
     // Filter by Module ID
     if (moduleId && item.moduleId !== moduleId) {
-      return false;
+      continue;
     }
 
     // Filter by Subject
     if (subject && item.subject?.toLowerCase() !== subject) {
-      return false;
+      continue;
     }
 
-    // Text search matching against title, description, author, subject, tags
-    if (query) {
-      const inTitle = item.title.toLowerCase().includes(query);
-      const inDescription = item.description?.toLowerCase().includes(query) ?? false;
-      const inSubject = item.subject?.toLowerCase().includes(query) ?? false;
-      const authorText = Array.isArray(item.author)
-        ? item.author.join(' ')
-        : (item.author ?? '');
-      const addedByText = Array.isArray(item.addedBy)
-        ? item.addedBy.join(' ')
-        : (item.addedBy ?? '');
-      const inAuthor = authorText.toLowerCase().includes(query);
-      const inAddedBy = addedByText.toLowerCase().includes(query);
-      const inTags = item.tags.some((tag) => tag.toLowerCase().includes(query));
-
-      if (!inTitle && !inDescription && !inSubject && !inAuthor && !inAddedBy && !inTags) {
-        return false;
-      }
+    // Text search matching with smart normalization and multi-token matching
+    if (tokens.length > 0) {
+      const doc = createSearchDocument(item);
+      const score = scoreSearchDocument(doc, query, tokens);
+      if (score <= 0) continue;
+      matchedItems.push({ item, score });
+    } else {
+      matchedItems.push({ item, score: 0 });
     }
+  }
 
-    return true;
-  });
+  if (tokens.length > 0) {
+    matchedItems.sort((a, b) => b.score - a.score);
+  }
+
+  return matchedItems.map((m) => m.item);
 }

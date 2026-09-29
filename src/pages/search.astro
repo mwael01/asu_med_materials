@@ -4,13 +4,26 @@ import SearchBar from '../components/search/SearchBar.astro';
 import FilterToolbar from '../components/search/FilterToolbar.astro';
 import ResourceGrid from '../components/materials/ResourceGrid.astro';
 import { getAllMaterials } from '../data/materials';
+import { getAllModules } from '../data/modules';
 import { getMaterialEnglishTitle, getMaterialEnglishDesc } from '../i18n/materialsTranslations';
 
 const rawMaterials = await getAllMaterials();
+const allModules = await getAllModules();
+
+// Build module metadata lookup table
+const moduleMetaMap: Record<string, { code: string; title: string; titleAr?: string }> = {};
+for (const m of allModules) {
+  moduleMetaMap[m.id] = {
+    code: m.code || '',
+    title: m.title || '',
+    titleAr: m.titleAr || ''
+  };
+}
+
 const allMaterials = rawMaterials.map((m) => ({
   ...m,
-  titleEn: getMaterialEnglishTitle(m.id, m.title),
-  descEn: m.description ? getMaterialEnglishDesc(m.id, m.description) : undefined,
+  titleEn: m.titleEn || getMaterialEnglishTitle(m.id, m.title),
+  descEn: m.descriptionEn || (m.description ? getMaterialEnglishDesc(m.id, m.description) : undefined),
 }));
 ---
 
@@ -78,25 +91,107 @@ const allMaterials = rawMaterials.map((m) => ({
     </button>
   </div>
 
+  <!-- Cross-Year Suggestion Banner -->
+  <div
+    id="cross-year-suggestion"
+    class="hidden mb-4 p-3 rounded-xl border border-emerald-500/30 bg-emerald-50/60 dark:bg-emerald-950/30 text-xs flex flex-wrap items-center justify-between gap-3 text-start transition-all"
+  >
+    <div class="flex items-center gap-2 text-zinc-800 dark:text-zinc-200">
+      <svg class="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+      </svg>
+      <span id="cross-year-text"></span>
+    </div>
+    <button
+      type="button"
+      id="search-all-years-btn"
+      class="px-2.5 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold transition-all shadow-2xs cursor-pointer inline-flex items-center gap-1 shrink-0 text-xs"
+    >
+      <span data-i18n="search.searchAllYears">Search All Years</span>
+      <svg class="w-3 h-3 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+      </svg>
+    </button>
+  </div>
+
   <!-- Materials Grid Container -->
   <div id="search-results-grid">
     <ResourceGrid materials={allMaterials} showYear={true} />
+
+    <!-- Zero Results Empty State -->
+    <div
+      id="search-empty-state"
+      class="hidden text-center py-12 px-4 rounded-2xl border border-dashed border-zinc-200 dark:border-zinc-800"
+    >
+      <div class="w-12 h-12 mx-auto mb-3 rounded-full bg-zinc-100 dark:bg-zinc-800/80 flex items-center justify-center text-zinc-400">
+        <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+        </svg>
+      </div>
+      <h3 class="text-sm font-bold text-zinc-900 dark:text-zinc-100 mb-1" data-i18n="search.emptyTitle">
+        No resources found matching your search
+      </h3>
+      <p class="text-xs text-zinc-500 dark:text-zinc-400 max-w-sm mx-auto mb-4" data-i18n="search.emptyDesc">
+        Try different search keywords or remove some filters.
+      </p>
+      <button
+        type="button"
+        id="empty-reset-filters-btn"
+        class="inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-semibold rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white transition-colors cursor-pointer shadow-2xs"
+      >
+        <span data-i18n="search.resetFilters">Reset Filters</span>
+      </button>
+    </div>
   </div>
 </Layout>
 
-<script define:vars={{ rawMaterials: allMaterials }}>
+<script define:vars={{ rawMaterials: allMaterials, rawModuleMeta: moduleMetaMap }}>
   window.__ALL_SEARCH_MATERIALS = rawMaterials;
+  window.__ALL_MODULE_META = rawModuleMeta;
 </script>
 
 <script>
+  import {
+    createSearchDocument,
+    scoreSearchDocument,
+    tokenizeQuery,
+    type SearchDocument
+  } from '../utils/search';
+  import { getUserStoredYear } from '../utils/storage';
+  import { getCurrentLanguage } from '../utils/i18n';
+
   function initSearchPage(): void {
     const input = document.getElementById('site-search-input') as HTMLInputElement | null;
     const yearBtns = document.querySelectorAll('.year-filter-btn');
     const typeChips = document.querySelectorAll('.filter-chip');
-    const cards = document.querySelectorAll('#search-results-grid [data-material-id]');
+    const resultsGrid = document.querySelector('#search-results-grid .materials-grid');
+    const cards = Array.from(document.querySelectorAll('#search-results-grid [data-material-id]')) as HTMLElement[];
     const resultsCount = document.getElementById('results-count');
     const resetBtn = document.getElementById('reset-filters-btn');
+    const emptyResetBtn = document.getElementById('empty-reset-filters-btn');
+    const emptyState = document.getElementById('search-empty-state');
+    const crossYearBanner = document.getElementById('cross-year-suggestion');
+    const crossYearText = document.getElementById('cross-year-text');
+    const searchAllYearsBtn = document.getElementById('search-all-years-btn');
 
+    if (cards.length === 0) return;
+
+    // Card map for fast O(1) lookup
+    const cardMap = new Map<string, HTMLElement>();
+    cards.forEach((card) => {
+      const id = card.getAttribute('data-material-id');
+      if (id) cardMap.set(id, card);
+    });
+
+    const allItems: any[] = (window as any).__ALL_SEARCH_MATERIALS || [];
+    const moduleMetaMap: Record<string, any> = (window as any).__ALL_MODULE_META || {};
+
+    // Build SearchDocument index once in memory
+    const searchDocs: SearchDocument[] = allItems.map((m) =>
+      createSearchDocument(m, m.moduleId ? moduleMetaMap[m.moduleId] : undefined)
+    );
+
+    // Initial state from URL or Student Stored Academic Year
     let currentQuery = '';
     let currentYear = 'all';
     let currentType = 'all';
@@ -106,9 +201,19 @@ const allMaterials = rawMaterials.map((m) => ({
       currentQuery = params.get('q') || '';
       if (input) input.value = currentQuery;
     }
-    if (params.get('year')) {
+
+    if (params.has('year')) {
       currentYear = params.get('year') || 'all';
+    } else {
+      // Default to student's academic year if saved, otherwise 'all'
+      const storedYear = getUserStoredYear();
+      if (storedYear && storedYear >= 1 && storedYear <= 5) {
+        currentYear = String(storedYear);
+      } else {
+        currentYear = 'all';
+      }
     }
+
     if (params.get('type')) {
       currentType = params.get('type') || 'all';
     }
@@ -126,8 +231,8 @@ const allMaterials = rawMaterials.map((m) => ({
       });
 
       typeChips.forEach((chip) => {
-        const t = chip.getAttribute('data-filter-type');
-        if (t === currentType) {
+        const tVal = chip.getAttribute('data-filter-type');
+        if (tVal === currentType) {
           chip.classList.add('bg-zinc-900', 'text-white', 'border-zinc-900', 'dark:bg-zinc-100', 'dark:text-zinc-900');
           chip.classList.remove('bg-white', 'dark:bg-zinc-900', 'text-zinc-600', 'dark:text-zinc-400');
         } else {
@@ -142,64 +247,112 @@ const allMaterials = rawMaterials.map((m) => ({
       }
     }
 
+    let filterTimeout: any = null;
+    function debounceApplyFilter(): void {
+      if (filterTimeout) clearTimeout(filterTimeout);
+      filterTimeout = setTimeout(() => {
+        applyFilter();
+      }, 100);
+    }
+
     function applyFilter(): void {
-      const allItems: any[] = (window as any).__ALL_SEARCH_MATERIALS || [];
-      const q = currentQuery.trim().toLowerCase();
-      let matchedCount = 0;
+      const q = currentQuery.trim();
+      const tokens = tokenizeQuery(q);
 
-      cards.forEach((cardEl) => {
-        const id = cardEl.getAttribute('data-material-id');
-        const item = allItems.find((x) => x.id === id);
+      interface MatchedItem {
+        id: string;
+        score: number;
+        doc: SearchDocument;
+      }
 
-        if (!item) return;
+      const matchesInCurrentYear: MatchedItem[] = [];
+      const matchesInOtherYears: MatchedItem[] = [];
 
-        if (currentYear !== 'all' && String(item.year) !== currentYear) {
-          (cardEl as HTMLElement).style.display = 'none';
-          return;
-        }
+      for (let i = 0; i < searchDocs.length; i++) {
+        const doc = searchDocs[i];
 
+        // Type filter check
         if (currentType !== 'all') {
-          const isYouTubeMatch = currentType === 'youtube' && (item.type === 'youtube' || item.type === 'playlist');
-          if (!isYouTubeMatch && item.type !== currentType) {
-            (cardEl as HTMLElement).style.display = 'none';
-            return;
+          const isYouTubeMatch = currentType === 'youtube' && (doc.type === 'youtube' || doc.type === 'playlist');
+          if (!isYouTubeMatch && doc.type !== currentType) {
+            continue;
           }
         }
 
-        if (q) {
-          const matchTitle = item.title?.toLowerCase().includes(q) || item.titleEn?.toLowerCase().includes(q);
-          const matchDesc = item.description?.toLowerCase().includes(q) || item.descEn?.toLowerCase().includes(q);
-          const matchSubj = item.subject?.toLowerCase().includes(q);
-          const authorText = Array.isArray(item.author)
-            ? item.author.join(' ').toLowerCase()
-            : (item.author ? item.author.toLowerCase() : '');
-          const addedByText = Array.isArray(item.addedBy)
-            ? item.addedBy.join(' ').toLowerCase()
-            : (item.addedBy ? item.addedBy.toLowerCase() : '');
-          const matchAuthor = authorText.includes(q);
-          const matchAddedBy = addedByText.includes(q);
-          const matchTags = item.tags?.some((t: string) => t.toLowerCase().includes(q));
-
-          if (!matchTitle && !matchDesc && !matchSubj && !matchAuthor && !matchAddedBy && !matchTags) {
-            (cardEl as HTMLElement).style.display = 'none';
-            return;
-          }
+        // Search match & score check
+        let score = 0;
+        if (tokens.length > 0) {
+          score = scoreSearchDocument(doc, q, tokens);
+          if (score <= 0) continue;
         }
 
-        (cardEl as HTMLElement).style.display = '';
-        matchedCount++;
+        const isYearMatch = currentYear === 'all' || String(doc.year) === currentYear;
+        if (isYearMatch) {
+          matchesInCurrentYear.push({ id: doc.id, score, doc });
+        } else {
+          matchesInOtherYears.push({ id: doc.id, score, doc });
+        }
+      }
+
+      // Sort matches by relevance score if a query is active
+      if (tokens.length > 0) {
+        matchesInCurrentYear.sort((a, b) => b.score - a.score);
+      }
+
+      // Hide all cards first
+      cards.forEach((card) => {
+        card.style.display = 'none';
       });
 
-      const isAr = document.documentElement.lang === 'ar';
+      // Display and re-order matched cards in the current year
+      if (resultsGrid) {
+        matchesInCurrentYear.forEach(({ id }) => {
+          const card = cardMap.get(id);
+          if (card) {
+            card.style.display = '';
+            resultsGrid.appendChild(card);
+          }
+        });
+      }
+
+      // Update results count indicator
+      const matchedCount = matchesInCurrentYear.length;
+      if (resultsCount) {
+        resultsCount.textContent = String(matchedCount);
+      }
+
+      const lang = getCurrentLanguage();
+      const isAr = lang === 'ar';
       const prefixEl = document.getElementById('results-label-prefix');
       const suffixEl = document.getElementById('results-label-suffix');
       if (prefixEl) prefixEl.textContent = isAr ? 'عرض' : 'Showing';
       if (suffixEl) suffixEl.textContent = isAr ? 'مصادر تعليمية' : 'study resources';
 
-      if (resultsCount) {
-        resultsCount.textContent = String(matchedCount);
+      // Cross-year suggestion logic
+      if (currentYear !== 'all' && matchedCount === 0 && matchesInOtherYears.length > 0 && q) {
+        if (crossYearBanner && crossYearText) {
+          const otherCount = matchesInOtherYears.length;
+          crossYearText.textContent = isAr
+            ? `لم نجد نتائج في السنة ${currentYear} لبحثك عن "${q}". تم العثور على ${otherCount} نتيجة في السنوات الأخرى.`
+            : `No results found in Year ${currentYear} for "${q}". Found ${otherCount} results in other years.`;
+          crossYearBanner.classList.remove('hidden');
+        }
+      } else {
+        if (crossYearBanner) {
+          crossYearBanner.classList.add('hidden');
+        }
       }
 
+      // Empty state logic (0 matches anywhere)
+      if (emptyState) {
+        if (matchedCount === 0 && (currentYear === 'all' || matchesInOtherYears.length === 0)) {
+          emptyState.classList.remove('hidden');
+        } else {
+          emptyState.classList.add('hidden');
+        }
+      }
+
+      // Update URL search parameters without page reload
       const nextParams = new URLSearchParams();
       if (currentQuery) nextParams.set('q', currentQuery);
       if (currentYear !== 'all') nextParams.set('year', currentYear);
@@ -211,11 +364,12 @@ const allMaterials = rawMaterials.map((m) => ({
       syncUI();
     }
 
+    // Event listeners
     window.addEventListener('asumed-language-changed', applyFilter);
 
     input?.addEventListener('input', () => {
       currentQuery = input.value;
-      applyFilter();
+      debounceApplyFilter();
     });
 
     yearBtns.forEach((btn) => {
@@ -232,14 +386,24 @@ const allMaterials = rawMaterials.map((m) => ({
       });
     });
 
-    resetBtn?.addEventListener('click', () => {
-      currentQuery = '';
+    searchAllYearsBtn?.addEventListener('click', () => {
       currentYear = 'all';
-      currentType = 'all';
-      if (input) input.value = '';
       applyFilter();
     });
 
+    const resetAction = () => {
+      currentQuery = '';
+      const storedYear = getUserStoredYear();
+      currentYear = storedYear ? String(storedYear) : 'all';
+      currentType = 'all';
+      if (input) input.value = '';
+      applyFilter();
+    };
+
+    resetBtn?.addEventListener('click', resetAction);
+    emptyResetBtn?.addEventListener('click', resetAction);
+
+    // Initial filter pass
     applyFilter();
   }
 

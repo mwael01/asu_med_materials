@@ -8,7 +8,7 @@ interface Props {
 const { currentYear } = Astro.props;
 
 const years: { label: string; year: AcademicYear | 'all'; href: string; i18nKey: string; params?: any }[] = [
-  { label: 'All Resources', year: 'all', href: '/search', i18nKey: 'home.browseAll' },
+  { label: 'All Resources', year: 'all', href: '/search?year=all', i18nKey: 'home.browseAll' },
   { label: 'Year 1', year: 1, href: '/year/1', i18nKey: 'nav.year', params: { y: 1 } },
   { label: 'Year 2', year: 2, href: '/year/2', i18nKey: 'nav.year', params: { y: 2 } },
   { label: 'Year 3', year: 3, href: '/year/3', i18nKey: 'nav.year', params: { y: 3 } },

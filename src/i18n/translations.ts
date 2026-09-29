@@ -80,7 +80,9 @@ export const translations: Record<SupportedLanguage, TranslationsSchema> = {
       resultsCount: 'عرض {n} مصادر تعليمية',
       resetFilters: 'إعادة تعيين الفلاتر',
       emptyTitle: 'لم نجد مصادر مطابقة لبحثك',
-      emptyDesc: 'جرب البحث بكلمات مفتاحية أخرى أو إلغاء بعض الفلاتر.'
+      emptyDesc: 'جرب البحث بكلمات مفتاحية أخرى أو إلغاء بعض الفلاتر.',
+      noYearResults: 'لم نجد نتائج في السنة {y} لبحثك. تم العثور على {count} نتيجة في السنوات الأخرى.',
+      searchAllYears: 'البحث في جميع السنوات'
     },
     categories: {
       central: 'درايفات وقنوات مركزية',
@@ -421,7 +423,9 @@ export const translations: Record<SupportedLanguage, TranslationsSchema> = {
       resultsCount: 'Showing {n} study resources',
       resetFilters: 'Reset Filters',
       emptyTitle: 'No resources found matching your search',
-      emptyDesc: 'Try different search keywords or remove some filters.'
+      emptyDesc: 'Try different search keywords or remove some filters.',
+      noYearResults: 'No results found in Year {y}. Found {count} results in other years.',
+      searchAllYears: 'Search All Years'
     },
     categories: {
       central: 'Central Batch Drives & Channels',

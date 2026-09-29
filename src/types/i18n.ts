@@ -74,6 +74,8 @@ export interface TranslationsSchema {
     resetFilters: string;
     emptyTitle: string;
     emptyDesc: string;
+    noYearResults: string;
+    searchAllYears: string;
   };
   categories: {
     central: string;
