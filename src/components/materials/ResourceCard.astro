@@ -3,6 +3,7 @@ import type { MaterialItem } from '../../types/materials';
 import TypeBadge from './TypeBadge.astro';
 import { subjectToSlug } from '../../utils/slug';
 import { getMaterialEnglishTitle, getMaterialEnglishDesc } from '../../i18n/materialsTranslations';
+import { formatShortName } from '../../utils/format';
 
 interface Props {
   material: MaterialItem;
@@ -36,7 +37,10 @@ const rawAddedBy: string[] = Array.isArray(material.addedBy)
     : material.contributorUsername
       ? [`@${material.contributorUsername}`]
       : [];
-const displayedAddedByText = rawAddedBy.slice(0, maxVisible).join('، ');
+const displayedAddedByText = rawAddedBy
+  .slice(0, maxVisible)
+  .map((name) => formatShortName(name))
+  .join('، ');
 const fullAddedByTooltip = rawAddedBy.join('، ');
 const contributorProfileTarget = material.contributorUsername || rawAddedBy[0];
 const contributorProfileUrl = contributorProfileTarget ? `/profile?u=${encodeURIComponent(contributorProfileTarget)}` : undefined;

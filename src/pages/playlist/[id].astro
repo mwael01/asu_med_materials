@@ -5,6 +5,7 @@ import { getPlaylistById } from '../../data/materials';
 import { getModuleById } from '../../data/modules';
 import { subjectToSlug } from '../../utils/slug';
 import { getMaterialEnglishTitle, getMaterialEnglishDesc } from '../../i18n/materialsTranslations';
+import { formatShortName } from '../../utils/format';
 
 const { id } = Astro.params;
 if (!id) {
@@ -34,8 +35,13 @@ const rawAddedBy = Array.isArray(playlist.addedBy)
   ? playlist.addedBy
   : playlist.addedBy
     ? [playlist.addedBy]
-    : [];
-const addedByText = rawAddedBy.join('، ');
+    : playlist.contributorUsername
+      ? [`@${playlist.contributorUsername}`]
+      : [];
+const addedByText = rawAddedBy.map((n) => formatShortName(n)).join('، ');
+const fullAddedByTooltip = rawAddedBy.join('، ');
+const contributorProfileTarget = playlist.contributorUsername || rawAddedBy[0];
+const contributorProfileUrl = contributorProfileTarget ? `/profile?u=${encodeURIComponent(contributorProfileTarget)}` : undefined;
 
 // Initial video setup:
 // If has discrete videos, initial video is first video
@@ -183,8 +189,12 @@ const initialEmbedUrl = hasDiscreteVideos
             </p>
           )}
           {addedByText && (
-            <p>
-              <span data-i18n="card.addedBy">Added by:</span> <span class="text-zinc-800 dark:text-zinc-200 font-semibold">{addedByText}</span>
+            <p title={fullAddedByTooltip}>
+              <span data-i18n="card.addedBy">Added by:</span> {contributorProfileUrl ? (
+                <a href={contributorProfileUrl} class="text-zinc-800 dark:text-zinc-200 font-semibold hover:text-emerald-600 dark:hover:text-emerald-400 hover:underline">{addedByText}</a>
+              ) : (
+                <span class="text-zinc-800 dark:text-zinc-200 font-semibold">{addedByText}</span>
+              )}
             </p>
           )}
         </div>
