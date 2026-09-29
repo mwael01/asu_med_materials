@@ -86,6 +86,47 @@ function isValidMatchName(name) {
   return normalized.length >= 2;
 }
 
+function isAbbreviation(abbrev, fullName) {
+  const abbrevParts = abbrev.replace(/[.]/g, ' ').split(/\s+/).filter(Boolean);
+  const fullNameParts = fullName.split(/\s+/).filter(Boolean);
+
+  if (abbrevParts.length !== fullNameParts.length) return false;
+
+  for (let i = 0; i < abbrevParts.length; i++) {
+    const a = abbrevParts[i].toLowerCase();
+    const f = fullNameParts[i].toLowerCase();
+    if (a.length === 1) {
+      if (f[0] !== a) return false;
+    } else if (a !== f) {
+      return false;
+    }
+  }
+  return true;
+}
+
+function findUserForName(normalizedName, matchNameToUser, contributors, users) {
+  if (matchNameToUser.has(normalizedName)) {
+    return matchNameToUser.get(normalizedName);
+  }
+
+  for (const contributor of contributors) {
+    const matchNames = (contributor.matchNames || []).filter(isValidMatchName);
+    for (const mn of matchNames) {
+      if (isAbbreviation(normalizedName, mn)) {
+        const user = users.find((u) =>
+          normalizeName(u.displayName) === normalizeName(mn) ||
+          normalizeName(u.username) === normalizeName(mn)
+        );
+        if (user) {
+          return { user, contributorId: contributor.id, matchName: mn, kind: contributor.kind };
+        }
+      }
+    }
+  }
+
+  return null;
+}
+
 async function migrate() {
   console.log('\n📦 Fetching users, contributors, and materials...\n');
 
@@ -170,13 +211,13 @@ async function migrate() {
       const addedByNames = namesOf(material.addedBy);
       for (const name of addedByNames) {
         const normalized = normalizeName(name);
-        if (matchNameToUser.has(normalized)) {
-          const { user, matchName } = matchNameToUser.get(normalized);
-          updates.added_by_username = user.username;
-          updates.addedBy = user.displayName;
+        const match = findUserForName(normalized, matchNameToUser, contributors, users);
+        if (match) {
+          updates.added_by_username = match.user.username;
+          updates.addedBy = match.user.displayName;
           matched = true;
           if (VERBOSE) {
-            console.log(`  ✓ addedBy "${name}" → @${user.username}`);
+            console.log(`  ✓ addedBy "${name}" → @${match.user.username}`);
           }
           break;
         }
@@ -189,13 +230,13 @@ async function migrate() {
       const authorNames = namesOf(material.author);
       for (const name of authorNames) {
         const normalized = normalizeName(name);
-        if (matchNameToUser.has(normalized)) {
-          const { user, matchName } = matchNameToUser.get(normalized);
-          updates.creator_username = user.username;
-          updates.author = user.displayName;
+        const match = findUserForName(normalized, matchNameToUser, contributors, users);
+        if (match) {
+          updates.creator_username = match.user.username;
+          updates.author = match.user.displayName;
           matched = true;
           if (VERBOSE) {
-            console.log(`  ✓ author "${name}" → @${user.username}`);
+            console.log(`  ✓ author "${name}" → @${match.user.username}`);
           }
           break;
         }
