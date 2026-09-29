@@ -69,43 +69,85 @@ export function onAuthChange(
     return () => {};
   }
 
-  return onAuthStateChanged(auth, async (firebaseUser) => {
-    if (!firebaseUser) {
-      setCachedUserProfile(null);
-      callback(null, null);
-      return;
+  let hasFired = false;
+  // Safety timeout: if onAuthStateChanged does not fire within 1500ms, emit cached state or guest
+  const fallbackTimer = setTimeout(() => {
+    if (!hasFired) {
+      hasFired = true;
+      const cached = getCachedUserProfile();
+      callback(auth.currentUser, cached);
     }
+  }, 1500);
 
-    // Try reading cached profile first, then sync with Firestore
-    let profile = getCachedUserProfile();
-    if (!profile || profile.uid !== firebaseUser.uid) {
-      profile = await getUserProfileByUid(firebaseUser.uid);
+  return onAuthStateChanged(
+    auth,
+    async (firebaseUser) => {
+      clearTimeout(fallbackTimer);
+      hasFired = true;
+
+      try {
+        if (!firebaseUser) {
+          setCachedUserProfile(null);
+          callback(null, null);
+          return;
+        }
+
+        // Try reading cached profile first, then sync with Firestore
+        let profile = getCachedUserProfile();
+        if (!profile || profile.uid !== firebaseUser.uid) {
+          try {
+            profile = await getUserProfileByUid(firebaseUser.uid);
+          } catch (e) {
+            console.warn('[Auth] Failed to load profile from Firestore:', e);
+          }
+        }
+
+        // If profile doesn't exist in Firestore yet (e.g. first Google sign in), generate initial profile
+        if (!profile) {
+          try {
+            const generatedUsername = (
+              firebaseUser.displayName?.toLowerCase().replace(/\s+/g, '_').replace(/[^a-z0-9_]/g, '') ||
+              'student_' + firebaseUser.uid.substring(0, 5)
+            );
+
+            const available = await checkUsernameAvailable(generatedUsername, firebaseUser.uid);
+            const finalUsername = available ? generatedUsername : `${generatedUsername}_${Date.now().toString(36).slice(-4)}`;
+
+            profile = {
+              uid: firebaseUser.uid,
+              username: finalUsername,
+              displayName: firebaseUser.displayName || 'ASU Med Student',
+              photoURL: firebaseUser.photoURL || undefined,
+              createdAt: new Date().toISOString()
+            };
+
+            await upsertUserProfile(profile);
+          } catch (e) {
+            console.warn('[Auth] Fallback profile generated in-memory:', e);
+            profile = {
+              uid: firebaseUser.uid,
+              username: firebaseUser.displayName?.toLowerCase().replace(/\s+/g, '_') || 'student',
+              displayName: firebaseUser.displayName || 'ASU Med Student',
+              photoURL: firebaseUser.photoURL || undefined,
+              createdAt: new Date().toISOString()
+            };
+          }
+        }
+
+        setCachedUserProfile(profile);
+        callback(firebaseUser, profile);
+      } catch (outerErr) {
+        console.warn('[Auth] Error in onAuthStateChanged callback:', outerErr);
+        callback(firebaseUser, getCachedUserProfile());
+      }
+    },
+    (authError) => {
+      clearTimeout(fallbackTimer);
+      hasFired = true;
+      console.warn('[Auth] onAuthStateChanged error:', authError);
+      callback(null, getCachedUserProfile());
     }
-
-    // If profile doesn't exist in Firestore yet (e.g. first Google sign in), generate initial profile
-    if (!profile) {
-      const generatedUsername = (
-        firebaseUser.displayName?.toLowerCase().replace(/\s+/g, '_').replace(/[^a-z0-9_]/g, '') ||
-        'student_' + firebaseUser.uid.substring(0, 5)
-      );
-
-      const available = await checkUsernameAvailable(generatedUsername, firebaseUser.uid);
-      const finalUsername = available ? generatedUsername : `${generatedUsername}_${Date.now().toString(36).slice(-4)}`;
-
-      profile = {
-        uid: firebaseUser.uid,
-        username: finalUsername,
-        displayName: firebaseUser.displayName || 'ASU Med Student',
-        photoURL: firebaseUser.photoURL || undefined,
-        createdAt: new Date().toISOString()
-      };
-
-      await upsertUserProfile(profile);
-    }
-
-    setCachedUserProfile(profile);
-    callback(firebaseUser, profile);
-  });
+  );
 }
 
 /**

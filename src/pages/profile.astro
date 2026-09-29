@@ -463,9 +463,11 @@ const allMaterials = await getAllMaterials();
     async function renderPublicProfile(identifier: string, isUid: boolean) {
       showSection('loading');
       try {
-        let profile: UserProfile | null = isUid
-          ? await getUserProfileByUid(identifier)
-          : await getUserProfileByUsername(identifier);
+        const fetchPromise = isUid
+          ? getUserProfileByUid(identifier)
+          : getUserProfileByUsername(identifier);
+        const timeoutPromise = new Promise<null>((resolve) => setTimeout(() => resolve(null), 3000));
+        let profile: UserProfile | null = await Promise.race([fetchPromise, timeoutPromise]);
 
         // Fallback for author names or non-registered contributors
         if (!profile && !isUid) {
@@ -918,8 +920,25 @@ const allMaterials = await getAllMaterials();
       return;
     }
 
+    // Fast initial render from local cached profile if available
+    if (currentProfile) {
+      renderMyProfile(currentProfile);
+    }
+
+    // Safety fallback: if Firebase Auth takes more than 1.2s (e.g. storage access blocked), never stay stuck on loading skeleton
+    const safetyTimer = setTimeout(() => {
+      if (!loadingSkeleton?.classList.contains('hidden')) {
+        if (currentProfile) {
+          renderMyProfile(currentProfile);
+        } else {
+          showSection('guest');
+        }
+      }
+    }, 1200);
+
     // Subscribe to Auth state
     onAuthChange((user, profile) => {
+      clearTimeout(safetyTimer);
       currentUser = user;
       currentProfile = profile;
 
