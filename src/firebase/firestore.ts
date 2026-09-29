@@ -625,6 +625,30 @@ export async function saveModuleToFirestore(mod: ModuleInfo): Promise<boolean> {
 const CONTRIBUTORS_COLLECTION = 'contributors';
 
 /**
+ * Fetches administrators from Firestore (users where role == 'admin'), capped at limitCount.
+ */
+export async function fetchAdminUsers(limitCount = 8): Promise<UserProfile[]> {
+  const db = getFirestoreDb();
+  if (!db) return [];
+
+  try {
+    const usersRef = collection(db, USERS_COLLECTION);
+    const q = query(usersRef, where('role', '==', 'admin'));
+    const snapshot = await getDocs(q);
+    const admins: UserProfile[] = [];
+
+    snapshot.forEach((docSnap) => {
+      admins.push(docSnap.data() as UserProfile);
+    });
+
+    return admins.slice(0, limitCount);
+  } catch (err) {
+    console.warn('[Firestore] Failed to fetch admin users:', err);
+    return [];
+  }
+}
+
+/**
  * Fetches all platform authors and contributor profiles from Firestore.
  */
 export async function fetchContributorsFromFirestore(): Promise<{
@@ -643,16 +667,28 @@ export async function fetchContributorsFromFirestore(): Promise<{
     snapshot.forEach((docSnap) => {
       const data = docSnap.data() as ContributorDocument;
       if (data.kind === 'author') {
+        let badge = data.badge;
+        // Remove owner badge from Mohamed Wael or any badge indicating owner
+        if (
+          badge &&
+          (badge.text?.toLowerCase().includes('owner') ||
+            badge.textAr?.includes('المالك') ||
+            data.id === 'mohammed-wael')
+        ) {
+          badge = undefined;
+        }
+
         authors.push({
           id: data.id || docSnap.id,
           name: data.name,
           role: data.role || '',
           roleAr: data.roleAr,
+          adminRoleDescription: data.adminRoleDescription,
           bio: data.bio,
           bioEn: data.bioEn,
           photo: data.photo,
           order: data.order ?? 99,
-          badge: data.badge,
+          badge,
           matchNames: data.matchNames || [],
           contacts: data.contacts,
         });

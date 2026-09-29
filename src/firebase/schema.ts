@@ -156,6 +156,7 @@ export interface ContributorDocument {
   name: string;
   role?: string;
   roleAr?: string;
+  adminRoleDescription?: string;
   bio?: string;
   bioEn?: string;
   photo?: string;
@@ -349,6 +350,7 @@ export const contributorConverter: FirestoreDataConverter<ContributorDocument> =
       name: c.name,
       role: c.role || null,
       roleAr: c.roleAr || null,
+      adminRoleDescription: c.adminRoleDescription || null,
       bio: c.bio || null,
       bioEn: c.bioEn || null,
       photo: c.photo || null,
@@ -372,6 +374,7 @@ export const contributorConverter: FirestoreDataConverter<ContributorDocument> =
       name: data.name || '',
       role: data.role || undefined,
       roleAr: data.roleAr || undefined,
+      adminRoleDescription: data.adminRoleDescription || undefined,
       bio: data.bio || undefined,
       bioEn: data.bioEn || undefined,
       photo: data.photo || undefined,

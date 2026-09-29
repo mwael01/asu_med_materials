@@ -11,6 +11,11 @@ export interface PersonContacts {
   linkedin?: ContactLink[];
   instagram?: ContactLink[];
   linktree?: ContactLink[];
+  facebook?: ContactLink[];
+  youtube?: ContactLink[];
+  website?: ContactLink[];
+  email?: ContactLink[];
+  other?: ContactLink[];
 }
 
 export interface AuthorEntry {
@@ -18,6 +23,7 @@ export interface AuthorEntry {
   name: string;
   role: string;
   roleAr?: string;
+  adminRoleDescription?: string;
   bio?: string;
   bioEn?: string;
   photo?: string;

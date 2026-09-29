@@ -1,0 +1,178 @@
+import type { ContactPlatform, UserContact } from '../types/profile';
+
+export interface PlatformConfig {
+  id: ContactPlatform;
+  label: string;
+  labelAr: string;
+  placeholder: string;
+  badgeClass: string;
+  svgPath: string;
+  svgViewBox?: string;
+  svgType?: 'fill' | 'stroke';
+}
+
+export const PLATFORM_REGISTRY: Record<ContactPlatform, PlatformConfig> = {
+  whatsapp: {
+    id: 'whatsapp',
+    label: 'WhatsApp',
+    labelAr: 'واتساب',
+    placeholder: '+2010... or wa.me/2010...',
+    badgeClass:
+      'bg-emerald-50 text-emerald-700 border-emerald-200/80 hover:bg-emerald-600 hover:text-white dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-800/60 dark:hover:bg-emerald-600 dark:hover:text-white',
+    svgPath:
+      'M12.04 2c-5.46 0-9.91 4.45-9.91 9.91 0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38c1.45.79 3.08 1.21 4.74 1.21 5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.82 9.82 0 0 0 12.04 2m.01 1.67c2.2 0 4.26.86 5.82 2.42a8.23 8.23 0 0 1 2.41 5.83c0 4.54-3.7 8.24-8.24 8.24-1.42 0-2.82-.37-4.06-1.07l-.29-.17-3.02.79.81-2.94-.19-.3a8.21 8.21 0 0 1-1.26-4.38c0-4.54 3.7-8.24 8.24-8.24m-3.53 3.44c-.19 0-.5.07-.76.35-.26.29-1 1-1 2.43 0 1.43 1.03 2.81 1.18 3s2.02 3.1 4.9 4.34c.69.3 1.22.48 1.64.61.69.22 1.32.19 1.81.12.55-.08 1.7-1.05 1.94-1.72.24-.67.24-1.24.17-1.36-.07-.12-.26-.19-.55-.33s-1.7-.84-1.96-.94c-.26-.1-.45-.14-.64.14-.19.29-.74.93-.91 1.13-.17.19-.34.22-.63.07-.29-.14-1.22-.45-2.32-1.43-.86-.77-1.44-1.71-1.61-2-.17-.29-.02-.45.13-.59.13-.13.29-.34.43-.5.14-.17.19-.29.29-.48.1-.19.05-.36-.02-.5-.07-.14-.64-1.56-.88-2.14-.23-.56-.47-.49-.64-.5z',
+    svgType: 'fill',
+  },
+  telegram: {
+    id: 'telegram',
+    label: 'Telegram',
+    labelAr: 'تليجرام',
+    placeholder: '@username or t.me/username',
+    badgeClass:
+      'bg-sky-50 text-sky-700 border-sky-200/80 hover:bg-sky-500 hover:text-white dark:bg-sky-950/40 dark:text-sky-300 dark:border-sky-800/60 dark:hover:bg-sky-500 dark:hover:text-white',
+    svgPath:
+      'M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69a.2.2 0 00-.05-.18c-.06-.05-.14-.03-.21-.02-.09.02-1.49.95-4.22 2.79-.4.27-.76.41-1.08.4-.36-.01-1.04-.2-1.55-.37-.63-.2-1.12-.31-1.08-.66.02-.18.27-.36.74-.55 2.92-1.27 4.86-2.11 5.83-2.51 2.78-1.16 3.35-1.36 3.73-1.36.08 0 .27.02.39.12.1.08.13.19.14.27-.01.06.01.24 0 .38z',
+    svgType: 'fill',
+  },
+  facebook: {
+    id: 'facebook',
+    label: 'Facebook',
+    labelAr: 'فيسبوك',
+    placeholder: 'facebook.com/... or username',
+    badgeClass:
+      'bg-blue-50 text-[#1877F2] border-blue-200/80 hover:bg-[#1877F2] hover:text-white dark:bg-blue-950/40 dark:text-blue-300 dark:border-blue-800/60 dark:hover:bg-[#1877F2] dark:hover:text-white',
+    svgPath:
+      'M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z',
+    svgType: 'fill',
+  },
+  youtube: {
+    id: 'youtube',
+    label: 'YouTube',
+    labelAr: 'يوتيوب',
+    placeholder: 'youtube.com/@channel or @channel',
+    badgeClass:
+      'bg-rose-50 text-rose-600 border-rose-200/80 hover:bg-[#FF0000] hover:text-white dark:bg-rose-950/40 dark:text-rose-300 dark:border-rose-800/60 dark:hover:bg-[#FF0000] dark:hover:text-white',
+    svgPath:
+      'M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z',
+    svgType: 'fill',
+  },
+  linkedin: {
+    id: 'linkedin',
+    label: 'LinkedIn',
+    labelAr: 'لينكد إن',
+    placeholder: 'linkedin.com/in/... or username',
+    badgeClass:
+      'bg-blue-50 text-[#0A66C2] border-blue-200/80 hover:bg-[#0A66C2] hover:text-white dark:bg-blue-950/40 dark:text-blue-300 dark:border-blue-800/60 dark:hover:bg-[#0A66C2] dark:hover:text-white',
+    svgPath:
+      'M19 3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14m-.5 15.5v-5.3a3.26 3.26 0 0 0-3.26-3.26c-.85 0-1.84.52-2.28 1.3v-1.11h-2.79v8.37h2.79v-4.93c0-.77.62-1.4 1.39-1.4a1.4 1.4 0 0 1 1.4 1.4v4.93h2.75M6.88 8.56a1.68 1.68 0 0 0 1.68-1.68c0-.93-.75-1.69-1.68-1.69a1.69 1.69 0 0 0-1.69 1.69c0 .93.76 1.68 1.69 1.68m1.39 9.94v-8.37H5.5v8.37h2.77z',
+    svgType: 'fill',
+  },
+  github: {
+    id: 'github',
+    label: 'GitHub',
+    labelAr: 'جيت هب',
+    placeholder: 'github.com/... or username',
+    badgeClass:
+      'bg-zinc-100 text-zinc-800 border-zinc-200/80 hover:bg-zinc-900 hover:text-white dark:bg-zinc-800 dark:text-zinc-200 dark:border-zinc-700 dark:hover:bg-zinc-100 dark:hover:text-zinc-900',
+    svgPath:
+      'M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z',
+    svgType: 'fill',
+  },
+  email: {
+    id: 'email',
+    label: 'Email',
+    labelAr: 'البريد الإلكتروني',
+    placeholder: 'name@example.com',
+    badgeClass:
+      'bg-violet-50 text-violet-700 border-violet-200/80 hover:bg-violet-600 hover:text-white dark:bg-violet-950/40 dark:text-violet-300 dark:border-violet-800/60 dark:hover:bg-violet-600 dark:hover:text-white',
+    svgPath:
+      'M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z M20 6l-8 5-8-5',
+    svgType: 'stroke',
+  },
+  website: {
+    id: 'website',
+    label: 'Website',
+    labelAr: 'الموقع الإلكتروني',
+    placeholder: 'https://...',
+    badgeClass:
+      'bg-teal-50 text-teal-700 border-teal-200/80 hover:bg-teal-600 hover:text-white dark:bg-teal-950/40 dark:text-teal-300 dark:border-teal-800/60 dark:hover:bg-teal-600 dark:hover:text-white',
+    svgPath:
+      'M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm0 2c1.7 2.3 2.8 5 3 8H9c.2-3 1.3-5.7 3-8zm-5 8c0-2.5.8-4.8 2.2-6.7-1.3 1.7-2.1 3.9-2.2 6.7zm10 0c-.1-2.8-.9-5-2.2-6.7 1.4 1.9 2.2 4.2 2.2 6.7z',
+    svgType: 'fill',
+  },
+  other: {
+    id: 'other',
+    label: 'Other',
+    labelAr: 'رابط آخر',
+    placeholder: 'https://...',
+    badgeClass:
+      'bg-zinc-100 text-zinc-700 border-zinc-200/80 hover:bg-zinc-700 hover:text-white dark:bg-zinc-800 dark:text-zinc-300 dark:border-zinc-700 dark:hover:bg-zinc-700 dark:hover:text-white',
+    svgPath:
+      'M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6 M15 3h6v6 M10 14L21 3',
+    svgType: 'stroke',
+  },
+};
+
+/**
+ * Normalizes input URL or handle into a fully qualified href.
+ */
+export function formatContactHref(platform: string, raw: string): string {
+  const trimmed = (raw || '').trim();
+  if (!trimmed) return '#';
+
+  if (platform === 'email') {
+    return trimmed.startsWith('mailto:') ? trimmed : `mailto:${trimmed}`;
+  }
+  if (trimmed.startsWith('http://') || trimmed.startsWith('https://')) {
+    return trimmed;
+  }
+  if (platform === 'whatsapp') {
+    return `https://wa.me/${trimmed.replace(/\D/g, '')}`;
+  }
+  if (platform === 'telegram') {
+    return `https://t.me/${trimmed.replace(/^@/, '')}`;
+  }
+  if (platform === 'facebook') {
+    return `https://facebook.com/${trimmed}`;
+  }
+  if (platform === 'youtube') {
+    return `https://youtube.com/${trimmed.startsWith('@') ? trimmed : '@' + trimmed}`;
+  }
+  if (platform === 'github') {
+    return `https://github.com/${trimmed.replace(/^@/, '')}`;
+  }
+  if (platform === 'linkedin') {
+    return `https://linkedin.com/in/${trimmed}`;
+  }
+  return `https://${trimmed}`;
+}
+
+/**
+ * Generates reusable HTML string for a single contact pill button.
+ */
+export function renderContactPillMarkup(contact: UserContact, showLabels = true): string {
+  const config = PLATFORM_REGISTRY[contact.platform] || PLATFORM_REGISTRY.other;
+  const href = formatContactHref(contact.platform, contact.url);
+  const labelText = contact.label?.trim() || config.label;
+
+  const svgInner =
+    config.svgType === 'stroke'
+      ? `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="${config.svgPath}" />`
+      : `<path fill-rule="evenodd" clip-rule="evenodd" d="${config.svgPath}" />`;
+
+  return `
+    <a
+      href="${href}"
+      target="_blank"
+      rel="noopener noreferrer"
+      title="${labelText}: ${contact.url}"
+      aria-label="${labelText}"
+      class="inline-flex items-center justify-center gap-1.5 h-8 px-3 rounded-full border hover:scale-105 active:scale-95 transition-all duration-150 shadow-2xs text-xs font-medium cursor-pointer ${config.badgeClass}"
+    >
+      <svg class="w-3.5 h-3.5 shrink-0" viewBox="0 0 24 24" ${config.svgType === 'stroke' ? 'fill="none" stroke="currentColor"' : 'fill="currentColor"'} aria-hidden="true">
+        ${svgInner}
+      </svg>
+      ${showLabels ? `<span>${labelText}</span>` : ''}
+    </a>
+  `;
+}
