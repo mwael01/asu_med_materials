@@ -265,6 +265,18 @@ export interface TranslationsSchema {
     publishDirectBtn: string;
     publishingBtn: string;
     publishSuccessToast: string;
+    bulkStagingTitle: string;
+    publishBulkBtn: string;
+    skipDuplicatesBtn: string;
+    clearBulkBtn: string;
+    addManualItemBtn: string;
+    duplicateWarning: string;
+    duplicateBadge: string;
+    newLinkBadge: string;
+    bulkPublishSuccess: string;
+    submissionDuplicateNotice: string;
+    switchToSingleMode: string;
+    sourceSubmissionNotice: string;
     titleArLabel: string;
     titleEnLabel: string;
     urlLabel: string;

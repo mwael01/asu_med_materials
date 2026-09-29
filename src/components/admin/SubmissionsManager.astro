@@ -45,7 +45,7 @@
   <!-- Loading State -->
   <div id="sub-loading" class="py-10 text-center text-xs text-zinc-400">
     <div class="w-6 h-6 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin mx-auto mb-2"></div>
-    <span>جاري تحميل المساهمات...</span>
+    <span>جاري تحميل المساهمات وفحص الروابط المكررة...</span>
   </div>
 
   <!-- Empty State -->
@@ -65,10 +65,12 @@
     fetchSubmissionsFromFirestore,
     updateSubmissionStatus,
     deleteSubmissionFromFirestore,
-    saveMaterialToFirestore
+    saveMaterialToFirestore,
+    checkUrlsBatchInFirestore
   } from '../../firebase/firestore';
   import { getCachedUserProfile } from '../../firebase/auth';
   import { showToast } from '../../utils/toast';
+  import { extractUrls } from '../../utils/submission';
   import type { SubmissionDocument } from '../../firebase/schema';
   import type { MaterialItem, AcademicYear } from '../../types/materials';
 
@@ -81,6 +83,7 @@
 
     let currentFilter: 'pending' | 'approved' | 'rejected' = 'pending';
     let allSubmissions: SubmissionDocument[] = [];
+    let duplicateUrlMap = new Map<string, MaterialItem>();
 
     async function loadSubmissions() {
       if (!listEl) return;
@@ -89,6 +92,19 @@
       listEl.innerHTML = '';
 
       allSubmissions = await fetchSubmissionsFromFirestore();
+
+      // Collect all URLs across all submissions to batch check against Firestore
+      const urlsToCheck: string[] = [];
+      for (const s of allSubmissions) {
+        if (s.url) urlsToCheck.push(s.url);
+        if (Array.isArray(s.urls)) {
+          for (const u of s.urls) urlsToCheck.push(u);
+        }
+        const fromContent = extractUrls(s.content || '');
+        for (const u of fromContent) urlsToCheck.push(u);
+      }
+
+      duplicateUrlMap = await checkUrlsBatchInFirestore(urlsToCheck);
       loadingEl?.classList.add('hidden');
       renderList();
     }
@@ -116,6 +132,21 @@
         const displayYear = sub.year && sub.year !== 'general' ? `سنة ${sub.year}` : 'عام';
         const displayModule = sub.moduleId && sub.moduleId !== 'general' ? sub.moduleId : '';
 
+        // Check if any link in this submission is duplicate
+        const subUrls = [
+          sub.url,
+          ...(Array.isArray(sub.urls) ? sub.urls : []),
+          ...extractUrls(sub.content || '')
+        ].filter(Boolean) as string[];
+
+        let duplicateMatch: MaterialItem | undefined;
+        for (const u of subUrls) {
+          if (duplicateUrlMap.has(u)) {
+            duplicateMatch = duplicateUrlMap.get(u);
+            break;
+          }
+        }
+
         card.innerHTML = `
           <div class="flex items-start justify-between gap-2">
             <div>
@@ -130,6 +161,13 @@
                 }">
                   ${sub.status === 'pending' ? 'قيد المراجعة' : sub.status === 'approved' ? 'معتمد' : 'مرفوض'}
                 </span>
+                ${
+                  duplicateMatch
+                    ? `<span class="text-[10px] font-bold px-2 py-0.5 rounded bg-amber-100 dark:bg-amber-950 text-amber-800 dark:text-amber-300 border border-amber-300 dark:border-amber-800">
+                        ⚠️ رابط مكرر بالموقع
+                      </span>`
+                    : ''
+                }
               </div>
               <div class="text-[11px] text-zinc-400 mt-0.5 flex flex-wrap items-center gap-2">
                 <span>بواسطة: <strong>${escapeHtml(contributorName)}</strong></span>
@@ -141,6 +179,19 @@
             </div>
           </div>
 
+          <!-- Duplicate Alert on Card -->
+          ${
+            duplicateMatch
+              ? `<div class="p-2.5 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800/40 text-xs text-amber-900 dark:text-amber-200 flex items-center justify-between gap-2">
+                  <div class="flex items-center gap-1.5">
+                    <span class="text-base shrink-0">⚠️</span>
+                    <span>الرابط مسجل مسبقاً بعنوان: <strong>"${escapeHtml(duplicateMatch.title)}"</strong></span>
+                  </div>
+                  <span class="text-[10px] font-bold text-amber-700 dark:text-amber-300 shrink-0">موجود بالموقع</span>
+                </div>`
+              : ''
+          }
+
           <!-- Content / URLs -->
           <div class="p-2.5 rounded-lg bg-zinc-50 dark:bg-zinc-800/60 text-xs text-zinc-700 dark:text-zinc-300 font-mono break-all whitespace-pre-wrap leading-relaxed select-text">
             ${escapeHtml(rawContent)}
@@ -150,13 +201,18 @@
             Array.isArray(sub.urls) && sub.urls.length > 0
               ? `<div class="flex flex-wrap gap-1.5 pt-1">
                   ${sub.urls
-                    .map(
-                      (u) =>
-                        `<a href="${escapeHtml(u)}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1 text-[11px] text-emerald-600 dark:text-emerald-400 hover:underline bg-emerald-50 dark:bg-emerald-950/40 px-2 py-0.5 rounded border border-emerald-200 dark:border-emerald-800/40">
+                    .map((u) => {
+                      const isDup = duplicateUrlMap.has(u);
+                      return `<a href="${escapeHtml(u)}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1 text-[11px] ${
+                        isDup
+                          ? 'text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/40 border border-amber-300 dark:border-amber-800/50'
+                          : 'text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/40'
+                      } hover:underline px-2 py-0.5 rounded">
                           <svg class="w-3 h-3 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
                           <span class="max-w-[200px] truncate">${escapeHtml(u)}</span>
-                        </a>`
-                    )
+                          ${isDup ? '<span class="text-[9px] font-bold">(مكرر)</span>' : ''}
+                        </a>`;
+                    })
                     .join('')}
                 </div>`
               : ''
@@ -167,7 +223,11 @@
             <button
               type="button"
               class="sub-fill-ai-btn px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-100 dark:hover:bg-emerald-900/60 transition-all cursor-pointer flex items-center gap-1"
+              data-id="${sub.id}"
+              data-contributor="${encodeURIComponent(contributorName)}"
               data-content="${encodeURIComponent(rawContent)}"
+              data-year="${sub.year || 2}"
+              data-module="${sub.moduleId || ''}"
             >
               <span>✨</span>
               <span>تحليل بالذكاء الاصطناعي ونشر</span>
@@ -178,11 +238,16 @@
                 ? `
                 <button
                   type="button"
-                  class="sub-quick-approve-btn px-3 py-1.5 rounded-lg text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white transition-all cursor-pointer flex items-center gap-1 shadow-2xs"
+                  class="sub-quick-approve-btn px-3 py-1.5 rounded-lg text-xs font-bold ${
+                    duplicateMatch
+                      ? 'bg-amber-600 hover:bg-amber-700 text-white'
+                      : 'bg-emerald-600 hover:bg-emerald-700 text-white'
+                  } transition-all cursor-pointer flex items-center gap-1 shadow-2xs"
                   data-id="${sub.id}"
+                  data-dup-title="${escapeHtml(duplicateMatch?.title || '')}"
                 >
                   <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>
-                  <span>اعتماد ونشر</span>
+                  <span>${duplicateMatch ? 'اعتماد رغم التكرار' : 'اعتماد ونشر'}</span>
                 </button>
                 <button
                   type="button"
@@ -215,17 +280,27 @@
     function attachCardHandlers() {
       if (!listEl) return;
 
-      // 1. Fill in AI in Direct Form
+      // 1. Fill in AI in Direct Form / Staging with Submission details
       listEl.querySelectorAll<HTMLButtonElement>('.sub-fill-ai-btn').forEach((btn) => {
         btn.addEventListener('click', () => {
-          const raw = decodeURIComponent(btn.getAttribute('data-content') || '');
-          const aiInput = document.getElementById('admin-ai-input') as HTMLTextAreaElement | null;
-          const directTabBtn = document.querySelector<HTMLButtonElement>('.admin-nav-tab[data-tab="direct"]');
-          if (aiInput && directTabBtn) {
-            aiInput.value = raw;
-            directTabBtn.click();
-            document.getElementById('admin-ai-extract-btn')?.click();
-          }
+          const submissionId = btn.getAttribute('data-id') || '';
+          const contributor = decodeURIComponent(btn.getAttribute('data-contributor') || '');
+          const content = decodeURIComponent(btn.getAttribute('data-content') || '');
+          const year = Number(btn.getAttribute('data-year')) || 2;
+          const moduleId = btn.getAttribute('data-module') || '';
+
+          // Dispatch event to DirectMaterialForm
+          window.dispatchEvent(
+            new CustomEvent('admin:load-submission-for-extraction', {
+              detail: {
+                submissionId,
+                contributor,
+                content,
+                year,
+                moduleId
+              }
+            })
+          );
         });
       });
 
@@ -233,9 +308,18 @@
       listEl.querySelectorAll<HTMLButtonElement>('.sub-quick-approve-btn').forEach((btn) => {
         btn.addEventListener('click', async () => {
           const id = btn.getAttribute('data-id');
+          const dupTitle = btn.getAttribute('data-dup-title');
           if (!id) return;
           const sub = allSubmissions.find((s) => s.id === id);
           if (!sub) return;
+
+          // If duplicate, ask for explicit confirmation
+          if (dupTitle) {
+            const proceed = confirm(
+              `⚠️ تنبيه: هذا الرابط مسجل مسبقاً بالموقع بعنوان: "${dupTitle}"\nهل تريد اعتماده ونشره على أي حال مسبباً تكراراً؟`
+            );
+            if (!proceed) return;
+          }
 
           btn.disabled = true;
           const adminUser = getCachedUserProfile();

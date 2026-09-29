@@ -37,7 +37,7 @@ export function getGeminiModel(): GenerativeModel | null {
 export async function parseMaterialMessageWithAI(
   rawMessage: string,
   modules: ModuleInfo[]
-): Promise<ParsedAIMaterial> {
+): Promise<ParsedAIMaterial[]> {
   const cleanMessage = rawMessage.trim();
   if (!cleanMessage) {
     return fallbackParseDumpText(cleanMessage, modules);

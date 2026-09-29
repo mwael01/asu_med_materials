@@ -9,45 +9,154 @@ const { modules } = Astro.props;
 ---
 
 <div id="admin-direct-form-root" data-modules={JSON.stringify(modules)} class="space-y-6 text-start">
+  <!-- Sourced Student Submission Banner (Visible when reviewing a submission) -->
+  <div id="admin-source-submission-banner" class="hidden p-3.5 rounded-2xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800/40 flex items-center justify-between gap-3">
+    <div class="flex items-center gap-2">
+      <span class="text-base">📥</span>
+      <div>
+        <div class="text-xs font-bold text-amber-900 dark:text-amber-200" id="admin-source-sub-text">
+          مراجعة مساهمة طلابية
+        </div>
+        <div class="text-[11px] text-amber-700 dark:text-amber-400">
+          سيتم اعتماد المساهمة تلقائياً بمجرد نشر المواد المحددة.
+        </div>
+      </div>
+    </div>
+    <button
+      type="button"
+      id="admin-source-sub-cancel-btn"
+      class="text-xs px-2.5 py-1 rounded-lg border border-amber-300 dark:border-amber-700/60 text-amber-800 dark:text-amber-300 hover:bg-amber-100 dark:hover:bg-amber-900/40 cursor-pointer font-semibold"
+    >
+      إلغاء الربط
+    </button>
+  </div>
+
   <!-- 1. AI WhatsApp / Message Parser Card -->
   <div class="p-4 sm:p-5 rounded-2xl bg-emerald-50/70 dark:bg-emerald-950/30 border border-emerald-200/80 dark:border-emerald-800/40">
-    <div class="flex items-center gap-2 mb-1.5">
-      <span class="text-base">✨</span>
-      <h3 class="text-xs font-bold text-emerald-900 dark:text-emerald-200" data-i18n="admin.aiAssistantTitle">
-        AI Study Material Assistant (Gemini 3.8 Flash)
-      </h3>
+    <div class="flex items-center justify-between gap-2 mb-1.5">
+      <div class="flex items-center gap-2">
+        <span class="text-base">✨</span>
+        <h3 class="text-xs font-bold text-emerald-900 dark:text-emerald-200" data-i18n="admin.aiAssistantTitle">
+          AI Study Material Assistant (Gemini 3.8 Flash)
+        </h3>
+      </div>
+      <span class="text-[10px] font-semibold px-2 py-0.5 rounded-md bg-emerald-100 dark:bg-emerald-900/60 text-emerald-800 dark:text-emerald-300">
+        يدعم روابط متعددة دفعة واحدة
+      </span>
     </div>
     <p class="text-[11px] text-emerald-700 dark:text-emerald-400 mb-3" data-i18n="admin.aiAssistantSubtitle">
-      Paste WhatsApp messages or Telegram dumps to extract structured fields automatically
+      الصق رسائل الواتساب أو تيليجرام أو قائمة الروابط لاستخراج المواد تلقائياً وتجهيزها للنشر مع فحص التكرار
     </p>
 
     <div class="space-y-2.5">
       <textarea
         id="admin-ai-input"
         rows="3"
-        placeholder="Paste the WhatsApp message or link here, e.g.: Dr. Shireen Blood Pathology recordings with drive https://t.me/..."
+        placeholder="الصق رسالة الواتساب أو قائمة الروابط هنا، مثلاً: تفريغات د. شيرين باثولوجي بلود https://... وقناة التليجرام https://t.me/..."
         data-i18n-attr="placeholder:admin.aiInputPlaceholder"
         class="w-full px-3 py-2 text-xs bg-white dark:bg-zinc-900 border border-emerald-200 dark:border-emerald-800/60 rounded-xl text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 font-sans leading-relaxed transition-all resize-y"
       ></textarea>
 
       <div class="flex flex-wrap items-center justify-between gap-2">
-        <button
-          type="button"
-          id="admin-ai-extract-btn"
-          class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 active:scale-[0.98] text-white text-xs font-bold transition-all shadow-xs flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
-        >
-          <span>✨</span>
-          <span id="admin-ai-btn-text" data-i18n="admin.aiParseBtn">Extract with AI</span>
-        </button>
+        <div class="flex items-center gap-2">
+          <button
+            type="button"
+            id="admin-ai-extract-btn"
+            class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 active:scale-[0.98] text-white text-xs font-bold transition-all shadow-xs flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+          >
+            <span>✨</span>
+            <span id="admin-ai-btn-text" data-i18n="admin.aiParseBtn">Extract with AI</span>
+          </button>
+
+          <button
+            type="button"
+            id="admin-add-manual-bulk-btn"
+            class="px-3 py-2 rounded-xl border border-emerald-300 dark:border-emerald-700/60 bg-white dark:bg-zinc-900 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 text-emerald-800 dark:text-emerald-300 text-xs font-semibold transition-all cursor-pointer"
+          >
+            <span>+ إضافة مادة يدوياً للقائمة</span>
+          </button>
+        </div>
 
         <div id="admin-ai-notice" class="hidden text-[11px] font-semibold text-emerald-700 dark:text-emerald-300">
-          <span data-i18n="admin.aiSuccessNotice">✨ Extracted successfully! Review the fields below and click Publish.</span>
+          <span data-i18n="admin.aiSuccessNotice">✨ تم استخراج البيانات بنجاح! راجع الحقول أدناه ثم اضغط نشر.</span>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- 2. Direct Material Form -->
+  <!-- 2. Bulk Review Staging Area (Shown when multiple items are extracted/staged) -->
+  <div id="admin-bulk-staging" class="hidden space-y-4">
+    <div class="p-4 sm:p-5 rounded-2xl bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700/80 space-y-4">
+      <!-- Staging Header & Action Toolbar -->
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-zinc-200 dark:border-zinc-700/80 pb-3">
+        <div>
+          <h4 class="text-xs font-bold text-zinc-900 dark:text-zinc-100 flex items-center gap-2">
+            <span>📦</span>
+            <span id="admin-bulk-staging-title">المواد المستخرجة في الانتظار (0)</span>
+          </h4>
+          <p class="text-[11px] text-zinc-500 dark:text-zinc-400 mt-0.5">
+            راجع البيانات، عدل العناوين والتصنيفات، وسيتم استبعاد المواد المكررة تلقائياً.
+          </p>
+        </div>
+
+        <div class="flex flex-wrap items-center gap-1.5">
+          <button
+            type="button"
+            id="admin-bulk-skip-dups-btn"
+            class="px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-amber-100 dark:bg-amber-950/80 text-amber-800 dark:text-amber-300 hover:bg-amber-200 dark:hover:bg-amber-900/60 transition-all cursor-pointer flex items-center gap-1"
+            title="إلغاء تحديد أي مادة مكررة مسبقاً"
+          >
+            <span>⚠️</span>
+            <span>استبعاد المكرر</span>
+          </button>
+          <button
+            type="button"
+            id="admin-bulk-select-all-btn"
+            class="px-2.5 py-1.5 rounded-lg text-xs font-semibold text-zinc-600 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-all cursor-pointer"
+          >
+            تحديد الكل
+          </button>
+          <button
+            type="button"
+            id="admin-bulk-clear-btn"
+            class="px-2.5 py-1.5 rounded-lg text-xs font-semibold text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-all cursor-pointer"
+          >
+            مسح القائمة
+          </button>
+          <button
+            type="button"
+            id="admin-bulk-switch-single-btn"
+            class="px-2.5 py-1.5 rounded-lg text-xs font-semibold text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100 transition-all cursor-pointer"
+          >
+            النموذج الفردي
+          </button>
+        </div>
+      </div>
+
+      <!-- Staged Cards List -->
+      <div id="admin-bulk-cards-list" class="space-y-3"></div>
+
+      <!-- Bulk Publish Action Bar -->
+      <div class="pt-2 border-t border-zinc-200 dark:border-zinc-700/80 flex flex-col sm:flex-row items-center justify-between gap-3">
+        <div id="admin-bulk-status-text" class="text-xs text-zinc-500 dark:text-zinc-400">
+          المحدد للنشر: <strong id="admin-bulk-selected-count" class="text-emerald-600">0</strong> مواد
+        </div>
+
+        <button
+          type="button"
+          id="admin-bulk-publish-btn"
+          class="w-full sm:w-auto px-6 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 active:scale-[0.98] text-white text-xs font-bold transition-all shadow-xs flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+        >
+          <svg class="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+          </svg>
+          <span id="admin-bulk-publish-btn-text">نشر المواد المحددة دفعة واحدة</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. Direct Single Material Form -->
   <form id="admin-direct-form" class="space-y-4">
     <!-- Title fields (Ar & En) -->
     <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -77,7 +186,7 @@ const { modules } = Astro.props;
       </div>
     </div>
 
-    <!-- URL -->
+    <!-- URL with Real-time Duplicate Alert -->
     <div>
       <label for="admin-mat-url" class="block text-xs font-bold text-zinc-700 dark:text-zinc-300 mb-1">
         <span data-i18n="admin.urlLabel">Resource URL</span> <span class="text-emerald-600">*</span>
@@ -89,6 +198,19 @@ const { modules } = Astro.props;
         placeholder="https://drive.google.com/... or https://t.me/..."
         class="w-full px-3 py-2 text-xs bg-zinc-50 dark:bg-zinc-800/60 border border-zinc-200 dark:border-zinc-700 rounded-xl text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-emerald-500 dir-ltr"
       />
+
+      <!-- Duplicate Alert Banner -->
+      <div id="admin-mat-url-dup-alert" class="hidden mt-1.5 p-2.5 rounded-xl bg-amber-50 dark:bg-amber-950/50 border border-amber-200 dark:border-amber-800/50 text-xs font-medium text-amber-800 dark:text-amber-300 flex items-center justify-between gap-2">
+        <div class="flex items-center gap-1.5">
+          <span class="text-base shrink-0">⚠️</span>
+          <span>
+            تنبيه: هذا الرابط مسجل مسبقاً بعنوان: <strong id="admin-mat-url-dup-title"></strong>
+          </span>
+        </div>
+        <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-amber-200/80 dark:bg-amber-900 text-amber-900 dark:text-amber-200 shrink-0">
+          مكرر
+        </span>
+      </div>
     </div>
 
     <!-- Classification: Year, Module, Subject -->
@@ -221,16 +343,25 @@ const { modules } = Astro.props;
     <div id="admin-direct-error" class="hidden p-3 rounded-xl text-xs bg-rose-50 dark:bg-rose-950/50 text-rose-800 dark:text-rose-300 border border-rose-200 dark:border-rose-800/40"></div>
 
     <!-- Submit Action -->
-    <div class="pt-2">
+    <div class="pt-2 flex flex-col sm:flex-row items-center gap-2">
       <button
         type="submit"
         id="admin-direct-submit-btn"
-        class="w-full py-2.5 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 active:scale-[0.99] text-white text-xs font-bold transition-all shadow-xs flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+        class="flex-1 py-2.5 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 active:scale-[0.99] text-white text-xs font-bold transition-all shadow-xs flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
       >
         <svg class="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
           <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
         </svg>
         <span id="admin-direct-btn-text" data-i18n="admin.publishDirectBtn">Publish Directly to Database</span>
+      </button>
+
+      <button
+        type="button"
+        id="admin-add-to-staging-btn"
+        class="w-full sm:w-auto py-2.5 px-4 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800 hover:bg-zinc-100 dark:hover:bg-zinc-700 text-zinc-700 dark:text-zinc-300 text-xs font-semibold transition-all cursor-pointer"
+        title="إضافة هذه المادة لقائمة الدفعة للمراجعة قبل النشر"
+      >
+        + إضافة للقائمة
       </button>
     </div>
   </form>
@@ -238,11 +369,25 @@ const { modules } = Astro.props;
 
 <script>
   import { parseMaterialMessageWithAI } from '../../firebase/ai';
-  import { saveMaterialToFirestore, logAdminAction } from '../../firebase/firestore';
+  import {
+    saveMaterialToFirestore,
+    saveMaterialsBulk,
+    checkUrlExistsInFirestore,
+    checkUrlsBatchInFirestore,
+    logAdminAction
+  } from '../../firebase/firestore';
   import { getCachedUserProfile } from '../../firebase/auth';
   import { t, getCurrentLanguage } from '../../utils/i18n';
   import { showToast } from '../../utils/toast';
   import type { ModuleInfo, MaterialItem, AcademicYear, MaterialCategory, ResourceType } from '../../types/materials';
+  import type { ParsedAIMaterial } from '../../utils/aiParser';
+
+  interface StagedItem extends ParsedAIMaterial {
+    stagedId: string;
+    isDuplicate: boolean;
+    existingTitle?: string;
+    selected: boolean;
+  }
 
   function initDirectMaterialForm() {
     const root = document.getElementById('admin-direct-form-root');
@@ -255,10 +400,28 @@ const { modules } = Astro.props;
     const aiBtnText = document.getElementById('admin-ai-btn-text');
     const aiNotice = document.getElementById('admin-ai-notice');
 
+    const subBanner = document.getElementById('admin-source-submission-banner');
+    const subBannerText = document.getElementById('admin-source-sub-text');
+    const subCancelBtn = document.getElementById('admin-source-sub-cancel-btn');
+
+    const bulkStaging = document.getElementById('admin-bulk-staging');
+    const bulkStagingTitle = document.getElementById('admin-bulk-staging-title');
+    const bulkCardsList = document.getElementById('admin-bulk-cards-list');
+    const bulkSelectedCountEl = document.getElementById('admin-bulk-selected-count');
+    const bulkPublishBtn = document.getElementById('admin-bulk-publish-btn') as HTMLButtonElement | null;
+    const bulkPublishBtnText = document.getElementById('admin-bulk-publish-btn-text');
+    const bulkSkipDupsBtn = document.getElementById('admin-bulk-skip-dups-btn');
+    const bulkSelectAllBtn = document.getElementById('admin-bulk-select-all-btn');
+    const bulkClearBtn = document.getElementById('admin-bulk-clear-btn');
+    const bulkSwitchSingleBtn = document.getElementById('admin-bulk-switch-single-btn');
+    const addManualBulkBtn = document.getElementById('admin-add-manual-bulk-btn');
+
     const form = document.getElementById('admin-direct-form') as HTMLFormElement | null;
     const titleInput = document.getElementById('admin-mat-title') as HTMLInputElement | null;
     const titleEnInput = document.getElementById('admin-mat-title-en') as HTMLInputElement | null;
     const urlInput = document.getElementById('admin-mat-url') as HTMLInputElement | null;
+    const urlDupAlert = document.getElementById('admin-mat-url-dup-alert');
+    const urlDupTitle = document.getElementById('admin-mat-url-dup-title');
     const yearSelect = document.getElementById('admin-mat-year') as HTMLSelectElement | null;
     const moduleSelect = document.getElementById('admin-mat-module') as HTMLSelectElement | null;
     const subjectInput = document.getElementById('admin-mat-subject') as HTMLInputElement | null;
@@ -270,10 +433,15 @@ const { modules } = Astro.props;
     const errorBox = document.getElementById('admin-direct-error');
     const submitBtn = document.getElementById('admin-direct-submit-btn') as HTMLButtonElement | null;
     const submitBtnText = document.getElementById('admin-direct-btn-text');
+    const addToStagingBtn = document.getElementById('admin-add-to-staging-btn');
 
     if (!form || !aiBtn || !aiInput) return;
 
-    // Filter modules based on year
+    let stagedItems: StagedItem[] = [];
+    let activeSourceSubmissionId: string | null = null;
+    let urlCheckTimeout: any = null;
+
+    // Filter modules based on year for single form
     function filterModules() {
       if (!yearSelect || !moduleSelect) return;
       const yr = yearSelect.value;
@@ -299,7 +467,35 @@ const { modules } = Astro.props;
     yearSelect?.addEventListener('change', filterModules);
     filterModules();
 
-    // AI Extraction click handler
+    // -------------------------------------------------------------
+    // Real-time Single Form URL Duplicate Check
+    // -------------------------------------------------------------
+    urlInput?.addEventListener('input', () => {
+      clearTimeout(urlCheckTimeout);
+      const url = urlInput.value.trim();
+      if (!url) {
+        urlDupAlert?.classList.add('hidden');
+        return;
+      }
+
+      urlCheckTimeout = setTimeout(async () => {
+        try {
+          const res = await checkUrlExistsInFirestore(url);
+          if (res.exists && res.existingMaterial) {
+            if (urlDupTitle) urlDupTitle.textContent = `"${res.existingMaterial.title}"`;
+            urlDupAlert?.classList.remove('hidden');
+          } else {
+            urlDupAlert?.classList.add('hidden');
+          }
+        } catch {
+          urlDupAlert?.classList.add('hidden');
+        }
+      }, 350);
+    });
+
+    // -------------------------------------------------------------
+    // AI Extraction click handler (Multi-Material Support)
+    // -------------------------------------------------------------
     aiBtn.addEventListener('click', async () => {
       const text = aiInput.value.trim();
       if (!text) {
@@ -313,33 +509,494 @@ const { modules } = Astro.props;
       aiNotice?.classList.add('hidden');
 
       try {
-        const parsed = await parseMaterialMessageWithAI(text, modules);
+        const parsedList = await parseMaterialMessageWithAI(text, modules);
 
-        if (titleInput && parsed.title) titleInput.value = parsed.title;
-        if (titleEnInput && parsed.titleEn) titleEnInput.value = parsed.titleEn;
-        if (urlInput && parsed.url) urlInput.value = parsed.url;
-        if (yearSelect && parsed.year) {
-          yearSelect.value = String(parsed.year);
-          filterModules();
+        if (parsedList.length === 0) {
+          showToast('لم يتم العثور على روابط أو مواد في النص.', 'info');
+          return;
         }
-        if (moduleSelect && parsed.moduleId) moduleSelect.value = parsed.moduleId;
-        if (subjectInput && parsed.subject) subjectInput.value = parsed.subject;
-        if (categorySelect && parsed.category) categorySelect.value = parsed.category;
-        if (typeSelect && parsed.type) typeSelect.value = parsed.type;
-        if (authorInput && parsed.author) authorInput.value = parsed.author;
-        if (descInput && parsed.description) descInput.value = parsed.description;
 
-        aiNotice?.classList.remove('hidden');
-        titleInput?.focus();
+        // Batch check all extracted URLs for duplicates
+        const allUrls = parsedList.map((p) => p.url).filter(Boolean);
+        const dupMap = await checkUrlsBatchInFirestore(allUrls);
+
+        if (parsedList.length === 1 && stagedItems.length === 0) {
+          // If only 1 item and no existing staging, populate single form directly
+          const parsed = parsedList[0];
+          if (titleInput && parsed.title) titleInput.value = parsed.title;
+          if (titleEnInput && parsed.titleEn) titleEnInput.value = parsed.titleEn;
+          if (urlInput && parsed.url) {
+            urlInput.value = parsed.url;
+            // Check duplicate on this single URL
+            const dup = dupMap.get(parsed.url);
+            if (dup && urlDupAlert && urlDupTitle) {
+              urlDupTitle.textContent = `"${dup.title}"`;
+              urlDupAlert.classList.remove('hidden');
+            } else {
+              urlDupAlert?.classList.add('hidden');
+            }
+          }
+          if (yearSelect && parsed.year) {
+            yearSelect.value = String(parsed.year);
+            filterModules();
+          }
+          if (moduleSelect && parsed.moduleId) moduleSelect.value = parsed.moduleId;
+          if (subjectInput && parsed.subject) subjectInput.value = parsed.subject;
+          if (categorySelect && parsed.category) categorySelect.value = parsed.category;
+          if (typeSelect && parsed.type) typeSelect.value = parsed.type;
+          if (authorInput && parsed.author) authorInput.value = parsed.author;
+          if (descInput && parsed.description) descInput.value = parsed.description;
+
+          aiNotice?.classList.remove('hidden');
+          titleInput?.focus();
+        } else {
+          // Add items to Bulk Staging Area
+          for (const item of parsedList) {
+            const dup = dupMap.get(item.url);
+            const isDuplicate = !!dup;
+            stagedItems.push({
+              ...item,
+              stagedId: `stage_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
+              isDuplicate,
+              existingTitle: dup?.title,
+              selected: !isDuplicate // Automatically deselect duplicate links
+            });
+          }
+
+          renderBulkStaging();
+          bulkStaging?.classList.remove('hidden');
+          aiNotice?.classList.remove('hidden');
+          bulkStaging?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
       } catch (err) {
         console.error('AI extraction error:', err);
+        showToast('تعذر استخراج البيانات بالذكاء الاصطناعي.', 'error');
       } finally {
         aiBtn.disabled = false;
         if (aiBtnText) aiBtnText.textContent = t('admin.aiParseBtn', getCurrentLanguage());
       }
     });
 
-    // Form submit handler
+    // -------------------------------------------------------------
+    // Bulk Staging Rendering and Management
+    // -------------------------------------------------------------
+    function renderBulkStaging() {
+      if (!bulkCardsList || !bulkStagingTitle || !bulkSelectedCountEl) return;
+
+      bulkStagingTitle.textContent = `المواد المستخرجة في الانتظار (${stagedItems.length})`;
+      const selectedCount = stagedItems.filter((i) => i.selected).length;
+      bulkSelectedCountEl.textContent = String(selectedCount);
+
+      if (bulkPublishBtn) {
+        bulkPublishBtn.disabled = selectedCount === 0;
+      }
+
+      if (stagedItems.length === 0) {
+        bulkStaging?.classList.add('hidden');
+        return;
+      }
+
+      bulkCardsList.innerHTML = '';
+
+      stagedItems.forEach((item, index) => {
+        const card = document.createElement('div');
+        card.className = `p-3.5 rounded-xl border ${
+          item.isDuplicate
+            ? 'border-amber-300 dark:border-amber-800/60 bg-amber-50/40 dark:bg-amber-950/20'
+            : 'border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900'
+        } space-y-3 transition-all`;
+
+        const moduleOpts = modules
+          .filter((m) => m.year === item.year)
+          .map((m) => `<option value="${m.id}" ${m.id === item.moduleId ? 'selected' : ''}>${escapeHtml(m.title)}</option>`)
+          .join('');
+
+        card.innerHTML = `
+          <div class="flex items-start justify-between gap-2">
+            <div class="flex items-center gap-2">
+              <input
+                type="checkbox"
+                class="bulk-item-check w-4 h-4 rounded text-emerald-600 focus:ring-emerald-500 cursor-pointer"
+                data-index="${index}"
+                ${item.selected ? 'checked' : ''}
+              />
+              <span class="text-xs font-bold text-zinc-900 dark:text-zinc-100">مادة #${index + 1}</span>
+              ${
+                item.isDuplicate
+                  ? `<span class="text-[10px] font-bold px-2 py-0.5 rounded bg-amber-100 dark:bg-amber-950 text-amber-800 dark:text-amber-300 border border-amber-300 dark:border-amber-800">
+                      ⚠️ مكرر مسبقاً: "${escapeHtml(item.existingTitle || '')}"
+                    </span>`
+                  : `<span class="text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800/40">
+                      ✅ جديد
+                    </span>`
+              }
+            </div>
+
+            <button
+              type="button"
+              class="bulk-remove-btn text-zinc-400 hover:text-rose-600 dark:hover:text-rose-400 transition-all cursor-pointer p-1"
+              data-index="${index}"
+              title="حذف من القائمة"
+            >
+              <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+
+          <!-- Title Input -->
+          <div class="space-y-1">
+            <label class="block text-[11px] font-bold text-zinc-600 dark:text-zinc-400">عنوان المادة (بالعربية)</label>
+            <input
+              type="text"
+              class="bulk-item-title w-full px-2.5 py-1.5 text-xs bg-zinc-50 dark:bg-zinc-800/60 border border-zinc-200 dark:border-zinc-700 rounded-lg text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-1 focus:ring-emerald-500"
+              data-index="${index}"
+              value="${escapeHtml(item.title)}"
+            />
+          </div>
+
+          <!-- URL with direct preview link -->
+          <div class="space-y-1">
+            <div class="flex items-center justify-between text-[11px]">
+              <label class="font-bold text-zinc-600 dark:text-zinc-400">الرابط</label>
+              ${
+                item.url
+                  ? `<a href="${escapeHtml(item.url)}" target="_blank" rel="noopener noreferrer" class="text-emerald-600 dark:text-emerald-400 hover:underline inline-flex items-center gap-1 font-mono">
+                      <span>فتح الرابط</span>
+                      <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+                    </a>`
+                  : ''
+              }
+            </div>
+            <input
+              type="url"
+              class="bulk-item-url w-full px-2.5 py-1.5 text-xs bg-zinc-50 dark:bg-zinc-800/60 border border-zinc-200 dark:border-zinc-700 rounded-lg text-zinc-900 dark:text-zinc-100 font-mono dir-ltr focus:outline-none focus:ring-1 focus:ring-emerald-500"
+              data-index="${index}"
+              value="${escapeHtml(item.url)}"
+            />
+          </div>
+
+          <!-- Classification Controls Grid -->
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
+            <div>
+              <label class="block text-[10px] font-semibold text-zinc-500 dark:text-zinc-400 mb-0.5">السنة</label>
+              <select class="bulk-item-year w-full px-2 py-1 text-xs bg-zinc-50 dark:bg-zinc-800/60 border border-zinc-200 dark:border-zinc-700 rounded-lg" data-index="${index}">
+                <option value="1" ${item.year === 1 ? 'selected' : ''}>Year 1</option>
+                <option value="2" ${item.year === 2 ? 'selected' : ''}>Year 2</option>
+                <option value="3" ${item.year === 3 ? 'selected' : ''}>Year 3</option>
+                <option value="4" ${item.year === 4 ? 'selected' : ''}>Year 4</option>
+                <option value="5" ${item.year === 5 ? 'selected' : ''}>Year 5</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="block text-[10px] font-semibold text-zinc-500 dark:text-zinc-400 mb-0.5">الموديول</label>
+              <select class="bulk-item-module w-full px-2 py-1 text-xs bg-zinc-50 dark:bg-zinc-800/60 border border-zinc-200 dark:border-zinc-700 rounded-lg" data-index="${index}">
+                ${moduleOpts}
+              </select>
+            </div>
+
+            <div>
+              <label class="block text-[10px] font-semibold text-zinc-500 dark:text-zinc-400 mb-0.5">المادة (Subject)</label>
+              <input
+                type="text"
+                class="bulk-item-subject w-full px-2 py-1 text-xs bg-zinc-50 dark:bg-zinc-800/60 border border-zinc-200 dark:border-zinc-700 rounded-lg"
+                data-index="${index}"
+                value="${escapeHtml(item.subject || 'عام')}"
+              />
+            </div>
+
+            <div>
+              <label class="block text-[10px] font-semibold text-zinc-500 dark:text-zinc-400 mb-0.5">الدكتور</label>
+              <input
+                type="text"
+                class="bulk-item-author w-full px-2 py-1 text-xs bg-zinc-50 dark:bg-zinc-800/60 border border-zinc-200 dark:border-zinc-700 rounded-lg"
+                data-index="${index}"
+                placeholder="د. ..."
+                value="${escapeHtml(item.author || '')}"
+              />
+            </div>
+          </div>
+        `;
+
+        bulkCardsList.appendChild(card);
+      });
+
+      attachBulkCardEvents();
+    }
+
+    function attachBulkCardEvents() {
+      if (!bulkCardsList) return;
+
+      // Checkbox changes
+      bulkCardsList.querySelectorAll<HTMLInputElement>('.bulk-item-check').forEach((cb) => {
+        cb.addEventListener('change', () => {
+          const idx = Number(cb.getAttribute('data-index'));
+          if (stagedItems[idx]) {
+            stagedItems[idx].selected = cb.checked;
+            const selectedCount = stagedItems.filter((i) => i.selected).length;
+            if (bulkSelectedCountEl) bulkSelectedCountEl.textContent = String(selectedCount);
+            if (bulkPublishBtn) bulkPublishBtn.disabled = selectedCount === 0;
+          }
+        });
+      });
+
+      // Title input edits
+      bulkCardsList.querySelectorAll<HTMLInputElement>('.bulk-item-title').forEach((inp) => {
+        inp.addEventListener('input', () => {
+          const idx = Number(inp.getAttribute('data-index'));
+          if (stagedItems[idx]) stagedItems[idx].title = inp.value;
+        });
+      });
+
+      // URL input edits with duplicate recheck
+      bulkCardsList.querySelectorAll<HTMLInputElement>('.bulk-item-url').forEach((inp) => {
+        inp.addEventListener('change', async () => {
+          const idx = Number(inp.getAttribute('data-index'));
+          if (stagedItems[idx]) {
+            stagedItems[idx].url = inp.value.trim();
+            const res = await checkUrlExistsInFirestore(stagedItems[idx].url);
+            stagedItems[idx].isDuplicate = res.exists;
+            stagedItems[idx].existingTitle = res.existingMaterial?.title;
+            renderBulkStaging();
+          }
+        });
+      });
+
+      // Year changes
+      bulkCardsList.querySelectorAll<HTMLSelectElement>('.bulk-item-year').forEach((sel) => {
+        sel.addEventListener('change', () => {
+          const idx = Number(sel.getAttribute('data-index'));
+          if (stagedItems[idx]) {
+            stagedItems[idx].year = Number(sel.value) as AcademicYear;
+            renderBulkStaging();
+          }
+        });
+      });
+
+      // Module changes
+      bulkCardsList.querySelectorAll<HTMLSelectElement>('.bulk-item-module').forEach((sel) => {
+        sel.addEventListener('change', () => {
+          const idx = Number(sel.getAttribute('data-index'));
+          if (stagedItems[idx]) stagedItems[idx].moduleId = sel.value;
+        });
+      });
+
+      // Subject changes
+      bulkCardsList.querySelectorAll<HTMLInputElement>('.bulk-item-subject').forEach((inp) => {
+        inp.addEventListener('input', () => {
+          const idx = Number(inp.getAttribute('data-index'));
+          if (stagedItems[idx]) stagedItems[idx].subject = inp.value;
+        });
+      });
+
+      // Author changes
+      bulkCardsList.querySelectorAll<HTMLInputElement>('.bulk-item-author').forEach((inp) => {
+        inp.addEventListener('input', () => {
+          const idx = Number(inp.getAttribute('data-index'));
+          if (stagedItems[idx]) stagedItems[idx].author = inp.value;
+        });
+      });
+
+      // Remove button
+      bulkCardsList.querySelectorAll<HTMLButtonElement>('.bulk-remove-btn').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          const idx = Number(btn.getAttribute('data-index'));
+          stagedItems.splice(idx, 1);
+          renderBulkStaging();
+        });
+      });
+    }
+
+    // Skip duplicates button
+    bulkSkipDupsBtn?.addEventListener('click', () => {
+      stagedItems.forEach((item) => {
+        if (item.isDuplicate) {
+          item.selected = false;
+        }
+      });
+      renderBulkStaging();
+      showToast('تم استبعاد وتجريد المواد المكررة من التحديد.', 'info');
+    });
+
+    // Select all button
+    bulkSelectAllBtn?.addEventListener('click', () => {
+      stagedItems.forEach((item) => (item.selected = true));
+      renderBulkStaging();
+    });
+
+    // Clear bulk staging list
+    bulkClearBtn?.addEventListener('click', () => {
+      if (confirm('هل تريد بالتأكيد مسح كافة المواد في قائمة الانتظار؟')) {
+        stagedItems = [];
+        renderBulkStaging();
+      }
+    });
+
+    // Switch to single form
+    bulkSwitchSingleBtn?.addEventListener('click', () => {
+      form?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+
+    // Add manual item to bulk staging
+    function addManualItemToStaging() {
+      const yr = (Number(yearSelect?.value) || 2) as AcademicYear;
+      const mod = moduleSelect?.value || 'year2-blood';
+      stagedItems.push({
+        title: '',
+        url: '',
+        urls: [],
+        type: 'drive',
+        category: 'summaries',
+        year: yr,
+        moduleId: mod,
+        subject: 'عام',
+        tags: [],
+        stagedId: `manual_${Date.now()}`,
+        isDuplicate: false,
+        selected: true
+      });
+      renderBulkStaging();
+      bulkStaging?.classList.remove('hidden');
+    }
+
+    addManualBulkBtn?.addEventListener('click', addManualItemToStaging);
+
+    // Add single form values to staging
+    addToStagingBtn?.addEventListener('click', async () => {
+      const title = titleInput?.value.trim() || 'مادة جديدة';
+      const url = urlInput?.value.trim() || '';
+      if (!url) {
+        urlInput?.focus();
+        showToast('يرجى كتابة رابط المادة أولاً.', 'info');
+        return;
+      }
+
+      const dupRes = await checkUrlExistsInFirestore(url);
+
+      stagedItems.push({
+        title,
+        titleEn: titleEnInput?.value.trim() || undefined,
+        url,
+        urls: [url],
+        type: (typeSelect?.value || 'drive') as ResourceType,
+        category: (categorySelect?.value || 'summaries') as MaterialCategory,
+        year: (Number(yearSelect?.value) || 2) as AcademicYear,
+        moduleId: moduleSelect?.value || 'year2-blood',
+        subject: subjectInput?.value.trim() || 'عام',
+        author: authorInput?.value.trim() || undefined,
+        tags: [subjectInput?.value.trim()].filter(Boolean) as string[],
+        stagedId: `staged_${Date.now()}`,
+        isDuplicate: dupRes.exists,
+        existingTitle: dupRes.existingMaterial?.title,
+        selected: !dupRes.exists
+      });
+
+      renderBulkStaging();
+      bulkStaging?.classList.remove('hidden');
+      form.reset();
+      filterModules();
+      showToast('تمت إضافة المادة إلى قائمة الانتظار للمراجعة.', 'success');
+      bulkStaging?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+
+    // Bulk Publish Action
+    bulkPublishBtn?.addEventListener('click', async () => {
+      const selected = stagedItems.filter((i) => i.selected);
+      if (selected.length === 0) return;
+
+      const adminUser = getCachedUserProfile();
+      bulkPublishBtn.disabled = true;
+      if (bulkPublishBtnText) bulkPublishBtnText.textContent = 'جاري النشر وحفظ المواد في قاعدة البيانات...';
+
+      const materialsToSave: MaterialItem[] = selected.map((item) => ({
+        id: `mat_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
+        title: item.title || 'مادة دراسية جديدة',
+        titleEn: item.titleEn,
+        url: item.url,
+        year: item.year,
+        moduleId: item.moduleId,
+        subject: item.subject,
+        category: item.category,
+        type: item.type,
+        author: item.author,
+        addedBy: adminUser?.displayName || adminUser?.username || 'الإدارة',
+        description: item.description,
+        tags: [item.subject, item.type].filter(Boolean) as string[],
+        createdAt: new Date().toISOString()
+      }));
+
+      try {
+        const result = await saveMaterialsBulk(
+          materialsToSave,
+          adminUser || undefined,
+          activeSourceSubmissionId || undefined
+        );
+
+        if (result.savedCount > 0) {
+          showToast(
+            `تم نشر ${result.savedCount} مادة بنجاح! ${result.skippedCount > 0 ? `(تم استبعاد ${result.skippedCount} مكرر)` : ''}`,
+            'success'
+          );
+
+          // Remove published items from staging
+          stagedItems = stagedItems.filter((i) => !i.selected);
+          renderBulkStaging();
+
+          // Reset source submission banner
+          if (activeSourceSubmissionId) {
+            activeSourceSubmissionId = null;
+            subBanner?.classList.add('hidden');
+          }
+        } else if (result.skippedCount > 0) {
+          showToast('تم استبعاد كافة المواد المختارة لأن روابطها مسجلة مسبقاً بالموقع!', 'info');
+        } else {
+          showToast('تعذر حفظ المواد. يرجى مراجعة الاتصال بقاعدة البيانات.', 'error');
+        }
+      } catch (err: any) {
+        console.error('Bulk save error:', err);
+        showToast(err?.message || 'حدث خطأ أثناء النشر الجماعي.', 'error');
+      } finally {
+        bulkPublishBtn.disabled = false;
+        if (bulkPublishBtnText) bulkPublishBtnText.textContent = 'نشر المواد المحددة دفعة واحدة';
+      }
+    });
+
+    // Cancel source submission link
+    subCancelBtn?.addEventListener('click', () => {
+      activeSourceSubmissionId = null;
+      subBanner?.classList.add('hidden');
+      showToast('تم إلغاء ربط المساهمة.', 'info');
+    });
+
+    // -------------------------------------------------------------
+    // Listener for Student Submissions sent for AI extraction
+    // -------------------------------------------------------------
+    window.addEventListener('admin:load-submission-for-extraction', async (e: any) => {
+      const detail = e.detail;
+      if (!detail) return;
+
+      activeSourceSubmissionId = detail.submissionId || null;
+      if (subBanner && subBannerText) {
+        subBannerText.textContent = `مراجعة مساهمة الطالب: ${detail.contributor || 'فاعل خير'}`;
+        subBanner.classList.remove('hidden');
+      }
+
+      if (aiInput) {
+        aiInput.value = detail.content || '';
+      }
+
+      // Switch to Direct Add tab visually
+      const directTabBtn = document.querySelector<HTMLButtonElement>('.admin-nav-tab[data-tab="direct"]');
+      directTabBtn?.click();
+
+      // Trigger AI extraction automatically
+      aiBtn?.click();
+    });
+
+    // -------------------------------------------------------------
+    // Single Form Submit Handler
+    // -------------------------------------------------------------
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
       if (!titleInput || !urlInput || !yearSelect || !moduleSelect || !submitBtn) return;
@@ -347,6 +1004,15 @@ const { modules } = Astro.props;
       const title = titleInput.value.trim();
       const url = urlInput.value.trim();
       if (!title || !url) return;
+
+      // Duplicate check before saving
+      const dupCheck = await checkUrlExistsInFirestore(url);
+      if (dupCheck.exists && dupCheck.existingMaterial) {
+        const proceed = confirm(
+          `⚠️ تنبيه: هذا الرابط مضاف مسبقاً بالموقع بعنوان: "${dupCheck.existingMaterial.title}"\nهل تريد بالتأكيد إضافة رابط مكرر؟`
+        );
+        if (!proceed) return;
+      }
 
       submitBtn.disabled = true;
       const lang = getCurrentLanguage();
@@ -392,6 +1058,7 @@ const { modules } = Astro.props;
           form.reset();
           aiInput.value = '';
           aiNotice?.classList.add('hidden');
+          urlDupAlert?.classList.add('hidden');
           filterModules();
         } else {
           if (errorBox) {
@@ -409,6 +1076,16 @@ const { modules } = Astro.props;
         if (submitBtnText) submitBtnText.textContent = t('admin.publishDirectBtn', getCurrentLanguage());
       }
     });
+
+    function escapeHtml(str: string): string {
+      if (!str) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
   }
 
   initDirectMaterialForm();

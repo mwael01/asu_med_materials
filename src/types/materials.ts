@@ -47,6 +47,7 @@ export interface MaterialItem {
   description?: string;
   descriptionEn?: string;
   url: string;
+  urls?: string[];
   type: ResourceType;
   category?: MaterialCategory;
   year: AcademicYear;

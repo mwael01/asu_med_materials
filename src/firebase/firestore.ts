@@ -28,6 +28,7 @@ import type {
   AdminLogDocument
 } from './schema';
 import type { AuthorEntry, ContributorProfile } from '../types/contributors';
+import { normalizeResourceUrl } from '../utils/url';
 
 let firestoreInstance: Firestore | null = null;
 
@@ -152,6 +153,134 @@ export async function saveMaterialToFirestore(material: MaterialItem): Promise<b
     console.error('[Firestore] Failed to save material:', err);
     return false;
   }
+}
+
+/**
+ * Checks a batch of URLs against existing materials in Firestore.
+ * Returns a map of the input URL to the matched existing MaterialItem if found.
+ */
+export async function checkUrlsBatchInFirestore(urls: string[]): Promise<Map<string, MaterialItem>> {
+  const result = new Map<string, MaterialItem>();
+  if (!urls || urls.length === 0) return result;
+
+  try {
+    const allMaterials = await fetchMaterialsFromFirestore();
+    const index = new Map<string, MaterialItem>();
+
+    for (const mat of allMaterials) {
+      if (mat.url) {
+        const norm = normalizeResourceUrl(mat.url);
+        if (norm && !index.has(norm)) index.set(norm, mat);
+      }
+      if (Array.isArray(mat.urls)) {
+        for (const u of mat.urls) {
+          const norm = normalizeResourceUrl(u);
+          if (norm && !index.has(norm)) index.set(norm, mat);
+        }
+      }
+    }
+
+    for (const rawUrl of urls) {
+      if (!rawUrl) continue;
+      const norm = normalizeResourceUrl(rawUrl);
+      if (norm && index.has(norm)) {
+        result.set(rawUrl, index.get(norm)!);
+      }
+    }
+  } catch (err) {
+    console.warn('[Firestore] Error checking batch URLs:', err);
+  }
+
+  return result;
+}
+
+/**
+ * Checks whether a single URL already exists in the Firestore materials collection.
+ */
+export async function checkUrlExistsInFirestore(
+  url: string
+): Promise<{ exists: boolean; existingMaterial?: MaterialItem }> {
+  if (!url || !url.trim()) return { exists: false };
+  const matches = await checkUrlsBatchInFirestore([url.trim()]);
+  if (matches.has(url.trim())) {
+    return { exists: true, existingMaterial: matches.get(url.trim()) };
+  }
+  return { exists: false };
+}
+
+/**
+ * Saves multiple materials atomically in Firestore while skipping duplicates.
+ * Also logs the admin action and optionally marks the source submission as approved.
+ */
+export async function saveMaterialsBulk(
+  materials: MaterialItem[],
+  actingAdmin?: UserProfile,
+  sourceSubmissionId?: string
+): Promise<{ savedCount: number; skippedCount: number; errors: string[] }> {
+  const db = getFirestoreDb();
+  if (!db || !materials || materials.length === 0) {
+    return { savedCount: 0, skippedCount: 0, errors: ['Database not available or materials empty'] };
+  }
+
+  const urlsToCheck = materials.map((m) => m.url).filter(Boolean);
+  const existingMap = await checkUrlsBatchInFirestore(urlsToCheck);
+
+  let savedCount = 0;
+  let skippedCount = 0;
+  const errors: string[] = [];
+  const seenNormUrlsInBatch = new Set<string>();
+
+  for (const mat of materials) {
+    if (!mat.title || !mat.url) {
+      skippedCount++;
+      continue;
+    }
+
+    const norm = normalizeResourceUrl(mat.url);
+    if (existingMap.has(mat.url) || (norm && seenNormUrlsInBatch.has(norm))) {
+      skippedCount++;
+      continue;
+    }
+
+    if (norm) seenNormUrlsInBatch.add(norm);
+
+    try {
+      const docRef = doc(db, MATERIALS_COLLECTION, mat.id);
+      await setDoc(docRef, sanitizeFirestorePayload(mat), { merge: true });
+      savedCount++;
+    } catch (err: any) {
+      console.error(`[Firestore] Failed to save material ${mat.id} in bulk:`, err);
+      errors.push(`Material "${mat.title}": ${err?.message || 'Save failed'}`);
+    }
+  }
+
+  // Update submission status if source submission exists
+  if (sourceSubmissionId && savedCount > 0) {
+    try {
+      await updateSubmissionStatus(sourceSubmissionId, 'approved', actingAdmin);
+    } catch (err) {
+      console.warn(`[Firestore] Failed to update source submission ${sourceSubmissionId}:`, err);
+    }
+  }
+
+  // Log admin action
+  if (actingAdmin && savedCount > 0) {
+    try {
+      await logAdminAction({
+        adminUid: actingAdmin.uid,
+        adminName: actingAdmin.displayName,
+        adminUsername: actingAdmin.username,
+        action: 'publish_material',
+        targetId: sourceSubmissionId || materials[0]?.id || 'bulk',
+        targetTitle: `نشر ${savedCount} مواد دفعة واحدة`,
+        details: `Successfully published ${savedCount} materials in bulk (Skipped ${skippedCount} duplicates)`
+      });
+    } catch (logErr) {
+      console.warn('[Firestore] Failed to log bulk admin action:', logErr);
+    }
+  }
+
+  return { savedCount, skippedCount, errors };
 }
 
 /**
