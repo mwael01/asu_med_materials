@@ -1,43 +1,5 @@
 import { getAllMaterials } from '../data/materials';
-import { fetchContributorsFromFirestore } from '../firebase/firestore';
-import type {
-  AuthorEntry,
-  ContributorProfile,
-  ContributorStats,
-} from '../types/contributors';
-
-let contributorsCache: {
-  authors: AuthorEntry[];
-  contributorProfiles: ContributorProfile[];
-  timestamp: number;
-} | null = null;
-
-const CACHE_TTL_MS = 15_000;
-
-async function getLiveContributorsData() {
-  const now = Date.now();
-  if (contributorsCache && now - contributorsCache.timestamp < CACHE_TTL_MS) {
-    return contributorsCache;
-  }
-
-  const data = await fetchContributorsFromFirestore();
-  if (data && (data.authors.length > 0 || data.contributorProfiles.length > 0)) {
-    contributorsCache = { ...data, timestamp: now };
-    return contributorsCache;
-  }
-
-  return contributorsCache || { authors: [], contributorProfiles: [], timestamp: now };
-}
-
-export async function getAuthors(): Promise<AuthorEntry[]> {
-  const data = await getLiveContributorsData();
-  return [...data.authors].sort((a, b) => a.order - b.order);
-}
-
-export async function getContributorProfiles(): Promise<ContributorProfile[]> {
-  const data = await getLiveContributorsData();
-  return data.contributorProfiles;
-}
+import type { ContributorStats } from '../types/contributors';
 
 function normalizeName(value: string): string {
   return value.trim().toLowerCase().replace(/\s+/g, ' ');
@@ -83,34 +45,14 @@ export async function getAllContributors(): Promise<ContributorStats[]> {
       if (material.subject?.trim()) {
         subjectSets.get(key)?.add(material.subject.trim());
       }
+      if (material.contributorUsername && !entry.username) {
+        entry.username = material.contributorUsername;
+      }
     }
   }
 
   for (const [key, entry] of grouped) {
     entry.subjects = subjectSets.get(key)?.size ?? 0;
-  }
-
-  const profiles = await getContributorProfiles();
-  for (const profile of profiles) {
-    const keys = [profile.name, ...profile.matchNames].map(normalizeName);
-    const existingKey = keys.find((k) => grouped.has(k));
-    if (existingKey) {
-      const entry = grouped.get(existingKey);
-      if (entry) {
-        entry.profile = profile;
-        entry.name = profile.name;
-      }
-    } else {
-      grouped.set(normalizeName(profile.name), {
-        name: profile.name,
-        total: 0,
-        authored: 0,
-        subjects: 0,
-        byType: {},
-        byYear: {},
-        profile,
-      });
-    }
   }
 
   return [...grouped.values()].sort(
@@ -155,48 +97,14 @@ export async function getResourceContributors(): Promise<ContributorStats[]> {
       if (material.subject?.trim()) {
         subjectSets.get(key)?.add(material.subject.trim());
       }
+      if (material.contributorUsername && !entry.username) {
+        entry.username = material.contributorUsername;
+      }
     }
   }
 
   for (const [key, entry] of grouped) {
     entry.subjects = subjectSets.get(key)?.size ?? 0;
-  }
-
-  // 1. Link with ContributorProfiles if matched
-  const profiles = await getContributorProfiles();
-  for (const profile of profiles) {
-    const keys = [profile.name, ...profile.matchNames].map(normalizeName);
-    const existingKey = keys.find((k) => grouped.has(k));
-    if (existingKey) {
-      const entry = grouped.get(existingKey);
-      if (entry) {
-        entry.profile = profile;
-        entry.name = profile.name;
-      }
-    }
-  }
-
-  // 2. Link with Authors if matched and doesn't already have profile
-  const authors = await getAuthors();
-  for (const author of authors) {
-    const matchNames = [author.name, ...(author.matchNames ?? [])];
-    const keys = matchNames.map(normalizeName);
-    const existingKey = keys.find((k) => grouped.has(k));
-    if (existingKey) {
-      const entry = grouped.get(existingKey);
-      if (entry && !entry.profile) {
-        entry.profile = {
-          id: author.id,
-          name: author.name,
-          photo: author.photo,
-          note: author.roleAr || author.role,
-          noteEn: author.role,
-          matchNames: author.matchNames ?? [author.name],
-          contacts: author.contacts,
-        };
-        entry.name = author.name;
-      }
-    }
   }
 
   return [...grouped.values()].sort(

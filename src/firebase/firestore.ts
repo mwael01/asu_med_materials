@@ -27,7 +27,7 @@ import type {
   FeedbackDocument,
   AdminLogDocument
 } from './schema';
-import type { AuthorEntry, ContributorProfile } from '../types/contributors';
+import type { AuthorEntry } from '../types/contributors';
 import { normalizeResourceUrl } from '../utils/url';
 
 let firestoreInstance: Firestore | null = null;
@@ -789,11 +789,47 @@ export async function fetchAdminUsers(limitCount = 8): Promise<UserProfile[]> {
 }
 
 /**
+ * Fetches a lightweight map of username → displayName for all users.
+ * Used for resolving contributor usernames to display names in the UI.
+ */
+export async function fetchAllUsernames(): Promise<Map<string, string>> {
+  const db = getFirestoreDb();
+  if (!db) return new Map();
+
+  try {
+    const usersRef = collection(db, USERS_COLLECTION);
+    const snapshot = await getDocs(usersRef);
+    const map = new Map<string, string>();
+
+    snapshot.forEach((docSnap) => {
+      const data = docSnap.data() as UserProfile;
+      if (data.username && data.displayName) {
+        map.set(data.username.toLowerCase(), data.displayName);
+      }
+    });
+
+    return map;
+  } catch (err) {
+    console.warn('[Firestore] Failed to fetch usernames:', err);
+    return new Map();
+  }
+}
+
+/**
  * Fetches all platform authors and contributor profiles from Firestore.
  */
 export async function fetchContributorsFromFirestore(): Promise<{
   authors: AuthorEntry[];
-  contributorProfiles: ContributorProfile[];
+  contributorProfiles: Array<{
+    id: string;
+    name: string;
+    photo?: string;
+    note?: string;
+    noteEn?: string;
+    year?: number;
+    matchNames: string[];
+    contacts?: AuthorEntry['contacts'];
+  }>;
 }> {
   const db = getFirestoreDb();
   if (!db) return { authors: [], contributorProfiles: [] };
@@ -802,13 +838,21 @@ export async function fetchContributorsFromFirestore(): Promise<{
     const contribRef = collection(db, CONTRIBUTORS_COLLECTION);
     const snapshot = await getDocs(contribRef);
     const authors: AuthorEntry[] = [];
-    const contributorProfiles: ContributorProfile[] = [];
+    const contributorProfiles: Array<{
+      id: string;
+      name: string;
+      photo?: string;
+      note?: string;
+      noteEn?: string;
+      year?: number;
+      matchNames: string[];
+      contacts?: AuthorEntry['contacts'];
+    }> = [];
 
     snapshot.forEach((docSnap) => {
       const data = docSnap.data() as ContributorDocument;
       if (data.kind === 'author') {
         let badge = data.badge;
-        // Remove owner badge from Mohamed Wael or any badge indicating owner
         if (
           badge &&
           (badge.text?.toLowerCase().includes('owner') ||

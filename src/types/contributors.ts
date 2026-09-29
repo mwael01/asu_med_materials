@@ -36,20 +36,8 @@ export interface AuthorEntry {
   contacts?: PersonContacts;
 }
 
-export interface ContributorProfile {
-  id: string;
-  name: string;
-  photo?: string;
-  note?: string;
-  noteEn?: string;
-  year?: number;
-  matchNames: string[];
-  contacts?: PersonContacts;
-}
-
 export interface ContributorsFile {
   authors: AuthorEntry[];
-  contributorProfiles: ContributorProfile[];
 }
 
 export interface ContributorStats {
@@ -59,5 +47,5 @@ export interface ContributorStats {
   subjects: number;
   byType: Record<string, number>;
   byYear: Record<string, number>;
-  profile?: ContributorProfile;
+  username?: string;
 }

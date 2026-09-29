@@ -11,7 +11,8 @@
     "preview": "astro preview",
     "astro": "astro",
     "seed:firestore": "node scripts/seed-firestore.mjs",
-    "schema:sync": "node scripts/sync-firebase-schema.mjs"
+    "schema:sync": "node scripts/sync-firebase-schema.mjs",
+    "migrate:contributions": "node scripts/migrate-contributions.mjs"
   },
   "dependencies": {
     "@astrojs/check": "^0.9.10",
