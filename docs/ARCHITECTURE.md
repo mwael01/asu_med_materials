@@ -220,6 +220,7 @@ export interface MaterialItem {
      - `submissions`: Pending and approved peer material submissions.
    - **Schema Specification & Synchronization**:
      - [`firebase/schema.json`](file:///home/mwael/work/asu_med_materials/firebase/schema.json): Canonical JSON schema defining document types, constraints, and live document counts (local contract for syntax validation).
+     - [`firebase/firestore.indexes.json`](file:///home/mwael/work/asu_med_materials/firebase/firestore.indexes.json): Declarative Cloud Firestore composite index configuration and single-field overrides (deployed via `pnpm run deploy:indexes`).
      - [`src/firebase/schema.ts`](file:///home/mwael/work/asu_med_materials/src/firebase/schema.ts): Strongly typed TypeScript interfaces and `FirestoreDataConverter` implementations (`materialConverter`, `moduleConverter`, `contributorConverter`, `userConverter`, `submissionConverter`).
      - [`scripts/sync-firebase-schema.mjs`](file:///home/mwael/work/asu_med_materials/scripts/sync-firebase-schema.mjs) (`pnpm run schema:sync`): Synchronizes live Firestore collection states and document counts with `firebase/schema.json`.
      - [`scripts/seed-firestore.mjs`](file:///home/mwael/work/asu_med_materials/scripts/seed-firestore.mjs): Uploads initial/seed materials, modules, and contributors to Cloud Firestore.

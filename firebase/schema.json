@@ -26,7 +26,45 @@
         },
         {
           "fields": [
+            "moduleId",
+            "category"
+          ]
+        },
+        {
+          "fields": [
+            "moduleId",
             "type"
+          ]
+        },
+        {
+          "fields": [
+            "year",
+            "category"
+          ]
+        },
+        {
+          "fields": [
+            "year",
+            "type"
+          ]
+        },
+        {
+          "fields": [
+            "moduleId",
+            "subject",
+            "category"
+          ]
+        },
+        {
+          "fields": [
+            "tags",
+            "year"
+          ]
+        },
+        {
+          "fields": [
+            "contributorUid",
+            "createdAt"
           ]
         }
       ],
@@ -334,6 +372,20 @@
           "required": true
         }
       },
+      "indexes": [
+        {
+          "fields": [
+            "status",
+            "timestamp"
+          ]
+        },
+        {
+          "fields": [
+            "contributorUid",
+            "timestamp"
+          ]
+        }
+      ],
       "totalDocuments": 1
     },
     "modules": {

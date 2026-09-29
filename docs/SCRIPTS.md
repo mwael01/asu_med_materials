@@ -43,6 +43,21 @@ node scripts/seed-firestore.mjs
 
 ---
 
+## 4. Cloud Firestore Indexes & Deployment
+
+- **Index Definition**: [`firebase/firestore.indexes.json`](file:///workspaces/asu_med_materials/firebase/firestore.indexes.json)
+- **Configuration**: Linked in [`firebase.json`](file:///workspaces/asu_med_materials/firebase.json) under `firestore.indexes`.
+- **Purpose**: Configures all multi-field composite indexes (for materials, submissions, user rankings, and feedback) and single-field index exemptions to optimize query execution and prevent index bloat.
+- **Usage**:
+```bash
+# Deploy composite indexes directly to remote Firebase project:
+pnpm run deploy:indexes
+# or via Firebase CLI directly:
+firebase deploy --only firestore:indexes
+```
+
+---
+
 ## Instructions for AI Agents
 - **Single Source of Truth**: All study materials, curriculum modules, user profiles, and contributors live directly in Cloud Firestore. Never store or look for local JSON or static data files for materials.
 - When adding new YouTube playlists, use YouTube fetch helpers to populate the `videos` array with accurate chapter titles and IDs directly in Cloud Firestore.
