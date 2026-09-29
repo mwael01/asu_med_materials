@@ -247,7 +247,7 @@ const allMaterials = rawMaterials.map((m) => ({
       }
     }
 
-    let filterTimeout: any = null;
+    let filterTimeout: ReturnType<typeof setTimeout> | null = null;
     function debounceApplyFilter(): void {
       if (filterTimeout) clearTimeout(filterTimeout);
       filterTimeout = setTimeout(() => {

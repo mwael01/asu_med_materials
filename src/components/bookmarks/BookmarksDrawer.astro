@@ -1,6 +1,6 @@
 ---
-import { getAllMaterials } from '../../data/materials';
-import { getAllModules } from '../../data/modules';
+  import { getAllMaterials } from '../../data/materials';
+  import { getAllModules } from '../../data/modules';
 
 const rawMaterials = await getAllMaterials();
 const rawModules = await getAllModules();
@@ -119,6 +119,7 @@ const rawModules = await getAllModules();
   import { getStoredBookmarkIds, saveBookmarkIds, getStoredStudiedIds } from '../../utils/storage';
   import { syncBookmarkToggle } from '../../utils/userSync';
   import { getCurrentLanguage, t } from '../../utils/i18n';
+  import { escapeHtml } from '../../utils/sanitize';
   import type { MaterialItem, ModuleInfo } from '../../types/materials';
 
   let drawerGlobalListenersAttached = false;
@@ -432,7 +433,7 @@ const rawModules = await getAllModules();
                       ? 'border-emerald-600 bg-emerald-600 dark:border-emerald-500 dark:bg-emerald-500 text-white shadow-2xs'
                       : 'border-zinc-300 dark:border-zinc-600 bg-white dark:bg-zinc-800 hover:border-emerald-500'
                   }"
-                  data-drawer-studied-id="${item.id}"
+                  data-drawer-studied-id="${escapeHtml(item.id)}"
                   title="${isStudied ? (isAr ? 'تمت المذاكرة' : 'Marked as studied') : (isAr ? 'تحديد كمذاكر' : 'Mark as studied')}"
                   aria-label="Toggle studied status"
                 >
@@ -444,25 +445,25 @@ const rawModules = await getAllModules();
                 <!-- Resource Link and Meta -->
                 <div class="min-w-0 flex-1">
                   <a
-                    href="${targetUrl}"
+                    href="${escapeHtml(targetUrl)}"
                     target="${targetAttr}"
                     rel="${targetAttr === '_blank' ? 'noopener noreferrer' : ''}"
                     class="block text-xs font-bold text-zinc-900 dark:text-zinc-100 hover:text-emerald-600 dark:hover:text-emerald-400 truncate leading-snug"
-                    title="${titleText}"
+                    title="${escapeHtml(titleText)}"
                   >
-                    ${titleText}
+                    ${escapeHtml(titleText)}
                   </a>
                   <div class="flex items-center gap-1.5 text-[10px] text-zinc-400 dark:text-zinc-500 mt-0.5">
-                    <span>${typeLabel}</span>
+                    <span>${escapeHtml(typeLabel)}</span>
                     <span>&bull;</span>
-                    <span>${isAr ? `السنة ${item.year}` : `Year ${item.year}`}</span>
+                    <span>${isAr ? `السنة ${escapeHtml(String(item.year))}` : `Year ${escapeHtml(String(item.year))}`}</span>
                   </div>
                 </div>
 
                 <!-- Right Actions: Open and Remove -->
                 <div class="flex items-center gap-1 shrink-0">
                   <a
-                    href="${targetUrl}"
+                    href="${escapeHtml(targetUrl)}"
                     target="${targetAttr}"
                     rel="${targetAttr === '_blank' ? 'noopener noreferrer' : ''}"
                     class="p-1.5 text-zinc-400 hover:text-emerald-600 dark:hover:text-emerald-400 rounded-lg hover:bg-zinc-200/80 dark:hover:bg-zinc-700 transition-colors"
@@ -475,7 +476,7 @@ const rawModules = await getAllModules();
                   <button
                     type="button"
                     class="drawer-remove-btn p-1.5 text-zinc-400 hover:text-rose-500 rounded-lg hover:bg-zinc-200/80 dark:hover:bg-zinc-700 transition-colors cursor-pointer"
-                    data-drawer-remove-id="${item.id}"
+                    data-drawer-remove-id="${escapeHtml(item.id)}"
                     title="${isAr ? 'حذف من المحفوظات' : 'Remove from saved'}"
                   >
                     <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">

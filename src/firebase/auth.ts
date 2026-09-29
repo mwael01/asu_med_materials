@@ -82,13 +82,14 @@ export function onAuthChange(
   return onAuthStateChanged(
     auth,
     async (firebaseUser) => {
-      clearTimeout(fallbackTimer);
-      hasFired = true;
-
       try {
         if (!firebaseUser) {
-          setCachedUserProfile(null);
-          callback(null, null);
+          if (!hasFired) {
+            hasFired = true;
+            clearTimeout(fallbackTimer);
+            setCachedUserProfile(null);
+            callback(null, null);
+          }
           return;
         }
 
@@ -97,7 +98,11 @@ export function onAuthChange(
 
         // 1. Instant zero-flash render from local cache if UID matches
         if (cached && cached.uid === firebaseUser.uid) {
-          callback(firebaseUser, cached);
+          if (!hasFired) {
+            hasFired = true;
+            clearTimeout(fallbackTimer);
+            callback(firebaseUser, cached);
+          }
         }
 
         // 2. Always fetch fresh profile from Firestore to detect role updates (e.g. promoted to admin)
@@ -130,7 +135,9 @@ export function onAuthChange(
               } catch {}
             }
 
-            if (hasChanged) {
+            if (hasChanged && !hasFired) {
+              hasFired = true;
+              clearTimeout(fallbackTimer);
               callback(firebaseUser, remoteProfile);
             }
             return;
@@ -170,19 +177,29 @@ export function onAuthChange(
             };
           }
 
-          setCachedUserProfile(currentProfile);
-          callback(firebaseUser, currentProfile);
+          if (!hasFired) {
+            hasFired = true;
+            clearTimeout(fallbackTimer);
+            setCachedUserProfile(currentProfile);
+            callback(firebaseUser, currentProfile);
+          }
         }
       } catch (outerErr) {
-        console.warn('[Auth] Error in onAuthStateChanged callback:', outerErr);
-        callback(firebaseUser, getCachedUserProfile());
+        if (!hasFired) {
+          hasFired = true;
+          clearTimeout(fallbackTimer);
+          console.warn('[Auth] Error in onAuthStateChanged callback:', outerErr);
+          callback(firebaseUser, getCachedUserProfile());
+        }
       }
     },
     (authError) => {
-      clearTimeout(fallbackTimer);
-      hasFired = true;
-      console.warn('[Auth] onAuthStateChanged error:', authError);
-      callback(null, getCachedUserProfile());
+      if (!hasFired) {
+        hasFired = true;
+        clearTimeout(fallbackTimer);
+        console.warn('[Auth] onAuthStateChanged error:', authError);
+        callback(null, getCachedUserProfile());
+      }
     }
   );
 }

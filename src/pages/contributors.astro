@@ -186,6 +186,7 @@ const CREATORS_INITIAL_LIMIT = 12;
 
 <script>
   import { t, getCurrentLanguage } from '../utils/i18n';
+  import { escapeHtml } from '../utils/sanitize';
 
   function initContributorPopups(): void {
     const triggers = document.querySelectorAll<HTMLButtonElement>('[data-contributor-trigger]');
@@ -347,14 +348,14 @@ const CREATORS_INITIAL_LIMIT = 12;
 
       grid.innerHTML = liveAdmins
         .map((admin) => {
-          const name = admin.displayName || admin.username;
+          const name = escapeHtml(admin.displayName || admin.username);
           const initials = getInitials(name);
           const roleDescHtml = admin.adminRoleDescription
-            ? `<p class="mt-2 text-xs font-semibold text-emerald-700 dark:text-emerald-400 bg-emerald-50/60 dark:bg-emerald-950/30 px-3 py-1 rounded-xl border border-emerald-100 dark:border-emerald-900/40 max-w-[90%]">${admin.adminRoleDescription}</p>`
+            ? `<p class="mt-2 text-xs font-semibold text-emerald-700 dark:text-emerald-400 bg-emerald-50/60 dark:bg-emerald-950/30 px-3 py-1 rounded-xl border border-emerald-100 dark:border-emerald-900/40 max-w-[90%]">${escapeHtml(admin.adminRoleDescription)}</p>`
             : '';
 
           const avatarHtml = admin.photoURL
-            ? `<div class="relative rounded-full overflow-hidden mb-5 border-2 border-emerald-100 dark:border-emerald-900/50 shrink-0 bg-zinc-100 dark:bg-zinc-800 shadow-2xs aspect-square" style="width: 160px; height: 160px; min-width: 160px; min-height: 160px; max-width: 160px; max-height: 160px; border-radius: 50%;"><img src="${admin.photoURL}" alt="${name}" width="160" height="160" class="absolute inset-0 w-full h-full object-cover object-center block" style="aspect-ratio: 1 / 1; border-radius: 50%; object-fit: cover; object-position: center;" /></div>`
+            ? `<div class="relative rounded-full overflow-hidden mb-5 border-2 border-emerald-100 dark:border-emerald-900/50 shrink-0 bg-zinc-100 dark:bg-zinc-800 shadow-2xs aspect-square" style="width: 160px; height: 160px; min-width: 160px; min-height: 160px; max-width: 160px; max-height: 160px; border-radius: 50%;"><img src="${escapeHtml(admin.photoURL)}" alt="${name}" width="160" height="160" class="absolute inset-0 w-full h-full object-cover object-center block" style="aspect-ratio: 1 / 1; border-radius: 50%; object-fit: cover; object-position: center;" /></div>`
             : `<div class="rounded-full bg-emerald-600 text-white flex items-center justify-center text-4xl font-extrabold mb-5 select-none shrink-0 shadow-2xs aspect-square" style="width: 160px; height: 160px; min-width: 160px; min-height: 160px; max-width: 160px; max-height: 160px; border-radius: 50%;">${initials}</div>`;
 
           let contactsHtml = '';
