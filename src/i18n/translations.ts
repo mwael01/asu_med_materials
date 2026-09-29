@@ -338,10 +338,10 @@ export const translations: Record<SupportedLanguage, TranslationsSchema> = {
       tagline: 'المنصة الشاملة لمصادر طب عين شمس',
       university: 'كلية الطب جامعة عين شمس',
       madeBy: 'Made by',
-      shareResource: 'شارك مصدراً أو درايف',
-      contributors: 'فريق العمل والمساهمون',
-      feedback: 'الآراء والملاحظات',
-      searchCatalog: 'دليل البحث الشامل'
+      shareResource: 'مشاركة مصدر',
+      contributors: 'المساهمون',
+      feedback: 'الملاحظات',
+      searchCatalog: 'البحث'
     }
   },
   en: {
@@ -681,10 +681,10 @@ export const translations: Record<SupportedLanguage, TranslationsSchema> = {
       tagline: 'All-in-one Medical Study Hub for ASU',
       university: 'Ain Shams University Faculty of Medicine',
       madeBy: 'Made by',
-      shareResource: 'Share a Resource or Drive',
-      contributors: 'Team & Contributors',
-      feedback: 'Feedback & Suggestions',
-      searchCatalog: 'Comprehensive Search'
+      shareResource: 'Share Resource',
+      contributors: 'Contributors',
+      feedback: 'Feedback',
+      searchCatalog: 'Search'
     }
   }
 };

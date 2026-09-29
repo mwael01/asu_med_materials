@@ -11,11 +11,11 @@ const isYear = (y: number) => currentPath.startsWith(`/year/${y}`);
   <div class="max-w-6xl mx-auto px-4 sm:px-6 h-12 flex items-center justify-between gap-4">
     <!-- Brand Title -->
     <a href="/" class="inline-flex items-center text-zinc-900 dark:text-zinc-100 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors shrink-0">
-      <span class="font-bold text-xs sm:text-sm tracking-tight">ASU Med Materials</span>
+      <span class="font-bold text-xs sm:text-sm tracking-tight truncate max-w-[140px] sm:max-w-none shrink-0">ASU Med Materials</span>
     </a>
 
     <!-- Navigation Links (Desktop) -->
-    <nav class="hidden md:flex items-center gap-0.5 text-xs font-medium">
+    <nav class="hidden lg:flex items-center gap-0.5 text-xs font-medium">
       <a
         href="/"
         data-i18n="nav.home"
@@ -66,7 +66,7 @@ const isYear = (y: number) => currentPath.startsWith(`/year/${y}`);
       <button
         type="button"
         id="nav-change-year-btn"
-        class="trigger-multistage-selector inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium text-zinc-600 dark:text-zinc-300 hover:text-emerald-600 dark:hover:text-emerald-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 cursor-pointer"
+        class="trigger-multistage-selector hidden sm:inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium text-zinc-600 dark:text-zinc-300 hover:text-emerald-600 dark:hover:text-emerald-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 cursor-pointer"
         data-i18n-attr="title:nav.changeYearTitle"
         title="Change Year & Module"
       >
@@ -92,7 +92,7 @@ const isYear = (y: number) => currentPath.startsWith(`/year/${y}`);
       <!-- Bookmarks Trigger -->
       <button
         type="button"
-        class="open-bookmarks-trigger relative p-1.5 text-zinc-600 dark:text-zinc-300 hover:text-amber-500 dark:hover:text-amber-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-md transition-colors cursor-pointer"
+        class="open-bookmarks-trigger hidden sm:inline-flex relative p-1.5 text-zinc-600 dark:text-zinc-300 hover:text-amber-500 dark:hover:text-amber-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-md transition-colors cursor-pointer"
         data-i18n-attr="title:nav.savedResourcesTitle,aria-label:nav.savedResourcesTitle"
         title="Saved Bookmarks"
         aria-label="Saved Bookmarks"
@@ -141,7 +141,7 @@ const isYear = (y: number) => currentPath.startsWith(`/year/${y}`);
       <button
         type="button"
         id="mobile-menu-trigger"
-        class="md:hidden p-1.5 text-zinc-600 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-md transition-colors cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500"
+        class="lg:hidden p-1.5 text-zinc-600 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-md transition-colors cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500"
         data-i18n-attr="aria-label:nav.menu,title:nav.menu"
         aria-label="Navigation Menu"
         title="Navigation Menu"
@@ -199,7 +199,7 @@ const isYear = (y: number) => currentPath.startsWith(`/year/${y}`);
       // Hide year reset button for logged in users
       if (changeYearBtn) {
         changeYearBtn.classList.add('hidden');
-        changeYearBtn.classList.remove('inline-flex');
+        changeYearBtn.classList.remove('inline-flex', 'sm:inline-flex');
       }
     } else {
       avatar?.classList.add('hidden');
@@ -208,7 +208,7 @@ const isYear = (y: number) => currentPath.startsWith(`/year/${y}`);
       // Show year selection button for guests
       if (changeYearBtn) {
         changeYearBtn.classList.remove('hidden');
-        changeYearBtn.classList.add('inline-flex');
+        changeYearBtn.classList.add('inline-flex', 'sm:inline-flex');
       }
     }
   }
