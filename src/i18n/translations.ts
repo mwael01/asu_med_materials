@@ -271,8 +271,8 @@ export const translations: Record<SupportedLanguage, TranslationsSchema> = {
       tabLogs: 'سجل النشاط',
       // Direct Add & AI
       aiAssistantTitle: 'مساعد الذكاء الاصطناعي (Gemini 3.8 Flash)',
-      aiAssistantSubtitle: 'الصق رسائل الواتساب أو تيليجرام لاستخراج بيانات المادة تلقائياً',
-      aiInputPlaceholder: 'الصق رسالة الواتساب أو رابط المحتوى هنا، مثلاً: تسجيلات د. شيرين باثولوجي بلود مع الداتا https://t.me/...',
+      aiAssistantSubtitle: 'الصق أي نص أو رسائل أو روابط لاستخراج بيانات المادة كاملة (عربي وإنجليزي)',
+      aiInputPlaceholder: 'الصق أي نص هنا: رسائل واتساب، تفريغات، روابط يوتيوب أو درايف...',
       aiParseBtn: 'استخراج بالذكاء الاصطناعي',
       aiParsingBtn: 'جاري التحليل واستخراج البيانات...',
       aiSuccessNotice: '✨ تم استخراج البيانات بنجاح! راجع الحقول أدناه ثم اضغط نشر.',
@@ -616,8 +616,8 @@ export const translations: Record<SupportedLanguage, TranslationsSchema> = {
       tabLogs: 'Activity Log',
       // Direct Add & AI
       aiAssistantTitle: 'AI Study Material Assistant (Gemini 3.8 Flash)',
-      aiAssistantSubtitle: 'Paste WhatsApp messages or Telegram dumps to extract structured fields automatically',
-      aiInputPlaceholder: 'Paste the WhatsApp message or link here, e.g.: Dr. Shireen Blood Pathology recordings with drive https://t.me/...',
+      aiAssistantSubtitle: 'Paste any text, messages, or links to extract complete material details (Arabic & English)',
+      aiInputPlaceholder: 'Paste any text here: WhatsApp messages, lecture notes, YouTube or Drive links...',
       aiParseBtn: 'Extract with AI',
       aiParsingBtn: 'Analyzing & extracting fields...',
       aiSuccessNotice: '✨ Extracted successfully! Review the fields below and click Publish.',

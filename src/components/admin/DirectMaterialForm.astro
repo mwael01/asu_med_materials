@@ -57,40 +57,6 @@ const { modules } = Astro.props;
         class="w-full px-3 py-2 text-xs bg-white dark:bg-zinc-900 border border-emerald-200 dark:border-emerald-800/60 rounded-xl text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 font-sans leading-relaxed transition-all resize-y"
       ></textarea>
 
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
-        <div class="flex items-center gap-2">
-          <input
-            type="text"
-            id="admin-playlist-url"
-            placeholder="https://www.youtube.com/playlist?list=..."
-            class="flex-1 px-3 py-2 text-xs bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 rounded-xl text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-emerald-500"
-          />
-          <button
-            type="button"
-            id="admin-fetch-playlist-btn"
-            class="px-3 py-2 rounded-xl bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 text-zinc-700 dark:text-zinc-200 text-xs font-semibold transition-all cursor-pointer whitespace-nowrap"
-          >
-            Fetch Playlist
-          </button>
-        </div>
-
-        <div class="flex items-center gap-2">
-          <input
-            type="text"
-            id="admin-drive-url"
-            placeholder="https://drive.google.com/drive/folders/..."
-            class="flex-1 px-3 py-2 text-xs bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 rounded-xl text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-emerald-500"
-          />
-          <button
-            type="button"
-            id="admin-fetch-drive-btn"
-            class="px-3 py-2 rounded-xl bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 text-zinc-700 dark:text-zinc-200 text-xs font-semibold transition-all cursor-pointer whitespace-nowrap"
-          >
-            Fetch Drive
-          </button>
-        </div>
-      </div>
-
       <div class="flex flex-wrap items-center justify-between gap-2">
         <div class="flex items-center gap-2">
           <button
@@ -333,6 +299,40 @@ const { modules } = Astro.props;
       </div>
     </div>
 
+    <!-- Playlist-specific fields (shown when type is playlist) -->
+    <div id="admin-playlist-fields" class="hidden space-y-3 p-3 rounded-xl bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700">
+      <div>
+        <label for="admin-playlist-id" class="block text-xs font-bold text-zinc-700 dark:text-zinc-300 mb-1">
+          YouTube Playlist ID
+        </label>
+        <input
+          type="text"
+          id="admin-playlist-id"
+          placeholder="e.g. PLxxxxxxxxxxxxxxxxxxx"
+          class="w-full px-3 py-2 text-xs bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 rounded-xl text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+        />
+        <p class="text-[10px] text-zinc-500 mt-1">Auto-extracted from URL if provided</p>
+      </div>
+
+      <div>
+        <div class="flex items-center justify-between mb-2">
+          <label class="block text-xs font-bold text-zinc-700 dark:text-zinc-300">
+            Playlist Videos
+          </label>
+          <button
+            type="button"
+            id="admin-add-video-btn"
+            class="px-2 py-1 text-[10px] font-bold rounded-lg bg-zinc-200 dark:bg-zinc-700 hover:bg-zinc-300 dark:hover:bg-zinc-600 text-zinc-700 dark:text-zinc-200 transition-colors cursor-pointer"
+          >
+            + Add Video
+          </button>
+        </div>
+        <div id="admin-playlist-videos" class="space-y-2">
+          <!-- Video items will be added here dynamically -->
+        </div>
+      </div>
+    </div>
+
     <!-- Author & Contributor -->
     <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
       <div>
@@ -473,8 +473,51 @@ const { modules } = Astro.props;
     const submitBtn = document.getElementById('admin-direct-submit-btn') as HTMLButtonElement | null;
     const submitBtnText = document.getElementById('admin-direct-btn-text');
     const addToStagingBtn = document.getElementById('admin-add-to-staging-btn');
+    const playlistFields = document.getElementById('admin-playlist-fields');
+    const playlistIdInput = document.getElementById('admin-playlist-id') as HTMLInputElement | null;
+    const playlistVideosContainer = document.getElementById('admin-playlist-videos');
+    const addVideoBtn = document.getElementById('admin-add-video-btn');
 
     if (!form || !aiBtn || !aiInput) return;
+
+    let playlistVideos: Array<{ id: string; title: string; youtubeId?: string; url?: string; duration?: string }> = [];
+
+    function togglePlaylistFields() {
+      if (!playlistFields || !typeSelect) return;
+      const isPlaylist = typeSelect.value === 'playlist';
+      playlistFields.classList.toggle('hidden', !isPlaylist);
+      if (isPlaylist && playlistIdInput && urlInput && !playlistIdInput.value) {
+        const url = urlInput.value;
+        const match = url.match(/[?&]list=([^&]+)/);
+        if (match) playlistIdInput.value = match[1];
+      }
+    }
+
+    function addPlaylistVideo() {
+      if (!playlistVideosContainer) return;
+      const id = `video-${Date.now()}`;
+      const div = document.createElement('div');
+      div.className = 'flex items-center gap-2 p-2 rounded-lg bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700';
+      div.innerHTML = `
+        <input type="text" placeholder="Video title" class="flex-1 px-2 py-1 text-xs bg-transparent border-none focus:outline-none text-zinc-900 dark:text-zinc-100" data-video-title />
+        <input type="text" placeholder="YouTube ID" class="w-24 px-2 py-1 text-xs bg-transparent border-none focus:outline-none text-zinc-900 dark:text-zinc-100" data-video-yt-id />
+        <button type="button" class="text-zinc-400 hover:text-rose-500 cursor-pointer" data-remove-video>
+          <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      `;
+      div.querySelector('[data-remove-video]')?.addEventListener('click', () => {
+        div.remove();
+        playlistVideos = playlistVideos.filter((v) => v.id !== id);
+      });
+      playlistVideosContainer.appendChild(div);
+      playlistVideos.push({ id, title: '', youtubeId: '', url: '' });
+    }
+
+    typeSelect?.addEventListener('change', togglePlaylistFields);
+    addVideoBtn?.addEventListener('click', addPlaylistVideo);
+    togglePlaylistFields();
 
     let stagedItems: StagedItem[] = [];
     let activeSourceSubmissionId: string | null = null;
@@ -533,130 +576,6 @@ const { modules } = Astro.props;
           urlDupAlert?.classList.add('hidden');
         }
       }, 350);
-    });
-
-    // -------------------------------------------------------------
-    // Playlist Fetcher click handler
-    // -------------------------------------------------------------
-    const playlistBtn = document.getElementById('admin-fetch-playlist-btn') as HTMLButtonElement | null;
-    const playlistInput = document.getElementById('admin-playlist-url') as HTMLInputElement | null;
-
-    playlistBtn?.addEventListener('click', async () => {
-      if (!playlistInput) return;
-      const url = playlistInput.value.trim();
-      if (!url) {
-        playlistInput.focus();
-        return;
-      }
-
-      playlistBtn.disabled = true;
-      const originalText = playlistBtn.textContent;
-      playlistBtn.textContent = 'Fetching...';
-
-      try {
-        const res = await fetch('/api/fetch-playlist', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ playlistId: url })
-        });
-        const data = await res.json();
-
-        if (data.error) {
-          showToast(data.error, 'error');
-          return;
-        }
-
-        const videos = data.videos || [];
-        if (videos.length === 0) {
-          showToast('No videos found in playlist', 'info');
-          return;
-        }
-
-        const items = videos.map((v: { id: string; title: string; youtubeId: string; url: string }) => ({
-          id: `pl-${v.youtubeId}`,
-          title: v.title,
-          url: v.url,
-          type: 'youtube',
-          year: parseInt(yearSelect?.value || '2', 10) as 1|2|3|4|5,
-          moduleId: moduleSelect?.value || '',
-          subject: subjectInput?.value || '',
-          category: 'lectures',
-          author: '',
-          description: '',
-          titleEn: '',
-        }));
-
-        stagedItems = [...stagedItems, ...items];
-        renderBulkStaging();
-        showToast(`Fetched ${videos.length} videos from playlist`, 'success');
-      } catch (err) {
-        showToast(err instanceof Error ? err.message : 'Failed to fetch playlist', 'error');
-      } finally {
-        playlistBtn.disabled = false;
-        playlistBtn.textContent = originalText;
-      }
-    });
-
-    // -------------------------------------------------------------
-    // Drive Fetcher click handler
-    // -------------------------------------------------------------
-    const driveBtn = document.getElementById('admin-fetch-drive-btn') as HTMLButtonElement | null;
-    const driveInput = document.getElementById('admin-drive-url') as HTMLInputElement | null;
-
-    driveBtn?.addEventListener('click', async () => {
-      if (!driveInput) return;
-      const url = driveInput.value.trim();
-      if (!url) {
-        driveInput.focus();
-        return;
-      }
-
-      driveBtn.disabled = true;
-      const originalText = driveBtn.textContent;
-      driveBtn.textContent = 'Fetching...';
-
-      try {
-        const res = await fetch('/api/fetch-drive', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ driveUrl: url })
-        });
-        const data = await res.json();
-
-        if (data.error) {
-          showToast(data.error, 'error');
-          return;
-        }
-
-        const files = data.files || [];
-        if (files.length === 0) {
-          showToast('No files found in drive', 'info');
-          return;
-        }
-
-        const items = files.map((f: { id: string; name: string; mimeType: string; url: string }) => ({
-          id: `drv-${f.id}`,
-          title: f.name,
-          url: f.url,
-          type: 'drive',
-          year: parseInt(yearSelect?.value || '2', 10) as 1|2|3|4|5,
-          moduleId: moduleSelect?.value || '',
-          subject: subjectInput?.value || '',
-          category: 'central',
-          author: '',
-          description: '',
-          titleEn: '',
-        }));
-
-        stagedItems = [...stagedItems, ...items];
-        renderBulkStaging();
-        showToast(`Fetched ${files.length} files from drive`, 'success');
-      } catch (err) {
-        showToast(err instanceof Error ? err.message : 'Failed to fetch drive', 'error');
-      } finally {
-        driveBtn.disabled = false;
-        driveBtn.textContent = originalText;
-      }
     });
 
     // -------------------------------------------------------------
@@ -1098,7 +1017,9 @@ const { modules } = Astro.props;
         contributorUsername: item.contributorUsername || activeSourceContributorUsername || adminUser?.username,
         description: item.description,
         tags: [item.subject, item.type].filter(Boolean) as string[],
-        createdAt: new Date().toISOString()
+        createdAt: new Date().toISOString(),
+        playlistId: item.type === 'playlist' ? (item.url.match(/[?&]list=([^&]+)/)?.[1] || undefined) : undefined,
+        videos: item.type === 'playlist' && item.videos ? item.videos : undefined
       }));
 
       try {
@@ -1211,6 +1132,7 @@ const { modules } = Astro.props;
       const adminUser = getCachedUserProfile();
       const materialId = `mat_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`;
 
+      const isPlaylist = typeSelect?.value === 'playlist';
       const newMaterial: MaterialItem = {
         id: materialId,
         title,
@@ -1227,7 +1149,9 @@ const { modules } = Astro.props;
         contributorUsername: activeSourceContributorUsername || adminUser?.username,
         description: descInput?.value.trim() || undefined,
         tags: [subjectInput?.value.trim(), typeSelect?.value].filter(Boolean) as string[],
-        createdAt: new Date().toISOString()
+        createdAt: new Date().toISOString(),
+        playlistId: isPlaylist ? (playlistIdInput?.value.trim() || undefined) : undefined,
+        videos: isPlaylist && playlistVideos.length > 0 ? playlistVideos : undefined
       };
 
       try {

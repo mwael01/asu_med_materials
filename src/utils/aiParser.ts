@@ -5,15 +5,29 @@ export interface ParsedAIMaterial {
   title: string;
   titleEn?: string;
   description?: string;
+  descriptionEn?: string;
   url: string;
   urls: string[];
   type: ResourceType;
   category: MaterialCategory;
   year: AcademicYear;
+  semester?: 1 | 2;
   moduleId: string;
+  moduleTitle?: string;
+  moduleTitleEn?: string;
   subject?: string;
+  subjectEn?: string;
   author?: string;
+  authorEn?: string;
   tags: string[];
+  playlistId?: string;
+  videos?: Array<{
+    id: string;
+    title: string;
+    youtubeId?: string;
+    url?: string;
+    duration?: string;
+  }>;
 }
 
 /**
@@ -52,20 +66,34 @@ Return strictly a valid JSON object (no markdown quotes, no explanations) adheri
     {
       "title": "Clean, concise Arabic title describing the material (e.g. 'تفريغات د. شيرين - هستولوجي الدم')",
       "titleEn": "Concise English title (optional)",
-      "description": "Short informative description of what the material contains",
+      "description": "Short informative Arabic description of what the material contains",
+      "descriptionEn": "Short English description (optional)",
       "url": "Direct link to this specific resource",
       "type": "One of the valid resource types above",
       "category": "One of the valid categories above",
       "year": 1 | 2 | 3 | 4 | 5,
+      "semester": 1 | 2 (optional, infer from context if mentioned),
       "moduleId": "Matching module ID from the reference list above or best fit",
-      "subject": "Subject name (e.g. 'Pathology', 'Physiology', 'Histology', 'Anatomy', 'Biochemistry', 'Pharmacology', 'Microbiology', 'Internal Medicine', 'Surgery', 'Pediatrics', 'Obstetrics & Gynecology')",
-      "author": "Doctor or creator name who authored the material if mentioned (e.g. 'د. شيرين', 'د. عبد المنعم', 'د. موافي')",
+      "moduleTitle": "Module title in Arabic if mentioned",
+      "moduleTitleEn": "Module title in English if mentioned",
+      "subject": "Subject name in Arabic if mentioned",
+      "subjectEn": "Subject name in English (e.g. 'Pathology', 'Physiology', 'Histology', 'Anatomy', 'Biochemistry', 'Pharmacology', 'Microbiology', 'Internal Medicine', 'Surgery', 'Pediatrics', 'Obstetrics & Gynecology')",
+      "author": "Doctor or creator name in Arabic if mentioned (e.g. 'د. شيرين')",
+      "authorEn": "Doctor or creator name in English if mentioned",
       "tags": ["Array of 2-5 relevant keywords"]
     }
   ]
 }
 
-IMPORTANT: If the message contains multiple links or resources, return an entry in "materials" for EACH resource/link. If only one resource is present, return an array with that single item.`;
+IMPORTANT RULES:
+1. If the message contains multiple links or resources, return an entry in "materials" for EACH resource/link.
+2. If only one resource is present, return an array with that single item.
+3. Extract ALL available information from the text - do not leave fields empty if the information is present.
+4. For YouTube playlist links (URLs containing 'list=' or 'playlist'), set type to "playlist" and extract the playlistId from the URL (the value after 'list=').
+5. For Google Drive links, set type to "drive" and use the URL as-is.
+6. Infer year, semester, module, and subject from context clues in the text.
+7. If the text is in Arabic, provide Arabic titles/descriptions. If in English, provide English ones. If mixed, provide both.
+8. For playlists, if individual video information is available in the text, populate the "videos" array with {id, title, youtubeId, url, duration} for each video.`;
 }
 
 /**
@@ -116,19 +144,32 @@ function normalizeParsedItem(
     }
   }
 
+  const isPlaylist = detectedType === 'playlist';
+  const playlistId = isPlaylist && url.includes('list=')
+    ? url.split('list=')[1]?.split('&')[0]
+    : undefined;
+
   return {
     title,
     titleEn: item?.titleEn?.trim() || undefined,
     description: item?.description?.trim() || undefined,
+    descriptionEn: item?.descriptionEn?.trim() || undefined,
     url,
     urls: url ? [url] : extractUrls(rawMessage),
     type: detectedType,
-    category: item?.category || 'summaries',
+    category: item?.category || (isPlaylist ? 'lectures' : 'summaries'),
     year: finalYear,
+    semester: item?.semester === 1 || item?.semester === 2 ? item.semester : undefined,
     moduleId: finalModuleId,
+    moduleTitle: item?.moduleTitle?.trim() || undefined,
+    moduleTitleEn: item?.moduleTitleEn?.trim() || undefined,
     subject: item?.subject?.trim() || 'عام',
+    subjectEn: item?.subjectEn?.trim() || undefined,
     author: item?.author?.trim() || undefined,
-    tags: Array.isArray(item?.tags) ? item.tags.filter(Boolean) : []
+    authorEn: item?.authorEn?.trim() || undefined,
+    tags: Array.isArray(item?.tags) ? item.tags.filter(Boolean) : [],
+    playlistId,
+    videos: Array.isArray(item?.videos) ? item.videos : undefined
   };
 }
 
