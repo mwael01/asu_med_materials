@@ -195,6 +195,7 @@ export async function signInWithGoogle(): Promise<{ user: User; profile: UserPro
     profile = {
       uid: user.uid,
       username,
+      hasCustomUsername: false, // User can customize and finalize their username once
       displayName: user.displayName || rawName,
       photoURL: user.photoURL || undefined,
       createdAt: new Date().toISOString()
@@ -241,9 +242,16 @@ export async function signUpWithEmail(
   }
 
   const cleanUsername = username.trim().toLowerCase().replace(/^@/, '');
+  if (!cleanUsername || cleanUsername.length < 3 || cleanUsername.length > 25) {
+    throw new Error('يجب أن يتكون اسم المستخدم من 3 إلى 25 حرفاً أو رقماً');
+  }
+  if (!/^[a-z0-9_-]+$/.test(cleanUsername)) {
+    throw new Error('يسمح فقط بالأحرف الإنجليزية والأرقام والشرطة _ أو -');
+  }
+
   const isAvailable = await checkUsernameAvailable(cleanUsername);
   if (!isAvailable) {
-    throw new Error('اسم المستخدم مستخدم بالفعل أو غير صالح');
+    throw new Error('اسم المستخدم مستخدم بالفعل، يرجى اختيار اسم آخر');
   }
 
   const cred = await createUserWithEmailAndPassword(auth, email.trim(), pass);
@@ -255,6 +263,7 @@ export async function signUpWithEmail(
   const profile: UserProfile = {
     uid: user.uid,
     username: cleanUsername,
+    hasCustomUsername: true, // Email signups explicitly chose their permanent username
     displayName: displayName.trim(),
     academicYear,
     createdAt: new Date().toISOString()
@@ -263,6 +272,54 @@ export async function signUpWithEmail(
   await upsertUserProfile(profile);
   setCachedUserProfile(profile);
   return { user, profile };
+}
+
+/**
+ * Sets a permanent, immutable custom username for the user.
+ * Once set, it cannot be changed.
+ */
+export async function setPermanentUsername(
+  uid: string,
+  desiredUsername: string
+): Promise<{ success: boolean; profile?: UserProfile; error?: string }> {
+  const clean = desiredUsername.trim().toLowerCase().replace(/^@/, '');
+
+  if (!clean || clean.length < 3 || clean.length > 25) {
+    return { success: false, error: 'يجب أن يتكون اسم المستخدم من 3 إلى 25 حرفاً أو رقماً' };
+  }
+
+  if (!/^[a-z0-9_-]+$/.test(clean)) {
+    return { success: false, error: 'يسمح فقط بالأحرف الإنجليزية والأرقام والشرطة _ أو -' };
+  }
+
+  const isAvailable = await checkUsernameAvailable(clean, uid);
+  if (!isAvailable) {
+    return { success: false, error: 'اسم المستخدم مأخوذ بالفعل، يرجى اختيار اسم آخر' };
+  }
+
+  const currentProfile = await getUserProfileByUid(uid);
+  if (!currentProfile) {
+    return { success: false, error: 'تعذر العثور على بيانات المستخدم' };
+  }
+
+  if (currentProfile.hasCustomUsername) {
+    return { success: false, error: 'تم تعيين اسم المستخدم الخاص بك مسبقاً ولا يمكن تغييره' };
+  }
+
+  const updatedProfile: UserProfile = {
+    ...currentProfile,
+    username: clean,
+    hasCustomUsername: true,
+    updatedAt: new Date().toISOString()
+  };
+
+  const saved = await upsertUserProfile(updatedProfile);
+  if (saved) {
+    setCachedUserProfile(updatedProfile);
+    return { success: true, profile: updatedProfile };
+  } else {
+    return { success: false, error: 'تعذر حفظ اسم المستخدم في قاعدة البيانات' };
+  }
 }
 
 /**

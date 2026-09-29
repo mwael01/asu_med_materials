@@ -5,6 +5,7 @@ export type UserRole = 'student' | 'contributor' | 'admin';
 export interface UserProfile {
   uid: string;
   username: string;       // Unique handle, e.g. "mohamed_wael" (used for /profile?u=username)
+  hasCustomUsername?: boolean; // Whether the user has chosen their permanent unique username
   displayName: string;    // Display name, e.g. "Mohamed Wael"
   photoURL?: string;      // Firebase Storage avatar URL
   bio?: string;           // Student bio or description

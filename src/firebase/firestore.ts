@@ -389,9 +389,23 @@ export async function upsertUserProfile(profile: UserProfile): Promise<boolean> 
 
   try {
     const userDocRef = doc(db, USERS_COLLECTION, profile.uid);
+    const existingSnap = await getDoc(userDocRef);
+    let finalUsername = profile.username.trim().toLowerCase().replace(/^@/, '');
+    let hasCustomUsername = profile.hasCustomUsername ?? false;
+
+    if (existingSnap.exists()) {
+      const existing = existingSnap.data() as UserProfile;
+      // If the user already had a permanent custom username, lock it in permanently
+      if (existing.username && existing.hasCustomUsername) {
+        finalUsername = existing.username;
+        hasCustomUsername = true;
+      }
+    }
+
     const payload = {
       ...profile,
-      username: profile.username.trim().toLowerCase().replace(/^@/, ''),
+      username: finalUsername,
+      hasCustomUsername,
       updatedAt: new Date().toISOString()
     };
     await setDoc(userDocRef, sanitizeFirestorePayload(payload), { merge: true });

@@ -98,16 +98,22 @@ const allMaterials = await getAllMaterials();
               </div>
 
               <div>
-                <label for="auth-username" class="block text-xs font-bold text-zinc-700 dark:text-zinc-300 mb-1">Username (Handle for your link)</label>
+                <div class="flex items-center justify-between mb-1">
+                  <label for="auth-username" class="block text-xs font-bold text-zinc-700 dark:text-zinc-300">
+                    Username Handle <span class="text-emerald-600">*</span>
+                  </label>
+                  <span class="text-[10px] text-zinc-400 dark:text-zinc-500">Permanent 🔒</span>
+                </div>
                 <div class="relative flex items-center">
-                  <span class="absolute left-3 text-zinc-400 text-xs">@</span>
+                  <span class="absolute left-3 text-zinc-400 text-xs font-mono">@</span>
                   <input
                     type="text"
                     id="auth-username"
-                    placeholder="username"
-                    class="w-full text-xs pl-7 pr-3 py-2 rounded-xl border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 focus:outline-none focus:ring-2 focus:ring-emerald-500 dark:text-zinc-100"
+                    placeholder="e.g. ahmed_wael"
+                    class="w-full text-xs pl-7 pr-3 py-2 rounded-xl border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 focus:outline-none focus:ring-2 focus:ring-emerald-500 dark:text-zinc-100 font-mono"
                   />
                 </div>
+                <div id="auth-username-status" class="hidden text-[11px] mt-1 font-semibold"></div>
               </div>
             </div>
 
@@ -247,16 +253,28 @@ const allMaterials = await getAllMaterials();
             </div>
 
             <div>
-              <label for="edit-username" class="block text-xs font-bold text-zinc-700 dark:text-zinc-300 mb-1">Username Handle (Public URL)</label>
+              <div class="flex items-center justify-between mb-1">
+                <label for="edit-username" class="block text-xs font-bold text-zinc-700 dark:text-zinc-300">
+                  Username Handle (Public URL)
+                </label>
+                <span class="text-[10px] text-zinc-400 dark:text-zinc-500 font-semibold flex items-center gap-1">
+                  <span>Permanent</span>
+                  <span>🔒</span>
+                </span>
+              </div>
               <div class="relative flex items-center">
-                <span class="absolute left-3 text-zinc-400 text-xs">@</span>
+                <span class="absolute left-3 text-zinc-400 text-xs font-mono">@</span>
                 <input
                   type="text"
                   id="edit-username"
-                  required
-                  class="w-full text-xs pl-7 pr-3 py-2 rounded-xl border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 focus:outline-none focus:ring-2 focus:ring-emerald-500 dark:text-zinc-100"
+                  disabled
+                  readonly
+                  class="w-full text-xs pl-7 pr-3 py-2 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-zinc-100/80 dark:bg-zinc-800/60 text-zinc-500 dark:text-zinc-400 cursor-not-allowed select-all font-mono"
                 />
               </div>
+              <p class="text-[10px] text-zinc-400 dark:text-zinc-500 mt-1">
+                اسم المستخدم دائم ويمثل هويتك ورابط ملفك الشخصي العام ولا يمكن تغييره.
+              </p>
             </div>
           </div>
 
@@ -408,6 +426,59 @@ const allMaterials = await getAllMaterials();
       </div>
     </div>
   </div>
+
+  <!-- Choose Permanent Username Modal (Shown for accounts without custom username) -->
+  <div id="modal-set-username" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-zinc-900/60 backdrop-blur-xs">
+    <div class="w-full max-w-md p-6 rounded-2xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 shadow-xl space-y-4 text-start">
+      <div class="flex items-center gap-2.5">
+        <div class="w-10 h-10 rounded-xl bg-emerald-100 dark:bg-emerald-950/80 text-emerald-700 dark:text-emerald-300 flex items-center justify-center text-lg font-bold">
+          👤
+        </div>
+        <div>
+          <h3 class="text-sm font-bold text-zinc-900 dark:text-zinc-100">
+            اختر اسم المستخدم الخاص بك (Username)
+          </h3>
+          <p class="text-[11px] text-zinc-500 dark:text-zinc-400">
+            هذا الاسم سيكون معرّف حسابك ورابط ملفك الشخصي الدائم.
+          </p>
+        </div>
+      </div>
+
+      <div class="p-3 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800/40 text-[11px] text-amber-800 dark:text-amber-300 flex items-center gap-2">
+        <span class="text-base shrink-0">⚠️</span>
+        <span>
+          <strong>تنبيه هام:</strong> اسم المستخدم يُختار مرة واحدة فقط، ولا يمكن تغييره لاحقاً لحماية هويتك ومساهماتك.
+        </span>
+      </div>
+
+      <div class="space-y-1.5">
+        <label for="modal-input-username" class="block text-xs font-bold text-zinc-700 dark:text-zinc-300">
+          اسم المستخدم المرغوب <span class="text-emerald-600">*</span>
+        </label>
+        <div class="relative flex items-center">
+          <span class="absolute left-3 text-zinc-400 text-xs font-mono">@</span>
+          <input
+            type="text"
+            id="modal-input-username"
+            placeholder="e.g. mohamed_wael"
+            class="w-full text-xs pl-7 pr-3 py-2 rounded-xl border border-zinc-300 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800 focus:outline-none focus:ring-2 focus:ring-emerald-500 dark:text-zinc-100 font-mono"
+          />
+        </div>
+        <div id="modal-username-status" class="hidden text-[11px] mt-1 font-semibold"></div>
+      </div>
+
+      <div class="pt-2 flex items-center justify-end gap-2">
+        <button
+          type="button"
+          id="modal-btn-confirm-username"
+          disabled
+          class="w-full py-2.5 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 active:scale-[0.98] text-white text-xs font-bold transition-all shadow-xs disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed"
+        >
+          تأكيد وتثبيت اسم المستخدم
+        </button>
+      </div>
+    </div>
+  </div>
 </Layout>
 
 <script define:vars={{ allMaterialsSnapshot: allMaterials }}>
@@ -421,6 +492,7 @@ const allMaterials = await getAllMaterials();
     signInWithEmail,
     signUpWithEmail,
     signOutUser,
+    setPermanentUsername,
     getCachedUserProfile
   } from '../firebase/auth';
   import {
@@ -680,6 +752,17 @@ const allMaterials = await getAllMaterials();
       const publicShareUrl = `${window.location.origin}/profile?u=${encodeURIComponent(profile.username)}`;
       if (shareUrlInput) shareUrlInput.value = publicShareUrl;
 
+      // Check if user needs to choose their permanent custom username
+      const modal = document.getElementById('modal-set-username');
+      const modalInput = document.getElementById('modal-input-username') as HTMLInputElement | null;
+      if (!profile.hasCustomUsername && modal && modalInput) {
+        modal.classList.remove('hidden');
+        modalInput.value = (profile.username || '').replace(/_[a-z0-9]{4}$/, '');
+        modalInput.dispatchEvent(new Event('input'));
+      } else {
+        modal?.classList.add('hidden');
+      }
+
       // Populate user contributions
       const rawMaterials: MaterialItem[] = (window as any).__ALL_MATERIALS_SNAPSHOT || [];
       const userMaterials = rawMaterials.filter((m) => {
@@ -787,29 +870,19 @@ const allMaterials = await getAllMaterials();
       }
     });
 
-    // Save Profile Form
+    // Save Profile Form (Updates name, year, bio - Username is immutable)
     const editForm = document.getElementById('edit-profile-form');
     editForm?.addEventListener('submit', async (e) => {
       e.preventDefault();
       if (!currentProfile || !currentUser) return;
 
       const editName = (document.getElementById('edit-display-name') as HTMLInputElement)?.value.trim();
-      const editHandle = (document.getElementById('edit-username') as HTMLInputElement)?.value.trim().toLowerCase().replace(/^@/, '');
       const editYearVal = (document.getElementById('edit-academic-year') as HTMLSelectElement)?.value;
       const editBio = (document.getElementById('edit-bio') as HTMLTextAreaElement)?.value.trim();
 
-      if (!editName || !editHandle) {
-        notify('Name and username are required', 'error');
+      if (!editName) {
+        notify('Full Name is required', 'error');
         return;
-      }
-
-      // Check handle availability if changed
-      if (editHandle !== currentProfile.username) {
-        const isAvail = await checkUsernameAvailable(editHandle, currentUser.uid);
-        if (!isAvail) {
-          notify('This handle is already taken. Please choose another.', 'error');
-          return;
-        }
       }
 
       const saveBtn = document.getElementById('btn-save-profile') as HTMLButtonElement | null;
@@ -820,7 +893,6 @@ const allMaterials = await getAllMaterials();
 
       try {
         currentProfile.displayName = editName;
-        currentProfile.username = editHandle;
         currentProfile.academicYear = editYearVal ? (parseInt(editYearVal, 10) as AcademicYear) : undefined;
         currentProfile.bio = editBio;
 
@@ -834,6 +906,132 @@ const allMaterials = await getAllMaterials();
           saveBtn.disabled = false;
           saveBtn.textContent = 'Save Changes';
         }
+      }
+    });
+
+    // ─── Live Username Validation for Registration ───────────────────────
+    const authUsernameInput = document.getElementById('auth-username') as HTMLInputElement | null;
+    const authUsernameStatus = document.getElementById('auth-username-status');
+    let authCheckTimer: any = null;
+
+    authUsernameInput?.addEventListener('input', () => {
+      clearTimeout(authCheckTimer);
+      const val = authUsernameInput.value.trim().toLowerCase().replace(/^@/, '');
+      if (!val) {
+        authUsernameStatus?.classList.add('hidden');
+        return;
+      }
+
+      if (val.length < 3 || val.length > 25 || !/^[a-z0-9_-]+$/.test(val)) {
+        if (authUsernameStatus) {
+          authUsernameStatus.textContent = '❌ يجب أن يتكون من 3 إلى 25 حرفاً أو رقماً أو _';
+          authUsernameStatus.className = 'text-[11px] mt-1 font-semibold text-rose-600 dark:text-rose-400';
+          authUsernameStatus.classList.remove('hidden');
+        }
+        return;
+      }
+
+      if (authUsernameStatus) {
+        authUsernameStatus.textContent = 'جاري التحقق من التوفر...';
+        authUsernameStatus.className = 'text-[11px] mt-1 font-semibold text-zinc-400';
+        authUsernameStatus.classList.remove('hidden');
+      }
+
+      authCheckTimer = setTimeout(async () => {
+        try {
+          const isAvail = await checkUsernameAvailable(val);
+          if (authUsernameStatus) {
+            if (isAvail) {
+              authUsernameStatus.textContent = '✅ اسم المستخدم متاح ويمكنك استخدامه!';
+              authUsernameStatus.className = 'text-[11px] mt-1 font-semibold text-emerald-600 dark:text-emerald-400';
+            } else {
+              authUsernameStatus.textContent = '❌ اسم المستخدم مأخوذ بالفعل، يرجى اختيار اسم آخر';
+              authUsernameStatus.className = 'text-[11px] mt-1 font-semibold text-rose-600 dark:text-rose-400';
+            }
+            authUsernameStatus.classList.remove('hidden');
+          }
+        } catch {
+          authUsernameStatus?.classList.add('hidden');
+        }
+      }, 350);
+    });
+
+    // ─── Modal Set Permanent Username Logic ──────────────────────────────
+    const modalInput = document.getElementById('modal-input-username') as HTMLInputElement | null;
+    const modalStatus = document.getElementById('modal-username-status');
+    const modalConfirmBtn = document.getElementById('modal-btn-confirm-username') as HTMLButtonElement | null;
+    let modalCheckTimer: any = null;
+
+    modalInput?.addEventListener('input', () => {
+      clearTimeout(modalCheckTimer);
+      const val = modalInput.value.trim().toLowerCase().replace(/^@/, '');
+      if (!val) {
+        modalStatus?.classList.add('hidden');
+        if (modalConfirmBtn) modalConfirmBtn.disabled = true;
+        return;
+      }
+
+      if (val.length < 3 || val.length > 25 || !/^[a-z0-9_-]+$/.test(val)) {
+        if (modalStatus) {
+          modalStatus.textContent = '❌ يجب أن يتكون من 3 إلى 25 حرفاً أو رقماً أو _';
+          modalStatus.className = 'text-[11px] mt-1 font-semibold text-rose-600 dark:text-rose-400';
+          modalStatus.classList.remove('hidden');
+        }
+        if (modalConfirmBtn) modalConfirmBtn.disabled = true;
+        return;
+      }
+
+      if (modalStatus) {
+        modalStatus.textContent = 'جاري التحقق من التوفر...';
+        modalStatus.className = 'text-[11px] mt-1 font-semibold text-zinc-400';
+        modalStatus.classList.remove('hidden');
+      }
+
+      modalCheckTimer = setTimeout(async () => {
+        try {
+          const avail = await checkUsernameAvailable(val, currentUser?.uid);
+          if (modalStatus) {
+            if (avail) {
+              modalStatus.textContent = '✅ اسم المستخدم متاح!';
+              modalStatus.className = 'text-[11px] mt-1 font-semibold text-emerald-600 dark:text-emerald-400';
+              if (modalConfirmBtn) modalConfirmBtn.disabled = false;
+            } else {
+              modalStatus.textContent = '❌ اسم المستخدم مأخوذ بالفعل، يرجى اختيار اسم آخر';
+              modalStatus.className = 'text-[11px] mt-1 font-semibold text-rose-600 dark:text-rose-400';
+              if (modalConfirmBtn) modalConfirmBtn.disabled = true;
+            }
+            modalStatus.classList.remove('hidden');
+          }
+        } catch {
+          modalStatus?.classList.add('hidden');
+        }
+      }, 350);
+    });
+
+    modalConfirmBtn?.addEventListener('click', async () => {
+      if (!currentUser || !modalInput) return;
+      const desired = modalInput.value.trim().toLowerCase().replace(/^@/, '');
+      if (!desired) return;
+
+      modalConfirmBtn.disabled = true;
+      modalConfirmBtn.textContent = 'جاري التثبيت...';
+
+      try {
+        const res = await setPermanentUsername(currentUser.uid, desired);
+        if (res.success && res.profile) {
+          currentProfile = res.profile;
+          document.getElementById('modal-set-username')?.classList.add('hidden');
+          notify('تم تثبيت اسم المستخدم بنجاح! هذا الاسم دائم الآن.', 'success');
+          renderMyProfile(res.profile);
+        } else {
+          notify(res.error || 'تعذر تثبيت اسم المستخدم', 'error');
+          modalConfirmBtn.disabled = false;
+          modalConfirmBtn.textContent = 'تأكيد وتثبيت اسم المستخدم';
+        }
+      } catch (err: any) {
+        notify(err?.message || 'حدث خطأ غير متوقع', 'error');
+        modalConfirmBtn.disabled = false;
+        modalConfirmBtn.textContent = 'تأكيد وتثبيت اسم المستخدم';
       }
     });
 
@@ -904,7 +1102,18 @@ const allMaterials = await getAllMaterials();
       try {
         if (isRegisterMode) {
           const dName = (document.getElementById('auth-display-name') as HTMLInputElement)?.value.trim() || 'ASU Student';
-          const uName = (document.getElementById('auth-username') as HTMLInputElement)?.value.trim() || 'student';
+          const uName = (document.getElementById('auth-username') as HTMLInputElement)?.value.trim().toLowerCase().replace(/^@/, '');
+          if (!uName || uName.length < 3) {
+            if (authErrorMsg) {
+              authErrorMsg.textContent = 'يرجى إدخال اسم مستخدم فريد لحسابك (3 أحرف على الأقل).';
+              authErrorMsg.classList.remove('hidden');
+            }
+            if (authSubmitBtn) {
+              authSubmitBtn.removeAttribute('disabled');
+              authSubmitBtn.textContent = 'Create Account';
+            }
+            return;
+          }
           const res = await signUpWithEmail(email, pass, dName, uName);
           currentUser = res.user;
           currentProfile = res.profile;
