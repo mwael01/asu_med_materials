@@ -1,0 +1,196 @@
+---
+import type { ModuleInfo } from '../../types/materials';
+import DirectMaterialForm from './DirectMaterialForm.astro';
+import SubmissionsManager from './SubmissionsManager.astro';
+import FeedbackManager from './FeedbackManager.astro';
+import AdminUserManager from './AdminUserManager.astro';
+import AdminActivityLogs from './AdminActivityLogs.astro';
+import AdminModuleManager from './AdminModuleManager.astro';
+import AdminMaterialManager from './AdminMaterialManager.astro';
+
+interface Props {
+  modules: ModuleInfo[];
+}
+
+const { modules } = Astro.props;
+---
+
+<div class="space-y-6 text-start">
+  <!-- Admin Header Bar -->
+  <div class="p-4 sm:p-5 rounded-2xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 shadow-2xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+    <div>
+      <div class="flex items-center gap-2 mb-1">
+        <span class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-emerald-100 dark:bg-emerald-950/80 text-emerald-800 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800/40" data-i18n="admin.badge">
+          لوحة الإدارة
+        </span>
+        <h1 class="text-base sm:text-lg font-extrabold text-zinc-900 dark:text-zinc-100" data-i18n="admin.title">
+          إدارة المحتوى والمساهمات
+        </h1>
+      </div>
+      <p class="text-xs text-zinc-500 dark:text-zinc-400" data-i18n="admin.subtitle">
+        إضافة المواد مباشرة، مراجعة المساهمات، متابعة الملاحظات، وإدارة فريق المسؤولين.
+      </p>
+    </div>
+
+    <!-- Switch to Student Form Preview Button -->
+    <button
+      type="button"
+      id="btn-toggle-student-view"
+      class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800 hover:bg-zinc-100 dark:hover:bg-zinc-700/60 text-zinc-700 dark:text-zinc-200 text-xs font-semibold transition-all cursor-pointer shadow-2xs shrink-0 self-start sm:self-center"
+    >
+      <svg class="w-3.5 h-3.5 text-zinc-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
+        <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+      </svg>
+      <span id="toggle-student-view-text" data-i18n="admin.previewStudent">معاينة صفحة الطالب</span>
+    </button>
+  </div>
+
+  <!-- Tabs Navigation -->
+  <div class="flex items-center gap-1.5 border-b border-zinc-200 dark:border-zinc-800 overflow-x-auto no-scrollbar pb-1 text-xs">
+    <button
+      type="button"
+      data-tab="direct"
+      class="admin-nav-tab px-3.5 py-2 rounded-xl font-bold bg-emerald-600 text-white shadow-2xs transition-all cursor-pointer whitespace-nowrap flex items-center gap-1.5"
+    >
+      <span>✨</span>
+      <span data-i18n="admin.tabDirectAdd">إضافة المواد (فردي / دفعة)</span>
+    </button>
+
+    <button
+      type="button"
+      data-tab="submissions"
+      class="admin-nav-tab px-3.5 py-2 rounded-xl font-semibold text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-all cursor-pointer whitespace-nowrap flex items-center gap-1.5"
+    >
+      <span>📥</span>
+      <span data-i18n="admin.tabSubmissions">المساهمات المعلقة</span>
+    </button>
+
+    <button
+      type="button"
+      data-tab="modules"
+      class="admin-nav-tab px-3.5 py-2 rounded-xl font-semibold text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-all cursor-pointer whitespace-nowrap flex items-center gap-1.5"
+    >
+      <span>📦</span>
+      <span data-i18n="admin.tabModules">إدارة الموديولات</span>
+    </button>
+
+    <button
+      type="button"
+      data-tab="materials"
+      class="admin-nav-tab px-3.5 py-2 rounded-xl font-semibold text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-all cursor-pointer whitespace-nowrap flex items-center gap-1.5"
+    >
+      <span>🗑️</span>
+      <span data-i18n="admin.tabMaterials">إدارة المواد</span>
+    </button>
+
+    <button
+      type="button"
+      data-tab="feedback"
+      class="admin-nav-tab px-3.5 py-2 rounded-xl font-semibold text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-all cursor-pointer whitespace-nowrap flex items-center gap-1.5"
+    >
+      <span>💬</span>
+      <span data-i18n="admin.tabFeedback">الملاحظات والشكاوى</span>
+    </button>
+
+    <button
+      type="button"
+      data-tab="team"
+      class="admin-nav-tab px-3.5 py-2 rounded-xl font-semibold text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-all cursor-pointer whitespace-nowrap flex items-center gap-1.5"
+    >
+      <span>👥</span>
+      <span data-i18n="admin.tabTeam">فريق الإدارة</span>
+    </button>
+
+    <button
+      type="button"
+      data-tab="logs"
+      class="admin-nav-tab px-3.5 py-2 rounded-xl font-semibold text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-all cursor-pointer whitespace-nowrap flex items-center gap-1.5"
+    >
+      <span>📋</span>
+      <span data-i18n="admin.tabLogs">سجل النشاط</span>
+    </button>
+
+  </div>
+
+  <!-- Tab Contents -->
+  <div class="p-4 sm:p-6 rounded-2xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 shadow-xs">
+    <!-- 1. Direct Add -->
+    <div id="admin-view-direct" class="admin-view-section">
+      <DirectMaterialForm modules={modules} />
+    </div>
+
+    <!-- 2. Submissions -->
+    <div id="admin-view-submissions" class="admin-view-section hidden">
+      <SubmissionsManager />
+    </div>
+
+    <!-- 3. Module Management -->
+    <div id="admin-view-modules" class="admin-view-section hidden">
+      <AdminModuleManager />
+    </div>
+
+    <!-- 4. Material Management -->
+    <div id="admin-view-materials" class="admin-view-section hidden">
+      <AdminMaterialManager />
+    </div>
+
+    <!-- 3. Feedback -->
+    <div id="admin-view-feedback" class="admin-view-section hidden">
+      <FeedbackManager />
+    </div>
+
+    <!-- 4. Team -->
+    <div id="admin-view-team" class="admin-view-section hidden">
+      <AdminUserManager />
+    </div>
+
+    <!-- 5. Activity Logs -->
+    <div id="admin-view-logs" class="admin-view-section hidden">
+      <AdminActivityLogs />
+    </div>
+
+  </div>
+</div>
+
+<script>
+  function initAdminDashboard() {
+    const tabs = document.querySelectorAll('.admin-nav-tab');
+    const sections = {
+      direct: document.getElementById('admin-view-direct'),
+      submissions: document.getElementById('admin-view-submissions'),
+      modules: document.getElementById('admin-view-modules'),
+      materials: document.getElementById('admin-view-materials'),
+      feedback: document.getElementById('admin-view-feedback'),
+      team: document.getElementById('admin-view-team'),
+      logs: document.getElementById('admin-view-logs')
+    };
+
+    tabs.forEach((tab) => {
+      tab.addEventListener('click', () => {
+        const target = tab.getAttribute('data-tab');
+
+        // Style tabs
+        tabs.forEach((t) => {
+          t.className =
+            'admin-nav-tab px-3.5 py-2 rounded-xl font-semibold text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-all cursor-pointer whitespace-nowrap flex items-center gap-1.5';
+        });
+        tab.className =
+          'admin-nav-tab px-3.5 py-2 rounded-xl font-bold bg-emerald-600 text-white shadow-2xs transition-all cursor-pointer whitespace-nowrap flex items-center gap-1.5';
+
+        // Switch views
+        Object.entries(sections).forEach(([key, el]) => {
+          if (!el) return;
+          if (key === target) {
+            el.classList.remove('hidden');
+          } else {
+            el.classList.add('hidden');
+          }
+        });
+      });
+    });
+  }
+
+  initAdminDashboard();
+  document.addEventListener('astro:after-swap', initAdminDashboard);
+</script>

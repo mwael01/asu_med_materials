@@ -38,6 +38,7 @@ export interface ModuleInfo {
   subjects: string[];
   description?: string;
   descriptionAr?: string;
+  active?: boolean; // defaults to true when undefined
 }
 
 export interface MaterialItem {
@@ -54,10 +55,15 @@ export interface MaterialItem {
   subject?: string;
   author?: string | string[]; // Creator / Doctor / Teacher who prepared the materials
   addedBy?: string | string[]; // Contributor / Student who added it to the platform
+  contributorUid?: string; // Firebase Auth UID of the contributing user
+  contributorUsername?: string; // Username handle of the contributing user
+  added_by_username?: string; // Username of the person who added the material
+  creator_username?: string; // Username of the content creator (if they have a profile)
   tags: string[];
   createdAt?: string;
   playlistId?: string; // YouTube playlist ID if applicable
   videos?: PlaylistItem[]; // Individual videos for multi-part video series
+  bookmarksCount?: number; // Total number of students who bookmarked/loved this material
 }
 
 export interface FilterOptions {
@@ -74,13 +80,5 @@ export interface UserPreferences {
   moduleId?: string;
 }
 
-export type FolderColor = 'emerald' | 'blue' | 'purple' | 'amber' | 'rose' | 'teal';
 
-export interface UserFolder {
-  id: string;
-  name: string;
-  color?: FolderColor;
-  materialIds: string[];
-  createdAt: number;
-}
 

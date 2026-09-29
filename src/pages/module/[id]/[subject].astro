@@ -3,45 +3,28 @@ import Layout from '../../../layouts/Layout.astro';
 import GroupedResourceList from '../../../components/materials/GroupedResourceList.astro';
 import FilterToolbar from '../../../components/search/FilterToolbar.astro';
 import SubjectBar from '../../../components/materials/SubjectBar.astro';
-import { modulesData } from '../../../data/modules';
+import { getModuleById } from '../../../data/modules';
 import { getMaterialsByModule, getMaterialsByModuleAndSubject } from '../../../data/materials';
 import { subjectToSlug } from '../../../utils/slug';
-import type { ModuleInfo } from '../../../types/materials';
 
-export function getStaticPaths() {
-  const paths: Array<{
-    params: { id: string; subject: string };
-    props: { module: ModuleInfo; subjectName: string };
-  }> = [];
-
-  for (const mod of modulesData) {
-    for (const sub of mod.subjects) {
-      paths.push({
-        params: {
-          id: mod.id,
-          subject: subjectToSlug(sub)
-        },
-        props: {
-          module: mod,
-          subjectName: sub
-        }
-      });
-    }
-  }
-
-  return paths;
+const { id, subject: subjectSlug } = Astro.params;
+if (!id || !subjectSlug) {
+  return Astro.redirect('/404');
 }
 
-interface Props {
-  module: ModuleInfo;
-  subjectName: string;
+const module = await getModuleById(id);
+if (!module) {
+  return Astro.redirect('/404');
 }
 
-const { module, subjectName } = Astro.props;
-const currentSubjectSlug = subjectToSlug(subjectName);
+const subjectName = module.subjects.find((sub) => subjectToSlug(sub) === subjectSlug);
+if (!subjectName) {
+  return Astro.redirect(`/module/${id}`);
+}
 
-const allModuleMaterials = getMaterialsByModule(module.id);
-const subjectMaterials = getMaterialsByModuleAndSubject(module.id, subjectName);
+const currentSubjectSlug = subjectSlug;
+const allModuleMaterials = await getMaterialsByModule(module.id);
+const subjectMaterials = await getMaterialsByModuleAndSubject(module.id, subjectName);
 
 // Compute counts per subject
 const materialCounts: Record<string, number> = {};

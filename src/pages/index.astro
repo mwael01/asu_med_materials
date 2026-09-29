@@ -4,13 +4,12 @@ import SearchBar from '../components/search/SearchBar.astro';
 import ModuleCard from '../components/materials/ModuleCard.astro';
 import ResourceCard from '../components/materials/ResourceCard.astro';
 import { getAllMaterials } from '../data/materials';
-import { modulesData } from '../data/modules';
-import welcomeQuotes from '../data/welcome-quotes.json';
+import { getAllModules } from '../data/modules';
 import { subjectToSlug } from '../utils/slug';
 import type { MaterialItem, ModuleInfo } from '../types/materials';
 
-const allMaterials = getAllMaterials();
-const allModules = modulesData;
+const allMaterials = await getAllMaterials();
+const allModules = await getAllModules();
 
 // Organize materials into Module > Subject groups for the student's personal library
 interface LibrarySubjectGroup {
@@ -133,10 +132,18 @@ if (generalMaterials.length > 0) {
         </h2>
         <button
           type="button"
+          id="home-guest-change-year-btn"
           class="trigger-multistage-selector text-xs text-emerald-600 dark:text-emerald-400 hover:underline font-semibold cursor-pointer"
         >
           (<span data-i18n="nav.chooseYear">Change Year</span>)
         </button>
+        <a
+          href="/profile"
+          id="home-user-edit-year-link"
+          class="hidden text-xs text-emerald-600 dark:text-emerald-400 hover:underline font-semibold cursor-pointer"
+        >
+          (<span data-i18n="nav.chooseYear">Change Year</span>)
+        </a>
       </div>
 
       <a id="home-year-modules-link" href="/year/2" class="text-xs font-bold text-emerald-600 dark:text-emerald-400 hover:underline">
@@ -147,11 +154,38 @@ if (generalMaterials.length > 0) {
     <!-- Modules Grid using standard ModuleCard -->
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4" id="home-modules-grid">
       {allModules.map((mod) => (
-        <div data-module-year={mod.year} class="home-module-wrapper">
+        <div
+          data-module-year={mod.year}
+          class:list={['home-module-wrapper', mod.year !== 2 && 'hidden']}
+        >
           <ModuleCard module={mod} resourceCount={allMaterials.filter(m => m.moduleId === mod.id).length} />
         </div>
       ))}
     </div>
+
+    <!-- Zero-Flash Early Pre-Paint Year Setter (Prevents repeated reference books flicker) -->
+    <script is:inline>
+      (function () {
+        try {
+          var y = parseInt(localStorage.getItem('asumed_user_year') || '2', 10);
+          var wrappers = document.querySelectorAll('.home-module-wrapper');
+          var matchCount = 0;
+          wrappers.forEach(function (el) {
+            var modYear = parseInt(el.getAttribute('data-module-year') || '0', 10);
+            if (modYear === y) {
+              el.classList.remove('hidden');
+              matchCount++;
+            } else {
+              el.classList.add('hidden');
+            }
+          });
+          var placeholder = document.getElementById('no-modules-placeholder');
+          if (placeholder) placeholder.classList.toggle('hidden', matchCount > 0);
+          var link = document.getElementById('home-year-modules-link');
+          if (link) link.href = '/year/' + y;
+        } catch (e) {}
+      })();
+    </script>
 
     <!-- Fallback when selected year has no registered modules yet -->
     <div id="no-modules-placeholder" class="hidden py-8 text-center border border-dashed border-zinc-200 dark:border-zinc-800 rounded-xl p-6 bg-white dark:bg-zinc-900/60">
@@ -202,14 +236,15 @@ if (generalMaterials.length > 0) {
         <!-- Injected dynamically: All Modules, Module chips -->
       </div>
 
-      <!-- Unstudied Only Toggle Button -->
+      <!-- Completed Materials Filter Toggle Button -->
       <button
         type="button"
-        id="home-library-unstudied-toggle"
-        class="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg border bg-white dark:bg-zinc-900 text-zinc-700 dark:text-zinc-300 border-zinc-200/80 dark:border-zinc-800 hover:border-zinc-300 transition-all cursor-pointer shadow-2xs"
+        id="home-library-completed-toggle"
+        class="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg border transition-all cursor-pointer shadow-2xs bg-emerald-50 text-emerald-700 border-emerald-200/80 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-800/60"
+        aria-pressed="true"
       >
-        <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
-        <span data-i18n="home.unstudiedOnly">Unstudied Only</span>
+        <span id="home-library-toggle-dot" class="w-2 h-2 rounded-full bg-emerald-500"></span>
+        <span id="home-library-toggle-text" data-i18n="home.hideCompleted">Hide Completed</span>
       </button>
     </div>
 
@@ -322,7 +357,9 @@ if (generalMaterials.length > 0) {
     getStoredStudiedIds
   } from '../utils/storage';
   import { getCurrentLanguage } from '../utils/i18n';
+  import { getCachedUserProfile, onAuthChange } from '../firebase/auth';
 
+  let unsubscribeAuth: (() => void) | null = null;
   let homePageAbortController: AbortController | null = null;
 
   function initHomePage(): void {
@@ -332,7 +369,22 @@ if (generalMaterials.length > 0) {
     homePageAbortController = new AbortController();
     const { signal } = homePageAbortController;
 
-    // 1. Active Year Sync for Modules
+    // 1. Auth & Change Year link sync
+    const guestChangeYearBtn = document.getElementById('home-guest-change-year-btn');
+    const userEditYearLink = document.getElementById('home-user-edit-year-link');
+
+    function syncHomeAuth(): void {
+      const profile = getCachedUserProfile();
+      if (profile) {
+        guestChangeYearBtn?.classList.add('hidden');
+        userEditYearLink?.classList.remove('hidden');
+      } else {
+        guestChangeYearBtn?.classList.remove('hidden');
+        userEditYearLink?.classList.add('hidden');
+      }
+    }
+
+    // 2. Active Year Sync for Modules
     const yearModulesLink = document.getElementById('home-year-modules-link') as HTMLAnchorElement | null;
     const moduleWrappers = document.querySelectorAll<HTMLElement>('.home-module-wrapper');
     const noModulesPlaceholder = document.getElementById('no-modules-placeholder');
@@ -363,12 +415,14 @@ if (generalMaterials.length > 0) {
       syncYear();
     }, { signal });
 
-    // 2. Personal Study Library on Home Page (Hierarchical: Module > Subject > Materials)
+    // 3. Personal Study Library on Home Page (Hierarchical: Module > Subject > Materials)
     const libraryEmpty = document.getElementById('home-library-empty');
     const libraryContent = document.getElementById('home-library-content');
     const libraryControls = document.getElementById('home-library-controls');
     const moduleFilterChipsContainer = document.getElementById('home-library-module-chips');
-    const unstudiedToggleBtn = document.getElementById('home-library-unstudied-toggle');
+    const completedToggleBtn = document.getElementById('home-library-completed-toggle');
+    const completedToggleDot = document.getElementById('home-library-toggle-dot');
+    const completedToggleText = document.getElementById('home-library-toggle-text');
     const emptyFilterNotice = document.getElementById('home-library-filter-empty');
 
     const cardItems = document.querySelectorAll<HTMLElement>('.home-library-card-item');
@@ -376,7 +430,7 @@ if (generalMaterials.length > 0) {
     const moduleGroups = document.querySelectorAll<HTMLElement>('.home-library-module-group');
 
     let activeModuleFilter = 'all'; // 'all' or moduleId
-    let unstudiedOnly = false;
+    let hideCompleted = true; // default: hide completed materials for a clean UI
 
     function renderHomeLibrary(): void {
       const isAr = getCurrentLanguage() === 'ar';
@@ -397,13 +451,18 @@ if (generalMaterials.length > 0) {
       libraryContent?.classList.remove('hidden');
       libraryControls?.classList.remove('hidden');
 
-      // Identify modules that have saved items
+      // Count how many bookmarked items are studied
+      let totalCompleted = 0;
       const modulesWithSaved = new Map<string, number>();
+
       cardItems.forEach((card) => {
         const id = card.getAttribute('data-home-card-id') || '';
         const modId = card.getAttribute('data-home-card-module') || 'general';
         if (bookmarks.includes(id)) {
           modulesWithSaved.set(modId, (modulesWithSaved.get(modId) || 0) + 1);
+          if (studiedIds.includes(id)) {
+            totalCompleted++;
+          }
         }
       });
 
@@ -461,14 +520,25 @@ if (generalMaterials.length > 0) {
         });
       }
 
-      // Update Unstudied toggle button styling
-      if (unstudiedToggleBtn) {
-        if (unstudiedOnly) {
-          unstudiedToggleBtn.className =
-            'inline-flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-lg border bg-emerald-600 text-white border-emerald-600 dark:bg-emerald-500 dark:border-emerald-500 shadow-2xs transition-all cursor-pointer';
+      // Update Completed toggle button styling and text
+      if (completedToggleBtn) {
+        completedToggleBtn.setAttribute('aria-pressed', hideCompleted ? 'true' : 'false');
+        if (hideCompleted) {
+          completedToggleBtn.className =
+            'inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg border transition-all cursor-pointer shadow-2xs bg-emerald-50 text-emerald-700 border-emerald-200/80 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-800/60';
+          if (completedToggleDot) completedToggleDot.className = 'w-2 h-2 rounded-full bg-emerald-500';
+          if (completedToggleText) {
+            completedToggleText.textContent = isAr ? 'إخفاء المكتمل' : 'Hide Completed';
+          }
         } else {
-          unstudiedToggleBtn.className =
-            'inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg border bg-white dark:bg-zinc-900 text-zinc-700 dark:text-zinc-300 border-zinc-200/80 dark:border-zinc-800 hover:border-zinc-300 transition-all cursor-pointer shadow-2xs';
+          completedToggleBtn.className =
+            'inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg border transition-all cursor-pointer shadow-2xs bg-white dark:bg-zinc-900 text-zinc-700 dark:text-zinc-300 border-zinc-200/80 dark:border-zinc-800 hover:border-zinc-300';
+          if (completedToggleDot) completedToggleDot.className = 'w-2 h-2 rounded-full bg-zinc-400';
+          if (completedToggleText) {
+            completedToggleText.textContent = isAr
+              ? `عرض المكتمل (${totalCompleted})`
+              : `Show Completed (${totalCompleted})`;
+          }
         }
       }
 
@@ -482,9 +552,9 @@ if (generalMaterials.length > 0) {
         const isStudied = studiedIds.includes(cid);
 
         const matchesModule = activeModuleFilter === 'all' || cMod === activeModuleFilter;
-        const matchesStudied = !unstudiedOnly || !isStudied;
+        const matchesCompleted = !hideCompleted || !isStudied;
 
-        const isVisible = isSaved && matchesModule && matchesStudied;
+        const isVisible = isSaved && matchesModule && matchesCompleted;
         card.classList.toggle('hidden', !isVisible);
 
         if (isVisible) totalVisibleCards++;
@@ -524,13 +594,21 @@ if (generalMaterials.length > 0) {
       }
     }
 
-    unstudiedToggleBtn?.addEventListener('click', () => {
-      unstudiedOnly = !unstudiedOnly;
+    completedToggleBtn?.addEventListener('click', () => {
+      hideCompleted = !hideCompleted;
       renderHomeLibrary();
     }, { signal });
 
+    syncHomeAuth();
     syncYear();
     renderHomeLibrary();
+
+    if (unsubscribeAuth) unsubscribeAuth();
+    unsubscribeAuth = onAuthChange(() => {
+      syncHomeAuth();
+      syncYear();
+      renderHomeLibrary();
+    });
 
     window.addEventListener('user-preferences-updated', () => {
       syncYear();

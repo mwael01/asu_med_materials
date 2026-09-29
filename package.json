@@ -9,21 +9,31 @@
     "dev": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
-    "astro": "astro"
+    "astro": "astro",
+    "seed:firestore": "node scripts/seed-firestore.mjs",
+    "schema:sync": "node scripts/sync-firebase-schema.mjs",
+    "migrate:contributions": "node scripts/migrate-contributions.mjs",
+    "deploy:indexes": "firebase deploy --only firestore:indexes",
+    "deploy:rules": "firebase deploy --only firestore:rules",
+    "deploy:all": "firebase deploy --only firestore"
   },
   "dependencies": {
     "@astrojs/check": "^0.9.10",
     "@tailwindcss/vite": "^4.3.3",
     "@vercel/analytics": "^2.0.1",
     "astro": "^7.3.3",
+    "firebase": "^12.19.0",
     "tailwindcss": "^4.3.3",
     "typescript": "^6",
     "vercel": "^59.23.2"
   },
   "allowScripts": {
-    "esbuild": true
+    "esbuild": true,
+    "@firebase/util": true,
+    "protobufjs": true
   },
   "devDependencies": {
+    "@astrojs/vercel": "^11.0.11",
     "sharp": "^0.35.4"
   }
 }

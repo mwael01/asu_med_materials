@@ -1,0 +1,421 @@
+---
+// SubmissionsManager Component
+---
+
+<div class="space-y-4 text-start">
+  <!-- Status Filter Toolbar -->
+  <div class="flex items-center justify-between border-b border-zinc-200 dark:border-zinc-800 pb-3">
+    <div class="flex items-center gap-1.5" id="sub-filter-tabs">
+      <button
+        type="button"
+        data-status="pending"
+        class="sub-filter-btn px-3 py-1.5 rounded-lg text-xs font-bold bg-emerald-100 dark:bg-emerald-950/80 text-emerald-800 dark:text-emerald-300 transition-all cursor-pointer"
+      >
+        <span>المعلقة (Pending)</span>
+      </button>
+      <button
+        type="button"
+        data-status="approved"
+        class="sub-filter-btn px-3 py-1.5 rounded-lg text-xs font-semibold text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-200 transition-all cursor-pointer"
+      >
+        <span>المعتمدة (Approved)</span>
+      </button>
+      <button
+        type="button"
+        data-status="rejected"
+        class="sub-filter-btn px-3 py-1.5 rounded-lg text-xs font-semibold text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-200 transition-all cursor-pointer"
+      >
+        <span>المرفوضة (Rejected)</span>
+      </button>
+    </div>
+
+    <button
+      type="button"
+      id="sub-refresh-btn"
+      class="text-xs text-zinc-500 hover:text-emerald-600 dark:hover:text-emerald-400 flex items-center gap-1 cursor-pointer font-medium"
+      title="تحديث القائمة"
+    >
+      <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" />
+      </svg>
+      <span>تحديث</span>
+    </button>
+  </div>
+
+  <!-- Loading State -->
+  <div id="sub-loading" class="py-10 text-center text-xs text-zinc-400">
+    <div class="w-6 h-6 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin mx-auto mb-2"></div>
+    <span>جاري تحميل المساهمات وفحص الروابط المكررة...</span>
+  </div>
+
+  <!-- Empty State -->
+  <div id="sub-empty" class="hidden py-10 text-center space-y-1">
+    <p class="text-xs font-bold text-zinc-700 dark:text-zinc-300" data-i18n="admin.noSubmissions">
+      No pending submissions at the moment.
+    </p>
+    <p class="text-[11px] text-zinc-400">أي روابط أو رسائل يشاركها الطلاب ستظهر هنا فوراً للمراجعة.</p>
+  </div>
+
+  <!-- Submissions Feed List -->
+  <div id="sub-list" class="space-y-3"></div>
+</div>
+
+<script>
+  import {
+    fetchSubmissionsFromFirestore,
+    updateSubmissionStatus,
+    deleteSubmissionFromFirestore,
+    saveMaterialToFirestore,
+    checkUrlsBatchInFirestore,
+    incrementUserContributionsCount
+  } from '../../firebase/firestore';
+  import { getCachedUserProfile } from '../../firebase/auth';
+  import { showToast } from '../../utils/toast';
+  import { extractUrls } from '../../utils/submission';
+  import type { SubmissionDocument } from '../../firebase/schema';
+  import type { MaterialItem, AcademicYear } from '../../types/materials';
+
+  function initSubmissionsManager() {
+    const listEl = document.getElementById('sub-list');
+    const loadingEl = document.getElementById('sub-loading');
+    const emptyEl = document.getElementById('sub-empty');
+    const refreshBtn = document.getElementById('sub-refresh-btn');
+    const filterTabs = document.getElementById('sub-filter-tabs');
+
+    let currentFilter: 'pending' | 'approved' | 'rejected' = 'pending';
+    let allSubmissions: SubmissionDocument[] = [];
+    let duplicateUrlMap = new Map<string, MaterialItem>();
+
+    async function loadSubmissions() {
+      if (!listEl) return;
+      loadingEl?.classList.remove('hidden');
+      emptyEl?.classList.add('hidden');
+      listEl.innerHTML = '';
+
+      allSubmissions = await fetchSubmissionsFromFirestore();
+
+      // Collect all URLs across all submissions to batch check against Firestore
+      const urlsToCheck: string[] = [];
+      for (const s of allSubmissions) {
+        if (s.url) urlsToCheck.push(s.url);
+        if (Array.isArray(s.urls)) {
+          for (const u of s.urls) urlsToCheck.push(u);
+        }
+        const fromContent = extractUrls(s.content || '');
+        for (const u of fromContent) urlsToCheck.push(u);
+      }
+
+      duplicateUrlMap = await checkUrlsBatchInFirestore(urlsToCheck);
+      loadingEl?.classList.add('hidden');
+      renderList();
+    }
+
+    function renderList() {
+      if (!listEl) return;
+      listEl.innerHTML = '';
+
+      const filtered = allSubmissions.filter((s) => s.status === currentFilter);
+
+      if (filtered.length === 0) {
+        emptyEl?.classList.remove('hidden');
+        return;
+      }
+      emptyEl?.classList.add('hidden');
+
+      filtered.forEach((sub) => {
+        const card = document.createElement('div');
+        card.className =
+          'p-4 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-2xs space-y-2.5 transition-all';
+
+        const dateStr = sub.timestamp ? new Date(sub.timestamp).toLocaleDateString('ar-EG', { dateStyle: 'medium' }) : '';
+        const rawContent = sub.content || sub.url || sub.notes || '';
+        const contributorName = sub.contributor || 'فاعل خير';
+        const displayYear = sub.year && sub.year !== 'general' ? `سنة ${sub.year}` : 'عام';
+        const displayModule = sub.moduleId && sub.moduleId !== 'general' ? sub.moduleId : '';
+
+        // Check if any link in this submission is duplicate
+        const subUrls = [
+          sub.url,
+          ...(Array.isArray(sub.urls) ? sub.urls : []),
+          ...extractUrls(sub.content || '')
+        ].filter(Boolean) as string[];
+
+        let duplicateMatch: MaterialItem | undefined;
+        for (const u of subUrls) {
+          if (duplicateUrlMap.has(u)) {
+            duplicateMatch = duplicateUrlMap.get(u);
+            break;
+          }
+        }
+
+        card.innerHTML = `
+          <div class="flex items-start justify-between gap-2">
+            <div>
+              <div class="flex items-center gap-2">
+                <span class="text-xs font-bold text-zinc-900 dark:text-zinc-100">${escapeHtml(sub.title || 'مساهمة جديدة')}</span>
+                <span class="text-[10px] px-2 py-0.5 rounded-md font-semibold ${
+                  sub.status === 'pending'
+                    ? 'bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800/40'
+                    : sub.status === 'approved'
+                      ? 'bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800/40'
+                      : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-500'
+                }">
+                  ${sub.status === 'pending' ? 'قيد المراجعة' : sub.status === 'approved' ? 'معتمد' : 'مرفوض'}
+                </span>
+                ${
+                  duplicateMatch
+                    ? `<span class="text-[10px] font-bold px-2 py-0.5 rounded bg-amber-100 dark:bg-amber-950 text-amber-800 dark:text-amber-300 border border-amber-300 dark:border-amber-800">
+                        ⚠️ رابط مكرر بالموقع
+                      </span>`
+                    : ''
+                }
+              </div>
+              <div class="text-[11px] text-zinc-400 mt-0.5 flex flex-wrap items-center gap-2">
+                <span>بواسطة: <strong>${escapeHtml(contributorName)}</strong>${sub.contributorUsername ? ` (@${escapeHtml(sub.contributorUsername)})` : ''}</span>
+                <span>•</span>
+                <span>${escapeHtml(displayYear)} ${escapeHtml(displayModule)}</span>
+                <span>•</span>
+                <span>${dateStr}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Duplicate Alert on Card -->
+          ${
+            duplicateMatch
+              ? `<div class="p-2.5 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800/40 text-xs text-amber-900 dark:text-amber-200 flex items-center justify-between gap-2">
+                  <div class="flex items-center gap-1.5">
+                    <span class="text-base shrink-0">⚠️</span>
+                    <span>الرابط مسجل مسبقاً بعنوان: <strong>"${escapeHtml(duplicateMatch.title)}"</strong></span>
+                  </div>
+                  <span class="text-[10px] font-bold text-amber-700 dark:text-amber-300 shrink-0">موجود بالموقع</span>
+                </div>`
+              : ''
+          }
+
+          <!-- Content / URLs -->
+          <div class="p-2.5 rounded-lg bg-zinc-50 dark:bg-zinc-800/60 text-xs text-zinc-700 dark:text-zinc-300 font-mono break-all whitespace-pre-wrap leading-relaxed select-text">
+            ${escapeHtml(rawContent)}
+          </div>
+
+          ${
+            Array.isArray(sub.urls) && sub.urls.length > 0
+              ? `<div class="flex flex-wrap gap-1.5 pt-1">
+                  ${sub.urls
+                    .map((u) => {
+                      const isDup = duplicateUrlMap.has(u);
+                      return `<a href="${escapeHtml(u)}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1 text-[11px] ${
+                        isDup
+                          ? 'text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/40 border border-amber-300 dark:border-amber-800/50'
+                          : 'text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/40'
+                      } hover:underline px-2 py-0.5 rounded">
+                          <svg class="w-3 h-3 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+                          <span class="max-w-[200px] truncate">${escapeHtml(u)}</span>
+                          ${isDup ? '<span class="text-[9px] font-bold">(مكرر)</span>' : ''}
+                        </a>`;
+                    })
+                    .join('')}
+                </div>`
+              : ''
+          }
+
+          <!-- Action Buttons -->
+          <div class="flex flex-wrap items-center justify-end gap-2 pt-2 border-t border-zinc-100 dark:border-zinc-800/80">
+            <button
+              type="button"
+              class="sub-fill-ai-btn px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-100 dark:hover:bg-emerald-900/60 transition-all cursor-pointer flex items-center gap-1"
+              data-id="${sub.id}"
+              data-contributor="${encodeURIComponent(contributorName)}"
+              data-contributor-uid="${sub.contributorUid || ''}"
+              data-contributor-username="${sub.contributorUsername || ''}"
+              data-content="${encodeURIComponent(rawContent)}"
+              data-year="${sub.year || 2}"
+              data-module="${sub.moduleId || ''}"
+            >
+              <span>✨</span>
+              <span>تحليل بالذكاء الاصطناعي ونشر</span>
+            </button>
+
+            ${
+              sub.status === 'pending'
+                ? `
+                <button
+                  type="button"
+                  class="sub-quick-approve-btn px-3 py-1.5 rounded-lg text-xs font-bold ${
+                    duplicateMatch
+                      ? 'bg-amber-600 hover:bg-amber-700 text-white'
+                      : 'bg-emerald-600 hover:bg-emerald-700 text-white'
+                  } transition-all cursor-pointer flex items-center gap-1 shadow-2xs"
+                  data-id="${sub.id}"
+                  data-dup-title="${escapeHtml(duplicateMatch?.title || '')}"
+                >
+                  <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>
+                  <span>${duplicateMatch ? 'اعتماد رغم التكرار' : 'اعتماد ونشر'}</span>
+                </button>
+                <button
+                  type="button"
+                  class="sub-reject-btn px-2.5 py-1.5 rounded-lg text-xs font-semibold text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-all cursor-pointer"
+                  data-id="${sub.id}"
+                >
+                  <span>رفض</span>
+                </button>
+                `
+                : ''
+            }
+
+            <button
+              type="button"
+              class="sub-delete-btn px-2 py-1.5 rounded-lg text-xs text-zinc-400 hover:text-rose-600 dark:hover:text-rose-400 transition-all cursor-pointer"
+              data-id="${sub.id}"
+              title="حذف"
+            >
+              <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0"/></svg>
+            </button>
+          </div>
+        `;
+
+        listEl.appendChild(card);
+      });
+
+      attachCardHandlers();
+    }
+
+    function attachCardHandlers() {
+      if (!listEl) return;
+
+      // 1. Fill in AI in Direct Form / Staging with Submission details
+      listEl.querySelectorAll<HTMLButtonElement>('.sub-fill-ai-btn').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          const submissionId = btn.getAttribute('data-id') || '';
+          const contributor = decodeURIComponent(btn.getAttribute('data-contributor') || '');
+          const contributorUid = btn.getAttribute('data-contributor-uid') || '';
+          const contributorUsername = btn.getAttribute('data-contributor-username') || '';
+          const content = decodeURIComponent(btn.getAttribute('data-content') || '');
+          const year = Number(btn.getAttribute('data-year')) || 2;
+          const moduleId = btn.getAttribute('data-module') || '';
+
+          // Dispatch event to DirectMaterialForm
+          window.dispatchEvent(
+            new CustomEvent('admin:load-submission-for-extraction', {
+              detail: {
+                submissionId,
+                contributor,
+                contributorUid,
+                contributorUsername,
+                content,
+                year,
+                moduleId
+              }
+            })
+          );
+        });
+      });
+
+      // 2. Quick Approve
+      listEl.querySelectorAll<HTMLButtonElement>('.sub-quick-approve-btn').forEach((btn) => {
+        btn.addEventListener('click', async () => {
+          const id = btn.getAttribute('data-id');
+          const dupTitle = btn.getAttribute('data-dup-title');
+          if (!id) return;
+          const sub = allSubmissions.find((s) => s.id === id);
+          if (!sub) return;
+
+          // If duplicate, ask for explicit confirmation
+          if (dupTitle) {
+            const proceed = confirm(
+              `⚠️ تنبيه: هذا الرابط مسجل مسبقاً بالموقع بعنوان: "${dupTitle}"\nهل تريد اعتماده ونشره على أي حال مسبباً تكراراً؟`
+            );
+            if (!proceed) return;
+          }
+
+          btn.disabled = true;
+          const adminUser = getCachedUserProfile();
+
+          // Create material document
+          const matId = `mat_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`;
+          const yrNum = (typeof sub.year === 'number' && sub.year >= 1 && sub.year <= 5 ? sub.year : 2) as AcademicYear;
+          const newMat: MaterialItem = {
+            id: matId,
+            title: sub.title || 'مساهمة طلابية جديدة',
+            url: sub.url || (sub.urls && sub.urls[0]) || '',
+            year: yrNum,
+            moduleId: sub.moduleId || 'year2-blood',
+            subject: sub.subject || 'عام',
+            type: sub.type || 'drive',
+            category: 'summaries',
+            addedBy: sub.contributor || 'فاعل خير',
+            contributorUid: sub.contributorUid || undefined,
+            contributorUsername: sub.contributorUsername || undefined,
+            description: sub.notes || undefined,
+            tags: ['مساهمة طلابية'],
+            createdAt: new Date().toISOString()
+          };
+
+          await saveMaterialToFirestore(newMat);
+          if (sub.contributorUid) {
+            await incrementUserContributionsCount(sub.contributorUid, 1);
+          }
+          await updateSubmissionStatus(id, 'approved', adminUser || undefined);
+          showToast('تم اعتماد ونشر المادة بنجاح!', 'success');
+          await loadSubmissions();
+        });
+      });
+
+      // 3. Reject
+      listEl.querySelectorAll<HTMLButtonElement>('.sub-reject-btn').forEach((btn) => {
+        btn.addEventListener('click', async () => {
+          const id = btn.getAttribute('data-id');
+          if (!id) return;
+          const adminUser = getCachedUserProfile();
+          await updateSubmissionStatus(id, 'rejected', adminUser || undefined);
+          showToast('تم رفض المساهمة.', 'info');
+          await loadSubmissions();
+        });
+      });
+
+      // 4. Delete
+      listEl.querySelectorAll<HTMLButtonElement>('.sub-delete-btn').forEach((btn) => {
+        btn.addEventListener('click', async () => {
+          const id = btn.getAttribute('data-id');
+          if (!id) return;
+          if (!confirm('هل تريد بالتأكيد حذف هذه المساهمة نهائياً؟')) return;
+          const adminUser = getCachedUserProfile();
+          await deleteSubmissionFromFirestore(id, adminUser || undefined);
+          showToast('تم حذف المساهمة.', 'info');
+          await loadSubmissions();
+        });
+      });
+    }
+
+    // Filter Buttons
+    filterTabs?.querySelectorAll('.sub-filter-btn').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        currentFilter = (btn.getAttribute('data-status') as 'pending' | 'approved' | 'rejected') || 'pending';
+        filterTabs.querySelectorAll('.sub-filter-btn').forEach((b) => {
+          b.className =
+            'sub-filter-btn px-3 py-1.5 rounded-lg text-xs font-semibold text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-200 transition-all cursor-pointer';
+        });
+        btn.className =
+          'sub-filter-btn px-3 py-1.5 rounded-lg text-xs font-bold bg-emerald-100 dark:bg-emerald-950/80 text-emerald-800 dark:text-emerald-300 transition-all cursor-pointer';
+        renderList();
+      });
+    });
+
+    refreshBtn?.addEventListener('click', loadSubmissions);
+
+    function escapeHtml(str: string): string {
+      if (!str) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
+    loadSubmissions();
+  }
+
+  initSubmissionsManager();
+  document.addEventListener('astro:after-swap', initSubmissionsManager);
+</script>

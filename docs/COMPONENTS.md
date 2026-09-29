@@ -273,22 +273,22 @@ This document details all UI components, their props, intended reuse guidelines,
 
 ### Contributors & Site Team (`/contributors`)
 
-Data lives in [`src/data/contributors.json`](file:///workspaces/asu_med_materials/src/data/contributors.json) (site team `authors` in manual order + `contributorProfiles` overrides with `matchNames`, optional photo, and labeled contacts). The contributors list shows content makers only: derived at build time by [`src/utils/contributors.ts`](file:///workspaces/asu_med_materials/src/utils/contributors.ts) scanning the `author` field across `materialsData` (`addedBy` ignored), then sorting descending by total. Types in [`src/types/contributors.ts`](file:///workspaces/asu_med_materials/src/types/contributors.ts).
+The Core Team is dynamic, loaded directly from website administrators in Firestore (`role === 'admin'`), strictly limited to 8 cards. Each admin card displays their display name, avatar/initials, Admin role pill, `adminRoleDescription` (custom responsibility/role description), bio, and their contact buttons. The resource contributors and content creators are derived from materials data.
 
 #### [`ContactButtons.astro`](file:///workspaces/asu_med_materials/src/components/contributors/ContactButtons.astro)
 - **Location**: `src/components/contributors/ContactButtons.astro`
-- **Purpose**: Reusable labeled contact pills for WhatsApp, Telegram, GitHub, LinkedIn, and Instagram. Each link supports an optional label (e.g. shared batch number vs personal).
+- **Purpose**: Unified, branded contact pills for WhatsApp, Telegram, Facebook, YouTube, LinkedIn, GitHub, Instagram, Linktree, Email, Website, and Other platforms. Accepts both `PersonContacts` and `UserContact[]` arrays.
 - **Props**:
   ```typescript
   interface Props {
-    contacts?: PersonContacts;
-    compact?: boolean;
+    contacts?: PersonContacts | UserContact[];
+    showLabels?: boolean;
   }
   ```
 
 #### [`AuthorCard.astro`](file:///workspaces/asu_med_materials/src/components/contributors/AuthorCard.astro)
 - **Location**: `src/components/contributors/AuthorCard.astro`
-- **Purpose**: Site team card with big circular photo (`w-24 h-24 rounded-full`) or initials fallback, name, emerald role pill, one-line bio, and contact buttons.
+- **Purpose**: Core team card with circular avatar (`160px` diameter) or initials fallback, name, role badge, `adminRoleDescription` pill, bio, and responsive contact buttons. Owner badges are omitted to keep cards unified.
 - **Props**:
   ```typescript
   interface Props {

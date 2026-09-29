@@ -1,7 +1,9 @@
 ---
 import Layout from '../layouts/Layout.astro';
-import { modulesData } from '../data/modules';
+import { getAllModules } from '../data/modules';
 import FeedbackForm from '../components/feedback/FeedbackForm.astro';
+
+const modules = await getAllModules();
 ---
 
 <Layout
@@ -25,7 +27,7 @@ import FeedbackForm from '../components/feedback/FeedbackForm.astro';
     </div>
 
     <!-- Unified Feedback Form -->
-    <FeedbackForm modules={modulesData} />
+    <FeedbackForm modules={modules} />
 
     <!-- Reciprocal Link to Contribute -->
     <div class="mt-5 p-4 rounded-2xl bg-zinc-50 dark:bg-zinc-900/60 border border-zinc-200 dark:border-zinc-800 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">

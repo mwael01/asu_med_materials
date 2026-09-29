@@ -1,14 +1,23 @@
 ---
 import Layout from '../layouts/Layout.astro';
-import { modulesData } from '../data/modules';
+import { getAllModulesIncludingInactive } from '../data/modules';
 import ContributeForm from '../components/contribute/ContributeForm.astro';
+import AdminDashboard from '../components/admin/AdminDashboard.astro';
+
+const modules = await getAllModulesIncludingInactive();
 ---
 
 <Layout
   title="Share Study Materials - ASU Med Materials"
   description="Share batch drives, lecture notes, and study collections to support your colleagues at Ain Shams University Faculty of Medicine."
 >
-  <div class="max-w-xl mx-auto py-4 text-start">
+  <!-- 1. Admin Management Flow Container (Active if user.role === 'admin') -->
+  <div id="admin-flow-container" class="hidden max-w-4xl mx-auto py-4">
+    <AdminDashboard modules={modules} />
+  </div>
+
+  <!-- 2. Student Contribution View Container (Active for guest & non-admin students) -->
+  <div id="student-flow-container" class="max-w-xl mx-auto py-4 text-start">
     <!-- Breadcrumb & Header -->
     <div class="mb-5">
       <div class="flex items-center gap-1.5 text-xs text-zinc-500 dark:text-zinc-400 mb-2">
@@ -24,8 +33,20 @@ import ContributeForm from '../components/contribute/ContributeForm.astro';
       </p>
     </div>
 
-    <!-- Unified Form -->
-    <ContributeForm modules={modulesData} />
+    <!-- Return to Admin Bar (Shown only when admin is previewing student view) -->
+    <div id="admin-preview-banner" class="hidden mb-4 p-3 rounded-xl bg-amber-50 dark:bg-amber-950/50 border border-amber-200 dark:border-amber-800/40 flex items-center justify-between gap-2 text-xs">
+      <span class="text-amber-800 dark:text-amber-300 font-medium">أنت تعاين الآن الصفحة كما يراها الطالب العادي.</span>
+      <button
+        type="button"
+        id="btn-return-admin"
+        class="px-3 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold transition-all cursor-pointer shadow-2xs shrink-0"
+      >
+        العودة للوحة الإدارة
+      </button>
+    </div>
+
+    <!-- Unified Student Form -->
+    <ContributeForm modules={modules} />
 
     <!-- Reciprocal Link to Feedback -->
     <div class="mt-5 p-4 rounded-2xl bg-zinc-50 dark:bg-zinc-900/60 border border-zinc-200 dark:border-zinc-800 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
@@ -41,3 +62,64 @@ import ContributeForm from '../components/contribute/ContributeForm.astro';
     </div>
   </div>
 </Layout>
+
+<script>
+  import { onAuthChange, getCachedUserProfile } from '../firebase/auth';
+
+  let unsubscribeAuth: (() => void) | null = null;
+
+  function initContributeRouting() {
+    const adminContainer = document.getElementById('admin-flow-container');
+    const studentContainer = document.getElementById('student-flow-container');
+    const toggleStudentBtn = document.getElementById('btn-toggle-student-view');
+    const returnAdminBtn = document.getElementById('btn-return-admin');
+    const previewBanner = document.getElementById('admin-preview-banner');
+
+    let isAdmin = false;
+    let isPreviewingStudent = false;
+
+    function applyView() {
+      if (isAdmin && !isPreviewingStudent) {
+        adminContainer?.classList.remove('hidden');
+        studentContainer?.classList.add('hidden');
+        previewBanner?.classList.add('hidden');
+      } else if (isAdmin && isPreviewingStudent) {
+        adminContainer?.classList.add('hidden');
+        studentContainer?.classList.remove('hidden');
+        previewBanner?.classList.remove('hidden');
+      } else {
+        adminContainer?.classList.add('hidden');
+        studentContainer?.classList.remove('hidden');
+        previewBanner?.classList.add('hidden');
+      }
+    }
+
+    // Check cached profile immediately for fast render
+    const cached = getCachedUserProfile();
+    if (cached && cached.role === 'admin') {
+      isAdmin = true;
+      applyView();
+    }
+
+    // Auth change listener
+    if (unsubscribeAuth) unsubscribeAuth();
+    unsubscribeAuth = onAuthChange((_user, profile) => {
+      isAdmin = Boolean(profile && profile.role === 'admin');
+      applyView();
+    });
+
+    // Toggle Preview
+    toggleStudentBtn?.addEventListener('click', () => {
+      isPreviewingStudent = true;
+      applyView();
+    });
+
+    returnAdminBtn?.addEventListener('click', () => {
+      isPreviewingStudent = false;
+      applyView();
+    });
+  }
+
+  initContributeRouting();
+  document.addEventListener('astro:after-swap', initContributeRouting);
+</script>

@@ -94,6 +94,20 @@ const { modules } = Astro.props;
           data-i18n-attr="placeholder:contribute.contributorPlaceholder"
           class="w-full px-3.5 py-2 text-xs bg-zinc-50 dark:bg-zinc-800/60 border border-zinc-200 dark:border-zinc-700 rounded-xl text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all"
         />
+
+        <!-- Account Linkage Status Pill (Dynamic) -->
+        <div id="contrib-account-linked" class="hidden mt-2 p-2.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200/80 dark:border-emerald-800/50 flex flex-wrap items-center justify-between gap-1 text-[11px] text-emerald-800 dark:text-emerald-300">
+          <div class="flex items-center gap-1.5 font-semibold">
+            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+            <span>مربوط بحسابك: <strong id="contrib-account-username" class="underline">@username</strong></span>
+          </div>
+          <span class="text-[10px] text-emerald-600 dark:text-emerald-400">ستُنسب المساهمة لك وتظهر في ملفك الشخصي</span>
+        </div>
+
+        <div id="contrib-account-guest-hint" class="hidden mt-2 p-2.5 rounded-xl bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700/60 flex items-center justify-between gap-2 text-[11px] text-zinc-500 dark:text-zinc-400">
+          <span>تريد ربط هذه المساهمة بملفك الشخصي؟</span>
+          <a href="/profile" class="font-bold text-emerald-600 dark:text-emerald-400 hover:underline shrink-0">سجّل الدخول &larr;</a>
+        </div>
       </div>
 
       <!-- Error Box -->
@@ -145,7 +159,10 @@ const { modules } = Astro.props;
 <script>
   import { extractUrls, submitMaterial } from '../../utils/submission';
   import { t, getCurrentLanguage } from '../../utils/i18n';
+  import { getCachedUserProfile, onAuthChange } from '../../firebase/auth';
   import type { MaterialSubmission } from '../../types/submission';
+
+  let unsubscribeAuth: (() => void) | null = null;
 
   function initContributeForm(): void {
     const form = document.getElementById('unified-contribute-form') as HTMLFormElement | null;
@@ -161,8 +178,39 @@ const { modules } = Astro.props;
     const btnText = document.getElementById('contrib-btn-text');
     const errorBox = document.getElementById('contrib-error-box');
     const resetBtn = document.getElementById('contrib-reset-btn');
+    const accountLinkedBox = document.getElementById('contrib-account-linked');
+    const accountUsernameEl = document.getElementById('contrib-account-username');
+    const guestHintBox = document.getElementById('contrib-account-guest-hint');
 
     if (!form || !contentEl) return;
+
+    let authorFieldTouched = false;
+    authorEl?.addEventListener('input', () => {
+      authorFieldTouched = true;
+    });
+
+    function syncContributeAuth(): void {
+      const user = getCachedUserProfile();
+      if (user) {
+        accountLinkedBox?.classList.remove('hidden');
+        guestHintBox?.classList.add('hidden');
+        if (accountUsernameEl) {
+          accountUsernameEl.textContent = `@${user.username}`;
+        }
+        if (authorEl && !authorFieldTouched && !authorEl.value) {
+          authorEl.value = user.displayName || user.username;
+        }
+      } else {
+        accountLinkedBox?.classList.add('hidden');
+        guestHintBox?.classList.remove('hidden');
+      }
+    }
+
+    syncContributeAuth();
+    if (unsubscribeAuth) unsubscribeAuth();
+    unsubscribeAuth = onAuthChange(() => {
+      syncContributeAuth();
+    });
 
     // Filter module dropdown options based on chosen year
     function filterModules(): void {
@@ -205,7 +253,8 @@ const { modules } = Astro.props;
     }
 
     contentEl.addEventListener('input', updateLinkCount);
-    window.addEventListener('asumed-language-changed', updateLinkCount);
+    const langAbort = new AbortController();
+    window.addEventListener('asumed-language-changed', updateLinkCount, { signal: langAbort.signal });
 
     // Form submission
     form.addEventListener('submit', async (e) => {
@@ -228,11 +277,12 @@ const { modules } = Astro.props;
       if (submitBtn) submitBtn.disabled = true;
       if (btnText) btnText.textContent = t('contribute.sendingBtn', lang);
 
+      const user = getCachedUserProfile();
       const urls = extractUrls(content);
       const title = titleEl?.value.trim() || '';
       const year = yearEl?.value || 'general';
       const moduleId = moduleEl?.value || 'general';
-      const contributor = authorEl?.value.trim() || '';
+      const contributor = authorEl?.value.trim() || user?.displayName || user?.username || '';
 
       let payload: MaterialSubmission;
 
@@ -244,7 +294,9 @@ const { modules } = Astro.props;
           title: title || undefined,
           year: year !== 'general' ? (Number(year) as any) : 'general',
           moduleId: moduleId !== 'general' ? moduleId : undefined,
-          addedBy: contributor || undefined
+          addedBy: contributor || undefined,
+          contributorUid: user?.uid,
+          contributorUsername: user?.username
         };
       } else {
         // Multi-link / message text dump
@@ -252,6 +304,8 @@ const { modules } = Astro.props;
           mode: 'dump',
           content,
           contributor: contributor || undefined,
+          contributorUid: user?.uid,
+          contributorUsername: user?.username,
           year: year !== 'general' ? (Number(year) as any) : 'general',
           moduleId: moduleId !== 'general' ? moduleId : undefined,
           notes: title || undefined

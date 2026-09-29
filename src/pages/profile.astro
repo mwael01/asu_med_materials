@@ -1,0 +1,1624 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { getAllMaterials } from '../data/materials';
+
+const allMaterials = await getAllMaterials();
+---
+
+<Layout
+  title="Student Profile - ASU Med Materials"
+  description="Manage your medical student profile, customize your avatar and bio, and share your contributions at ASU Faculty of Medicine."
+>
+  <div class="max-w-4xl mx-auto py-4 text-start">
+    <!-- Breadcrumbs -->
+    <div class="flex items-center gap-1.5 text-xs text-zinc-500 dark:text-zinc-400 mb-6">
+      <a href="/" data-i18n="nav.home" class="hover:text-emerald-600 dark:hover:text-emerald-400">Home</a>
+      <span>/</span>
+      <span class="text-zinc-900 dark:text-zinc-100 font-bold" id="profile-breadcrumb-title" data-i18n="nav.profile">Profile</span>
+    </div>
+
+    <!-- Loading State Skeleton -->
+    <div id="profile-loading-skeleton" class="py-12 flex flex-col items-center justify-center text-center">
+      <div class="w-10 h-10 border-3 border-emerald-500 border-t-transparent rounded-full animate-spin mb-3"></div>
+      <p class="text-xs text-zinc-500 dark:text-zinc-400">Loading student profile...</p>
+    </div>
+
+    <!-- 1. GUEST VIEW CONTAINER -->
+    <div id="guest-view-container" class="hidden space-y-6">
+      <div class="p-6 sm:p-8 rounded-3xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 shadow-sm text-center max-w-xl mx-auto">
+        <div class="w-16 h-16 mx-auto rounded-2xl bg-emerald-50 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-400 flex items-center justify-center mb-4">
+          <svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
+          </svg>
+        </div>
+
+        <h1 class="text-xl sm:text-2xl font-extrabold text-zinc-900 dark:text-zinc-100 mb-2">
+          Medical Student Profile
+        </h1>
+        <p class="text-xs sm:text-sm text-zinc-500 dark:text-zinc-400 leading-relaxed mb-6">
+          Sign in to customize your profile, upload your avatar, track your material contributions, and get a shareable public link.
+        </p>
+
+        <!-- Offline/Guest Notice -->
+        <div class="p-3.5 rounded-xl bg-zinc-50 dark:bg-zinc-800/60 border border-zinc-200/80 dark:border-zinc-700/60 text-xs text-zinc-600 dark:text-zinc-300 text-start mb-6 flex items-start gap-2.5">
+          <span class="text-base shrink-0 mt-0.5">ℹ️</span>
+          <span><strong>Guest Mode:</strong> You can continue using the site without an account. All study materials, search, and bookmarks work 100% offline without signing in.</span>
+        </div>
+
+        <!-- Google Sign-In Button -->
+        <button
+          type="button"
+          id="btn-google-signin"
+          class="w-full flex items-center justify-center gap-3 py-2.5 px-4 rounded-xl border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-700/60 text-zinc-800 dark:text-zinc-200 text-xs sm:text-sm font-bold transition-all shadow-2xs cursor-pointer mb-4"
+        >
+          <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24">
+            <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
+            <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
+            <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z" />
+            <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z" />
+          </svg>
+          <span>Continue with Google</span>
+        </button>
+
+        <div class="relative flex py-2 items-center mb-4">
+          <div class="flex-grow border-t border-zinc-200 dark:border-zinc-800"></div>
+          <span class="flex-shrink mx-3 text-zinc-400 text-xs uppercase font-medium">Or with Email</span>
+          <div class="flex-grow border-t border-zinc-200 dark:border-zinc-800"></div>
+        </div>
+
+        <!-- Email Sign In / Sign Up Form -->
+        <div class="text-start">
+          <div class="flex border-b border-zinc-200 dark:border-zinc-800 mb-4">
+            <button
+              type="button"
+              id="tab-auth-login"
+              class="flex-1 pb-2 text-xs font-bold text-emerald-600 dark:text-emerald-400 border-b-2 border-emerald-600 dark:border-emerald-400 cursor-pointer"
+            >
+              Sign In
+            </button>
+            <button
+              type="button"
+              id="tab-auth-register"
+              class="flex-1 pb-2 text-xs font-semibold text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 cursor-pointer"
+            >
+              Create Account
+            </button>
+          </div>
+
+          <form id="email-auth-form" class="space-y-3">
+            <div id="auth-register-fields" class="space-y-3 hidden">
+              <div>
+                <label for="auth-display-name" class="block text-xs font-bold text-zinc-700 dark:text-zinc-300 mb-1">Full Name</label>
+                <input
+                  type="text"
+                  id="auth-display-name"
+                  placeholder="e.g. Mohamed Wael"
+                  class="w-full text-xs px-3 py-2 rounded-xl border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 focus:outline-none focus:ring-2 focus:ring-emerald-500 dark:text-zinc-100"
+                />
+              </div>
+
+              <div>
+                <div class="flex items-center justify-between mb-1">
+                  <label for="auth-username" class="block text-xs font-bold text-zinc-700 dark:text-zinc-300">
+                    Username Handle <span class="text-emerald-600">*</span>
+                  </label>
+                  <span class="text-[10px] text-zinc-400 dark:text-zinc-500">Permanent 🔒</span>
+                </div>
+                <div class="relative flex items-center">
+                  <span class="absolute left-3 text-zinc-400 text-xs font-mono">@</span>
+                  <input
+                    type="text"
+                    id="auth-username"
+                    placeholder="e.g. ahmed_wael"
+                    class="w-full text-xs pl-7 pr-3 py-2 rounded-xl border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 focus:outline-none focus:ring-2 focus:ring-emerald-500 dark:text-zinc-100 font-mono"
+                  />
+                </div>
+                <div id="auth-username-status" class="hidden text-[11px] mt-1 font-semibold"></div>
+              </div>
+            </div>
+
+            <div>
+              <label for="auth-email" class="block text-xs font-bold text-zinc-700 dark:text-zinc-300 mb-1">Email</label>
+              <input
+                type="email"
+                id="auth-email"
+                required
+                placeholder="name@std.asu.edu.eg or personal email"
+                class="w-full text-xs px-3 py-2 rounded-xl border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 focus:outline-none focus:ring-2 focus:ring-emerald-500 dark:text-zinc-100"
+              />
+            </div>
+
+            <div>
+              <label for="auth-password" class="block text-xs font-bold text-zinc-700 dark:text-zinc-300 mb-1">Password</label>
+              <input
+                type="password"
+                id="auth-password"
+                required
+                placeholder="••••••••"
+                class="w-full text-xs px-3 py-2 rounded-xl border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 focus:outline-none focus:ring-2 focus:ring-emerald-500 dark:text-zinc-100"
+              />
+            </div>
+
+            <div id="auth-error-msg" class="hidden text-xs text-rose-600 dark:text-rose-400 font-semibold p-2 rounded-lg bg-rose-50 dark:bg-rose-950/40"></div>
+
+            <button
+              type="submit"
+              id="auth-submit-btn"
+              class="w-full py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition-colors cursor-pointer shadow-2xs"
+            >
+              Sign In
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2. MY PROFILE DASHBOARD CONTAINER (Logged In) -->
+    <div id="my-profile-container" class="hidden space-y-8">
+      <!-- Profile Header Card -->
+      <div class="p-6 rounded-3xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 shadow-sm">
+        <div class="flex flex-col sm:flex-row items-center sm:items-start gap-6">
+          <!-- Avatar with Upload Overlay -->
+          <div class="relative group">
+            <div class="w-24 h-24 rounded-2xl overflow-hidden bg-emerald-100 dark:bg-zinc-800 border-2 border-emerald-500/40 flex items-center justify-center shadow-sm">
+              <img
+                id="my-avatar-img"
+                src=""
+                alt="Avatar"
+                class="w-full h-full object-cover hidden"
+              />
+              <span id="my-avatar-initials" class="text-2xl font-black text-emerald-700 dark:text-emerald-400"></span>
+            </div>
+
+            <!-- Avatar URL edit hint -->
+            <div class="absolute -bottom-2 -right-2 p-2 rounded-xl bg-emerald-600 text-white shadow-md" title="Set avatar via URL in the edit section below">
+              <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L6.832 19.82a4.5 4.5 0 01-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 011.13-1.897L16.863 4.487zm0 0L19.5 7.125" />
+              </svg>
+            </div>
+          </div>
+
+          <!-- Profile Details Header -->
+          <div class="flex-1 text-center sm:text-start space-y-1">
+            <div class="flex flex-wrap items-center justify-center sm:justify-start gap-2">
+              <h2 id="my-profile-name" class="text-xl font-extrabold text-zinc-900 dark:text-zinc-100"></h2>
+              <span id="my-profile-year-badge" class="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-400"></span>
+              <span id="my-profile-contrib-badge" class="hidden px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-amber-50 dark:bg-amber-950/50 text-amber-700 dark:text-amber-400 border border-amber-200/60 dark:border-amber-800/40"></span>
+            </div>
+            <p id="my-profile-handle" class="text-xs font-semibold text-emerald-600 dark:text-emerald-400"></p>
+            <p id="my-profile-admin-role" class="hidden text-xs font-semibold text-emerald-700 dark:text-emerald-400 bg-emerald-50/70 dark:bg-emerald-950/30 px-2.5 py-0.5 rounded-lg border border-emerald-200/50 dark:border-emerald-800/40 inline-block"></p>
+            <p id="my-profile-bio-text" class="text-xs text-zinc-500 dark:text-zinc-400 max-w-lg mt-2 leading-relaxed"></p>
+            <div id="my-profile-contacts-container" class="mt-3 flex flex-wrap gap-1.5 justify-center sm:justify-start"></div>
+          </div>
+
+          <!-- Profile Actions -->
+          <div class="flex flex-wrap items-center gap-2 shrink-0">
+            <button
+              type="button"
+              id="btn-copy-my-share-link"
+              class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-700/60 text-xs font-bold text-zinc-700 dark:text-zinc-200 transition-all cursor-pointer shadow-2xs"
+            >
+              <svg class="w-3.5 h-3.5 text-zinc-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M7.217 10.907a2.25 2.25 0 100 2.186m0-2.186c.18.324.283.696.283 1.093s-.103.77-.283 1.093m0-2.186l9.566-5.314m-9.566 7.5l9.566 5.314m0 0a2.25 2.25 0 103.935 2.186 2.25 2.25 0 00-3.935-2.186zm0-12.814a2.25 2.25 0 103.933-2.185 2.25 2.25 0 00-3.933 2.185z" />
+              </svg>
+              <span>Share Profile</span>
+            </button>
+
+            <!-- Admin Dashboard button (Shown if profile.role === 'admin') -->
+            <a
+              href="/admin"
+              id="btn-profile-admin-dashboard"
+              class="hidden items-center gap-1.5 px-3 py-1.5 rounded-xl border border-amber-300 dark:border-amber-700/60 bg-amber-50 dark:bg-amber-950/60 hover:bg-amber-100 dark:hover:bg-amber-900/60 text-xs font-bold text-amber-800 dark:text-amber-300 transition-all cursor-pointer shadow-2xs"
+            >
+              <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
+              </svg>
+              <span data-i18n="admin.badge">لوحة الإدارة</span>
+            </a>
+
+            <button
+              type="button"
+              id="btn-signout"
+              class="px-3 py-1.5 rounded-xl text-xs font-bold text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-colors cursor-pointer"
+            >
+              Sign Out
+            </button>
+          </div>
+        </div>
+
+        <div id="avatar-upload-status" class="hidden mt-3 text-xs text-emerald-600 dark:text-emerald-400 font-semibold text-center sm:text-start">
+          Uploading image to Firebase Storage...
+        </div>
+      </div>
+
+      <!-- Edit Profile Section -->
+      <div class="p-6 rounded-3xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 shadow-sm">
+        <h3 class="text-sm font-bold text-zinc-900 dark:text-zinc-100 mb-4 pb-2 border-b border-zinc-100 dark:border-zinc-800">
+          Edit Profile Information
+        </h3>
+
+        <form id="edit-profile-form" class="space-y-4">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label for="edit-display-name" class="block text-xs font-bold text-zinc-700 dark:text-zinc-300 mb-1">Display Name</label>
+              <input
+                type="text"
+                id="edit-display-name"
+                required
+                class="w-full text-xs px-3 py-2 rounded-xl border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 focus:outline-none focus:ring-2 focus:ring-emerald-500 dark:text-zinc-100"
+              />
+            </div>
+
+            <div>
+              <div class="flex items-center justify-between mb-1">
+                <label for="edit-username" class="block text-xs font-bold text-zinc-700 dark:text-zinc-300">
+                  Username Handle (Public URL)
+                </label>
+                <span class="text-[10px] text-zinc-400 dark:text-zinc-500 font-semibold flex items-center gap-1">
+                  <span>Permanent</span>
+                  <span>🔒</span>
+                </span>
+              </div>
+              <div class="relative flex items-center">
+                <span class="absolute left-3 text-zinc-400 text-xs font-mono">@</span>
+                <input
+                  type="text"
+                  id="edit-username"
+                  disabled
+                  readonly
+                  class="w-full text-xs pl-7 pr-3 py-2 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-zinc-100/80 dark:bg-zinc-800/60 text-zinc-500 dark:text-zinc-400 cursor-not-allowed select-all font-mono"
+                />
+              </div>
+              <p class="text-[10px] text-zinc-400 dark:text-zinc-500 mt-1">
+                اسم المستخدم دائم ويمثل هويتك ورابط ملفك الشخصي العام ولا يمكن تغييره.
+              </p>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label for="edit-academic-year" class="block text-xs font-bold text-zinc-700 dark:text-zinc-300 mb-1">Academic Year</label>
+              <select
+                id="edit-academic-year"
+                class="w-full text-xs px-3 py-2 rounded-xl border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 focus:outline-none focus:ring-2 focus:ring-emerald-500 dark:text-zinc-100 cursor-pointer"
+              >
+                <option value="">Not selected</option>
+                <option value="1">Year 1 - Foundation & Musculoskeletal</option>
+                <option value="2">Year 2 - Blood, Endocrine, CVS, RS</option>
+                <option value="3">Year 3 - GIT, Renal, CNS</option>
+                <option value="4">Year 4 - Clinical Rotations</option>
+                <option value="5">Year 5 - Surgery, Obs & Gyn, Paediatrics</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="block text-xs font-bold text-zinc-700 dark:text-zinc-300 mb-1">Public Profile Link</label>
+              <div class="flex items-center gap-1.5">
+                <input
+                  type="text"
+                  id="my-share-url-preview"
+                  readonly
+                  class="w-full text-xs px-3 py-2 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800/50 text-zinc-500 dark:text-zinc-400 select-all"
+                />
+                <button
+                  type="button"
+                  id="btn-copy-preview-link"
+                  class="px-3 py-2 rounded-xl bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 text-xs font-bold text-zinc-700 dark:text-zinc-300 shrink-0 cursor-pointer"
+                >
+                  Copy
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <label for="edit-bio" class="block text-xs font-bold text-zinc-700 dark:text-zinc-300 mb-1">About Me (Bio)</label>
+            <textarea
+              id="edit-bio"
+              rows="3"
+              placeholder="e.g. Ain Shams Med Student | Contributing materials for Blood & CVS modules"
+              class="w-full text-xs px-3 py-2 rounded-xl border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 focus:outline-none focus:ring-2 focus:ring-emerald-500 dark:text-zinc-100 leading-relaxed"
+            ></textarea>
+          </div>
+
+          <div>
+            <label for="edit-avatar-url" class="block text-xs font-bold text-zinc-700 dark:text-zinc-300 mb-1">Profile Picture URL</label>
+            <input
+              type="url"
+              id="edit-avatar-url"
+              placeholder="https://example.com/your-image.jpg"
+              class="w-full text-xs px-3 py-2 rounded-xl border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 focus:outline-none focus:ring-2 focus:ring-emerald-500 dark:text-zinc-100"
+            />
+            <p class="text-[10px] text-zinc-400 dark:text-zinc-500 mt-1">
+              Upload your image to any hosting service (Imgur, Google Drive, etc.) and paste the direct link here.
+            </p>
+          </div>
+
+          <!-- Admin Role Description (Displayed on Core Team Card) -->
+          <div id="group-admin-role-desc" class="hidden">
+            <label for="edit-admin-role-desc" class="block text-xs font-bold text-zinc-700 dark:text-zinc-300 mb-1">
+              Admin Role Description (الدور في الفريق)
+            </label>
+            <input
+              type="text"
+              id="edit-admin-role-desc"
+              placeholder="e.g. مطور المنصة ومسؤول المواد الدراسية"
+              class="w-full text-xs px-3 py-2 rounded-xl border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 focus:outline-none focus:ring-2 focus:ring-emerald-500 dark:text-zinc-100"
+            />
+            <p class="text-[10px] text-zinc-400 dark:text-zinc-500 mt-1">
+              يظهر هذا المسمى أسفل اسمك في بطاقتك بقسم الفريق الأساسي (Core Team).
+            </p>
+          </div>
+
+          <!-- Social / Contact Links for all users -->
+          <div class="space-y-3 pt-3 border-t border-zinc-100 dark:border-zinc-800">
+            <div class="flex items-center justify-between">
+              <div>
+                <label class="block text-xs font-bold text-zinc-700 dark:text-zinc-300">
+                  Social & Contact Links (وسائل التواصل والروابط)
+                </label>
+                <p class="text-[10px] text-zinc-400 dark:text-zinc-500">
+                  تظهر روابطك في ملفك الشخصي وفي بطاقة الفريق إذا كنت مسؤولاً.
+                </p>
+              </div>
+              <button
+                type="button"
+                id="btn-add-contact-row"
+                class="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl border border-emerald-200 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-100 dark:hover:bg-emerald-900/40 text-xs font-bold transition-all cursor-pointer"
+              >
+                <span>+ إضافة رابط</span>
+              </button>
+            </div>
+            <div id="contacts-editor-list" class="space-y-2">
+              <!-- Contact rows dynamically added by script -->
+            </div>
+          </div>
+
+          <div class="flex justify-end pt-2">
+            <button
+              type="submit"
+              id="btn-save-profile"
+              class="px-5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition-all shadow-2xs cursor-pointer active:scale-95"
+            >
+              Save Changes
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <!-- My Contributions Section -->
+      <div class="space-y-4">
+        <div class="flex items-center justify-between pb-2 border-b border-zinc-200 dark:border-zinc-800">
+          <div class="flex items-center gap-2">
+            <h3 class="text-base font-bold text-zinc-900 dark:text-zinc-100">
+              My Material Contributions
+            </h3>
+            <span id="my-contributions-count" class="text-xs font-semibold text-zinc-400"></span>
+          </div>
+          <a href="/contribute" class="text-xs font-bold text-emerald-600 dark:text-emerald-400 hover:underline">
+            + Share More Materials
+          </a>
+        </div>
+
+        <div id="my-contributions-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <!-- Populated by client script -->
+        </div>
+
+        <div id="my-contributions-empty" class="hidden py-8 text-center border border-dashed border-zinc-200 dark:border-zinc-800 rounded-2xl p-6 bg-white dark:bg-zinc-900/40">
+          <p class="text-xs text-zinc-400 dark:text-zinc-500">
+            You haven't contributed any materials yet. Share your study drives or notes to help fellow med students!
+          </p>
+          <a
+            href="/contribute"
+            class="inline-block mt-3 px-4 py-2 rounded-xl bg-emerald-600 text-white text-xs font-bold hover:bg-emerald-700 transition-colors shadow-2xs"
+          >
+            Contribute Material
+          </a>
+        </div>
+
+        <!-- My Pending Submissions (Shown when user has submissions under review) -->
+        <div id="my-pending-submissions-container" class="hidden mt-6 pt-4 border-t border-zinc-200 dark:border-zinc-800 space-y-3">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <span class="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
+              <h4 class="text-xs font-bold text-zinc-800 dark:text-zinc-200">
+                Pending Submissions under Review (مساهماتك قيد المراجعة)
+              </h4>
+            </div>
+            <span id="my-pending-submissions-count" class="text-[11px] font-semibold text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/60 px-2 py-0.5 rounded-md border border-amber-200 dark:border-amber-800/40"></span>
+          </div>
+          <div id="my-pending-submissions-list" class="space-y-2">
+            <!-- Populated dynamically -->
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3. PUBLIC SHAREABLE PROFILE CONTAINER (Viewing Someone's Profile) -->
+    <div id="public-profile-container" class="hidden space-y-8">
+      <!-- Public Profile Header Card -->
+      <div class="p-6 sm:p-8 rounded-3xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 shadow-sm">
+        <div class="flex flex-col sm:flex-row items-center sm:items-start gap-6 text-center sm:text-start">
+          <!-- Avatar -->
+          <div class="w-24 h-24 rounded-2xl overflow-hidden bg-emerald-100 dark:bg-zinc-800 border-2 border-emerald-500/40 flex items-center justify-center shrink-0 shadow-sm">
+            <img
+              id="public-avatar-img"
+              src=""
+              alt="Avatar"
+              class="w-full h-full object-cover hidden"
+            />
+            <span id="public-avatar-initials" class="text-2xl font-black text-emerald-700 dark:text-emerald-400"></span>
+          </div>
+
+          <!-- Info -->
+          <div class="flex-1 space-y-1.5">
+            <div class="flex flex-wrap items-center justify-center sm:justify-start gap-2">
+              <h1 id="public-profile-name" class="text-xl sm:text-2xl font-extrabold text-zinc-900 dark:text-zinc-100"></h1>
+              <span id="public-profile-year-badge" class="hidden px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-400"></span>
+              <span id="public-profile-contrib-badge" class="hidden px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-50 dark:bg-amber-950/50 text-amber-700 dark:text-amber-400 border border-amber-200/60 dark:border-amber-800/40"></span>
+            </div>
+            <p id="public-profile-handle" class="text-xs font-semibold text-emerald-600 dark:text-emerald-400"></p>
+            <p id="public-profile-admin-role" class="hidden text-xs font-semibold text-emerald-700 dark:text-emerald-400 bg-emerald-50/70 dark:bg-emerald-950/30 px-2.5 py-0.5 rounded-lg border border-emerald-200/50 dark:border-emerald-800/40 inline-block"></p>
+            <p id="public-profile-bio" class="text-xs sm:text-sm text-zinc-600 dark:text-zinc-300 max-w-xl leading-relaxed pt-1"></p>
+            <div id="public-profile-contacts-container" class="mt-3 flex flex-wrap gap-1.5 justify-center sm:justify-start"></div>
+          </div>
+
+          <!-- Share Button -->
+          <button
+            type="button"
+            id="btn-share-public-profile"
+            class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition-all cursor-pointer shadow-2xs shrink-0"
+          >
+            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M7.217 10.907a2.25 2.25 0 100 2.186m0-2.186c.18.324.283.696.283 1.093s-.103.77-.283 1.093m0-2.186l9.566-5.314m-9.566 7.5l9.566 5.314m0 0a2.25 2.25 0 103.935 2.186 2.25 2.25 0 00-3.935-2.186zm0-12.814a2.25 2.25 0 103.933-2.185 2.25 2.25 0 00-3.933 2.185z" />
+            </svg>
+            <span>Share Profile</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Public Contributions Section -->
+      <div class="space-y-4">
+        <div class="flex items-center justify-between pb-2 border-b border-zinc-200 dark:border-zinc-800">
+          <h2 class="text-base sm:text-lg font-bold text-zinc-900 dark:text-zinc-100">
+            Contributions & Study Materials
+          </h2>
+          <span id="public-contributions-count" class="text-xs font-semibold text-zinc-400"></span>
+        </div>
+
+        <div id="public-contributions-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <!-- Populated by client script -->
+        </div>
+
+        <div id="public-contributions-empty" class="hidden py-10 text-center border border-dashed border-zinc-200 dark:border-zinc-800 rounded-2xl p-6 bg-white dark:bg-zinc-900/40">
+          <p class="text-xs text-zinc-400 dark:text-zinc-500">
+            No public contributions shared by this student yet.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Choose Permanent Username Modal (Shown for accounts without custom username) -->
+  <div id="modal-set-username" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-zinc-900/60 backdrop-blur-xs" role="dialog" aria-modal="true" aria-labelledby="modal-username-title">
+    <div class="w-full max-w-md p-6 rounded-2xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 shadow-xl space-y-4 text-start">
+      <div class="flex items-center gap-2.5">
+        <div class="w-10 h-10 rounded-xl bg-emerald-100 dark:bg-emerald-950/80 text-emerald-700 dark:text-emerald-300 flex items-center justify-center text-lg font-bold">
+          👤
+        </div>
+        <div>
+          <h3 class="text-sm font-bold text-zinc-900 dark:text-zinc-100">
+            اختر اسم المستخدم الخاص بك (Username)
+          </h3>
+          <p class="text-[11px] text-zinc-500 dark:text-zinc-400">
+            هذا الاسم سيكون معرّف حسابك ورابط ملفك الشخصي الدائم.
+          </p>
+        </div>
+      </div>
+
+      <div class="p-3 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800/40 text-[11px] text-amber-800 dark:text-amber-300 flex items-center gap-2">
+        <span class="text-base shrink-0">⚠️</span>
+        <span>
+          <strong>تنبيه هام:</strong> اسم المستخدم يُختار مرة واحدة فقط، ولا يمكن تغييره لاحقاً لحماية هويتك ومساهماتك.
+        </span>
+      </div>
+
+      <div class="space-y-1.5">
+        <label for="modal-input-username" class="block text-xs font-bold text-zinc-700 dark:text-zinc-300">
+          اسم المستخدم المرغوب <span class="text-emerald-600">*</span>
+        </label>
+        <div class="relative flex items-center">
+          <span class="absolute left-3 text-zinc-400 text-xs font-mono">@</span>
+          <input
+            type="text"
+            id="modal-input-username"
+            placeholder="e.g. mohamed_wael"
+            class="w-full text-xs pl-7 pr-3 py-2 rounded-xl border border-zinc-300 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800 focus:outline-none focus:ring-2 focus:ring-emerald-500 dark:text-zinc-100 font-mono"
+          />
+        </div>
+        <div id="modal-username-status" class="hidden text-[11px] mt-1 font-semibold"></div>
+      </div>
+
+      <div class="pt-2 flex items-center justify-end gap-2">
+        <button
+          type="button"
+          id="modal-btn-confirm-username"
+          disabled
+          class="w-full py-2.5 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 active:scale-[0.98] text-white text-xs font-bold transition-all shadow-xs disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed"
+        >
+          تأكيد وتثبيت اسم المستخدم
+        </button>
+      </div>
+    </div>
+  </div>
+</Layout>
+
+<script define:vars={{ allMaterialsSnapshot: allMaterials }}>
+  window.__ALL_MATERIALS_SNAPSHOT = allMaterialsSnapshot;
+</script>
+
+<script>
+  import {
+    onAuthChange,
+    signInWithGoogle,
+    signInWithEmail,
+    signUpWithEmail,
+    signOutUser,
+    setPermanentUsername,
+    getCachedUserProfile
+  } from '../firebase/auth';
+  import { escapeHtml } from '../utils/sanitize';
+  import type { User } from 'firebase/auth';
+
+  let unsubscribeAuth: (() => void) | null = null;
+  import {
+    getUserProfileByUsername,
+    getUserProfileByUid,
+    upsertUserProfile,
+    checkUsernameAvailable,
+    getUserContributions,
+    getUserSubmissions
+  } from '../firebase/firestore';
+  import type { UserProfile, UserContact, ContactPlatform } from '../types/profile';
+  import { PLATFORM_REGISTRY, renderContactPillMarkup } from '../utils/contacts';
+  import type { MaterialItem, AcademicYear } from '../types/materials';
+
+  function initProfilePage(): void {
+    const loadingSkeleton = document.getElementById('profile-loading-skeleton');
+    const guestContainer = document.getElementById('guest-view-container');
+    const myProfileContainer = document.getElementById('my-profile-container');
+    const publicContainer = document.getElementById('public-profile-container');
+    const breadcrumbTitle = document.getElementById('profile-breadcrumb-title');
+
+    // Parse URL queries
+    const urlParams = new URLSearchParams(window.location.search);
+    const targetUsername = urlParams.get('u');
+    const targetUid = urlParams.get('id');
+
+    let currentUser: User | null = null;
+    let currentProfile: UserProfile | null = getCachedUserProfile();
+
+    function showSection(section: 'loading' | 'guest' | 'my-profile' | 'public'): void {
+      loadingSkeleton?.classList.toggle('hidden', section !== 'loading');
+      guestContainer?.classList.toggle('hidden', section !== 'guest');
+      myProfileContainer?.classList.toggle('hidden', section !== 'my-profile');
+      publicContainer?.classList.toggle('hidden', section !== 'public');
+    }
+
+    function notify(message: string, type: 'success' | 'error' | 'info' = 'info') {
+      window.dispatchEvent(
+        new CustomEvent('show-toast', { detail: { message, type } })
+      );
+    }
+
+    // Helper: render initials
+    function getInitials(name: string): string {
+      const parts = name.trim().split(/\s+/);
+      if (parts.length >= 2) {
+        return (parts[0][0] + parts[1][0]).toUpperCase();
+      }
+      return name.slice(0, 2).toUpperCase();
+    }
+
+    // ─── 1. Public Profile View ──────────────────────────────────────────
+    async function renderPublicProfile(identifier: string, isUid: boolean) {
+      showSection('loading');
+      try {
+        const fetchPromise = isUid
+          ? getUserProfileByUid(identifier)
+          : getUserProfileByUsername(identifier);
+        const timeoutPromise = new Promise<null>((resolve) => setTimeout(() => resolve(null), 3000));
+        let profile: UserProfile | null = await Promise.race([fetchPromise, timeoutPromise]);
+
+        // Fallback for author names or non-registered contributors
+        if (!profile && !isUid) {
+          profile = {
+            uid: 'guest_' + identifier,
+            username: identifier.toLowerCase().replace(/\s+/g, '_'),
+            displayName: identifier,
+            bio: 'Contributor to ASU Med Materials community',
+            createdAt: new Date().toISOString()
+          };
+        }
+
+        if (!profile) {
+          notify('Profile not found', 'error');
+          showSection('guest');
+          return;
+        }
+
+        // Set breadcrumb
+        if (breadcrumbTitle) {
+          breadcrumbTitle.textContent = `@${profile.username}`;
+        }
+
+        // Fill public card
+        const nameEl = document.getElementById('public-profile-name');
+        const handleEl = document.getElementById('public-profile-handle');
+        const bioEl = document.getElementById('public-profile-bio');
+        const yearBadgeEl = document.getElementById('public-profile-year-badge');
+        const avatarImg = document.getElementById('public-avatar-img') as HTMLImageElement | null;
+        const avatarInitials = document.getElementById('public-avatar-initials');
+
+        if (nameEl) nameEl.textContent = profile.displayName || profile.username;
+        if (handleEl) handleEl.textContent = `@${profile.username}`;
+        if (bioEl) bioEl.textContent = profile.bio || 'ASU Faculty of Medicine student.';
+
+        if (yearBadgeEl) {
+          if (profile.academicYear) {
+            yearBadgeEl.textContent = `Year ${profile.academicYear}`;
+            yearBadgeEl.classList.remove('hidden');
+          } else {
+            yearBadgeEl.classList.add('hidden');
+          }
+        }
+
+        if (profile.photoURL && avatarImg) {
+          avatarImg.src = profile.photoURL;
+          avatarImg.classList.remove('hidden');
+          avatarInitials?.classList.add('hidden');
+        } else {
+          avatarImg?.classList.add('hidden');
+          if (avatarInitials) {
+            avatarInitials.textContent = getInitials(profile.displayName || profile.username);
+            avatarInitials.classList.remove('hidden');
+          }
+        }
+
+        // Admin role description (if admin)
+        const publicAdminRoleEl = document.getElementById('public-profile-admin-role');
+        if (publicAdminRoleEl) {
+          if (profile.role === 'admin' && profile.adminRoleDescription) {
+            publicAdminRoleEl.textContent = profile.adminRoleDescription;
+            publicAdminRoleEl.classList.remove('hidden');
+          } else {
+            publicAdminRoleEl.classList.add('hidden');
+          }
+        }
+
+        // Contact pills
+        const publicContactsContainer = document.getElementById('public-profile-contacts-container');
+        if (publicContactsContainer) {
+          publicContactsContainer.innerHTML = '';
+          if (profile.contacts && profile.contacts.length > 0) {
+            const validContacts = profile.contacts.filter((c) => c.url && c.url.trim());
+            if (validContacts.length > 0) {
+              publicContactsContainer.innerHTML = validContacts
+                .map((c) => renderContactPillMarkup(c, true))
+                .join('');
+              publicContactsContainer.classList.remove('hidden');
+            } else {
+              publicContactsContainer.classList.add('hidden');
+            }
+          } else {
+            publicContactsContainer.classList.add('hidden');
+          }
+        }
+
+        // Fetch contributions
+        const contribBadge = document.getElementById('public-profile-contrib-badge');
+        const rawMaterials: MaterialItem[] = (window as any).__ALL_MATERIALS_SNAPSHOT || [];
+        const targetSlug = profile.username.toLowerCase();
+        const targetName = (profile.displayName || '').toLowerCase();
+
+        // Query both firestore and fallback materials
+        let firestoreByUid: MaterialItem[] = [];
+        let firestoreByUsername: MaterialItem[] = [];
+        try {
+          if (profile.uid) firestoreByUid = await getUserContributions(profile.uid);
+          if (profile.username) firestoreByUsername = await getUserContributions(profile.username);
+        } catch (e) {
+          console.warn('Failed to query user contributions from Firestore:', e);
+        }
+
+        const seenIds = new Set<string>();
+        const userMaterials: MaterialItem[] = [];
+
+        for (const m of [...firestoreByUid, ...firestoreByUsername]) {
+          if (!seenIds.has(m.id)) {
+            seenIds.add(m.id);
+            userMaterials.push(m);
+          }
+        }
+
+        for (const m of rawMaterials) {
+          if (seenIds.has(m.id)) continue;
+          if (m.added_by_username && m.added_by_username.toLowerCase() === targetSlug) {
+            seenIds.add(m.id);
+            userMaterials.push(m);
+            continue;
+          }
+          if (m.creator_username && m.creator_username.toLowerCase() === targetSlug) {
+            seenIds.add(m.id);
+            userMaterials.push(m);
+            continue;
+          }
+          if ((profile.uid && m.contributorUid === profile.uid) || (m.contributorUsername && m.contributorUsername.toLowerCase() === targetSlug)) {
+            seenIds.add(m.id);
+            userMaterials.push(m);
+            continue;
+          }
+          const addedByArr = Array.isArray(m.addedBy) ? m.addedBy : m.addedBy ? [m.addedBy] : [];
+          const authorArr = Array.isArray(m.author) ? m.author : m.author ? [m.author] : [];
+          const allNames = [...addedByArr, ...authorArr].map((n) => n.toLowerCase().trim());
+          if (allNames.some((n) => n === targetSlug || (targetName && n === targetName))) {
+            seenIds.add(m.id);
+            userMaterials.push(m);
+          }
+        }
+
+        const grid = document.getElementById('public-contributions-grid');
+        const emptyState = document.getElementById('public-contributions-empty');
+        const countEl = document.getElementById('public-contributions-count');
+
+        if (countEl) countEl.textContent = `${userMaterials.length} materials`;
+
+        if (contribBadge) {
+          if (userMaterials.length > 0) {
+            contribBadge.textContent = `🌟 ${userMaterials.length} مساهمة`;
+            contribBadge.classList.remove('hidden');
+          } else {
+            contribBadge.classList.add('hidden');
+          }
+        }
+
+        if (grid) {
+          grid.innerHTML = '';
+          if (userMaterials.length === 0) {
+            emptyState?.classList.remove('hidden');
+          } else {
+            emptyState?.classList.add('hidden');
+            for (const item of userMaterials) {
+              const cardDiv = document.createElement('div');
+              cardDiv.className = 'p-4 rounded-2xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 shadow-2xs hover:border-emerald-500/50 transition-all';
+              cardDiv.innerHTML = `
+                <div class="flex items-center justify-between mb-2">
+                  <span class="text-[10px] uppercase font-bold px-2 py-0.5 rounded bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300">${escapeHtml(item.type)}</span>
+                  <span class="text-xs text-zinc-400 font-medium">Year ${escapeHtml(String(item.year))}</span>
+                </div>
+                <h3 class="text-sm font-bold text-zinc-900 dark:text-zinc-100 line-clamp-2 mb-1">
+                  <a href="${escapeHtml(item.url)}" target="_blank" rel="noopener noreferrer" class="hover:text-emerald-600 dark:hover:text-emerald-400">
+                    ${escapeHtml(item.title)}
+                  </a>
+                </h3>
+                <p class="text-xs text-zinc-500 dark:text-zinc-400 line-clamp-2 mb-3">
+                  ${escapeHtml(item.description || item.subject || '')}
+                </p>
+                <div class="flex items-center justify-between text-[11px] pt-2 border-t border-zinc-100 dark:border-zinc-800">
+                  <span class="text-emerald-600 dark:text-emerald-400 font-semibold">${escapeHtml(item.subject || '')}</span>
+                  <a href="${escapeHtml(item.url)}" target="_blank" rel="noopener noreferrer" class="font-bold text-emerald-600 dark:text-emerald-400 hover:underline">Open &rarr;</a>
+                </div>
+              `;
+              grid.appendChild(cardDiv);
+            }
+          }
+        }
+
+        // Share public profile button
+        const shareBtn = document.getElementById('btn-share-public-profile');
+        shareBtn?.addEventListener('click', async () => {
+          const shareUrl = window.location.href;
+          if (navigator.share) {
+            try {
+              await navigator.share({
+                title: `${profile.displayName} (@${profile.username}) - ASU Med Materials`,
+                text: `Check out ${profile.displayName}'s contributions on ASU Med Materials.`,
+                url: shareUrl
+              });
+              return;
+            } catch {}
+          }
+          await navigator.clipboard.writeText(shareUrl);
+          notify('Profile link copied to clipboard!', 'success');
+        });
+
+        showSection('public');
+      } catch (err: any) {
+        console.error(err);
+        showSection('guest');
+      }
+    }
+
+    // ─── 2. My Profile Dashboard View ────────────────────────────────────
+    function renderMyProfile(profile: UserProfile) {
+      if (breadcrumbTitle) {
+        breadcrumbTitle.textContent = 'My Profile';
+      }
+
+      const nameEl = document.getElementById('my-profile-name');
+      const handleEl = document.getElementById('my-profile-handle');
+      const bioEl = document.getElementById('my-profile-bio-text');
+      const yearBadgeEl = document.getElementById('my-profile-year-badge');
+      const avatarImg = document.getElementById('my-avatar-img') as HTMLImageElement | null;
+      const avatarInitials = document.getElementById('my-avatar-initials');
+
+      const editName = document.getElementById('edit-display-name') as HTMLInputElement | null;
+      const editHandle = document.getElementById('edit-username') as HTMLInputElement | null;
+      const editYear = document.getElementById('edit-academic-year') as HTMLSelectElement | null;
+      const editBio = document.getElementById('edit-bio') as HTMLTextAreaElement | null;
+      const shareUrlInput = document.getElementById('my-share-url-preview') as HTMLInputElement | null;
+
+      if (nameEl) nameEl.textContent = profile.displayName || 'ASU Student';
+      if (handleEl) handleEl.textContent = `@${profile.username}`;
+      if (bioEl) bioEl.textContent = profile.bio || 'Add a bio below to tell other med students about your study goals.';
+
+      if (yearBadgeEl) {
+        if (profile.academicYear) {
+          yearBadgeEl.textContent = `Year ${profile.academicYear}`;
+          yearBadgeEl.classList.remove('hidden');
+        } else {
+          yearBadgeEl.classList.add('hidden');
+        }
+      }
+
+      // Sync Admin Dashboard button visibility
+      const adminBtn = document.getElementById('btn-profile-admin-dashboard');
+      if (adminBtn) {
+        if (profile.role === 'admin') {
+          adminBtn.classList.remove('hidden');
+          adminBtn.classList.add('inline-flex');
+        } else {
+          adminBtn.classList.add('hidden');
+          adminBtn.classList.remove('inline-flex');
+        }
+      }
+
+      if (profile.photoURL && avatarImg) {
+        avatarImg.src = profile.photoURL;
+        avatarImg.classList.remove('hidden');
+        avatarInitials?.classList.add('hidden');
+      } else {
+        avatarImg?.classList.add('hidden');
+        if (avatarInitials) {
+          avatarInitials.textContent = getInitials(profile.displayName || profile.username);
+          avatarInitials.classList.remove('hidden');
+        }
+      }
+
+      // Admin role description (if admin)
+      const myAdminRoleEl = document.getElementById('my-profile-admin-role');
+      if (myAdminRoleEl) {
+        if (profile.role === 'admin' && profile.adminRoleDescription) {
+          myAdminRoleEl.textContent = profile.adminRoleDescription;
+          myAdminRoleEl.classList.remove('hidden');
+        } else {
+          myAdminRoleEl.classList.add('hidden');
+        }
+      }
+
+      // Contact pills in header
+      const myContactsContainer = document.getElementById('my-profile-contacts-container');
+      if (myContactsContainer) {
+        myContactsContainer.innerHTML = '';
+        if (profile.contacts && profile.contacts.length > 0) {
+          const validContacts = profile.contacts.filter((c) => c.url && c.url.trim());
+          if (validContacts.length > 0) {
+            myContactsContainer.innerHTML = validContacts
+              .map((c) => renderContactPillMarkup(c, true))
+              .join('');
+            myContactsContainer.classList.remove('hidden');
+          } else {
+            myContactsContainer.classList.add('hidden');
+          }
+        } else {
+          myContactsContainer.classList.add('hidden');
+        }
+      }
+
+      // Populate edit fields
+      if (editName) editName.value = profile.displayName || '';
+      if (editHandle) editHandle.value = profile.username || '';
+      if (editYear) editYear.value = profile.academicYear ? String(profile.academicYear) : '';
+      if (editBio) editBio.value = profile.bio || '';
+
+      // Admin role field in form
+      const groupAdminRoleDesc = document.getElementById('group-admin-role-desc');
+      const editAdminRoleDesc = document.getElementById('edit-admin-role-desc') as HTMLInputElement | null;
+      if (groupAdminRoleDesc) {
+        if (profile.role === 'admin') {
+          groupAdminRoleDesc.classList.remove('hidden');
+          if (editAdminRoleDesc) {
+            editAdminRoleDesc.value = profile.adminRoleDescription || '';
+          }
+        } else {
+          groupAdminRoleDesc.classList.add('hidden');
+        }
+      }
+
+      // Populate contacts editor list
+      renderContactsEditor(profile.contacts || []);
+
+      const publicShareUrl = `${window.location.origin}/profile?u=${encodeURIComponent(profile.username)}`;
+      if (shareUrlInput) shareUrlInput.value = publicShareUrl;
+
+      // Check if user needs to choose their permanent custom username
+      const modal = document.getElementById('modal-set-username');
+      const modalInput = document.getElementById('modal-input-username') as HTMLInputElement | null;
+      if (!profile.hasCustomUsername && modal && modalInput) {
+        modal.classList.remove('hidden');
+        modalInput.value = (profile.username || '').replace(/_[a-z0-9]{4}$/, '');
+        modalInput.dispatchEvent(new Event('input'));
+        modalInput.focus();
+      } else {
+        modal?.classList.add('hidden');
+      }
+
+      // Populate user contributions & pending submissions
+      loadMyContributions(profile);
+
+      showSection('my-profile');
+    }
+
+    async function loadMyContributions(profile: UserProfile): Promise<void> {
+      const grid = document.getElementById('my-contributions-grid');
+      const emptyState = document.getElementById('my-contributions-empty');
+      const countEl = document.getElementById('my-contributions-count');
+      const contribBadge = document.getElementById('my-profile-contrib-badge');
+      const pendingContainer = document.getElementById('my-pending-submissions-container');
+      const pendingList = document.getElementById('my-pending-submissions-list');
+      const pendingCountEl = document.getElementById('my-pending-submissions-count');
+
+      // 1. Published Materials
+      const rawMaterials: MaterialItem[] = (window as any).__ALL_MATERIALS_SNAPSHOT || [];
+      const targetSlug = (profile.username || '').toLowerCase();
+      const targetName = (profile.displayName || '').toLowerCase();
+
+      let firestoreByUid: MaterialItem[] = [];
+      let firestoreByUsername: MaterialItem[] = [];
+      try {
+        if (profile.uid) firestoreByUid = await getUserContributions(profile.uid);
+        if (profile.username) firestoreByUsername = await getUserContributions(profile.username);
+      } catch (e) {
+        console.warn('Failed to load user contributions from Firestore:', e);
+      }
+
+      const seenIds = new Set<string>();
+      const userMaterials: MaterialItem[] = [];
+
+      for (const m of [...firestoreByUid, ...firestoreByUsername]) {
+        if (!seenIds.has(m.id)) {
+          seenIds.add(m.id);
+          userMaterials.push(m);
+        }
+      }
+
+      for (const m of rawMaterials) {
+        if (seenIds.has(m.id)) continue;
+        if ((profile.uid && m.contributorUid === profile.uid) || (m.contributorUsername && m.contributorUsername.toLowerCase() === targetSlug)) {
+          seenIds.add(m.id);
+          userMaterials.push(m);
+          continue;
+        }
+        const addedByArr = Array.isArray(m.addedBy) ? m.addedBy : m.addedBy ? [m.addedBy] : [];
+        const authorArr = Array.isArray(m.author) ? m.author : m.author ? [m.author] : [];
+        const allNames = [...addedByArr, ...authorArr].map((n) => n.toLowerCase().trim());
+        if (allNames.some((n) => n.includes(targetSlug) || (targetName && n.includes(targetName)))) {
+          seenIds.add(m.id);
+          userMaterials.push(m);
+        }
+      }
+
+      if (countEl) countEl.textContent = `${userMaterials.length} materials`;
+
+      if (contribBadge) {
+        if (userMaterials.length > 0) {
+          contribBadge.textContent = `🌟 ${userMaterials.length} مساهمة`;
+          contribBadge.classList.remove('hidden');
+        } else {
+          contribBadge.classList.add('hidden');
+        }
+      }
+
+      if (grid) {
+        grid.innerHTML = '';
+        if (userMaterials.length === 0) {
+          emptyState?.classList.remove('hidden');
+        } else {
+          emptyState?.classList.add('hidden');
+          for (const item of userMaterials) {
+            const cardDiv = document.createElement('div');
+            cardDiv.className = 'p-4 rounded-2xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 shadow-2xs hover:border-emerald-500/50 transition-all';
+            cardDiv.innerHTML = `
+              <div class="flex items-center justify-between mb-2">
+                <span class="text-[10px] uppercase font-bold px-2 py-0.5 rounded bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300">${escapeHtml(item.type)}</span>
+                <span class="text-xs text-zinc-400 font-medium">Year ${escapeHtml(String(item.year))}</span>
+              </div>
+              <h3 class="text-sm font-bold text-zinc-900 dark:text-zinc-100 line-clamp-2 mb-1">
+                <a href="${escapeHtml(item.url)}" target="_blank" rel="noopener noreferrer" class="hover:text-emerald-600 dark:hover:text-emerald-400">
+                  ${escapeHtml(item.title)}
+                </a>
+              </h3>
+              <p class="text-xs text-zinc-500 dark:text-zinc-400 line-clamp-2 mb-3">
+                ${escapeHtml(item.description || item.subject || '')}
+              </p>
+              <div class="flex items-center justify-between text-[11px] pt-2 border-t border-zinc-100 dark:border-zinc-800">
+                <span class="text-emerald-600 dark:text-emerald-400 font-semibold">${escapeHtml(item.subject || '')}</span>
+                <a href="${escapeHtml(item.url)}" target="_blank" rel="noopener noreferrer" class="font-bold text-emerald-600 dark:text-emerald-400 hover:underline">Open &rarr;</a>
+              </div>
+            `;
+            grid.appendChild(cardDiv);
+          }
+        }
+      }
+
+      // 2. Pending Submissions
+      if (profile.uid) {
+        try {
+          const allUserSubmissions = await getUserSubmissions(profile.uid);
+          const pendingSubs = allUserSubmissions.filter((s) => s.status === 'pending');
+
+          if (pendingSubs.length > 0 && pendingContainer && pendingList) {
+            pendingContainer.classList.remove('hidden');
+            if (pendingCountEl) pendingCountEl.textContent = `${pendingSubs.length} قيد المراجعة`;
+
+            pendingList.innerHTML = pendingSubs
+              .map((sub) => {
+                const dateStr = sub.timestamp ? new Date(sub.timestamp).toLocaleDateString('ar-EG', { dateStyle: 'medium' }) : '';
+                const displayYear = sub.year && sub.year !== 'general' ? `سنة ${sub.year}` : 'عام';
+                const displayModule = sub.moduleId && sub.moduleId !== 'general' ? `• ${sub.moduleId}` : '';
+                return `
+                  <div class="p-3 rounded-xl bg-amber-50/50 dark:bg-amber-950/20 border border-amber-200/60 dark:border-amber-800/40 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs">
+                    <div>
+                      <div class="font-bold text-zinc-900 dark:text-zinc-100 flex items-center gap-1.5">
+                        <span>${sub.title || 'مساهمة قيد المراجعة'}</span>
+                      </div>
+                      <div class="text-[11px] text-zinc-400 mt-0.5 flex items-center gap-1.5">
+                        <span>${displayYear} ${displayModule}</span>
+                        <span>•</span>
+                        <span>${dateStr}</span>
+                      </div>
+                    </div>
+                    <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[10px] font-bold bg-amber-100 dark:bg-amber-900/60 text-amber-800 dark:text-amber-200 shrink-0 self-start sm:self-center">
+                      <span class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span>
+                      قيد المراجعة
+                    </span>
+                  </div>
+                `;
+              })
+              .join('');
+          } else {
+            pendingContainer?.classList.add('hidden');
+          }
+        } catch (err) {
+          console.warn('Failed to load pending submissions:', err);
+        }
+      }
+    }
+
+    // ─── 3. Event Listeners for Dashboard ───────────────────────────────
+    // Copy Share Links
+    const copyMyShareBtn = document.getElementById('btn-copy-my-share-link');
+    const copyPreviewBtn = document.getElementById('btn-copy-preview-link');
+
+    async function copyMyProfileLink() {
+      if (!currentProfile) return;
+      const shareUrl = `${window.location.origin}/profile?u=${encodeURIComponent(currentProfile.username)}`;
+      try {
+        await navigator.clipboard.writeText(shareUrl);
+        notify('Shareable profile link copied!', 'success');
+      } catch {
+        notify('Could not copy link', 'error');
+      }
+    }
+
+    copyMyShareBtn?.addEventListener('click', copyMyProfileLink);
+    copyPreviewBtn?.addEventListener('click', copyMyProfileLink);
+
+    // Pre-fill avatar URL input with current value
+    const avatarUrlInput = document.getElementById('edit-avatar-url') as HTMLInputElement | null;
+    if (avatarUrlInput && currentProfile?.photoURL) {
+      avatarUrlInput.value = currentProfile.photoURL;
+    }
+
+    // ─── Contact Links Editor Helpers ─────────────────────────────────
+    function createContactRowElement(contact?: UserContact): HTMLElement {
+      const row = document.createElement('div');
+      row.className = 'flex items-center gap-2 contact-row';
+
+      const platform = contact?.platform || 'whatsapp';
+      const url = contact?.url || '';
+      const label = contact?.label || '';
+
+      const platformOptions = Object.values(PLATFORM_REGISTRY)
+        .map(
+          (p) =>
+            `<option value="${p.id}" ${p.id === platform ? 'selected' : ''}>${p.label} (${p.labelAr})</option>`
+        )
+        .join('');
+
+      row.innerHTML = `
+        <select class="contact-platform-select text-xs px-2.5 py-2 rounded-xl border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 focus:outline-none focus:ring-2 focus:ring-emerald-500 dark:text-zinc-100 shrink-0 cursor-pointer">
+          ${platformOptions}
+        </select>
+        <input
+          type="text"
+          class="contact-url-input flex-1 text-xs px-3 py-2 rounded-xl border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 focus:outline-none focus:ring-2 focus:ring-emerald-500 dark:text-zinc-100"
+          placeholder="رابط أو معرف الحساب (e.g. +2010... or link)"
+          value="${url}"
+        />
+        <input
+          type="text"
+          class="contact-label-input w-24 sm:w-28 text-xs px-2.5 py-2 rounded-xl border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 focus:outline-none focus:ring-2 focus:ring-emerald-500 dark:text-zinc-100"
+          placeholder="اسم اختياري"
+          value="${label}"
+        />
+        <button
+          type="button"
+          class="btn-remove-contact-row p-2 rounded-xl text-zinc-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-colors shrink-0 cursor-pointer"
+          title="حذف"
+        >
+          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+          </svg>
+        </button>
+      `;
+
+      row.querySelector('.btn-remove-contact-row')?.addEventListener('click', () => {
+        row.remove();
+      });
+
+      return row;
+    }
+
+    function renderContactsEditor(contacts?: UserContact[]) {
+      const list = document.getElementById('contacts-editor-list');
+      if (!list) return;
+      list.innerHTML = '';
+      if (contacts && contacts.length > 0) {
+        contacts.forEach((c) => {
+          list.appendChild(createContactRowElement(c));
+        });
+      }
+    }
+
+    function getEnteredContacts(): UserContact[] {
+      const list = document.getElementById('contacts-editor-list');
+      if (!list) return [];
+      const rows = list.querySelectorAll<HTMLElement>('.contact-row');
+      const contacts: UserContact[] = [];
+
+      rows.forEach((row) => {
+        const platformSelect = row.querySelector<HTMLSelectElement>('.contact-platform-select');
+        const urlInput = row.querySelector<HTMLInputElement>('.contact-url-input');
+        const labelInput = row.querySelector<HTMLInputElement>('.contact-label-input');
+
+        const platform = (platformSelect?.value || 'other') as ContactPlatform;
+        const url = urlInput?.value.trim() || '';
+        const label = labelInput?.value.trim() || undefined;
+
+        if (url) {
+          contacts.push({ platform, url, label });
+        }
+      });
+
+      return contacts;
+    }
+
+    const addContactBtn = document.getElementById('btn-add-contact-row');
+    addContactBtn?.addEventListener('click', () => {
+      const list = document.getElementById('contacts-editor-list');
+      if (list) {
+        list.appendChild(createContactRowElement());
+      }
+    });
+
+    // Save Profile Form (Updates name, year, bio, contacts, admin role description)
+    const editForm = document.getElementById('edit-profile-form');
+    editForm?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      if (!currentProfile || !currentUser) return;
+
+      const editName = (document.getElementById('edit-display-name') as HTMLInputElement)?.value.trim();
+      const editYearVal = (document.getElementById('edit-academic-year') as HTMLSelectElement)?.value;
+      const editBio = (document.getElementById('edit-bio') as HTMLTextAreaElement)?.value.trim();
+      const avatarUrl = (document.getElementById('edit-avatar-url') as HTMLInputElement)?.value.trim() || '';
+
+      if (!editName) {
+        notify('Full Name is required', 'error');
+        return;
+      }
+
+      // Validate avatar URL if provided
+      if (avatarUrl) {
+        try {
+          const parsed = new URL(avatarUrl);
+          if (!['http:', 'https:'].includes(parsed.protocol)) {
+            throw new Error('Invalid URL');
+          }
+        } catch {
+          notify('Please enter a valid image URL (starting with http:// or https://)', 'error');
+          return;
+        }
+      }
+
+      const saveBtn = document.getElementById('btn-save-profile') as HTMLButtonElement | null;
+      if (saveBtn) {
+        saveBtn.disabled = true;
+        saveBtn.textContent = 'Saving...';
+      }
+
+      try {
+        currentProfile.displayName = editName;
+        currentProfile.academicYear = editYearVal ? (parseInt(editYearVal, 10) as AcademicYear) : undefined;
+        currentProfile.bio = editBio;
+        currentProfile.photoURL = avatarUrl || undefined;
+        currentProfile.contacts = getEnteredContacts();
+
+        if (currentProfile.role === 'admin') {
+          const roleInput = document.getElementById('edit-admin-role-desc') as HTMLInputElement | null;
+          currentProfile.adminRoleDescription = roleInput?.value.trim() || undefined;
+        }
+
+        await upsertUserProfile(currentProfile);
+
+        // Conserve user's updated academic year in localStorage and notify site components
+        if (currentProfile.academicYear) {
+          localStorage.setItem('asumed_user_year', String(currentProfile.academicYear));
+          window.dispatchEvent(
+            new CustomEvent('user-preferences-updated', {
+              detail: { year: currentProfile.academicYear }
+            })
+          );
+        }
+
+        notify('Profile updated successfully!', 'success');
+        renderMyProfile(currentProfile);
+      } catch (err: any) {
+        notify(err?.message || 'Failed to update profile', 'error');
+      } finally {
+        if (saveBtn) {
+          saveBtn.disabled = false;
+          saveBtn.textContent = 'Save Changes';
+        }
+      }
+    });
+
+    // ─── Live Username Validation for Registration ───────────────────────
+    const authUsernameInput = document.getElementById('auth-username') as HTMLInputElement | null;
+    const authUsernameStatus = document.getElementById('auth-username-status');
+    let authCheckTimer: any = null;
+
+    authUsernameInput?.addEventListener('input', () => {
+      clearTimeout(authCheckTimer);
+      const val = authUsernameInput.value.trim().toLowerCase().replace(/^@/, '');
+      if (!val) {
+        authUsernameStatus?.classList.add('hidden');
+        return;
+      }
+
+      if (val.length < 3 || val.length > 25 || !/^[a-z0-9_-]+$/.test(val)) {
+        if (authUsernameStatus) {
+          authUsernameStatus.textContent = '❌ يجب أن يتكون من 3 إلى 25 حرفاً أو رقماً أو _';
+          authUsernameStatus.className = 'text-[11px] mt-1 font-semibold text-rose-600 dark:text-rose-400';
+          authUsernameStatus.classList.remove('hidden');
+        }
+        return;
+      }
+
+      if (authUsernameStatus) {
+        authUsernameStatus.textContent = 'جاري التحقق من التوفر...';
+        authUsernameStatus.className = 'text-[11px] mt-1 font-semibold text-zinc-400';
+        authUsernameStatus.classList.remove('hidden');
+      }
+
+      authCheckTimer = setTimeout(async () => {
+        try {
+          const isAvail = await checkUsernameAvailable(val);
+          if (authUsernameStatus) {
+            if (isAvail) {
+              authUsernameStatus.textContent = '✅ اسم المستخدم متاح ويمكنك استخدامه!';
+              authUsernameStatus.className = 'text-[11px] mt-1 font-semibold text-emerald-600 dark:text-emerald-400';
+            } else {
+              authUsernameStatus.textContent = '❌ اسم المستخدم مأخوذ بالفعل، يرجى اختيار اسم آخر';
+              authUsernameStatus.className = 'text-[11px] mt-1 font-semibold text-rose-600 dark:text-rose-400';
+            }
+            authUsernameStatus.classList.remove('hidden');
+          }
+        } catch {
+          authUsernameStatus?.classList.add('hidden');
+        }
+      }, 350);
+    });
+
+    // ─── Modal Set Permanent Username Logic ──────────────────────────────
+    const modalInput = document.getElementById('modal-input-username') as HTMLInputElement | null;
+    const modalStatus = document.getElementById('modal-username-status');
+    const modalConfirmBtn = document.getElementById('modal-btn-confirm-username') as HTMLButtonElement | null;
+    let modalCheckTimer: any = null;
+
+    modalInput?.addEventListener('input', () => {
+      clearTimeout(modalCheckTimer);
+      const val = modalInput.value.trim().toLowerCase().replace(/^@/, '');
+      if (!val) {
+        modalStatus?.classList.add('hidden');
+        if (modalConfirmBtn) modalConfirmBtn.disabled = true;
+        return;
+      }
+
+      if (val.length < 3 || val.length > 25 || !/^[a-z0-9_-]+$/.test(val)) {
+        if (modalStatus) {
+          modalStatus.textContent = '❌ يجب أن يتكون من 3 إلى 25 حرفاً أو رقماً أو _';
+          modalStatus.className = 'text-[11px] mt-1 font-semibold text-rose-600 dark:text-rose-400';
+          modalStatus.classList.remove('hidden');
+        }
+        if (modalConfirmBtn) modalConfirmBtn.disabled = true;
+        return;
+      }
+
+      if (modalStatus) {
+        modalStatus.textContent = 'جاري التحقق من التوفر...';
+        modalStatus.className = 'text-[11px] mt-1 font-semibold text-zinc-400';
+        modalStatus.classList.remove('hidden');
+      }
+
+      modalCheckTimer = setTimeout(async () => {
+        try {
+          const avail = await checkUsernameAvailable(val, currentUser?.uid);
+          if (modalStatus) {
+            if (avail) {
+              modalStatus.textContent = '✅ اسم المستخدم متاح!';
+              modalStatus.className = 'text-[11px] mt-1 font-semibold text-emerald-600 dark:text-emerald-400';
+              if (modalConfirmBtn) modalConfirmBtn.disabled = false;
+            } else {
+              modalStatus.textContent = '❌ اسم المستخدم مأخوذ بالفعل، يرجى اختيار اسم آخر';
+              modalStatus.className = 'text-[11px] mt-1 font-semibold text-rose-600 dark:text-rose-400';
+              if (modalConfirmBtn) modalConfirmBtn.disabled = true;
+            }
+            modalStatus.classList.remove('hidden');
+          }
+        } catch {
+          modalStatus?.classList.add('hidden');
+        }
+      }, 350);
+    });
+
+    modalConfirmBtn?.addEventListener('click', async () => {
+      if (!currentUser || !modalInput) return;
+      const desired = modalInput.value.trim().toLowerCase().replace(/^@/, '');
+      if (!desired) return;
+
+      modalConfirmBtn.disabled = true;
+      modalConfirmBtn.textContent = 'جاري التثبيت...';
+
+      try {
+        const res = await setPermanentUsername(currentUser.uid, desired);
+        if (res.success && res.profile) {
+          currentProfile = res.profile;
+          document.getElementById('modal-set-username')?.classList.add('hidden');
+          notify('تم تثبيت اسم المستخدم بنجاح! هذا الاسم دائم الآن.', 'success');
+          renderMyProfile(res.profile);
+        } else {
+          notify(res.error || 'تعذر تثبيت اسم المستخدم', 'error');
+          modalConfirmBtn.disabled = false;
+          modalConfirmBtn.textContent = 'تأكيد وتثبيت اسم المستخدم';
+        }
+      } catch (err: any) {
+        notify(err?.message || 'حدث خطأ غير متوقع', 'error');
+        modalConfirmBtn.disabled = false;
+        modalConfirmBtn.textContent = 'تأكيد وتثبيت اسم المستخدم';
+      }
+    });
+
+    // Focus trap and Escape key handling for username modal
+    const modalEl = document.getElementById('modal-set-username');
+    if (modalEl) {
+      modalEl.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+          modalEl.classList.add('hidden');
+          return;
+        }
+        if (e.key === 'Tab') {
+          const focusable = modalEl.querySelectorAll<HTMLElement>('button, input, [tabindex]:not([tabindex="-1"])');
+          if (focusable.length === 0) return;
+          const first = focusable[0];
+          const last = focusable[focusable.length - 1];
+          if (e.shiftKey && document.activeElement === first) {
+            e.preventDefault();
+            last.focus();
+          } else if (!e.shiftKey && document.activeElement === last) {
+            e.preventDefault();
+            first.focus();
+          }
+        }
+      });
+    }
+
+    // Sign Out
+    document.getElementById('btn-signout')?.addEventListener('click', async () => {
+      await signOutUser();
+      notify('Signed out successfully', 'info');
+      showSection('guest');
+    });
+
+    // ─── 4. Auth Handlers for Guest View ────────────────────────────────
+    // Google Sign-In
+    document.getElementById('btn-google-signin')?.addEventListener('click', async () => {
+      try {
+        const res = await signInWithGoogle();
+        if (res) {
+          currentUser = res.user;
+          currentProfile = res.profile;
+          notify(`Welcome back, ${res.profile.displayName}!`, 'success');
+          renderMyProfile(res.profile);
+        }
+      } catch (err: any) {
+        notify(err?.message || 'Google sign in failed', 'error');
+      }
+    });
+
+    // Toggle Sign In vs Register Tabs
+    const tabLogin = document.getElementById('tab-auth-login');
+    const tabRegister = document.getElementById('tab-auth-register');
+    const registerFields = document.getElementById('auth-register-fields');
+    const authSubmitBtn = document.getElementById('auth-submit-btn');
+    let isRegisterMode = false;
+
+    tabLogin?.addEventListener('click', () => {
+      isRegisterMode = false;
+      registerFields?.classList.add('hidden');
+      tabLogin.className = 'flex-1 pb-2 text-xs font-bold text-emerald-600 dark:text-emerald-400 border-b-2 border-emerald-600 dark:border-emerald-400 cursor-pointer';
+      tabRegister!.className = 'flex-1 pb-2 text-xs font-semibold text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 cursor-pointer';
+      if (authSubmitBtn) authSubmitBtn.textContent = 'Sign In';
+    });
+
+    tabRegister?.addEventListener('click', () => {
+      isRegisterMode = true;
+      registerFields?.classList.remove('hidden');
+      tabRegister.className = 'flex-1 pb-2 text-xs font-bold text-emerald-600 dark:text-emerald-400 border-b-2 border-emerald-600 dark:border-emerald-400 cursor-pointer';
+      tabLogin!.className = 'flex-1 pb-2 text-xs font-semibold text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 cursor-pointer';
+      if (authSubmitBtn) authSubmitBtn.textContent = 'Create Account';
+    });
+
+    // Email Form Submission
+    const emailForm = document.getElementById('email-auth-form');
+    const authErrorMsg = document.getElementById('auth-error-msg');
+
+    emailForm?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      authErrorMsg?.classList.add('hidden');
+
+      const email = (document.getElementById('auth-email') as HTMLInputElement)?.value.trim();
+      const pass = (document.getElementById('auth-password') as HTMLInputElement)?.value;
+
+      if (!email || !pass) {
+        if (authErrorMsg) {
+          authErrorMsg.textContent = 'Please enter both email and password.';
+          authErrorMsg.classList.remove('hidden');
+        }
+        return;
+      }
+
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(email)) {
+        if (authErrorMsg) {
+          authErrorMsg.textContent = 'Please enter a valid email address.';
+          authErrorMsg.classList.remove('hidden');
+        }
+        return;
+      }
+
+      if (pass.length < 6) {
+        if (authErrorMsg) {
+          authErrorMsg.textContent = 'Password must be at least 6 characters.';
+          authErrorMsg.classList.remove('hidden');
+        }
+        return;
+      }
+
+      if (authSubmitBtn) {
+        authSubmitBtn.setAttribute('disabled', 'true');
+        authSubmitBtn.textContent = isRegisterMode ? 'Creating Account...' : 'Signing In...';
+      }
+
+      try {
+        if (isRegisterMode) {
+          const dName = (document.getElementById('auth-display-name') as HTMLInputElement)?.value.trim() || 'ASU Student';
+          const uName = (document.getElementById('auth-username') as HTMLInputElement)?.value.trim().toLowerCase().replace(/^@/, '');
+          if (!uName || uName.length < 3) {
+            if (authErrorMsg) {
+              authErrorMsg.textContent = 'يرجى إدخال اسم مستخدم فريد لحسابك (3 أحرف على الأقل).';
+              authErrorMsg.classList.remove('hidden');
+            }
+            if (authSubmitBtn) {
+              authSubmitBtn.removeAttribute('disabled');
+              authSubmitBtn.textContent = 'Create Account';
+            }
+            return;
+          }
+          const res = await signUpWithEmail(email, pass, dName, uName);
+          currentUser = res.user;
+          currentProfile = res.profile;
+          notify(`Account created! Welcome, ${res.profile.displayName}!`, 'success');
+          renderMyProfile(res.profile);
+        } else {
+          const res = await signInWithEmail(email, pass);
+          currentUser = res.user;
+          currentProfile = res.profile;
+          if (res.profile) {
+            notify(`Welcome back, ${res.profile.displayName}!`, 'success');
+            renderMyProfile(res.profile);
+          }
+        }
+      } catch (err: any) {
+        console.error(err);
+        if (authErrorMsg) {
+          authErrorMsg.textContent = err?.message || 'Authentication error occurred.';
+          authErrorMsg.classList.remove('hidden');
+        }
+      } finally {
+        if (authSubmitBtn) {
+          authSubmitBtn.removeAttribute('disabled');
+          authSubmitBtn.textContent = isRegisterMode ? 'Create Account' : 'Sign In';
+        }
+      }
+    });
+
+    // ─── 5. Initial State Detection ─────────────────────────────────────
+    if (targetUsername) {
+      renderPublicProfile(targetUsername, false);
+      return;
+    }
+
+    if (targetUid) {
+      renderPublicProfile(targetUid, true);
+      return;
+    }
+
+    // Fast initial render from local cached profile if available
+    if (currentProfile) {
+      renderMyProfile(currentProfile);
+    }
+
+    let hasShownProfile = false;
+
+    // Safety fallback: if Firebase Auth takes more than 2.5s (e.g. storage access blocked), never stay stuck on loading skeleton
+    const safetyTimer = setTimeout(() => {
+      if (!loadingSkeleton?.classList.contains('hidden')) {
+        if (currentProfile) {
+          hasShownProfile = true;
+          renderMyProfile(currentProfile);
+        } else {
+          showSection('guest');
+        }
+      }
+    }, 2500);
+
+    // Subscribe to Auth state
+    if (unsubscribeAuth) unsubscribeAuth();
+    unsubscribeAuth = onAuthChange((user, profile) => {
+      clearTimeout(safetyTimer);
+      currentUser = user;
+      currentProfile = profile;
+
+      if (user && profile) {
+        hasShownProfile = true;
+        renderMyProfile(profile);
+      } else if (!hasShownProfile) {
+        showSection('guest');
+      }
+    });
+  }
+
+  initProfilePage();
+  document.addEventListener('astro:after-swap', initProfilePage);
+</script>

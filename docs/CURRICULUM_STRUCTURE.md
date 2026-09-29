@@ -15,9 +15,15 @@ The medical program spans 5 years divided into two primary phases:
 ## 2. Currently Active Modules on the Platform
 
 > [!NOTE]
-> Currently, the platform's live database is dedicated exclusively to the **Blood & Lymphatic System (MED201)** of Year 2 (Semester 3). Other modules and subjects have been temporarily removed and will be activated once their respective curated study materials are submitted.
+> Currently, the platform's live Cloud Firestore database features the **Introduction Module (MED101)** for Year 1 and the **Blood & Lymphatic System (MED201)** for Year 2 (Semester 3). Reference books across Years 1–5 are also available. Other modules will be activated as their respective curated study materials are submitted.
+
+### Active Module: Year 1 — Introduction Module (MED101)
+- **Module ID**: `year1-introduction`
+- **Subjects**: Anatomy, Physiology, Histology, Biochemistry, Immunology, Genetics, Embryology, Presentation Skills.
+- **Resources**: Google Drive essay notes, MCQs, practical lab revisions, video lectures, and YouTube playlists with embedded chapter navigation.
 
 ### Active Module: Year 2 — Blood & Lymphatic System (MED201)
+- **Module ID**: `year2-blood`
 - **Subjects**: Anatomy, Physiology, Histology, Biochemistry, Pharmacology, Pathology, Parasitology, Microbiology, Clinical Lectures.
 - **Resources**: Central Drives (including Semester 3 Drive & Batch Lectures Drive), Video Playlists & Embedded Players, Telegram Lecture Recordings, Audio Revisions, MCQs & Essay Banks, Formatives, Telegram Bots (@ASUMedZonebot, @ASUbooksbot), and Past Finals.
 

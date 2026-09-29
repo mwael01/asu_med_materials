@@ -21,5 +21,5 @@ this is the asumedmaterials website, the all in one place for medicine students 
 - dont use icons in place of bigger images, you can use icons from the icon library for small buttons
 - keep the ui unified and make sure it is responsive on any screen size
 - you may create helper scripts (in `scripts/`) to automate tasks like fetching playlist details and data processing; document their usage and keep them reusable for future AI agent runs
+- database is Cloud Firestore: all study materials, curriculum modules, and contributor profiles live directly in Cloud Firestore (single source of truth); never create, store, or refer to local data files (such as local JSON files) for materials, and always read and write directly to Firestore
 - never add unnecesesary icons, countboxes, ui pills, or other unuseful text that only bloats the ui
-- 

@@ -1,6 +1,9 @@
 ---
-import { materialsData } from '../../data/materials';
-import { modulesData } from '../../data/modules';
+  import { getAllMaterials } from '../../data/materials';
+  import { getAllModules } from '../../data/modules';
+
+const rawMaterials = await getAllMaterials();
+const rawModules = await getAllModules();
 ---
 
 <!-- Smart Bookmarks Slide-over Drawer (RTL Friendly) -->
@@ -106,7 +109,7 @@ import { modulesData } from '../../data/modules';
   aria-hidden="true"
 ></div>
 
-<script define:vars={{ rawMaterials: materialsData, rawModules: modulesData }}>
+<script define:vars={{ rawMaterials, rawModules }}>
   window.__ALL_MATERIALS = rawMaterials;
   window.__ALL_MODULES = rawModules;
 </script>
@@ -114,7 +117,9 @@ import { modulesData } from '../../data/modules';
 <script>
   import { getMaterialEnglishTitle } from '../../i18n/materialsTranslations';
   import { getStoredBookmarkIds, saveBookmarkIds, getStoredStudiedIds } from '../../utils/storage';
+  import { syncBookmarkToggle } from '../../utils/userSync';
   import { getCurrentLanguage, t } from '../../utils/i18n';
+  import { escapeHtml } from '../../utils/sanitize';
   import type { MaterialItem, ModuleInfo } from '../../types/materials';
 
   let drawerGlobalListenersAttached = false;
@@ -133,13 +138,18 @@ import { modulesData } from '../../data/modules';
 
     let activeFilterMode: 'all' | 'unstudied' = 'all';
 
+    let lastFocusedElement: HTMLElement | null = null;
+
     function openDrawer(): void {
       if (!drawer || !backdrop) return;
+      lastFocusedElement = document.activeElement as HTMLElement;
       renderSmartBookmarks();
       drawer.classList.remove('-translate-x-full');
       backdrop.classList.remove('hidden');
       document.body.style.overflow = 'hidden';
       drawer.setAttribute('aria-hidden', 'false');
+      const closeBtn = document.getElementById('close-bookmarks-drawer');
+      closeBtn?.focus();
     }
 
     function closeDrawer(): void {
@@ -148,17 +158,19 @@ import { modulesData } from '../../data/modules';
       backdrop.classList.add('hidden');
       document.body.style.overflow = '';
       drawer.setAttribute('aria-hidden', 'true');
+      lastFocusedElement?.focus();
     }
 
     openBtns.forEach((btn) => btn.addEventListener('click', openDrawer));
     closeBtn?.addEventListener('click', closeDrawer);
     backdrop?.addEventListener('click', closeDrawer);
 
+    const drawerAbort = new AbortController();
     window.addEventListener('keydown', (e) => {
       if (e.key === 'Escape' && !drawer?.classList.contains('-translate-x-full')) {
         closeDrawer();
       }
-    });
+    }, { signal: drawerAbort.signal });
 
     viewHomeLink?.addEventListener('click', () => {
       closeDrawer();
@@ -215,7 +227,10 @@ import { modulesData } from '../../data/modules';
           } else {
             updated = [...current, matId];
           }
+
+          const isNewlyAdded = index < 0;
           saveBookmarkIds(updated);
+          syncBookmarkToggle(matId, isNewlyAdded);
           renderSmartBookmarks();
 
           const showFn = (window as any).showToast;
@@ -283,27 +298,39 @@ import { modulesData } from '../../data/modules';
     function renderSmartBookmarks(): void {
       const ids = getStoredBookmarkIds();
       const studiedIds = getStoredStudiedIds();
-      const allMaterials: MaterialItem[] = (window as any).__ALL_MATERIALS || [];
-      const allModules: ModuleInfo[] = (window as any).__ALL_MODULES || [];
+      const allMaterials: MaterialItem[] = (window as unknown as { __ALL_MATERIALS?: MaterialItem[] }).__ALL_MATERIALS || [];
+      const allModules: ModuleInfo[] = (window as unknown as { __ALL_MODULES?: ModuleInfo[] }).__ALL_MODULES || [];
       const isAr = getCurrentLanguage() === 'ar';
 
       const bookmarked = allMaterials.filter((m) => ids.includes(m.id));
       const unstudiedBookmarked = bookmarked.filter((m) => !studiedIds.includes(m.id));
 
       // Update card bookmark buttons in current document
-      document.querySelectorAll('[data-material-id]').forEach((card) => {
-        const matId = card.getAttribute('data-material-id');
+      document.querySelectorAll<HTMLElement>('.bookmark-btn[data-id]').forEach((btn) => {
+        const matId = btn.getAttribute('data-id');
         const isSaved = matId ? ids.includes(matId) : false;
-        const btn = card.querySelector('.bookmark-btn');
-        const emptyIcon = btn?.querySelector('.bookmark-icon-empty');
-        const filledIcon = btn?.querySelector('.bookmark-icon-filled');
+        const emptyIcon = btn.querySelector('.bookmark-icon-empty');
+        const filledIcon = btn.querySelector('.bookmark-icon-filled');
+        const countEl = btn.querySelector<HTMLElement>('.bookmark-count');
 
         if (isSaved) {
           emptyIcon?.classList.add('hidden');
           filledIcon?.classList.remove('hidden');
+          btn.classList.add('text-amber-500', 'dark:text-amber-400');
+          btn.classList.remove('text-zinc-400');
+          if (countEl) {
+            countEl.classList.add('text-amber-600', 'dark:text-amber-400');
+            countEl.classList.remove('text-zinc-500', 'dark:text-zinc-400');
+          }
         } else {
           emptyIcon?.classList.remove('hidden');
           filledIcon?.classList.add('hidden');
+          btn.classList.remove('text-amber-500', 'dark:text-amber-400');
+          btn.classList.add('text-zinc-400');
+          if (countEl) {
+            countEl.classList.remove('text-amber-600', 'dark:text-amber-400');
+            countEl.classList.add('text-zinc-500', 'dark:text-zinc-400');
+          }
         }
       });
 
@@ -412,7 +439,7 @@ import { modulesData } from '../../data/modules';
                       ? 'border-emerald-600 bg-emerald-600 dark:border-emerald-500 dark:bg-emerald-500 text-white shadow-2xs'
                       : 'border-zinc-300 dark:border-zinc-600 bg-white dark:bg-zinc-800 hover:border-emerald-500'
                   }"
-                  data-drawer-studied-id="${item.id}"
+                  data-drawer-studied-id="${escapeHtml(item.id)}"
                   title="${isStudied ? (isAr ? 'تمت المذاكرة' : 'Marked as studied') : (isAr ? 'تحديد كمذاكر' : 'Mark as studied')}"
                   aria-label="Toggle studied status"
                 >
@@ -424,25 +451,25 @@ import { modulesData } from '../../data/modules';
                 <!-- Resource Link and Meta -->
                 <div class="min-w-0 flex-1">
                   <a
-                    href="${targetUrl}"
+                    href="${escapeHtml(targetUrl)}"
                     target="${targetAttr}"
                     rel="${targetAttr === '_blank' ? 'noopener noreferrer' : ''}"
                     class="block text-xs font-bold text-zinc-900 dark:text-zinc-100 hover:text-emerald-600 dark:hover:text-emerald-400 truncate leading-snug"
-                    title="${titleText}"
+                    title="${escapeHtml(titleText)}"
                   >
-                    ${titleText}
+                    ${escapeHtml(titleText)}
                   </a>
                   <div class="flex items-center gap-1.5 text-[10px] text-zinc-400 dark:text-zinc-500 mt-0.5">
-                    <span>${typeLabel}</span>
+                    <span>${escapeHtml(typeLabel)}</span>
                     <span>&bull;</span>
-                    <span>${isAr ? `السنة ${item.year}` : `Year ${item.year}`}</span>
+                    <span>${isAr ? `السنة ${escapeHtml(String(item.year))}` : `Year ${escapeHtml(String(item.year))}`}</span>
                   </div>
                 </div>
 
                 <!-- Right Actions: Open and Remove -->
                 <div class="flex items-center gap-1 shrink-0">
                   <a
-                    href="${targetUrl}"
+                    href="${escapeHtml(targetUrl)}"
                     target="${targetAttr}"
                     rel="${targetAttr === '_blank' ? 'noopener noreferrer' : ''}"
                     class="p-1.5 text-zinc-400 hover:text-emerald-600 dark:hover:text-emerald-400 rounded-lg hover:bg-zinc-200/80 dark:hover:bg-zinc-700 transition-colors"
@@ -455,7 +482,7 @@ import { modulesData } from '../../data/modules';
                   <button
                     type="button"
                     class="drawer-remove-btn p-1.5 text-zinc-400 hover:text-rose-500 rounded-lg hover:bg-zinc-200/80 dark:hover:bg-zinc-700 transition-colors cursor-pointer"
-                    data-drawer-remove-id="${item.id}"
+                    data-drawer-remove-id="${escapeHtml(item.id)}"
                     title="${isAr ? 'حذف من المحفوظات' : 'Remove from saved'}"
                   >
                     <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">

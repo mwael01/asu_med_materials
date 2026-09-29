@@ -80,6 +80,7 @@
     }
 
     // Standard PWA install trigger (Chrome, Edge, Android Chrome, Samsung Internet, Opera)
+    const pwaAbort = new AbortController();
     window.addEventListener('beforeinstallprompt', (e) => {
       // Prevent browser default mini-infobar
       e.preventDefault();
@@ -95,7 +96,7 @@
       setTimeout(() => {
         showInstallNotification(false);
       }, 2500);
-    });
+    }, { signal: pwaAbort.signal });
 
     // Handle iOS Safari guidance if not already installed as standalone
     if (isIosDevice() && !isPwaInstalledOrStandalone() && !isDismissed && isYearPage) {
@@ -114,7 +115,7 @@
       deferredPrompt = null;
       const toastEl = document.querySelector('[data-toast-id="pwa-install-toast"]');
       if (toastEl) toastEl.remove();
-    });
+    }, { signal: pwaAbort.signal });
   }
 
   // Initialize on page load and on view transitions

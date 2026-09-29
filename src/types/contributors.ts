@@ -10,6 +10,12 @@ export interface PersonContacts {
   github?: ContactLink[];
   linkedin?: ContactLink[];
   instagram?: ContactLink[];
+  linktree?: ContactLink[];
+  facebook?: ContactLink[];
+  youtube?: ContactLink[];
+  website?: ContactLink[];
+  email?: ContactLink[];
+  other?: ContactLink[];
 }
 
 export interface AuthorEntry {
@@ -17,28 +23,17 @@ export interface AuthorEntry {
   name: string;
   role: string;
   roleAr?: string;
+  adminRoleDescription?: string;
   bio?: string;
   bioEn?: string;
   photo?: string;
   order: number;
+  badge?: {
+    text: string;
+    textAr?: string;
+  };
   matchNames?: string[];
   contacts?: PersonContacts;
-}
-
-export interface ContributorProfile {
-  id: string;
-  name: string;
-  photo?: string;
-  note?: string;
-  noteEn?: string;
-  year?: number;
-  matchNames: string[];
-  contacts?: PersonContacts;
-}
-
-export interface ContributorsFile {
-  authors: AuthorEntry[];
-  contributorProfiles: ContributorProfile[];
 }
 
 export interface ContributorStats {
@@ -48,5 +43,5 @@ export interface ContributorStats {
   subjects: number;
   byType: Record<string, number>;
   byYear: Record<string, number>;
-  profile?: ContributorProfile;
+  username?: string;
 }

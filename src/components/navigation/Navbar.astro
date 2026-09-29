@@ -11,11 +11,11 @@ const isYear = (y: number) => currentPath.startsWith(`/year/${y}`);
   <div class="max-w-6xl mx-auto px-4 sm:px-6 h-12 flex items-center justify-between gap-4">
     <!-- Brand Title -->
     <a href="/" class="inline-flex items-center text-zinc-900 dark:text-zinc-100 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors shrink-0">
-      <span class="font-bold text-xs sm:text-sm tracking-tight">ASU Med Materials</span>
+      <span class="font-bold text-xs sm:text-sm tracking-tight truncate max-w-[140px] sm:max-w-none shrink-0">ASU Med Materials</span>
     </a>
 
     <!-- Navigation Links (Desktop) -->
-    <nav class="hidden md:flex items-center gap-0.5 text-xs font-medium">
+    <nav class="hidden lg:flex items-center gap-0.5 text-xs font-medium">
       <a
         href="/"
         data-i18n="nav.home"
@@ -62,10 +62,11 @@ const isYear = (y: number) => currentPath.startsWith(`/year/${y}`);
 
     <!-- Action Tools -->
     <div class="flex items-center gap-1 sm:gap-1.5">
-      <!-- Quick Change Year Button (triggers MultistageSelector) -->
+      <!-- Quick Change Year Button (triggers MultistageSelector for guests) -->
       <button
         type="button"
-        class="trigger-multistage-selector inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium text-zinc-600 dark:text-zinc-300 hover:text-emerald-600 dark:hover:text-emerald-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 cursor-pointer"
+        id="nav-change-year-btn"
+        class="trigger-multistage-selector hidden sm:inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium text-zinc-600 dark:text-zinc-300 hover:text-emerald-600 dark:hover:text-emerald-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 cursor-pointer"
         data-i18n-attr="title:nav.changeYearTitle"
         title="Change Year & Module"
       >
@@ -91,7 +92,7 @@ const isYear = (y: number) => currentPath.startsWith(`/year/${y}`);
       <!-- Bookmarks Trigger -->
       <button
         type="button"
-        class="open-bookmarks-trigger relative p-1.5 text-zinc-600 dark:text-zinc-300 hover:text-amber-500 dark:hover:text-amber-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-md transition-colors cursor-pointer"
+        class="open-bookmarks-trigger hidden sm:inline-flex relative p-1.5 text-zinc-600 dark:text-zinc-300 hover:text-amber-500 dark:hover:text-amber-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-md transition-colors cursor-pointer"
         data-i18n-attr="title:nav.savedResourcesTitle,aria-label:nav.savedResourcesTitle"
         title="Saved Bookmarks"
         aria-label="Saved Bookmarks"
@@ -100,6 +101,35 @@ const isYear = (y: number) => currentPath.startsWith(`/year/${y}`);
           <path stroke-linecap="round" stroke-linejoin="round" d="M17.593 3.322c1.1.128 1.907 1.077 1.907 2.185V21L12 17.25 4.5 21V5.507c0-1.108.806-2.057 1.907-2.185a48.507 48.507 0 0111.186 0z" />
         </svg>
       </button>
+
+      <!-- Account / Profile Icon Button -->
+      <a
+        href="/profile"
+        id="nav-profile-link"
+        class:list={[
+          'p-1.5 rounded-md transition-colors flex items-center justify-center cursor-pointer',
+          currentPath === '/profile'
+            ? 'text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/50'
+            : 'text-zinc-600 dark:text-zinc-300 hover:text-emerald-600 dark:hover:text-emerald-400 hover:bg-zinc-100 dark:hover:bg-zinc-800'
+        ]}
+        data-i18n-attr="title:nav.profile,aria-label:nav.profile"
+        title="Profile"
+        aria-label="Profile"
+      >
+        <span
+          class:list={[
+            'w-5 h-5 rounded-full overflow-hidden flex items-center justify-center border transition-all',
+            currentPath === '/profile'
+              ? 'border-emerald-500 dark:border-emerald-400 ring-2 ring-emerald-500/20'
+              : 'bg-zinc-100 dark:bg-zinc-800 border-zinc-200 dark:border-zinc-700'
+          ]}
+        >
+          <img id="nav-profile-avatar" src="" alt="Profile" class="w-full h-full object-cover hidden" />
+          <svg id="nav-profile-default-icon" class="w-3.5 h-3.5 text-zinc-500 dark:text-zinc-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
+          </svg>
+        </span>
+      </a>
 
       <!-- Language Switcher -->
       <LanguageToggle />
@@ -111,7 +141,7 @@ const isYear = (y: number) => currentPath.startsWith(`/year/${y}`);
       <button
         type="button"
         id="mobile-menu-trigger"
-        class="md:hidden p-1.5 text-zinc-600 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-md transition-colors cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500"
+        class="lg:hidden p-1.5 text-zinc-600 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-md transition-colors cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500"
         data-i18n-attr="aria-label:nav.menu,title:nav.menu"
         aria-label="Navigation Menu"
         title="Navigation Menu"
@@ -134,6 +164,9 @@ const isYear = (y: number) => currentPath.startsWith(`/year/${y}`);
 
 <script>
   import { getCurrentLanguage } from '../../utils/i18n';
+  import { onAuthChange, getCachedUserProfile } from '../../firebase/auth';
+
+  let unsubscribeAuth: (() => void) | undefined;
 
   function syncNavYearBadge(): void {
     const badge = document.getElementById('nav-user-year-badge');
@@ -149,8 +182,50 @@ const isYear = (y: number) => currentPath.startsWith(`/year/${y}`);
     } catch {}
   }
 
+  function syncNavAuthState(): void {
+    const avatar = document.getElementById('nav-profile-avatar') as HTMLImageElement | null;
+    const defaultIcon = document.getElementById('nav-profile-default-icon');
+    const changeYearBtn = document.getElementById('nav-change-year-btn');
+    const cached = getCachedUserProfile();
+
+    if (cached) {
+      if (cached.photoURL && avatar) {
+        avatar.src = cached.photoURL;
+        avatar.classList.remove('hidden');
+        defaultIcon?.classList.add('hidden');
+      } else {
+        avatar?.classList.add('hidden');
+        defaultIcon?.classList.remove('hidden');
+      }
+
+      // Hide year reset button for logged in users
+      if (changeYearBtn) {
+        changeYearBtn.classList.add('hidden');
+        changeYearBtn.classList.remove('inline-flex', 'sm:inline-flex');
+      }
+    } else {
+      avatar?.classList.add('hidden');
+      defaultIcon?.classList.remove('hidden');
+
+      // Show year selection button for guests
+      if (changeYearBtn) {
+        changeYearBtn.classList.remove('hidden');
+        changeYearBtn.classList.add('inline-flex', 'sm:inline-flex');
+      }
+    }
+  }
+
   syncNavYearBadge();
+  syncNavAuthState();
+  if (unsubscribeAuth) unsubscribeAuth();
+  unsubscribeAuth = onAuthChange((_user) => {
+    syncNavAuthState();
+    syncNavYearBadge();
+  });
   window.addEventListener('user-preferences-updated', syncNavYearBadge);
   window.addEventListener('asumed-language-changed', syncNavYearBadge);
-  document.addEventListener('astro:after-swap', syncNavYearBadge);
+  document.addEventListener('astro:after-swap', () => {
+    syncNavYearBadge();
+    syncNavAuthState();
+  });
 </script>

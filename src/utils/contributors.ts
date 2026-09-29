@@ -1,21 +1,5 @@
-import { materialsData } from '../data/materials';
-import contributorsFile from '../data/contributors.json';
-import type {
-  AuthorEntry,
-  ContributorProfile,
-  ContributorStats,
-  ContributorsFile,
-} from '../types/contributors';
-
-const data = contributorsFile as ContributorsFile;
-
-export function getAuthors(): AuthorEntry[] {
-  return [...data.authors].sort((a, b) => a.order - b.order);
-}
-
-export function getContributorProfiles(): ContributorProfile[] {
-  return data.contributorProfiles;
-}
+import { getAllMaterials } from '../data/materials';
+import type { ContributorStats } from '../types/contributors';
 
 function normalizeName(value: string): string {
   return value.trim().toLowerCase().replace(/\s+/g, ' ');
@@ -31,11 +15,12 @@ function namesOf(value: string | string[] | undefined): string[] {
  * (whoever prepared the material). `addedBy` is intentionally ignored.
  * Sorted descending by total contributions.
  */
-export function getAllContributors(): ContributorStats[] {
+export async function getAllContributors(): Promise<ContributorStats[]> {
   const grouped = new Map<string, ContributorStats>();
   const subjectSets = new Map<string, Set<string>>();
+  const materials = await getAllMaterials();
 
-  for (const material of materialsData) {
+  for (const material of materials) {
     for (const authorName of namesOf(material.author)) {
       const trimmed = authorName.trim();
       if (!trimmed) continue;
@@ -67,29 +52,6 @@ export function getAllContributors(): ContributorStats[] {
     entry.subjects = subjectSets.get(key)?.size ?? 0;
   }
 
-  const profiles = getContributorProfiles();
-  for (const profile of profiles) {
-    const keys = [profile.name, ...profile.matchNames].map(normalizeName);
-    const existingKey = keys.find((k) => grouped.has(k));
-    if (existingKey) {
-      const entry = grouped.get(existingKey);
-      if (entry) {
-        entry.profile = profile;
-        entry.name = profile.name;
-      }
-    } else {
-      grouped.set(normalizeName(profile.name), {
-        name: profile.name,
-        total: 0,
-        authored: 0,
-        subjects: 0,
-        byType: {},
-        byYear: {},
-        profile,
-      });
-    }
-  }
-
   return [...grouped.values()].sort(
     (a, b) => b.total - a.total || a.name.localeCompare(b.name),
   );
@@ -102,11 +64,12 @@ export const getContentCreators = getAllContributors;
  * (students/contributors who collected, shared, and added materials to the website).
  * Sorted descending by total contributions.
  */
-export function getResourceContributors(): ContributorStats[] {
+export async function getResourceContributors(): Promise<ContributorStats[]> {
   const grouped = new Map<string, ContributorStats>();
   const subjectSets = new Map<string, Set<string>>();
+  const materials = await getAllMaterials();
 
-  for (const material of materialsData) {
+  for (const material of materials) {
     for (const adderName of namesOf(material.addedBy)) {
       const trimmed = adderName.trim();
       if (!trimmed) continue;
@@ -138,52 +101,17 @@ export function getResourceContributors(): ContributorStats[] {
     entry.subjects = subjectSets.get(key)?.size ?? 0;
   }
 
-  // 1. Link with ContributorProfiles if matched
-  const profiles = getContributorProfiles();
-  for (const profile of profiles) {
-    const keys = [profile.name, ...profile.matchNames].map(normalizeName);
-    const existingKey = keys.find((k) => grouped.has(k));
-    if (existingKey) {
-      const entry = grouped.get(existingKey);
-      if (entry) {
-        entry.profile = profile;
-        entry.name = profile.name;
-      }
-    }
-  }
-
-  // 2. Link with Authors if matched and doesn't already have profile
-  const authors = getAuthors();
-  for (const author of authors) {
-    const matchNames = [author.name, ...(author.matchNames ?? [])];
-    const keys = matchNames.map(normalizeName);
-    const existingKey = keys.find((k) => grouped.has(k));
-    if (existingKey) {
-      const entry = grouped.get(existingKey);
-      if (entry && !entry.profile) {
-        entry.profile = {
-          id: author.id,
-          name: author.name,
-          photo: author.photo,
-          note: author.roleAr || author.role,
-          noteEn: author.role,
-          matchNames: author.matchNames ?? [author.name],
-          contacts: author.contacts,
-        };
-        entry.name = author.name;
-      }
-    }
-  }
-
   return [...grouped.values()].sort(
     (a, b) => b.total - a.total || a.name.localeCompare(b.name),
   );
 }
 
-export function getContributorByName(name: string): ContributorStats | undefined {
+export async function getContributorByName(name: string): Promise<ContributorStats | undefined> {
   const key = normalizeName(name);
-  return getAllContributors().find((c) => normalizeName(c.name) === key)
-    || getResourceContributors().find((c) => normalizeName(c.name) === key);
+  const allContributors = await getAllContributors();
+  const resourceContributors = await getResourceContributors();
+  return allContributors.find((c) => normalizeName(c.name) === key)
+    || resourceContributors.find((c) => normalizeName(c.name) === key);
 }
 
 export function getInitials(name: string): string {

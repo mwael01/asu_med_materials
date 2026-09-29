@@ -27,6 +27,7 @@ const PRECACHE_ASSETS = [
 // 2. All 51 static routes in the website
 const PRECACHE_ROUTES = [
   '/',
+  '/profile',
   '/contribute',
   '/search',
   '/playlists',

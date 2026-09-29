@@ -5,19 +5,17 @@ import ModuleCard from '../../components/materials/ModuleCard.astro';
 import GroupedResourceList from '../../components/materials/GroupedResourceList.astro';
 import FilterToolbar from '../../components/search/FilterToolbar.astro';
 import { getModulesByYear } from '../../data/modules';
-import { getMaterialsByYear, getMaterialsByModule } from '../../data/materials';
+import { getMaterialsByYear } from '../../data/materials';
 import type { AcademicYear } from '../../types/materials';
 
-export function getStaticPaths() {
-  return [1, 2, 3, 4, 5].map((y) => ({
-    params: { year: String(y) },
-    props: { yearNum: y as AcademicYear }
-  }));
+const yearParam = Astro.params.year;
+const parsedYear = parseInt(yearParam || '1', 10);
+if (isNaN(parsedYear) || parsedYear < 1 || parsedYear > 5) {
+  return Astro.redirect('/404');
 }
-
-const { yearNum } = Astro.props;
-const modules = getModulesByYear(yearNum);
-const materials = getMaterialsByYear(yearNum);
+const yearNum = parsedYear as AcademicYear;
+const modules = await getModulesByYear(yearNum);
+const materials = await getMaterialsByYear(yearNum);
 ---
 
 <Layout
@@ -65,7 +63,7 @@ const materials = getMaterialsByYear(yearNum);
     ) : (
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {modules.map((mod) => {
-          const count = getMaterialsByModule(mod.id).length;
+          const count = materials.filter((m) => m.moduleId === mod.id).length;
           return <ModuleCard module={mod} resourceCount={count} />;
         })}
       </div>

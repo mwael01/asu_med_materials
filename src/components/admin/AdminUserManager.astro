@@ -1,0 +1,314 @@
+---
+// AdminUserManager.astro
+---
+
+<div class="space-y-6 text-start">
+  <!-- Capacity Bar & Hire Form -->
+  <div class="p-4 sm:p-5 rounded-2xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 shadow-2xs space-y-4">
+    <div class="flex items-center justify-between border-b border-zinc-100 dark:border-zinc-800/80 pb-3">
+      <div>
+        <h3 class="text-xs font-bold text-zinc-900 dark:text-zinc-100" data-i18n="admin.hireAdminTitle">
+          Appoint New Administrator
+        </h3>
+        <p class="text-[11px] text-zinc-400" data-i18n="admin.hireAdminDesc">
+          Search by username or UID to promote a student to administrator (capped at 25 admins).
+        </p>
+      </div>
+
+      <!-- Admin Count Indicator -->
+      <div id="admin-capacity-badge" class="px-3 py-1 rounded-full text-xs font-bold bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800/40 shrink-0">
+        المسؤولون: ... / 25
+      </div>
+    </div>
+
+    <!-- Search / Look-up Box -->
+    <div class="flex flex-col sm:flex-row gap-2">
+      <div class="relative flex-1">
+        <input
+          type="text"
+          id="admin-search-input"
+          placeholder="اسم المستخدم (مثلاً: ahmed_ali)"
+          class="w-full px-3.5 py-2 text-xs bg-zinc-50 dark:bg-zinc-800/60 border border-zinc-200 dark:border-zinc-700 rounded-xl text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+        />
+      </div>
+
+      <button
+        type="button"
+        id="admin-search-btn"
+        class="px-4 py-2 rounded-xl bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 text-xs font-bold hover:bg-zinc-800 dark:hover:bg-zinc-200 transition-all cursor-pointer shadow-xs shrink-0"
+      >
+        بحث عن المستخدم
+      </button>
+    </div>
+
+    <!-- User Found Card -->
+    <div id="admin-found-user" class="hidden p-3.5 rounded-xl bg-zinc-50 dark:bg-zinc-800/40 border border-zinc-200 dark:border-zinc-700/60 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+      <div class="flex items-center gap-3">
+        <div id="admin-found-avatar" class="w-10 h-10 rounded-full bg-emerald-100 dark:bg-emerald-950/80 text-emerald-600 dark:text-emerald-400 flex items-center justify-center font-bold text-sm shrink-0"></div>
+        <div>
+          <div class="flex items-center gap-2">
+            <span id="admin-found-name" class="text-xs font-bold text-zinc-900 dark:text-zinc-100"></span>
+            <span id="admin-found-role-badge" class="text-[10px] px-2 py-0.5 rounded-md font-semibold"></span>
+          </div>
+          <span id="admin-found-handle" class="text-[11px] text-zinc-400 font-mono"></span>
+        </div>
+      </div>
+
+      <div>
+        <button
+          type="button"
+          id="admin-promote-action-btn"
+          class="w-full sm:w-auto px-4 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 active:scale-[0.98] text-white text-xs font-bold transition-all shadow-xs cursor-pointer disabled:opacity-50"
+        >
+          ترقية إلى مسؤول
+        </button>
+      </div>
+    </div>
+
+    <!-- Error / Status Notice -->
+    <div id="admin-hire-error" class="hidden p-3 rounded-xl text-xs bg-rose-50 dark:bg-rose-950/50 text-rose-800 dark:text-rose-300 border border-rose-200 dark:border-rose-800/40"></div>
+  </div>
+
+  <!-- Active Admins List -->
+  <div class="space-y-3">
+    <div class="flex items-center justify-between">
+      <h3 class="text-xs font-bold text-zinc-700 dark:text-zinc-300">
+        قائمة المسؤولين الحاليين
+      </h3>
+      <button
+        type="button"
+        id="admin-team-refresh-btn"
+        class="text-xs text-zinc-500 hover:text-emerald-600 dark:hover:text-emerald-400 flex items-center gap-1 cursor-pointer font-medium"
+      >
+        <span>تحديث</span>
+      </button>
+    </div>
+
+    <div id="admin-team-list" class="space-y-2"></div>
+  </div>
+</div>
+
+<script>
+  import {
+    getAdminCount,
+    fetchAdminsAndContributors,
+    searchUserByUsernameOrUid,
+    updateUserRole,
+    MAX_ADMIN_COUNT
+  } from '../../firebase/firestore';
+  import { getCachedUserProfile } from '../../firebase/auth';
+  import { showToast } from '../../utils/toast';
+  import type { UserProfile } from '../../types/profile';
+
+  function initAdminUserManager() {
+    const capacityBadge = document.getElementById('admin-capacity-badge');
+    const searchInput = document.getElementById('admin-search-input') as HTMLInputElement | null;
+    const searchBtn = document.getElementById('admin-search-btn') as HTMLButtonElement | null;
+    const foundCard = document.getElementById('admin-found-user');
+    const foundAvatar = document.getElementById('admin-found-avatar');
+    const foundName = document.getElementById('admin-found-name');
+    const foundHandle = document.getElementById('admin-found-handle');
+    const foundRoleBadge = document.getElementById('admin-found-role-badge');
+    const promoteActionBtn = document.getElementById('admin-promote-action-btn') as HTMLButtonElement | null;
+    const errorBox = document.getElementById('admin-hire-error');
+    const teamListEl = document.getElementById('admin-team-list');
+    const refreshBtn = document.getElementById('admin-team-refresh-btn');
+
+    let currentFoundUser: UserProfile | null = null;
+    let currentAdmins: UserProfile[] = [];
+
+    async function loadTeam() {
+      if (!teamListEl) return;
+      teamListEl.innerHTML = '<div class="py-4 text-center text-xs text-zinc-400">جاري تحميل قائمة المسؤولين...</div>';
+
+      const count = await getAdminCount();
+      if (capacityBadge) {
+        capacityBadge.textContent = `المسؤولون: ${count} / ${MAX_ADMIN_COUNT}`;
+        if (count >= MAX_ADMIN_COUNT) {
+          capacityBadge.className =
+            'px-3 py-1 rounded-full text-xs font-bold bg-rose-50 dark:bg-rose-950/60 text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-800/40 shrink-0';
+        } else {
+          capacityBadge.className =
+            'px-3 py-1 rounded-full text-xs font-bold bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800/40 shrink-0';
+        }
+      }
+
+      const { admins } = await fetchAdminsAndContributors();
+      currentAdmins = admins;
+      renderTeamList();
+    }
+
+    function renderTeamList() {
+      if (!teamListEl) return;
+      teamListEl.innerHTML = '';
+
+      if (currentAdmins.length === 0) {
+        teamListEl.innerHTML = '<div class="py-4 text-center text-xs text-zinc-400">لا يوجد مسؤولون مسجلون بعد.</div>';
+        return;
+      }
+
+      const loggedInAdmin = getCachedUserProfile();
+
+      currentAdmins.forEach((admin) => {
+        const item = document.createElement('div');
+        item.className =
+          'p-3 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 flex items-center justify-between gap-3 shadow-2xs';
+
+        const isMe = loggedInAdmin && loggedInAdmin.uid === admin.uid;
+        const initial = (admin.displayName || admin.username || 'A')[0].toUpperCase();
+
+        item.innerHTML = `
+          <div class="flex items-center gap-3">
+            <div class="w-8 h-8 rounded-full bg-emerald-50 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400 flex items-center justify-center font-bold text-xs shrink-0">
+              ${initial}
+            </div>
+            <div>
+              <div class="flex items-center gap-2">
+                <span class="text-xs font-bold text-zinc-900 dark:text-zinc-100">${escapeHtml(admin.displayName || admin.username)}</span>
+                ${isMe ? '<span class="text-[10px] px-1.5 py-0.5 rounded bg-zinc-100 dark:bg-zinc-800 text-zinc-500 font-semibold">(أنت)</span>' : ''}
+              </div>
+              <span class="text-[11px] text-zinc-400 font-mono">@${escapeHtml(admin.username)}</span>
+            </div>
+          </div>
+
+          <div>
+            ${
+              !isMe
+                ? `<button
+                    type="button"
+                    class="demote-btn text-xs text-rose-600 hover:text-rose-700 dark:text-rose-400 font-semibold px-2.5 py-1 rounded-lg hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-all cursor-pointer"
+                    data-uid="${admin.uid}"
+                    data-name="${escapeHtml(admin.displayName || admin.username)}"
+                  >
+                    سحب الصلاحية
+                  </button>`
+                : '<span class="text-xs text-zinc-400">المسؤول الحالي</span>'
+            }
+          </div>
+        `;
+
+        teamListEl.appendChild(item);
+      });
+
+      // Attach demote handlers
+      teamListEl.querySelectorAll('.demote-btn').forEach((btn) => {
+        btn.addEventListener('click', async () => {
+          const uid = btn.getAttribute('data-uid');
+          const name = btn.getAttribute('data-name');
+          if (!uid) return;
+
+          if (!confirm(`هل تريد بالتأكيد سحب صلاحية الإدارة من ${name}؟`)) return;
+
+          const loggedIn = getCachedUserProfile();
+          const res = await updateUserRole(uid, 'student', loggedIn || undefined);
+          if (res.success) {
+            showToast(`تم سحب صلاحية الإدارة من ${name}`, 'info');
+            await loadTeam();
+          } else {
+            showToast(res.error || 'تعذر تغيير الصلاحية', 'error');
+          }
+        });
+      });
+    }
+
+    // User Search Handler
+    searchBtn?.addEventListener('click', async () => {
+      const q = searchInput?.value.trim();
+      if (!q) return;
+
+      errorBox?.classList.add('hidden');
+      searchBtn.disabled = true;
+      searchBtn.textContent = 'جاري البحث...';
+
+      try {
+        const user = await searchUserByUsernameOrUid(q);
+        if (!user) {
+          if (errorBox) {
+            errorBox.textContent = `لم يتم العثور على مستخدم بالاسم أو المعرف "${q}". تأكد من تسجيله في الموقع أولاً.`;
+            errorBox.classList.remove('hidden');
+          }
+          foundCard?.classList.add('hidden');
+          currentFoundUser = null;
+          return;
+        }
+
+        currentFoundUser = user;
+        if (foundAvatar) foundAvatar.textContent = (user.displayName || user.username || 'U')[0].toUpperCase();
+        if (foundName) foundName.textContent = user.displayName || user.username;
+        if (foundHandle) foundHandle.textContent = `@${user.username}`;
+
+        if (foundRoleBadge) {
+          if (user.role === 'admin') {
+            foundRoleBadge.textContent = 'مسؤول حالي';
+            foundRoleBadge.className = 'text-[10px] px-2 py-0.5 rounded-md font-semibold bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300';
+            if (promoteActionBtn) {
+              promoteActionBtn.textContent = 'المستخدم مسؤول بالفعل';
+              promoteActionBtn.disabled = true;
+            }
+          } else {
+            foundRoleBadge.textContent = user.role === 'contributor' ? 'مساهم' : 'طالب';
+            foundRoleBadge.className = 'text-[10px] px-2 py-0.5 rounded-md font-semibold bg-zinc-100 text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300';
+            if (promoteActionBtn) {
+              promoteActionBtn.textContent = 'ترقية إلى مسؤول';
+              promoteActionBtn.disabled = false;
+            }
+          }
+        }
+
+        foundCard?.classList.remove('hidden');
+      } catch (err) {
+        if (errorBox) {
+          errorBox.textContent = 'حدث خطأ أثناء البحث عن المستخدم.';
+          errorBox.classList.remove('hidden');
+        }
+      } finally {
+        searchBtn.disabled = false;
+        searchBtn.textContent = 'بحث عن المستخدم';
+      }
+    });
+
+    // Promote Action Handler
+    promoteActionBtn?.addEventListener('click', async () => {
+      if (!currentFoundUser || !promoteActionBtn) return;
+      promoteActionBtn.disabled = true;
+      promoteActionBtn.textContent = 'جاري الترقية...';
+      errorBox?.classList.add('hidden');
+
+      const loggedIn = getCachedUserProfile();
+      const res = await updateUserRole(currentFoundUser.uid, 'admin', loggedIn || undefined);
+
+      if (res.success) {
+        showToast(`تمت ترقية @${currentFoundUser.username} إلى مسؤول بنجاح!`, 'success');
+        foundCard?.classList.add('hidden');
+        if (searchInput) searchInput.value = '';
+        currentFoundUser = null;
+        await loadTeam();
+      } else {
+        if (errorBox) {
+          errorBox.textContent = res.error || 'تعذر الترقية.';
+          errorBox.classList.remove('hidden');
+        }
+      }
+
+      promoteActionBtn.disabled = false;
+      promoteActionBtn.textContent = 'ترقية إلى مسؤول';
+    });
+
+    refreshBtn?.addEventListener('click', loadTeam);
+
+    function escapeHtml(str: string): string {
+      if (!str) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
+    loadTeam();
+  }
+
+  initAdminUserManager();
+  document.addEventListener('astro:after-swap', initAdminUserManager);
+</script>
