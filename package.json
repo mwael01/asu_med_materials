@@ -14,7 +14,8 @@
     "schema:sync": "node scripts/sync-firebase-schema.mjs",
     "migrate:contributions": "node scripts/migrate-contributions.mjs",
     "deploy:indexes": "firebase deploy --only firestore:indexes",
-    "deploy:rules": "firebase deploy --only firestore:rules"
+    "deploy:rules": "firebase deploy --only firestore:rules",
+    "deploy:all": "firebase deploy --only firestore"
   },
   "dependencies": {
     "@astrojs/check": "^0.9.10",
