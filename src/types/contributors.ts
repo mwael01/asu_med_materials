@@ -36,10 +36,6 @@ export interface AuthorEntry {
   contacts?: PersonContacts;
 }
 
-export interface ContributorsFile {
-  authors: AuthorEntry[];
-}
-
 export interface ContributorStats {
   name: string;
   total: number;
@@ -47,5 +43,4 @@ export interface ContributorStats {
   subjects: number;
   byType: Record<string, number>;
   byYear: Record<string, number>;
-  username?: string;
 }

@@ -45,9 +45,6 @@ export async function getAllContributors(): Promise<ContributorStats[]> {
       if (material.subject?.trim()) {
         subjectSets.get(key)?.add(material.subject.trim());
       }
-      if (material.contributorUsername && !entry.username) {
-        entry.username = material.contributorUsername;
-      }
     }
   }
 
@@ -96,9 +93,6 @@ export async function getResourceContributors(): Promise<ContributorStats[]> {
       entry.byYear[String(material.year)] = (entry.byYear[String(material.year)] ?? 0) + 1;
       if (material.subject?.trim()) {
         subjectSets.get(key)?.add(material.subject.trim());
-      }
-      if (material.contributorUsername && !entry.username) {
-        entry.username = material.contributorUsername;
       }
     }
   }

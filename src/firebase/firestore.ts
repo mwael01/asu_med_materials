@@ -173,12 +173,7 @@ export async function checkUrlsBatchInFirestore(urls: string[]): Promise<Map<str
         const norm = normalizeResourceUrl(mat.url);
         if (norm && !index.has(norm)) index.set(norm, mat);
       }
-      if (Array.isArray(mat.urls)) {
-        for (const u of mat.urls) {
-          const norm = normalizeResourceUrl(u);
-          if (norm && !index.has(norm)) index.set(norm, mat);
-        }
-      }
+
     }
 
     for (const rawUrl of urls) {
@@ -563,7 +558,15 @@ export async function getUserContributions(usernameOrUid: string): Promise<Mater
         return;
       }
 
-      // 2. Direct Username match
+      // 2. Direct Username match (new username fields take priority)
+      if (mat.added_by_username && mat.added_by_username.toLowerCase().replace(/^@/, '') === target) {
+        contributions.push(mat);
+        return;
+      }
+      if (mat.creator_username && mat.creator_username.toLowerCase().replace(/^@/, '') === target) {
+        contributions.push(mat);
+        return;
+      }
       if (mat.contributorUsername && mat.contributorUsername.toLowerCase().replace(/^@/, '') === target) {
         contributions.push(mat);
         return;

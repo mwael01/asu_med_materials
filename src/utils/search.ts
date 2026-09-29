@@ -97,8 +97,9 @@ export function createSearchDocument(
   const rawAddedBy = Array.isArray(material.addedBy)
     ? material.addedBy.join(' ')
     : (material.addedBy || '');
-  const rawContributor = material.contributorUsername
-    ? `${rawAddedBy} ${material.contributorUsername} @${material.contributorUsername}`
+  const username = material.added_by_username || material.contributorUsername || '';
+  const rawContributor = username
+    ? `${rawAddedBy} ${username} @${username}`
     : rawAddedBy;
   const addedByNorm = normalizeSearchText(rawContributor);
 

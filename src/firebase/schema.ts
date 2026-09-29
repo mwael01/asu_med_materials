@@ -42,6 +42,8 @@ export interface MaterialDocument {
   addedBy?: string | string[];
   contributorUid?: string;
   contributorUsername?: string;
+  added_by_username?: string;
+  creator_username?: string;
   tags: string[];
   createdAt?: string;
   playlistId?: string;
@@ -202,6 +204,8 @@ export const materialConverter: FirestoreDataConverter<MaterialItem> = {
       addedBy: material.addedBy || null,
       contributorUid: material.contributorUid || null,
       contributorUsername: material.contributorUsername || null,
+      added_by_username: material.added_by_username || null,
+      creator_username: material.creator_username || null,
       tags: Array.isArray(material.tags) ? material.tags : [],
       createdAt: material.createdAt || new Date().toISOString(),
       playlistId: material.playlistId || null,
@@ -230,6 +234,8 @@ export const materialConverter: FirestoreDataConverter<MaterialItem> = {
       addedBy: data.addedBy || undefined,
       contributorUid: data.contributorUid || undefined,
       contributorUsername: data.contributorUsername || undefined,
+      added_by_username: data.added_by_username || undefined,
+      creator_username: data.creator_username || undefined,
       tags: Array.isArray(data.tags) ? data.tags : [],
       createdAt: data.createdAt || undefined,
       playlistId: data.playlistId || undefined,

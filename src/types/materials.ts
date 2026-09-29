@@ -48,7 +48,6 @@ export interface MaterialItem {
   description?: string;
   descriptionEn?: string;
   url: string;
-  urls?: string[];
   type: ResourceType;
   category?: MaterialCategory;
   year: AcademicYear;
@@ -58,6 +57,8 @@ export interface MaterialItem {
   addedBy?: string | string[]; // Contributor / Student who added it to the platform
   contributorUid?: string; // Firebase Auth UID of the contributing user
   contributorUsername?: string; // Username handle of the contributing user
+  added_by_username?: string; // Username of the person who added the material
+  creator_username?: string; // Username of the content creator (if they have a profile)
   tags: string[];
   createdAt?: string;
   playlistId?: string; // YouTube playlist ID if applicable

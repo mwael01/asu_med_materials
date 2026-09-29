@@ -1,16 +1,18 @@
 #!/usr/bin/env node
 /**
- * Migration Script: Link Materials to User Profiles
+ * Migration Script: Link Materials to User Profiles via Usernames
  *
- * Matches materials' `addedBy` static names to user profiles via the
- * `contributors` collection `matchNames` bridge, then sets
- * `contributorUid` and `contributorUsername` on matched materials.
+ * This script links materials to user profiles by:
+ * 1. Matching materials' addedBy/author names to contributor matchNames
+ * 2. Setting added_by_username and creator_username fields
+ * 3. Updating addedBy/author names to the profile displayName
  *
+ * Uses exact matching only (no substring matching).
  * Dry-run by default. Use --apply to write changes to Firestore.
  *
  * Usage:
- *   node scripts/migrate-contributions.mjs           # dry run
- *   node scripts/migrate-contributions.mjs --apply   # apply changes
+ *   node scripts/migrate-usernames.mjs           # dry run
+ *   node scripts/migrate-usernames.mjs --apply   # apply changes
  */
 
 import { initializeApp } from 'firebase/app';
@@ -101,8 +103,6 @@ async function migrate() {
   console.log(`  Materials: ${materials.length}\n`);
 
   // Build matchNames → user lookup using EXACT matching only
-  // Only match if the normalized name is >= 2 characters and exactly equals
-  // the user's displayName or username (no substring matching)
   const matchNameToUser = new Map();
   for (const contributor of contributors) {
     const matchNames = (contributor.matchNames || []).filter(isValidMatchName);
@@ -110,14 +110,18 @@ async function migrate() {
     for (const mn of matchNames) {
       const normalized = normalizeName(mn);
 
-      // Find a user whose displayName or username exactly matches this matchName
       const user = users.find((u) =>
         normalizeName(u.displayName) === normalized ||
         normalizeName(u.username) === normalized
       );
 
       if (user) {
-        matchNameToUser.set(normalized, { user, contributorId: contributor.id, matchName: mn });
+        matchNameToUser.set(normalized, {
+          user,
+          contributorId: contributor.id,
+          matchName: mn,
+          kind: contributor.kind,
+        });
       }
     }
   }
@@ -129,31 +133,49 @@ async function migrate() {
   const unmatched = new Set();
 
   for (const material of materials) {
-    if (material.added_by_username) continue;
-
-    const addedByNames = namesOf(material.addedBy);
+    const updates = {};
     let matched = false;
 
-    for (const name of addedByNames) {
-      const normalized = normalizeName(name);
-      if (matchNameToUser.has(normalized)) {
-        const { user, contributorId, matchName } = matchNameToUser.get(normalized);
-        toMigrate.push({
-          materialId: material.id,
-          materialName: material.title || material.id,
-          addedBy: name,
-          username: user.username,
-          contributorId,
-          matchName,
-          displayName: user.displayName,
-        });
-        matched = true;
-        break;
+    // Match addedBy → added_by_username
+    if (!material.added_by_username && material.addedBy) {
+      const addedByNames = namesOf(material.addedBy);
+      for (const name of addedByNames) {
+        const normalized = normalizeName(name);
+        if (matchNameToUser.has(normalized)) {
+          const { user, matchName } = matchNameToUser.get(normalized);
+          updates.added_by_username = user.username;
+          updates.addedBy = user.displayName;
+          matched = true;
+          break;
+        }
       }
     }
 
-    if (!matched && addedByNames.length > 0) {
-      for (const name of addedByNames) {
+    // Match author → creator_username
+    if (!material.creator_username && material.author) {
+      const authorNames = namesOf(material.author);
+      for (const name of authorNames) {
+        const normalized = normalizeName(name);
+        if (matchNameToUser.has(normalized)) {
+          const { user, matchName } = matchNameToUser.get(normalized);
+          updates.creator_username = user.username;
+          updates.author = user.displayName;
+          matched = true;
+          break;
+        }
+      }
+    }
+
+    if (matched) {
+      toMigrate.push({
+        materialId: material.id,
+        materialName: material.title || material.id,
+        updates,
+      });
+    } else {
+      const addedByNames = namesOf(material.addedBy);
+      const authorNames = namesOf(material.author);
+      for (const name of [...addedByNames, ...authorNames]) {
         unmatched.add(name.trim());
       }
     }
@@ -170,17 +192,23 @@ async function migrate() {
   console.log('─'.repeat(60));
   console.log('Materials to migrate:');
   console.log('─'.repeat(60));
-  for (const m of toMigrate) {
+  for (const m of toMigrate.slice(0, 50)) {
     console.log(`  ${m.materialName}`);
-    console.log(`    addedBy: "${m.addedBy}" → @${m.username} (${m.uid})`);
+    console.log(`    Updates: ${JSON.stringify(m.updates)}`);
+  }
+  if (toMigrate.length > 50) {
+    console.log(`  ... and ${toMigrate.length - 50} more`);
   }
 
   if (unmatched.size > 0) {
     console.log('\n' + '─'.repeat(60));
     console.log('Unmatched names (no user account found):');
     console.log('─'.repeat(60));
-    for (const name of unmatched) {
+    for (const name of [...unmatched].slice(0, 30)) {
       console.log(`  "${name}"`);
+    }
+    if (unmatched.size > 30) {
+      console.log(`  ... and ${unmatched.size - 30} more`);
     }
   }
 
@@ -191,22 +219,6 @@ async function migrate() {
 
   console.log('\n🚀 Applying changes...\n');
 
-  // Group by contributor to update matchNames
-  const contributorUpdates = new Map();
-  for (const m of toMigrate) {
-    if (!contributorUpdates.has(m.contributorId)) {
-      const contributor = contributors.find((c) => c.id === m.contributorId);
-      contributorUpdates.set(m.contributorId, {
-        matchNames: [...(contributor?.matchNames || [])],
-      });
-    }
-    const update = contributorUpdates.get(m.contributorId);
-    update.matchNames = update.matchNames.filter(
-      (n) => normalizeName(n) !== normalizeName(m.matchName)
-    );
-  }
-
-  // Batch update materials
   const batchSize = 500;
   let migrated = 0;
 
@@ -216,10 +228,7 @@ async function migrate() {
 
     for (const m of chunk) {
       const ref = doc(db, 'materials', m.materialId);
-      batch.update(ref, {
-        added_by_username: m.username,
-        addedBy: m.displayName,
-      });
+      batch.update(ref, m.updates);
     }
 
     await batch.commit();
@@ -227,17 +236,8 @@ async function migrate() {
     process.stdout.write(`\r  ✓ Migrated: ${migrated}/${toMigrate.length}`);
   }
 
-  // Update contributor documents (remove matched matchNames)
-  let contributorsUpdated = 0;
-  for (const [contributorId, update] of contributorUpdates) {
-    const ref = doc(db, 'contributors', contributorId);
-    await updateDoc(ref, { matchNames: update.matchNames });
-    contributorsUpdated++;
-  }
-
   console.log(`\n\n✅ Migration complete!`);
   console.log(`  Materials updated: ${migrated}`);
-  console.log(`  Contributors updated: ${contributorsUpdated}`);
 }
 
 migrate().catch((err) => {

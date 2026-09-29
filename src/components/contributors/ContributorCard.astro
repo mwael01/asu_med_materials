@@ -7,13 +7,10 @@ interface Props {
   dialogId: string;
   rank: number;
   roleType?: 'creator' | 'resource';
-  nameMap?: Record<string, string>;
 }
 
-const { contributor, dialogId, rank, roleType = 'creator', nameMap } = Astro.props;
-const displayName = contributor.username && nameMap
-  ? (nameMap[contributor.username.toLowerCase()] || contributor.name)
-  : contributor.name;
+const { contributor, dialogId, rank, roleType = 'creator' } = Astro.props;
+const displayName = contributor.name;
 const typeEntries = Object.entries(contributor.byType).sort((a, b) => b[1] - a[1]).slice(0, 4);
 const yearEntries = Object.entries(contributor.byYear).sort((a, b) => Number(a[0]) - Number(b[0]));
 const searchHref = `/search?q=${encodeURIComponent(displayName)}`;

@@ -34,15 +34,15 @@ const rawAddedBy: string[] = Array.isArray(material.addedBy)
   ? material.addedBy
   : material.addedBy
     ? [material.addedBy]
-    : material.contributorUsername
-      ? [`@${material.contributorUsername}`]
+    : material.added_by_username
+      ? [`@${material.added_by_username}`]
       : [];
 const displayedAddedByText = rawAddedBy
   .slice(0, maxVisible)
   .map((name) => formatShortName(name))
   .join('، ');
 const fullAddedByTooltip = rawAddedBy.join('، ');
-const contributorProfileTarget = material.contributorUsername || rawAddedBy[0];
+const contributorProfileTarget = material.added_by_username || material.contributorUsername || rawAddedBy[0];
 const contributorProfileUrl = contributorProfileTarget ? `/profile?u=${encodeURIComponent(contributorProfileTarget)}` : undefined;
 
 const isPlaylist = material.type === 'playlist' || Boolean(material.playlistId) || Boolean(material.videos);
