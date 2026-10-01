@@ -10,9 +10,9 @@ ASU Med Materials is a lightweight, static-first web portal built with [Astro](h
 
 ### Key Technical Pillars
 
-- **Dynamic On-Demand Server Core**: Server-side rendering (SSR) powered by Astro (`output: 'server'`) with `@astrojs/vercel`, serving fresh dynamic content on every request while maintaining lightning-fast edge performance.
-- **Cloud Firestore Single Source of Truth**: All study materials, curriculum modules, and contributors live in Cloud Firestore. Local JSON cache snapshots have been eliminated to ensure real-time consistency.
-- **In-Memory Server Request Deduplication**: A lightweight 15-second TTL in-memory cache deduplicates repetitive Firestore queries within and across concurrent SSR requests.
+- **Dynamic On-Demand Server Core**: Server-side rendering (SSR) powered by Astro (`output: 'server'`) with `@astrojs/vercel`, rendering content directly from Firestore with bounded runtime and CDN caching.
+- **Cloud Firestore Single Source of Truth**: All study materials, curriculum modules, and contributors live in Cloud Firestore. No local catalogue files are used; public content refreshes through bounded caches.
+- **In-Memory Server Request Deduplication**: Public materials and modules use Vercel Runtime Cache for 24 hours, shared across page routes and server instances within a region. A 60-second in-process cache shares pending requests and reduces cache-outage reads. Anonymous public HTML uses Vercel CDN caching (60 seconds fresh, followed by 60 seconds of stale-while-revalidate). Private pages, API responses, and requests with cookies or authorization bypass shared caching.
 - **Arabic-First with Technical English**: Arabic RTL interface for clear local usability, paired with standard English terminology for subjects (Anatomy, Histology, etc.), channel names, and drive labels.
 - **Multistage Year & Module Selection**: Students are guided on first visit through a two-stage prompt (Year & Module) saved locally in `localStorage` for personalized, instant access.
 - **Structured Grouped Categorization**: Materials are grouped by functional learning category (Central Drives, Lectures, Practical Labs & OSPE, Summaries, and Past Exams).
@@ -47,7 +47,7 @@ asu_med_materials/
 │   │   ├── modules.ts           # Firestore module queries (getAllModules, getModuleById)
 │   │   ├── materials.ts         # Facade re-exporting from ./materials/index
 │   │   └── materials/           # Modular study materials loaders
-│   │       └── index.ts         # Firestore materials queries with 15s in-memory deduplication
+│   │       └── index.ts         # Firestore materials queries with shared 24-hour caching
 │   ├── firebase/                # Firebase client, converters & schema types
 │   │   ├── client.ts            # Firebase app, auth, firestore (IndexedDB cache), storage
 │   │   ├── firestore.ts         # Firestore data access & converters
@@ -209,9 +209,9 @@ export interface MaterialItem {
 10. **Firebase Integration, Offline-First Persistence & Student Profiles**:
    - **Cloud Firestore**: Configured with modular SDK v12 `persistentLocalCache` and `persistentMultipleTabManager` for multi-tab IndexedDB offline persistence. Materials, curriculum modules, contributor data, and student profiles queried online are cached directly in IndexedDB for immediate offline access.
    - **Offline-First Persistence Architecture**:
-     1. *Dynamic SSR on Vercel*: On-demand server rendering queries Firestore directly with 15s in-memory request deduplication, eliminating static snapshot rebuilds and stale data.
+     1. *Dynamic SSR on Vercel*: On-demand server rendering queries Firestore directly with 60s in-memory request deduplication, without static snapshot rebuilds. Public catalogue data can remain cached for 24 hours plus the short HTML cache interval; open pages do not automatically reload.
      2. *Client IndexedDB Firestore Cache*: Modular Firebase SDK v12 with `persistentLocalCache` and `persistentMultipleTabManager` caches queries across tabs for instant offline retrieval without network roundtrips.
-     3. *Service Worker*: Pre-caches `/profile`, core assets, and shell pages in `public/sw.js`.
+     3. *Service Worker*: Fetches the homepage once to discover bundles and pre-caches static assets. Other public pages are cached after visiting, rather than fetching all routes on installation. Profile/admin pages bypass the response cache. Unvisited pages use the offline fallback.
    - **Dynamic Collections & Local Schema Architecture**:
      - `materials`: 163+ medical study drives, playlists, exam papers, and textbooks across academic years, queried on-demand.
      - `modules`: Curriculum modules stored dynamically in Firestore with bilingual descriptions and subjects, fetched via `getAllModules()`.
@@ -242,3 +242,17 @@ export interface MaterialItem {
 - **Static Validation**: Run `pnpm astro check` and `pnpm build` after all modifications.
 - **Component Separation**: Keep components focused on a single responsibility.
 - **Documentation**: Keep docs synchronized with major architectural decisions without bloating `README.md`.
+
+## 6. Firestore Read Optimizations
+
+- Public material/module queries use the official `@vercel/functions` Runtime Cache with a 86,400-second TTL. The first cache miss reads Firestore; later pages and students reuse that catalogue, including individual playlist/module lookups and profile contribution matching. Local development uses short in-process caching.
+- Cache keys include the Firebase project, Vercel project, and schema version. Oversized catalogues are stored in generation-specific chunks below 1 MB; a manifest is published after all chunks succeed. Failed Firestore reads are never cached as empty results. Cache failures fall back to Firestore with short in-process reuse; origin failures return uncached errors.
+- Admin reads/writes, duplicate checks, authentication, submissions, bookmark/progress writes, and profile listeners remain direct Firebase operations. Publishing does not invalidate the daily public catalogue.
+- Runtime Cache is regional and may evict entries; simultaneous misses across instances can repeat reads. It persists across deployments, and usage may be billed by Vercel. Bump the key version when the cached schema changes.
+- Admin logs order and limit in Firestore; admin lists limit in Firestore; team queries filter roles before downloading documents.
+- Missing material/module lookups do not fall back to full-collection scans. Document IDs must match the stored `id`, as in current write functions.
+- The homepage renders six recently added materials from its existing catalogue query, with no additional reads.
+- The shared bookmarks drawer receives the complete catalogue from the shared cache. Moving the drawer and homepage library to lazy queries of saved document IDs would enable scoped year/module reads in a future coordinated change.
+- IndexedDB supports offline access; ordinary online `getDocs` calls can still incur server reads. Measure actual reductions in the Firebase Usage dashboard after deployment and verify public CDN hits with `x-vercel-cache`.
+
+Cache verification: test cache reuse across different routes and cold instances, daily expiry, empty collections, read/write failures, incomplete chunks, and oversized catalogues. Confirm live account syncing and direct admin changes; compare Firebase reads and Vercel Runtime Cache activity after deployment. Runtime cache hits are distinct from HTML CDN `x-vercel-cache` hits. See [Vercel Runtime Cache documentation](https://vercel.com/docs/functions/functions-api-reference/vercel-functions-package#getcache).

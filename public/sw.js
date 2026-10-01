@@ -1,11 +1,10 @@
 // Service Worker for ASU Med Materials PWA
-// Provides 100% offline access to all static materials, pages, and assets.
+// Cache visited pages for offline access without fetching the entire catalogue.
 
-const CACHE_NAME = 'asumed-cache-v2';
+const CACHE_NAME = 'asumed-cache-v3';
 
 // 1. Static brand assets & icons
 const PRECACHE_ASSETS = [
-  '/',
   '/manifest.webmanifest',
   '/favicon.svg',
   '/favicon.ico',
@@ -22,62 +21,6 @@ const PRECACHE_ASSETS = [
   '/icons/whatsapp.svg',
   '/icons/youtube.svg',
   '/offline.html'
-];
-
-// 2. All 51 static routes in the website
-const PRECACHE_ROUTES = [
-  '/',
-  '/profile',
-  '/contribute',
-  '/search',
-  '/playlists',
-  '/year/1',
-  '/year/2',
-  '/year/3',
-  '/year/4',
-  '/year/5',
-  '/module/year2-blood',
-  '/module/year2-blood/anatomy',
-  '/module/year2-blood/biochemistry',
-  '/module/year2-blood/clinical',
-  '/module/year2-blood/histology',
-  '/module/year2-blood/microbiology',
-  '/module/year2-blood/parasitology',
-  '/module/year2-blood/pathology',
-  '/module/year2-blood/pharmacology',
-  '/module/year2-blood/physiology',
-  '/playlist/bld-anat-abdullah',
-  '/playlist/bld-anat-ahmad-fareed',
-  '/playlist/bld-anat-mohammed',
-  '/playlist/bld-anat-sameh',
-  '/playlist/bld-anat-shareef',
-  '/playlist/bld-anat-wageh',
-  '/playlist/bld-anat-wahdan',
-  '/playlist/bld-biochem-ayman',
-  '/playlist/bld-biochem-esawi',
-  '/playlist/bld-biochem-marwa',
-  '/playlist/bld-biochem-mohammed',
-  '/playlist/bld-biochem-walaa-1',
-  '/playlist/bld-biochem-walaa-2',
-  '/playlist/bld-histo-ahmeed-nerd',
-  '/playlist/bld-histo-eman-nabil',
-  '/playlist/bld-histo-faten',
-  '/playlist/bld-histo-shireen-blood',
-  '/playlist/bld-histo-shireen-lymph',
-  '/playlist/bld-micro-atef',
-  '/playlist/bld-micro-mofy',
-  '/playlist/bld-micro-ninja-nerd',
-  '/playlist/bld-micro-sherif',
-  '/playlist/bld-para-ayman-ibrahim',
-  '/playlist/bld-para-habib',
-  '/playlist/bld-patho-sharkawy',
-  '/playlist/bld-pharma-nour-eldin',
-  '/playlist/bld-pharma-shaer',
-  '/playlist/bld-phys-ahmed',
-  '/playlist/bld-phys-fayez',
-  '/playlist/bld-phys-nagi',
-  '/playlist/bld-phys-najeeb',
-  '/playlist/bld-phys-ninja-nerd'
 ];
 
 // Helper: fetch with network timeout
@@ -102,16 +45,16 @@ self.addEventListener('install', (event) => {
     (async () => {
       const cache = await caches.open(CACHE_NAME);
 
-      // 1. Fetch home page to extract and cache current _astro CSS/JS bundles
+      // Fetch home once to extract and cache current _astro CSS/JS bundles
       try {
-        const homeRes = await fetch('/', { cache: 'reload' });
+        const homeRes = await fetch('/', { cache: 'default' });
         if (homeRes.ok) {
           await cache.put('/', homeRes.clone());
           const html = await homeRes.text();
           const assetMatches = [...html.matchAll(/(?:href|src)="(\/_astro\/[^"]+)"/g)];
           const assetUrls = [...new Set(assetMatches.map((m) => m[1]))];
           await Promise.all(
-            assetUrls.map((url) => cache.add(new Request(url, { cache: 'reload' })).catch(() => {}))
+            assetUrls.map((url) => cache.add(new Request(url, { cache: 'default' })).catch(() => {}))
           );
         }
       } catch (err) {
@@ -121,26 +64,8 @@ self.addEventListener('install', (event) => {
       // 2. Precache static assets & icons
       await Promise.all(
         PRECACHE_ASSETS.map((asset) =>
-          cache.add(new Request(asset, { cache: 'reload' })).catch(() => {})
+          cache.add(new Request(asset, { cache: 'default' })).catch(() => {})
         )
-      );
-
-      // 3. Precache all routes (with both canonical path and trailing slash)
-      await Promise.all(
-        PRECACHE_ROUTES.map(async (route) => {
-          try {
-            const res = await fetch(route, { cache: 'reload' });
-            if (res.ok) {
-              await cache.put(route, res.clone());
-              const withSlash = route.endsWith('/') ? route : route + '/';
-              const noSlash = route.endsWith('/') && route !== '/' ? route.slice(0, -1) : route;
-              if (withSlash !== route) await cache.put(withSlash, res.clone());
-              if (noSlash !== route) await cache.put(noSlash, res.clone());
-            }
-          } catch (err) {
-            // Silently continue
-          }
-        })
       );
 
       // Activate immediately
@@ -156,7 +81,7 @@ self.addEventListener('activate', (event) => {
       const keys = await caches.keys();
       await Promise.all(
         keys.map((key) => {
-          if (key !== CACHE_NAME) {
+          if (key.startsWith('asumed-cache-') && key !== CACHE_NAME) {
             return caches.delete(key);
           }
         })
@@ -197,6 +122,9 @@ self.addEventListener('fetch', (event) => {
 
   // Skip API routes — always network
   if (url.pathname.startsWith('/api/')) return;
+
+  // Private pages must never enter the offline response cache.
+  if (/^\/(admin|profile)(?:\/|$)/.test(url.pathname)) return;
 
   // 1. Static assets (_astro bundles, icons, manifest, fonts, images)
   // Strategy: Cache-First with Network fallback & cache put

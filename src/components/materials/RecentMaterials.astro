@@ -1,0 +1,17 @@
+---
+import ResourceCard from './ResourceCard.astro';
+import type { MaterialItem } from '../../types/materials';
+interface Props { materials: MaterialItem[] }
+const recent = Astro.props.materials
+  .filter((item) => item.createdAt && Number.isFinite(Date.parse(item.createdAt)))
+  .sort((a, b) => Date.parse(b.createdAt!) - Date.parse(a.createdAt!))
+  .slice(0, 6);
+---
+{recent.length > 0 && (
+  <section class="mb-12" aria-labelledby="recent-materials-title">
+    <h2 id="recent-materials-title" class="text-base sm:text-lg font-bold text-zinc-900 dark:text-zinc-100 mb-4" data-i18n="home.recentMaterials">Recently Added</h2>
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      {recent.map((material) => <ResourceCard material={material} />)}
+    </div>
+  </section>
+)}

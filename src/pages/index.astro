@@ -3,13 +3,13 @@ import Layout from '../layouts/Layout.astro';
 import SearchBar from '../components/search/SearchBar.astro';
 import ModuleCard from '../components/materials/ModuleCard.astro';
 import ResourceCard from '../components/materials/ResourceCard.astro';
+import RecentMaterials from '../components/materials/RecentMaterials.astro';
 import { getAllMaterials } from '../data/materials';
 import { getAllModules } from '../data/modules';
 import { subjectToSlug } from '../utils/slug';
 import type { MaterialItem, ModuleInfo } from '../types/materials';
 
-const allMaterials = await getAllMaterials();
-const allModules = await getAllModules();
+const [allMaterials, allModules] = await Promise.all([getAllMaterials(), getAllModules()]);
 
 // Organize materials into Module > Subject groups for the student's personal library
 interface LibrarySubjectGroup {
@@ -201,6 +201,8 @@ if (generalMaterials.length > 0) {
       </button>
     </div>
   </section>
+
+  <RecentMaterials materials={allMaterials} />
 
   <!-- Student's Personal Study Library Section (Auto-Organized: Module > Subject > Materials) -->
   <section class="mb-12" id="home-library-section">

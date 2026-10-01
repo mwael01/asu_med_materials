@@ -576,7 +576,6 @@ const allMaterials = await getAllMaterials();
     getUserProfileByUid,
     upsertUserProfile,
     checkUsernameAvailable,
-    getUserContributions,
     getUserSubmissions
   } from '../firebase/firestore';
   import type { UserProfile, UserContact, ContactPlatform } from '../types/profile';
@@ -721,25 +720,8 @@ const allMaterials = await getAllMaterials();
         const targetSlug = profile.username.toLowerCase();
         const targetName = (profile.displayName || '').toLowerCase();
 
-        // Query both firestore and fallback materials
-        let firestoreByUid: MaterialItem[] = [];
-        let firestoreByUsername: MaterialItem[] = [];
-        try {
-          if (profile.uid) firestoreByUid = await getUserContributions(profile.uid);
-          if (profile.username) firestoreByUsername = await getUserContributions(profile.username);
-        } catch (e) {
-          console.warn('Failed to query user contributions from Firestore:', e);
-        }
-
         const seenIds = new Set<string>();
         const userMaterials: MaterialItem[] = [];
-
-        for (const m of [...firestoreByUid, ...firestoreByUsername]) {
-          if (!seenIds.has(m.id)) {
-            seenIds.add(m.id);
-            userMaterials.push(m);
-          }
-        }
 
         for (const m of rawMaterials) {
           if (seenIds.has(m.id)) continue;
@@ -983,27 +965,16 @@ const allMaterials = await getAllMaterials();
       const targetSlug = (profile.username || '').toLowerCase();
       const targetName = (profile.displayName || '').toLowerCase();
 
-      let firestoreByUid: MaterialItem[] = [];
-      let firestoreByUsername: MaterialItem[] = [];
-      try {
-        if (profile.uid) firestoreByUid = await getUserContributions(profile.uid);
-        if (profile.username) firestoreByUsername = await getUserContributions(profile.username);
-      } catch (e) {
-        console.warn('Failed to load user contributions from Firestore:', e);
-      }
-
       const seenIds = new Set<string>();
       const userMaterials: MaterialItem[] = [];
 
-      for (const m of [...firestoreByUid, ...firestoreByUsername]) {
-        if (!seenIds.has(m.id)) {
-          seenIds.add(m.id);
-          userMaterials.push(m);
-        }
-      }
-
       for (const m of rawMaterials) {
         if (seenIds.has(m.id)) continue;
+        if ([m.added_by_username, m.creator_username].some((name) => name && name.toLowerCase().replace(/^@/, '') === targetSlug)) {
+          seenIds.add(m.id);
+          userMaterials.push(m);
+          continue;
+        }
         if ((profile.uid && m.contributorUid === profile.uid) || (m.contributorUsername && m.contributorUsername.toLowerCase() === targetSlug)) {
           seenIds.add(m.id);
           userMaterials.push(m);
@@ -1012,7 +983,7 @@ const allMaterials = await getAllMaterials();
         const addedByArr = Array.isArray(m.addedBy) ? m.addedBy : m.addedBy ? [m.addedBy] : [];
         const authorArr = Array.isArray(m.author) ? m.author : m.author ? [m.author] : [];
         const allNames = [...addedByArr, ...authorArr].map((n) => n.toLowerCase().trim());
-        if (allNames.some((n) => n.includes(targetSlug) || (targetName && n.includes(targetName)))) {
+        if (allNames.some((n) => (targetSlug && n.replace(/^@/, '') === targetSlug) || (targetName && n === targetName))) {
           seenIds.add(m.id);
           userMaterials.push(m);
         }

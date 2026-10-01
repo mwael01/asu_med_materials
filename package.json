@@ -21,6 +21,7 @@
     "@astrojs/check": "^0.9.10",
     "@tailwindcss/vite": "^4.3.3",
     "@vercel/analytics": "^2.0.1",
+    "@vercel/functions": "^3.9.9",
     "astro": "^7.3.3",
     "firebase": "^12.19.0",
     "tailwindcss": "^4.3.3",

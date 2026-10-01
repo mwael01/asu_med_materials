@@ -1,5 +1,6 @@
+import { getPublicModules } from './catalogue.server';
 import type { ModuleInfo } from '../types/materials';
-import { fetchModulesFromFirestore, getModuleByIdFromFirestore } from '../firebase/firestore';
+import { fetchModulesFromFirestore } from '../firebase/firestore';
 
 export const REFERENCE_BOOK_SUBJECTS: string[] = [
   'Anatomy',
@@ -13,27 +14,11 @@ export const REFERENCE_BOOK_SUBJECTS: string[] = [
   'Terminology'
 ];
 
-let modulesMemoryCache: { data: ModuleInfo[]; timestamp: number } | null = null;
-const CACHE_TTL_MS = 15_000; // 15 seconds
+const loadModules = getPublicModules;
 
-/**
- * Fetches active curriculum modules from Cloud Firestore (filters out deactivated modules).
- */
+/** Fetch active modules; reuse the same pending read across SSR components. */
 export async function getAllModules(): Promise<ModuleInfo[]> {
-  const now = Date.now();
-  if (modulesMemoryCache && now - modulesMemoryCache.timestamp < CACHE_TTL_MS) {
-    return modulesMemoryCache.data;
-  }
-
-  const modules = await fetchModulesFromFirestore();
-  // Filter out deactivated modules for public views
-  const activeModules = modules.filter(m => m.active !== false);
-  if (activeModules && activeModules.length > 0) {
-    modulesMemoryCache = { data: activeModules, timestamp: now };
-    return activeModules;
-  }
-
-  return modulesMemoryCache?.data || [];
+  return (await loadModules()).filter((module) => module.active !== false);
 }
 
 /**
@@ -55,8 +40,7 @@ export async function getModulesByYear(year: number): Promise<ModuleInfo[]> {
  * Fetch a single module by ID from Cloud Firestore.
  */
 export async function getModuleById(id: string): Promise<ModuleInfo | null> {
-  const mod = await getModuleByIdFromFirestore(id);
+  const mod = (await getAllModules()).find((module) => module.id === id);
   if (mod) return mod;
-  const all = await getAllModules();
-  return all.find((m) => m.id === id) || null;
+  return null;
 }

@@ -1,30 +1,17 @@
 import type { MaterialItem, AcademicYear } from '../../types/materials';
+import { getPublicMaterials } from '../catalogue.server';
 import { subjectToSlug } from '../../utils/slug';
-import { fetchMaterialsFromFirestore, getMaterialByIdFromFirestore } from '../../firebase/firestore';
+
 
 const isReferenceModuleId = (moduleId?: string): boolean =>
   Boolean(moduleId && /^year\d+-reference-books$/.test(moduleId));
 
-// Short-term in-memory cache to deduplicate concurrent queries during a single server render
-let materialsMemoryCache: { data: MaterialItem[]; timestamp: number } | null = null;
-const CACHE_TTL_MS = 15_000; // 15 seconds
+// One pending read per runtime, including concurrent page/component renders.
+const loadMaterials = getPublicMaterials;
 
-/**
- * Fetches all study materials directly from Cloud Firestore (single source of truth).
- */
+/** Fetch the public catalogue from Firestore with a bounded runtime cache. */
 export async function getAllMaterials(): Promise<MaterialItem[]> {
-  const now = Date.now();
-  if (materialsMemoryCache && now - materialsMemoryCache.timestamp < CACHE_TTL_MS) {
-    return materialsMemoryCache.data;
-  }
-
-  const materials = await fetchMaterialsFromFirestore();
-  if (materials && materials.length > 0) {
-    materialsMemoryCache = { data: materials, timestamp: now };
-    return materials;
-  }
-
-  return materialsMemoryCache?.data || [];
+  return loadMaterials();
 }
 
 /**
@@ -84,22 +71,18 @@ export async function getAllPlaylists(): Promise<MaterialItem[]> {
  * Retrieve a single video playlist by ID from Firestore.
  */
 export async function getPlaylistById(id: string): Promise<MaterialItem | null> {
-  const material = await getMaterialByIdFromFirestore(id);
+  const material = (await getAllMaterials()).find((item) => item.id === id);
   if (material && (material.type === 'playlist' || Boolean(material.playlistId) || Boolean(material.videos))) {
     return material;
   }
-  // Fallback to searching in memory
-  const all = await getAllMaterials();
-  const found = all.find((item) => item.id === id && (item.type === 'playlist' || Boolean(item.playlistId) || Boolean(item.videos)));
-  return found || null;
+  return null;
 }
 
 /**
  * Retrieve a single material by ID from Firestore.
  */
 export async function getMaterialById(id: string): Promise<MaterialItem | null> {
-  const material = await getMaterialByIdFromFirestore(id);
+  const material = (await getAllMaterials()).find((item) => item.id === id);
   if (material) return material;
-  const all = await getAllMaterials();
-  return all.find((item) => item.id === id) || null;
+  return null;
 }

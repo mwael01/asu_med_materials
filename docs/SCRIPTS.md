@@ -101,3 +101,7 @@ The site uses a native Service Worker located at [`public/sw.js`](file:///worksp
 - **Offline Fallback**: Branded RTL fallback page at [`public/offline.html`](file:///workspaces/asu_med_materials/public/offline.html) and home page fallback.
 
 
+
+## Catalogue cache regression checks
+
+Run `node --experimental-strip-types scripts/test-catalogue-cache.mjs` with Node 22.12 or newer. Uses an in-memory test adapter and synthetic records; never reads or writes Firestore. Covers shared reuse, daily expiry, empty collections, incomplete or invalid chunks, cache outages, failed origin reads, oversized catalogues, and concurrent request deduplication.

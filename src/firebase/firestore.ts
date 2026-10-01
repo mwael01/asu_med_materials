@@ -16,6 +16,8 @@ import {
   onSnapshot,
   query,
   where,
+  orderBy,
+  limit,
   type Firestore
 } from 'firebase/firestore';
 import { getFirebaseApp } from './config';
@@ -97,9 +99,12 @@ const USERS_COLLECTION = 'users';
 /**
  * Fetches all study materials from Firestore (or IndexedDB cache when offline).
  */
-export async function fetchMaterialsFromFirestore(year?: AcademicYear): Promise<MaterialItem[]> {
+export async function fetchMaterialsFromFirestore(year?: AcademicYear, strict = false): Promise<MaterialItem[]> {
   const db = getFirestoreDb();
-  if (!db) return [];
+  if (!db) {
+    if (strict) throw new Error('Firestore is not configured');
+    return [];
+  }
 
   try {
     const materialsRef = collection(db, MATERIALS_COLLECTION);
@@ -114,6 +119,7 @@ export async function fetchMaterialsFromFirestore(year?: AcademicYear): Promise<
     });
     return results;
   } catch (err) {
+    if (strict) throw err;
     handleFirestoreError('Failed to fetch materials', err);
     return [];
   }
@@ -601,9 +607,12 @@ const MODULES_COLLECTION = 'modules';
 /**
  * Fetches all curriculum modules from Firestore (or IndexedDB cache).
  */
-export async function fetchModulesFromFirestore(year?: AcademicYear): Promise<ModuleInfo[]> {
+export async function fetchModulesFromFirestore(year?: AcademicYear, strict = false): Promise<ModuleInfo[]> {
   const db = getFirestoreDb();
-  if (!db) return [];
+  if (!db) {
+    if (strict) throw new Error('Firestore is not configured');
+    return [];
+  }
 
   try {
     const modulesRef = collection(db, MODULES_COLLECTION);
@@ -618,6 +627,7 @@ export async function fetchModulesFromFirestore(year?: AcademicYear): Promise<Mo
     });
     return results;
   } catch (err) {
+    if (strict) throw err;
     console.warn('[Firestore] Failed to fetch modules, falling back:', err);
     return [];
   }
@@ -777,7 +787,7 @@ export async function fetchAdminUsers(limitCount = 8): Promise<UserProfile[]> {
 
   try {
     const usersRef = collection(db, USERS_COLLECTION);
-    const q = query(usersRef, where('role', '==', 'admin'));
+    const q = query(usersRef, where('role', '==', 'admin'), limit(limitCount));
     const snapshot = await getDocs(q);
     const admins: UserProfile[] = [];
 
@@ -1215,7 +1225,7 @@ export async function fetchAdminsAndContributors(): Promise<{
 
   try {
     const usersRef = collection(db, USERS_COLLECTION);
-    const snap = await getDocs(usersRef);
+    const snap = await getDocs(query(usersRef, where('role', 'in', ['admin', 'contributor'])));
     const admins: UserProfile[] = [];
     const contributors: UserProfile[] = [];
 
@@ -1343,7 +1353,7 @@ export async function fetchRecentAdminLogs(limitCount: number = 50): Promise<Adm
 
   try {
     const coll = collection(db, ADMIN_LOGS_COLLECTION);
-    const snap = await getDocs(coll);
+    const snap = await getDocs(query(coll, orderBy('timestamp', 'desc'), limit(Math.max(1, Math.floor(limitCount)))));
     const results: AdminLogDocument[] = [];
     snap.forEach((d) => {
       results.push(d.data() as AdminLogDocument);
