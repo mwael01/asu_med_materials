@@ -59,6 +59,8 @@ function setCachedUserProfile(profile: UserProfile | null): void {
 
 /**
  * Subscribes to Firebase Authentication state changes.
+ * Profile data is served from localStorage cache to avoid duplicate Firestore reads.
+ * Real-time profile sync is handled by listenToUserProfile in userSync.ts.
  */
 export function onAuthChange(
   callback: (user: User | null, profile: UserProfile | null) => void
@@ -99,97 +101,57 @@ export function onAuthChange(
 
       lastAuthenticatedUid = firebaseUser.uid;
 
-        const cached = getCachedUserProfile();
-        let currentProfile: UserProfile | null = cached;
+      const cached = getCachedUserProfile();
+      let currentProfile: UserProfile | null = cached;
 
-        // 1. Instant zero-flash render from local cache if UID matches
-        if (cached && cached.uid === firebaseUser.uid) {
-          if (!hasFired) {
-            hasFired = true;
-            clearTimeout(fallbackTimer);
-            callback(firebaseUser, cached);
-          }
+      // Instant zero-flash render from local cache if UID matches
+      if (cached && cached.uid === firebaseUser.uid) {
+        if (!hasFired) {
+          hasFired = true;
+          clearTimeout(fallbackTimer);
+          callback(firebaseUser, cached);
         }
+        return;
+      }
 
-        // 2. Always fetch fresh profile from Firestore to detect role updates (e.g. promoted to admin)
+      // If profile doesn't exist in Firestore yet (e.g. first Google sign in), generate initial profile
+      if (!currentProfile || currentProfile.uid !== firebaseUser.uid) {
         try {
-          const remoteProfile = await getUserProfileByUid(firebaseUser.uid);
-          if (remoteProfile) {
-            const hasChanged =
-              !cached ||
-              cached.uid !== remoteProfile.uid ||
-              cached.role !== remoteProfile.role ||
-              cached.displayName !== remoteProfile.displayName ||
-              cached.photoURL !== remoteProfile.photoURL ||
-              cached.username !== remoteProfile.username ||
-              cached.academicYear !== remoteProfile.academicYear;
+          const generatedUsername = (
+            firebaseUser.displayName?.toLowerCase().replace(/\s+/g, '_').replace(/[^a-z0-9_]/g, '') ||
+            'student_' + firebaseUser.uid.substring(0, 5)
+          );
 
-            setCachedUserProfile(remoteProfile);
+          const available = await checkUsernameAvailable(generatedUsername, firebaseUser.uid);
+          const finalUsername = available ? generatedUsername : `${generatedUsername}_${Date.now().toString(36).slice(-4)}`;
 
-            // Conserve user academic year from profile
-            if (remoteProfile.academicYear) {
-              try {
-                const currentYear = localStorage.getItem('asumed_user_year');
-                if (currentYear !== String(remoteProfile.academicYear)) {
-                  localStorage.setItem('asumed_user_year', String(remoteProfile.academicYear));
-                  window.dispatchEvent(
-                    new CustomEvent('user-preferences-updated', {
-                      detail: { year: remoteProfile.academicYear }
-                    })
-                  );
-                }
-              } catch {}
-            }
+          currentProfile = {
+            uid: firebaseUser.uid,
+            username: finalUsername,
+            displayName: firebaseUser.displayName || 'ASU Med Student',
+            photoURL: firebaseUser.photoURL || undefined,
+            createdAt: new Date().toISOString()
+          };
 
-            if (hasChanged && !hasFired) {
-              hasFired = true;
-              clearTimeout(fallbackTimer);
-              callback(firebaseUser, remoteProfile);
-            }
-            return;
-          }
+          await upsertUserProfile(currentProfile);
         } catch (e) {
-          console.warn('[Auth] Failed to sync latest profile from Firestore:', e);
+          console.warn('[Auth] Fallback profile generated in-memory:', e);
+          currentProfile = {
+            uid: firebaseUser.uid,
+            username: firebaseUser.displayName?.toLowerCase().replace(/\s+/g, '_') || 'student',
+            displayName: firebaseUser.displayName || 'ASU Med Student',
+            photoURL: firebaseUser.photoURL || undefined,
+            createdAt: new Date().toISOString()
+          };
         }
 
-        // 3. If profile doesn't exist in Firestore yet (e.g. first Google sign in), generate initial profile
-        if (!currentProfile || currentProfile.uid !== firebaseUser.uid) {
-          try {
-            const generatedUsername = (
-              firebaseUser.displayName?.toLowerCase().replace(/\s+/g, '_').replace(/[^a-z0-9_]/g, '') ||
-              'student_' + firebaseUser.uid.substring(0, 5)
-            );
-
-            const available = await checkUsernameAvailable(generatedUsername, firebaseUser.uid);
-            const finalUsername = available ? generatedUsername : `${generatedUsername}_${Date.now().toString(36).slice(-4)}`;
-
-            currentProfile = {
-              uid: firebaseUser.uid,
-              username: finalUsername,
-              displayName: firebaseUser.displayName || 'ASU Med Student',
-              photoURL: firebaseUser.photoURL || undefined,
-              createdAt: new Date().toISOString()
-            };
-
-            await upsertUserProfile(currentProfile);
-          } catch (e) {
-            console.warn('[Auth] Fallback profile generated in-memory:', e);
-            currentProfile = {
-              uid: firebaseUser.uid,
-              username: firebaseUser.displayName?.toLowerCase().replace(/\s+/g, '_') || 'student',
-              displayName: firebaseUser.displayName || 'ASU Med Student',
-              photoURL: firebaseUser.photoURL || undefined,
-              createdAt: new Date().toISOString()
-            };
-          }
-
-          if (!hasFired) {
-            hasFired = true;
-            clearTimeout(fallbackTimer);
-            setCachedUserProfile(currentProfile);
-            callback(firebaseUser, currentProfile);
-          }
+        if (!hasFired) {
+          hasFired = true;
+          clearTimeout(fallbackTimer);
+          setCachedUserProfile(currentProfile);
+          callback(firebaseUser, currentProfile);
         }
+      }
       } catch (outerErr) {
         if (!hasFired) {
           hasFired = true;

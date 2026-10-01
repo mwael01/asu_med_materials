@@ -7,6 +7,7 @@ import {
   doc,
   getDoc,
   getDocs,
+  getCountFromServer,
   setDoc,
   updateDoc,
   deleteDoc,
@@ -162,16 +163,29 @@ export async function saveMaterialToFirestore(material: MaterialItem): Promise<b
   }
 }
 
+// Request-level deduplication cache for URL checks
+let urlCheckCache: { data: MaterialItem[]; timestamp: number } | null = null;
+const URL_CHECK_CACHE_TTL_MS = 30_000; // 30 seconds
+
 /**
  * Checks a batch of URLs against existing materials in Firestore.
  * Returns a map of the input URL to the matched existing MaterialItem if found.
+ * Uses request-level deduplication to avoid multiple full collection scans.
  */
 export async function checkUrlsBatchInFirestore(urls: string[]): Promise<Map<string, MaterialItem>> {
   const result = new Map<string, MaterialItem>();
   if (!urls || urls.length === 0) return result;
 
   try {
-    const allMaterials = await fetchMaterialsFromFirestore();
+    const now = Date.now();
+    if (!urlCheckCache || now - urlCheckCache.timestamp > URL_CHECK_CACHE_TTL_MS) {
+      urlCheckCache = {
+        data: await fetchMaterialsFromFirestore(),
+        timestamp: now
+      };
+    }
+
+    const allMaterials = urlCheckCache.data;
     const index = new Map<string, MaterialItem>();
 
     for (const mat of allMaterials) {
@@ -179,7 +193,6 @@ export async function checkUrlsBatchInFirestore(urls: string[]): Promise<Map<str
         const norm = normalizeResourceUrl(mat.url);
         if (norm && !index.has(norm)) index.set(norm, mat);
       }
-
     }
 
     for (const rawUrl of urls) {
@@ -1205,8 +1218,8 @@ export async function getAdminCount(): Promise<number> {
   try {
     const usersRef = collection(db, USERS_COLLECTION);
     const q = query(usersRef, where('role', '==', 'admin'));
-    const snap = await getDocs(q);
-    return snap.size;
+    const snapshot = await getCountFromServer(q);
+    return snapshot.data().count;
   } catch (err) {
     console.warn('[Firestore] Failed to count admins:', err);
     return 0;

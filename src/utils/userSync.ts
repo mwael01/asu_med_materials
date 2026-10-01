@@ -13,11 +13,8 @@ import {
   saveStudiedIds
 } from './storage';
 
-const SYNC_INTERVAL_MS = 60_000;
-
 let isListening = false;
 let unsubscribeProfileListener: (() => void) | null = null;
-let syncIntervalId: ReturnType<typeof setInterval> | null = null;
 let isUpdatingFromCloud = false;
 let currentUid: string | null = null;
 
@@ -82,15 +79,11 @@ export function initUserLibrarySync(): void {
   isListening = true;
 
   onAuthChange(async (firebaseUser) => {
-    // 1. If user signed out, clean up listener and interval
+    // 1. If user signed out, clean up listener
     if (!firebaseUser) {
       if (unsubscribeProfileListener) {
         unsubscribeProfileListener();
         unsubscribeProfileListener = null;
-      }
-      if (syncIntervalId) {
-        clearInterval(syncIntervalId);
-        syncIntervalId = null;
       }
       currentUid = null;
       return;
@@ -109,13 +102,9 @@ export function initUserLibrarySync(): void {
       mergeAndSync(uid, remoteProfile);
     });
 
-    // 3. Setup periodic sync (60s when online)
-    if (syncIntervalId) {
-      clearInterval(syncIntervalId);
-    }
-
-    syncIntervalId = setInterval(async () => {
-      if (!navigator.onLine || !currentUid) return;
+    // 3. Re-sync when user returns to the tab (replaces 60s polling)
+    const handleVisibilityChange = async () => {
+      if (document.visibilityState !== 'visible' || !currentUid || !navigator.onLine) return;
 
       try {
         const { getDoc, doc } = await import('firebase/firestore');
@@ -128,9 +117,11 @@ export function initUserLibrarySync(): void {
           mergeAndSync(currentUid, userDoc.data());
         }
       } catch (err) {
-        console.warn('[Sync] Periodic sync failed:', err);
+        console.warn('[Sync] Visibility re-sync failed:', err);
       }
-    }, SYNC_INTERVAL_MS);
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
   });
 }
 
