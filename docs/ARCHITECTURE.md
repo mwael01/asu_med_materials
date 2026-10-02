@@ -256,3 +256,7 @@ export interface MaterialItem {
 - IndexedDB supports offline access; ordinary online `getDocs` calls can still incur server reads. Measure actual reductions in the Firebase Usage dashboard after deployment and verify public CDN hits with `x-vercel-cache`.
 
 Cache verification: test cache reuse across different routes and cold instances, daily expiry, empty collections, read/write failures, incomplete chunks, and oversized catalogues. Confirm live account syncing and direct admin changes; compare Firebase reads and Vercel Runtime Cache activity after deployment. Runtime cache hits are distinct from HTML CDN `x-vercel-cache` hits. See [Vercel Runtime Cache documentation](https://vercel.com/docs/functions/functions-api-reference/vercel-functions-package#getcache).
+
+### Admin AI preparation
+
+Admin extraction combines Firebase AI Logic structured output with authenticated server-side public HTML previews. Typed drafts retain per-item attribution and unresolved review fields until explicit publication to Firestore. Single and bulk paths share validation and serialization. See [Admin AI preparation](ADMIN_AI.md) for the request contract, network protections, runtime limits, and tests.

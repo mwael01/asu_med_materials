@@ -105,3 +105,7 @@ The site uses a native Service Worker located at [`public/sw.js`](file:///worksp
 ## Catalogue cache regression checks
 
 Run `node --experimental-strip-types scripts/test-catalogue-cache.mjs` with Node 22.12 or newer. Uses an in-memory test adapter and synthetic records; never reads or writes Firestore. Covers shared reuse, daily expiry, empty collections, incomplete or invalid chunks, cache outages, failed origin reads, oversized catalogues, and concurrent request deduplication.
+
+### Admin AI regression tests
+
+Run `pnpm test:admin-ai` (Node 22.12+). The suite covers extraction normalization, bilingual persistence/search, attribution, curriculum uncertainty, public-preview protections, and endpoint authorization using synthetic fixtures and mocked services. `scripts/register-typescript.mjs` loads TypeScript in memory using the installed compiler; it does not generate material data files or access live Firestore.

@@ -339,3 +339,7 @@ The homepage reuses canonical shared components directly rather than bespoke car
 
 
 
+
+### Admin material review
+
+`DirectMaterialForm.astro` delegates behavior to `src/scripts/admin/directMaterialForm.ts`. The reusable `MaterialReviewFields.astro` template and `materialEditor.ts` power both single and bulk editors, including bilingual metadata, tags, contributor credit, author lists, classification, and playlist videos. Draft validation and serialization are shared. See [Admin AI preparation](ADMIN_AI.md) for extraction, preview limits, failure handling, and validation.

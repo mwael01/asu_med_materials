@@ -7,6 +7,7 @@ import {
   doc,
   getDoc,
   getDocs,
+  getDocsFromServer,
   getCountFromServer,
   setDoc,
   updateDoc,
@@ -33,6 +34,7 @@ import type {
 } from './schema';
 import type { AuthorEntry } from '../types/contributors';
 import { normalizeResourceUrl } from '../utils/url';
+import { materialUrlKey } from '../utils/materialLinks';
 
 let firestoreInstance: Firestore | null = null;
 
@@ -113,7 +115,7 @@ export async function fetchMaterialsFromFirestore(year?: AcademicYear, strict = 
       ? query(materialsRef, where('year', '==', year))
       : query(materialsRef);
 
-    const snapshot = await getDocs(q);
+    const snapshot = strict ? await getDocsFromServer(q) : await getDocs(q);
     const results: MaterialItem[] = [];
     snapshot.forEach((docSnap) => {
       results.push(docSnap.data() as MaterialItem);
@@ -156,6 +158,7 @@ export async function saveMaterialToFirestore(material: MaterialItem): Promise<b
   try {
     const docRef = doc(db, MATERIALS_COLLECTION, material.id);
     await setDoc(docRef, sanitizeFirestorePayload(material), { merge: true });
+    urlCheckCache = null;
     return true;
   } catch (err) {
     console.error('[Firestore] Failed to save material:', err);
@@ -172,15 +175,15 @@ const URL_CHECK_CACHE_TTL_MS = 30_000; // 30 seconds
  * Returns a map of the input URL to the matched existing MaterialItem if found.
  * Uses request-level deduplication to avoid multiple full collection scans.
  */
-export async function checkUrlsBatchInFirestore(urls: string[]): Promise<Map<string, MaterialItem>> {
+export async function checkUrlsBatchInFirestore(urls: string[], strict = false): Promise<Map<string, MaterialItem>> {
   const result = new Map<string, MaterialItem>();
   if (!urls || urls.length === 0) return result;
 
   try {
     const now = Date.now();
-    if (!urlCheckCache || now - urlCheckCache.timestamp > URL_CHECK_CACHE_TTL_MS) {
+    if (strict || !urlCheckCache || now - urlCheckCache.timestamp > URL_CHECK_CACHE_TTL_MS) {
       urlCheckCache = {
-        data: await fetchMaterialsFromFirestore(),
+        data: await fetchMaterialsFromFirestore(undefined, strict),
         timestamp: now
       };
     }
@@ -190,19 +193,20 @@ export async function checkUrlsBatchInFirestore(urls: string[]): Promise<Map<str
 
     for (const mat of allMaterials) {
       if (mat.url) {
-        const norm = normalizeResourceUrl(mat.url);
+        const norm = materialUrlKey(mat.url);
         if (norm && !index.has(norm)) index.set(norm, mat);
       }
     }
 
     for (const rawUrl of urls) {
       if (!rawUrl) continue;
-      const norm = normalizeResourceUrl(rawUrl);
+      const norm = materialUrlKey(rawUrl);
       if (norm && index.has(norm)) {
         result.set(rawUrl, index.get(norm)!);
       }
     }
   } catch (err) {
+    if (strict) throw err;
     console.warn('[Firestore] Error checking batch URLs:', err);
   }
 
