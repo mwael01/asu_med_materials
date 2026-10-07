@@ -98,6 +98,7 @@ uv run --project scripts/flashcards flashcards link-images
 - When adding new YouTube playlists, use YouTube fetch helpers to populate the `videos` array with accurate chapter titles and IDs directly in Cloud Firestore.
 - Maintain error handling and rate-limiting timeouts between YouTube fetches to prevent network bans.
 - Always run `pnpm run schema:sync` after adding or modifying Firestore documents to keep `firebase/schema.json` synchronized.
+- **Flashcards Direct Upload**: When uploading or updating flashcard decks and card documents, read [`docs/AI_FLASHCARDS_GUIDE.md`](file:///home/mwael/work/asu_med_materials/docs/AI_FLASHCARDS_GUIDE.md) for complete instructions on Anki package processing, R2 media hosting (sponsored by eduvour.com), sanitization invariants, and batch writes to Cloud Firestore.
 - Always run static validation (`pnpm astro check && pnpm build`) after code edits to ensure build and SSR integrity.
 
 ---
