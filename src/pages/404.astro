@@ -8,10 +8,10 @@ const title = 'Page Not Found - ASU Med Materials';
   <div class="min-h-[60vh] flex items-center justify-center px-4">
     <div class="text-center space-y-6">
       <div class="text-8xl font-black text-emerald-600 dark:text-emerald-400">404</div>
-      <h1 class="text-2xl font-extrabold text-zinc-900 dark:text-zinc-100">
+      <h1 class="text-2xl font-extrabold text-zinc-900 dark:text-zinc-100" data-i18n="notFound.title">
         Page Not Found
       </h1>
-      <p class="text-sm text-zinc-500 dark:text-zinc-400 max-w-md mx-auto leading-relaxed">
+      <p class="text-sm text-zinc-500 dark:text-zinc-400 max-w-md mx-auto leading-relaxed" data-i18n="notFound.desc">
         The page you're looking for doesn't exist or has been moved. Try navigating back to the homepage or use the search to find what you need.
       </p>
       <div class="flex flex-wrap items-center justify-center gap-3">
@@ -22,7 +22,7 @@ const title = 'Page Not Found - ASU Med Materials';
           <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
             <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" />
           </svg>
-          Go Home
+          <span data-i18n="notFound.goHome">Go Home</span>
         </a>
         <a
           href="/search"
@@ -31,7 +31,7 @@ const title = 'Page Not Found - ASU Med Materials';
           <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
             <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
           </svg>
-          Search Materials
+          <span data-i18n="notFound.searchMaterials">Search Materials</span>
         </a>
       </div>
     </div>

@@ -68,7 +68,12 @@ export const translations: Record<SupportedLanguage, TranslationsSchema> = {
       allSubjects: 'جميع المواد',
       subjectsTitle: 'المواد الدراسية',
       browseModule: 'تصفح الموديول',
-      activeSubject: 'المادة الحالية:'
+      activeSubject: 'المادة الحالية:',
+      resourcesOf: 'مصادر {subject}',
+      resourcesCount: '{n} مصادر',
+      noSubjectResourcesTitle: 'لا توجد مصادر لمادة {subject} حالياً',
+      noSubjectResourcesDesc: 'لو عندك داتا أو شروحات أو ورق وملخصات لمادة {subject}، شاركها باسمك لزملائك الطلاب!',
+      shareSubjectResource: 'مشاركة مصدر لمادة {subject}'
     },
     search: {
       title: 'دليل البحث الشامل في المصادر',
@@ -161,7 +166,11 @@ export const translations: Record<SupportedLanguage, TranslationsSchema> = {
       emptyError: 'من فضلك الصق رابطاً أو محتوى الرسالة قبل الضغط على إرسال',
       optional: '(اختياري)',
       toFeedbackPrompt: 'عندك اقتراح لتطوير الموقع أو لاحظت رابطاً لا يعمل؟',
-      toFeedbackLink: 'شاركنا رأيك أو أبلغ عن المشكلة هنا ←'
+      toFeedbackLink: 'شاركنا رأيك أو أبلغ عن المشكلة هنا ←',
+      linkedAccount: 'مربوط بحسابك:',
+      linkedAccountNote: 'ستُنسب المساهمة لك وتظهر في ملفك الشخصي',
+      guestLinkPrompt: 'تريد ربط هذه المساهمة بملفك الشخصي؟',
+      signInLink: 'سجّل الدخول ←'
     },
     contributors: {
       breadcrumbHome: 'الرئيسية',
@@ -191,11 +200,15 @@ export const translations: Record<SupportedLanguage, TranslationsSchema> = {
     contacts: {
       whatsapp: 'واتساب',
       telegram: 'تليجرام',
-      instagram: 'انستجرام'
+      instagram: 'انستجرام',
+      email: 'البريد',
+      website: 'الموقع',
+      link: 'رابط'
     },
     common: {
       close: 'إغلاق',
-      completed: 'مكتمل ✓'
+      completed: 'مكتمل ✓',
+      noResources: 'لا توجد مصادر متاحة حالياً.'
     },
     toast: {
       later: 'لاحقاً',
@@ -237,14 +250,25 @@ export const translations: Record<SupportedLanguage, TranslationsSchema> = {
       again: 'أعد البطاقة',
       known: 'أعرفها',
       pause: 'إيقاف مؤقت',
-      resume: 'استئناف',
+      resume: 'استئناف المذاكرة',
       completedTitle: 'أحسنت! أكملت مراجعة هذه المجموعة 🎉',
       completedSubtitle: 'تم حفظ تقدمك تلقائياً ويمكنك مراجعة البطاقات مرة أخرى متى شئت.',
       noDecks: 'لا توجد مجموعات بطاقات متاحة حالياً.',
       cardsCount: '{n} بطاقة',
       progress: 'بطاقة {current} من {total}',
       backToModule: 'العودة للموديول',
-      resetConfirm: 'هل تريد بالتأكيد إعادة ضبط تقدمك في هذه المجموعة؟'
+      resetConfirm: 'هل تريد بالتأكيد إعادة ضبط تقدمك في هذه المجموعة؟',
+      question: 'سؤال',
+      answer: 'الإجابة',
+      showHint: '💡 إظهار التلميح',
+      touchPrompt: 'المس البطاقة لإظهار الإجابة • اسحب يميناً أو يساراً للتقييم',
+      or: 'أو',
+      pausedTitle: 'تم إيقاف المذاكرة مؤقتاً',
+      pausedSubtitle: 'يمكنك استئناف جلستك في أي وقت، تم حفظ موضعك الحالي تلقائياً.',
+      resetModalTitle: 'إعادة ضبط تقدم المجموعة؟',
+      resetModalDesc: 'سيتم مسح حالتك للبطاقات في هذه المجموعة والبدء من البطاقة الأولى مجدداً.',
+      cancel: 'إلغاء',
+      confirmReset: 'تأكيد إعادة الضبط'
     },
     pwa: {
       installPrompt: 'تثبيت المنصة كتطبيق على جهازك للوصول السريع بدون إنترنت.',
@@ -287,6 +311,7 @@ export const translations: Record<SupportedLanguage, TranslationsSchema> = {
       subtitle: 'إضافة المواد مباشرة، مراجعة المساهمات، متابعة الملاحظات، وإدارة فريق المسؤولين.',
       previewStudent: 'معاينة صفحة الطالب',
       returnToAdmin: 'العودة للوحة الإدارة',
+      adminPreviewNotice: 'أنت تعاين الآن الصفحة كما يراها الطالب العادي.',
       tabDirectAdd: 'إضافة المواد (فردي / دفعة)',
       tabSubmissions: 'المساهمات المعلقة',
       tabModules: 'الموديولات',
@@ -361,6 +386,12 @@ export const translations: Record<SupportedLanguage, TranslationsSchema> = {
       actionDeleteFb: 'حذف ملاحظة',
       actionPromote: 'ترقية مسؤول جديد',
       actionDemote: 'سحب صلاحية مسؤول'
+    },
+    notFound: {
+      title: 'الصفحة غير موجودة',
+      desc: 'الصفحة التي تبحث عنها غير موجودة أو تم نقلها. جرب العودة للصفحة الرئيسية أو ابحث عما تريد.',
+      goHome: 'العودة للرئيسية',
+      searchMaterials: 'البحث في المصادر'
     },
     footer: {
       tagline: 'المنصة الشاملة لمصادر طب عين شمس',
@@ -439,7 +470,12 @@ export const translations: Record<SupportedLanguage, TranslationsSchema> = {
       allSubjects: 'All Subjects',
       subjectsTitle: 'Subjects',
       browseModule: 'Browse Module',
-      activeSubject: 'Active Subject:'
+      activeSubject: 'Active Subject:',
+      resourcesOf: '{subject} Resources',
+      resourcesCount: '{n} resources',
+      noSubjectResourcesTitle: 'No resources added for {subject} yet',
+      noSubjectResourcesDesc: 'If you have notes, slides, or study materials for {subject}, share them to help your fellow students!',
+      shareSubjectResource: 'Share material for {subject}'
     },
     search: {
       title: 'Comprehensive Resource Catalog & Search',
@@ -532,7 +568,11 @@ export const translations: Record<SupportedLanguage, TranslationsSchema> = {
       emptyError: 'Please paste at least one link or message content before submitting.',
       optional: '(Optional)',
       toFeedbackPrompt: 'Have an idea to improve the site or noticed a broken link?',
-      toFeedbackLink: 'Send your feedback or report the issue here →'
+      toFeedbackLink: 'Send your feedback or report the issue here →',
+      linkedAccount: 'Linked to account:',
+      linkedAccountNote: 'Contribution will be credited to you and visible on your profile',
+      guestLinkPrompt: 'Want to link this contribution to your profile?',
+      signInLink: 'Sign in →'
     },
     contributors: {
       breadcrumbHome: 'Home',
@@ -562,11 +602,15 @@ export const translations: Record<SupportedLanguage, TranslationsSchema> = {
     contacts: {
       whatsapp: 'WhatsApp',
       telegram: 'Telegram',
-      instagram: 'Instagram'
+      instagram: 'Instagram',
+      email: 'Email',
+      website: 'Website',
+      link: 'Link'
     },
     common: {
       close: 'Close',
-      completed: 'Completed ✓'
+      completed: 'Completed ✓',
+      noResources: 'No resources available currently.'
     },
     toast: {
       later: 'Later',
@@ -615,7 +659,18 @@ export const translations: Record<SupportedLanguage, TranslationsSchema> = {
       cardsCount: '{n} cards',
       progress: 'Card {current} of {total}',
       backToModule: 'Back to Module',
-      resetConfirm: 'Are you sure you want to reset your progress for this deck?'
+      resetConfirm: 'Are you sure you want to reset your progress for this deck?',
+      question: 'Question',
+      answer: 'Answer',
+      showHint: '💡 Show Hint',
+      touchPrompt: 'Tap card to reveal answer • Swipe left or right to rate',
+      or: 'or',
+      pausedTitle: 'Session Paused',
+      pausedSubtitle: 'You can resume anytime. Your current progress has been saved automatically.',
+      resetModalTitle: 'Reset deck progress?',
+      resetModalDesc: 'Your studied progress for this deck will be cleared and reset to card 1.',
+      cancel: 'Cancel',
+      confirmReset: 'Confirm Reset'
     },
     pwa: {
       installPrompt: 'Install app on your device for fast offline access anytime.',
@@ -658,6 +713,7 @@ export const translations: Record<SupportedLanguage, TranslationsSchema> = {
       subtitle: 'Add study materials directly, review student contributions, manage feedback, and coordinate the admin team.',
       previewStudent: 'Preview Student Form',
       returnToAdmin: 'Return to Admin Panel',
+      adminPreviewNotice: 'You are currently previewing the page as viewed by regular students.',
       tabDirectAdd: 'Add Materials (Single / Bulk)',
       tabSubmissions: 'Pending Submissions',
       tabModules: 'Modules',
@@ -732,6 +788,12 @@ export const translations: Record<SupportedLanguage, TranslationsSchema> = {
       actionDeleteFb: 'Deleted feedback',
       actionPromote: 'Promoted a new admin',
       actionDemote: 'Revoked admin permissions'
+    },
+    notFound: {
+      title: 'Page Not Found',
+      desc: "The page you're looking for doesn't exist or has been moved. Try navigating back to the homepage or use the search to find what you need.",
+      goHome: 'Go Home',
+      searchMaterials: 'Search Materials'
     },
     footer: {
       tagline: 'All-in-one Medical Study Hub for ASU',

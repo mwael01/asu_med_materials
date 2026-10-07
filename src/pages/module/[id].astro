@@ -124,7 +124,11 @@ const generalMaterials = moduleMaterials.filter((m) => !m.subject);
                 Central & Batch Resources
               </h3>
             </div>
-            <span class="text-xs font-semibold text-zinc-400 group-count-badge">
+            <span
+              class="text-xs font-semibold text-zinc-400 group-count-badge"
+              data-i18n="module.resourcesCount"
+              data-i18n-params={JSON.stringify({ n: generalMaterials.length })}
+            >
               {generalMaterials.length} resources
             </span>
           </div>
@@ -148,7 +152,11 @@ const generalMaterials = moduleMaterials.filter((m) => !m.subject);
                 {name}
               </h3>
             </div>
-            <span class="text-xs font-semibold text-zinc-400 group-count-badge">
+            <span
+              class="text-xs font-semibold text-zinc-400 group-count-badge"
+              data-i18n="module.resourcesCount"
+              data-i18n-params={JSON.stringify({ n: items.length })}
+            >
               {items.length} resources
             </span>
           </div>
@@ -187,7 +195,7 @@ const generalMaterials = moduleMaterials.filter((m) => !m.subject);
 </Layout>
 
 <script>
-  import { getCurrentLanguage } from '../../utils/i18n';
+  import { getCurrentLanguage, t } from '../../utils/i18n';
 
   function initModulePage(): void {
     const emptyState = document.getElementById('module-empty-state');
@@ -247,7 +255,7 @@ const generalMaterials = moduleMaterials.filter((m) => !m.subject);
         // Update group count label
         const countBadge = group.querySelector('.group-count-badge');
         if (countBadge) {
-          countBadge.textContent = `${visibleInGroup} ${isAr ? 'مصادر' : 'resources'}`;
+          countBadge.textContent = t('module.resourcesCount', isAr ? 'ar' : 'en', { n: visibleInGroup });
         }
 
         group.style.display = visibleInGroup > 0 ? '' : 'none';

@@ -233,7 +233,7 @@ function hasContacts(): boolean {
           <rect width="20" height="16" x="2" y="4" rx="2"/>
           <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/>
         </svg>
-        {showLabels && <span>{c.label || 'Email'}</span>}
+        {showLabels && <span data-i18n={c.label ? undefined : 'contacts.email'}>{c.label || 'Email'}</span>}
       </a>
     ))}
 
@@ -243,7 +243,7 @@ function hasContacts(): boolean {
         href={c.href}
         target="_blank"
         rel="noopener noreferrer"
-        title={c.label ? `${c.label}: ${c.value}` : `الموقع: ${c.value}`}
+        title={c.label ? `${c.label}: ${c.value}` : `Website: ${c.value}`}
         aria-label={c.label || 'Website'}
         class="inline-flex items-center justify-center gap-1.5 h-8 px-3 rounded-full bg-teal-50 text-teal-700 border border-teal-200/80 hover:bg-teal-600 hover:text-white dark:bg-teal-950/40 dark:text-teal-300 dark:border-teal-800/60 dark:hover:bg-teal-600 dark:hover:text-white hover:scale-105 active:scale-95 transition-all duration-150 shadow-2xs text-xs font-medium"
       >
@@ -252,7 +252,7 @@ function hasContacts(): boolean {
           <path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/>
           <path d="M2 12h20"/>
         </svg>
-        {showLabels && <span>{c.label || 'Website'}</span>}
+        {showLabels && <span data-i18n={c.label ? undefined : 'contacts.website'}>{c.label || 'Website'}</span>}
       </a>
     ))}
 
@@ -262,7 +262,7 @@ function hasContacts(): boolean {
         href={c.href}
         target="_blank"
         rel="noopener noreferrer"
-        title={c.label ? `${c.label}: ${c.value}` : `رابط: ${c.value}`}
+        title={c.label ? `${c.label}: ${c.value}` : `Link: ${c.value}`}
         aria-label={c.label || 'Link'}
         class="inline-flex items-center justify-center gap-1.5 h-8 px-3 rounded-full bg-zinc-100 text-zinc-700 border border-zinc-200/80 hover:bg-zinc-700 hover:text-white dark:bg-zinc-800 dark:text-zinc-300 dark:border-zinc-700 dark:hover:bg-zinc-700 dark:hover:text-white hover:scale-105 active:scale-95 transition-all duration-150 shadow-2xs text-xs font-medium"
       >
@@ -271,7 +271,7 @@ function hasContacts(): boolean {
           <path d="M10 14 21 3"/>
           <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
         </svg>
-        {showLabels && <span>{c.label || 'Link'}</span>}
+        {showLabels && <span data-i18n={c.label ? undefined : 'contacts.link'}>{c.label || 'Link'}</span>}
       </a>
     ))}
   </div>

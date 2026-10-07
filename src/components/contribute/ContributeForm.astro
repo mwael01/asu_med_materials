@@ -99,14 +99,14 @@ const { modules } = Astro.props;
         <div id="contrib-account-linked" class="hidden mt-2 p-2.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200/80 dark:border-emerald-800/50 flex flex-wrap items-center justify-between gap-1 text-[11px] text-emerald-800 dark:text-emerald-300">
           <div class="flex items-center gap-1.5 font-semibold">
             <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-            <span>مربوط بحسابك: <strong id="contrib-account-username" class="underline">@username</strong></span>
+            <span><span data-i18n="contribute.linkedAccount">مربوط بحسابك:</span> <strong id="contrib-account-username" class="underline">@username</strong></span>
           </div>
-          <span class="text-[10px] text-emerald-600 dark:text-emerald-400">ستُنسب المساهمة لك وتظهر في ملفك الشخصي</span>
+          <span class="text-[10px] text-emerald-600 dark:text-emerald-400" data-i18n="contribute.linkedAccountNote">ستُنسب المساهمة لك وتظهر في ملفك الشخصي</span>
         </div>
 
         <div id="contrib-account-guest-hint" class="hidden mt-2 p-2.5 rounded-xl bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700/60 flex items-center justify-between gap-2 text-[11px] text-zinc-500 dark:text-zinc-400">
-          <span>تريد ربط هذه المساهمة بملفك الشخصي؟</span>
-          <a href="/profile" class="font-bold text-emerald-600 dark:text-emerald-400 hover:underline shrink-0">سجّل الدخول &larr;</a>
+          <span data-i18n="contribute.guestLinkPrompt">تريد ربط هذه المساهمة بملفك الشخصي؟</span>
+          <a href="/profile" class="font-bold text-emerald-600 dark:text-emerald-400 hover:underline shrink-0" data-i18n="contribute.signInLink">سجّل الدخول &larr;</a>
         </div>
       </div>
 

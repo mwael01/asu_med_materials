@@ -79,8 +79,12 @@ const allMaterials = rawMaterials.map((m) => ({
 
   <!-- Results Count Bar -->
   <div class="flex items-center justify-between py-2 border-b border-zinc-200 dark:border-zinc-800 mb-4 text-xs text-zinc-500 dark:text-zinc-400">
-    <div id="results-count-container">
-      <span id="results-label-prefix">Showing</span> <span id="results-count" class="font-bold text-zinc-900 dark:text-zinc-100">{allMaterials.length}</span> <span id="results-label-suffix">study resources</span>
+    <div
+      id="results-count-container"
+      data-i18n="search.resultsCount"
+      data-i18n-params={JSON.stringify({ n: allMaterials.length })}
+    >
+      Showing {allMaterials.length} study resources
     </div>
     <button
       type="button"
@@ -158,7 +162,7 @@ const allMaterials = rawMaterials.map((m) => ({
     type SearchDocument
   } from '../utils/search';
   import { getUserStoredYear } from '../utils/storage';
-  import { getCurrentLanguage } from '../utils/i18n';
+  import { getCurrentLanguage, t } from '../utils/i18n';
   import type { MaterialItem, ModuleInfo } from '../types/materials';
 
   function initSearchPage(): void {
@@ -167,7 +171,6 @@ const allMaterials = rawMaterials.map((m) => ({
     const typeChips = document.querySelectorAll('.filter-chip');
     const resultsGrid = document.querySelector('#search-results-grid .materials-grid');
     const cards = Array.from(document.querySelectorAll('#search-results-grid [data-material-id]')) as HTMLElement[];
-    const resultsCount = document.getElementById('results-count');
     const resetBtn = document.getElementById('reset-filters-btn');
     const emptyResetBtn = document.getElementById('empty-reset-filters-btn');
     const emptyState = document.getElementById('search-empty-state');
@@ -318,24 +321,17 @@ const allMaterials = rawMaterials.map((m) => ({
 
       // Update results count indicator
       const matchedCount = matchesInCurrentYear.length;
-      if (resultsCount) {
-        resultsCount.textContent = String(matchedCount);
-      }
-
       const lang = getCurrentLanguage();
-      const isAr = lang === 'ar';
-      const prefixEl = document.getElementById('results-label-prefix');
-      const suffixEl = document.getElementById('results-label-suffix');
-      if (prefixEl) prefixEl.textContent = isAr ? 'عرض' : 'Showing';
-      if (suffixEl) suffixEl.textContent = isAr ? 'مصادر تعليمية' : 'study resources';
+      const countContainer = document.getElementById('results-count-container');
+      if (countContainer) {
+        countContainer.textContent = t('search.resultsCount', lang, { n: matchedCount });
+      }
 
       // Cross-year suggestion logic
       if (currentYear !== 'all' && matchedCount === 0 && matchesInOtherYears.length > 0 && q) {
         if (crossYearBanner && crossYearText) {
           const otherCount = matchesInOtherYears.length;
-          crossYearText.textContent = isAr
-            ? `لم نجد نتائج في السنة ${currentYear} لبحثك عن "${q}". تم العثور على ${otherCount} نتيجة في السنوات الأخرى.`
-            : `No results found in Year ${currentYear} for "${q}". Found ${otherCount} results in other years.`;
+          crossYearText.textContent = t('search.noYearResults', lang, { y: currentYear, count: otherCount });
           crossYearBanner.classList.remove('hidden');
         }
       } else {

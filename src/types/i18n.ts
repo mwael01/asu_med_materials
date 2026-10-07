@@ -62,6 +62,11 @@ export interface TranslationsSchema {
     subjectsTitle: string;
     browseModule: string;
     activeSubject: string;
+    resourcesOf?: string;
+    resourcesCount?: string;
+    noSubjectResourcesTitle?: string;
+    noSubjectResourcesDesc?: string;
+    shareSubjectResource?: string;
   };
   search: {
     title: string;
@@ -155,6 +160,10 @@ export interface TranslationsSchema {
     optional: string;
     toFeedbackPrompt: string;
     toFeedbackLink: string;
+    linkedAccount?: string;
+    linkedAccountNote?: string;
+    guestLinkPrompt?: string;
+    signInLink?: string;
   };
   contributors: {
     breadcrumbHome: string;
@@ -185,10 +194,14 @@ export interface TranslationsSchema {
     whatsapp: string;
     telegram: string;
     instagram: string;
+    email?: string;
+    website?: string;
+    link?: string;
   };
   common: {
     close: string;
     completed: string;
+    noResources?: string;
   };
   toast: {
     later: string;
@@ -238,6 +251,23 @@ export interface TranslationsSchema {
     progress: string;
     backToModule: string;
     resetConfirm: string;
+    question?: string;
+    answer?: string;
+    showHint?: string;
+    touchPrompt?: string;
+    or?: string;
+    pausedTitle?: string;
+    pausedSubtitle?: string;
+    resetModalTitle?: string;
+    resetModalDesc?: string;
+    cancel?: string;
+    confirmReset?: string;
+  };
+  notFound?: {
+    title: string;
+    desc: string;
+    goHome: string;
+    searchMaterials: string;
   };
   pwa: {
     installPrompt: string;
@@ -280,6 +310,7 @@ export interface TranslationsSchema {
     subtitle: string;
     previewStudent: string;
     returnToAdmin: string;
+    adminPreviewNotice?: string;
     tabDirectAdd: string;
     tabSubmissions: string;
     tabModules: string;
