@@ -77,7 +77,18 @@ uv run --project scripts/flashcards flashcards validate <import_id>
 
 # Publish import atomically to active website decks and linked materials:
 uv run --project scripts/flashcards flashcards publish <import_id>
+
+# Configure CORS rules on Cloudflare R2 bucket (asumed) via pnpm wrangler:
+uv run --project scripts/flashcards flashcards set-cors
+
+# Upload images from archive or directory to Cloudflare R2 (https://asumed.eduvour.com):
+uv run --project scripts/flashcards flashcards upload-media "path/to/archive.apkg"
+
+# Scan existing Firestore cards, rewrite relative image paths to R2, and link media:
+uv run --project scripts/flashcards flashcards link-images
 ```
+
+> **Image Hosting Attribution**: Image and media asset hosting for flashcards is powered by **Cloudflare R2** and covered by **[eduvour.com](https://eduvour.com)** via bucket `asumed` and custom domain `https://asumed.eduvour.com/`. Images are cached on-demand when students open decks.
 
 ---
 

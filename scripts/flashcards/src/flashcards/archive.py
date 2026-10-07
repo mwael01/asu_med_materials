@@ -22,6 +22,7 @@ class ArchiveInfo:
     compressed_bytes: int
     expanded_bytes: int
     media: list[str]
+    media_map: dict[str, str]
     has_modern_collection: bool
     has_legacy_collection: bool
 
@@ -49,12 +50,15 @@ def validate_archive(path: Path) -> ArchiveInfo:
 
     digest = hashlib.sha256(path.read_bytes()).hexdigest()
     media_names: list[str] = []
+    media_map: dict[str, str] = {}
     if "media" in names:
         with ZipFile(path) as archive:
             try:
-                media_map = json.loads(archive.read("media"))
-                media_names = [str(value) for value in media_map.values()]
+                raw_media = json.loads(archive.read("media"))
+                media_map = {str(k): str(v) for k, v in raw_media.items()}
+                media_names = sorted(set(media_map.values()))
             except (UnicodeDecodeError, json.JSONDecodeError):
+                media_map = {}
                 media_names = []
 
     return ArchiveInfo(
@@ -64,6 +68,7 @@ def validate_archive(path: Path) -> ArchiveInfo:
         compressed_bytes=path.stat().st_size,
         expanded_bytes=expanded,
         media=media_names,
+        media_map=media_map,
         has_modern_collection="collection.anki21" in names,
         has_legacy_collection="collection.anki2" in names,
     )
@@ -80,8 +85,13 @@ def extract_collection(path: Path) -> tempfile.TemporaryDirectory[str]:
         target.write_bytes(archive.read(source))
         if "media" in archive.namelist():
             (Path(temp.name) / "media.json").write_bytes(archive.read("media"))
-        for name in info.media:
-            if name in archive.namelist():
-                safe = Path(name).name
-                (Path(temp.name) / safe).write_bytes(archive.read(name))
+        if info.media_map:
+            media_dir = Path(temp.name) / "media"
+            media_dir.mkdir(exist_ok=True)
+            for zip_key, orig_name in info.media_map.items():
+                if zip_key in archive.namelist():
+                    safe = Path(orig_name).name
+                    content = archive.read(zip_key)
+                    (Path(temp.name) / safe).write_bytes(content)
+                    (media_dir / safe).write_bytes(content)
     return temp

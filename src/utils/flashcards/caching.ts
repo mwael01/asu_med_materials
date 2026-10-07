@@ -50,36 +50,75 @@ async function asyncPool<T, R>(
 }
 
 /**
- * Caches media assets into Cache Storage.
+ * Extracts all image URLs referenced by a deck's cards (via media metadata and HTML <img> tags).
  */
-async function cacheCardMedia(cards: FlashcardCard[], signal: AbortSignal): Promise<void> {
-  if (typeof caches === 'undefined' || signal.aborted) return;
+export function extractCardImageUrls(cards: FlashcardCard[]): string[] {
+  const urls = new Set<string>();
+  const imgRegex = /<img[^>]+src=["']([^"']+)["']/gi;
 
-  try {
-    const cache = await caches.open(MEDIA_CACHE_NAME);
-    const mediaUrls = cards
-      .flatMap((c) => c.media || [])
-      .map((m) => m.storagePath)
-      .filter((url) => Boolean(url && url.startsWith('http')));
-
-    for (const url of mediaUrls) {
-      if (signal.aborted) break;
-      const match = await cache.match(url);
-      if (!match) {
-        fetch(url, { signal, mode: 'cors' })
-          .then((res) => {
-            if (res.ok) cache.put(url, res);
-          })
-          .catch(() => {});
+  for (const card of cards) {
+    if (card.media && Array.isArray(card.media)) {
+      for (const m of card.media) {
+        if (m.storagePath) {
+          urls.add(m.storagePath);
+        }
       }
     }
+
+    const html = `${card.questionHtml || ''} ${card.answerHtml || ''}`;
+    let match: RegExpExecArray | null;
+    while ((match = imgRegex.exec(html)) !== null) {
+      const src = match[1]?.trim();
+      if (src && !src.startsWith('data:')) {
+        urls.add(src);
+      }
+    }
+  }
+
+  return Array.from(urls);
+}
+
+/**
+ * Caches image assets only when the user opens a specific deck in the study player.
+ * Images are stored in 'asumed-flashcard-media' Cache Storage to provide fast offline review
+ * without causing network congestion when the website is first loaded.
+ */
+export async function cacheDeckImagesOnOpen(cards: FlashcardCard[]): Promise<void> {
+  if (typeof window === 'undefined' || typeof caches === 'undefined' || !cards || cards.length === 0) return;
+
+  try {
+    const urls = extractCardImageUrls(cards);
+    if (urls.length === 0) return;
+
+    const cache = await caches.open(MEDIA_CACHE_NAME);
+
+    await asyncPool(
+      CONCURRENCY_LIMIT,
+      urls,
+      async (url, signal) => {
+        if (signal.aborted) return;
+        try {
+          const match = await cache.match(url);
+          if (!match) {
+            const res = await fetch(url, { signal, mode: 'cors' });
+            if (res.ok) {
+              await cache.put(url, res);
+            }
+          }
+        } catch {
+          // Silently ignore individual image network or offline errors
+        }
+      },
+      new AbortController().signal
+    );
   } catch (err) {
-    console.warn('[Cache] Error caching card media:', err);
+    console.warn('[Cache] Error caching deck images on open:', err);
   }
 }
 
 /**
- * Caches a single deck's manifest, cards, and media assets.
+ * Caches a single deck's metadata, manifest, and cards payload.
+ * Intentionally does NOT download image binaries upfront.
  */
 async function prefetchDeck(
   deck: FlashcardDeck,
@@ -106,11 +145,6 @@ async function prefetchDeck(
     if (cachedCards && cachedCards.length > 0) {
       await cacheCardsPayload(deck.id, deck.activeRevisionId, cachedCards);
     }
-  }
-
-  // 4. Cache media assets
-  if (cachedCards) {
-    await cacheCardMedia(cachedCards, signal);
   }
 }
 

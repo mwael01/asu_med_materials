@@ -192,8 +192,13 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Cache Firebase Storage media assets (diagrams, images)
-  if (url.hostname.includes('firebasestorage.googleapis.com') || url.pathname.startsWith('/flashcard-media/')) {
+  // Cache Cloudflare R2 (asumed.eduvour.com) and Firebase Storage media assets (diagrams, images)
+  if (
+    url.hostname === 'asumed.eduvour.com' ||
+    url.hostname.endsWith('.eduvour.com') ||
+    url.hostname.includes('firebasestorage.googleapis.com') ||
+    url.pathname.startsWith('/flashcard-media/')
+  ) {
     event.respondWith(
       caches.open('asumed-flashcard-media').then((mediaCache) =>
         mediaCache.match(request).then((cached) => {

@@ -1,0 +1,29 @@
+{
+  "rules": [
+    {
+      "allowed": {
+        "origins": [
+          "https://asumedmaterials.vercel.app",
+          "https://asumed.eduvour.com",
+          "http://localhost:4321",
+          "http://localhost:3000",
+          "http://localhost:5173",
+          "*"
+        ],
+        "methods": [
+          "GET",
+          "HEAD"
+        ],
+        "headers": [
+          "*"
+        ]
+      },
+      "exposeHeaders": [
+        "ETag",
+        "Content-Length",
+        "Content-Type"
+      ],
+      "maxAgeSeconds": 86400
+    }
+  ]
+}

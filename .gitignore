@@ -43,3 +43,7 @@ firebase-debug.log*
 .venv/
 __pycache__/
 *.pyc
+
+# Cloudflare Wrangler cache
+.wrangler/
+

@@ -2,15 +2,24 @@ from __future__ import annotations
 
 import hashlib
 import json
+import mimetypes
 import os
+import re
+import socket
 from collections import defaultdict
 from pathlib import Path
 from typing import Any
 
+# Ensure IPv4 priority for socket getaddrinfo to prevent hanging on gRPC/OAuth network calls
+_orig_gai = socket.getaddrinfo
+def _ipv4_gai(host, port, family=0, *args, **kwargs):
+    return _orig_gai(host, port, socket.AF_INET, *args, **kwargs)
+socket.getaddrinfo = _ipv4_gai
+
 import typer
 
 from .anki_adapter import read_source_cards
-from .archive import validate_archive
+from .archive import extract_collection, validate_archive
 from .classify import classify_deck_path, slug
 from .firebase_store import (
     delete_documents,
@@ -22,6 +31,13 @@ from .firebase_store import (
     upload_source_archive,
     write_documents,
 )
+from .r2_storage import (
+    DEFAULT_R2_BUCKET,
+    DEFAULT_R2_PUBLIC_DOMAIN,
+    apply_r2_cors,
+    upload_files_to_r2,
+)
+from .render import rewrite_media_urls
 
 app = typer.Typer(
     help="Inspect, stage, review, classify, validate, cleanup, and publish Anki flashcard imports."
@@ -133,6 +149,20 @@ def stage(
     created = now_iso()
     source_archive_path = upload_source_archive(sa, archive, import_id)
 
+    # Upload extracted media assets to Cloudflare R2 if present in archive
+    uploaded_media: dict[str, str] = {}
+    if info.media_map:
+        print(f"Extracting and uploading {len(info.media_map)} media assets to Cloudflare R2 (asumed)...")
+        temp_media = extract_collection(archive)
+        try:
+            media_dir = Path(temp_media.name) / "media"
+            files_to_upload = [p for p in media_dir.iterdir() if p.is_file()] if media_dir.exists() else []
+            if files_to_upload:
+                uploaded_media = upload_files_to_r2(files_to_upload)
+                print(f"Uploaded {len(uploaded_media)} media files to {DEFAULT_R2_PUBLIC_DOMAIN}.")
+        finally:
+            temp_media.cleanup()
+
     findings: list[dict[str, Any]] = []
     deck_rows: list[tuple[str, dict[str, Any]]] = []
     card_rows: list[tuple[str, dict[str, Any]]] = []
@@ -203,15 +233,34 @@ def stage(
             content_raw = card.rendered.question_html + "\n" + card.rendered.answer_html
             content_hash = hashlib.sha256(content_raw.encode("utf-8")).hexdigest()
 
+            # Find media URLs in rendered card
+            card_media: list[dict[str, Any]] = []
+            img_src_regex = re.compile(r'(\bsrc\s*=\s*)["\']([^"\']+)["\']', re.IGNORECASE)
+            seen_urls = set()
+            for part in (card.rendered.question_html, card.rendered.answer_html):
+                for match in img_src_regex.finditer(part):
+                    src_val = match.group(2).strip()
+                    if src_val and not src_val.startswith("data:") and src_val not in seen_urls:
+                        seen_urls.add(src_val)
+                        mime = mimetypes.guess_type(src_val)[0] or "image/jpeg"
+                        card_media.append({
+                            "storagePath": src_val,
+                            "contentType": mime,
+                        })
+
+            kind = card.rendered.kind
+            if card_media and kind == "basic":
+                kind = "image"
+
             card_payload = {
                 "id": card_id,
                 "deckId": deck_id,
                 "revisionId": revision_id,
                 "ordinal": ordinal,
-                "kind": card.rendered.kind,
+                "kind": kind,
                 "questionHtml": card.rendered.question_html,
                 "answerHtml": card.rendered.answer_html,
-                "media": [],
+                "media": card_media,
                 "sourceNoteGuid": card.note_guid,
                 "sourceTemplateOrdinal": card.template_ordinal,
                 "sourceDeckPath": deck_path,
@@ -500,6 +549,141 @@ def cleanup(
 
     deleted = delete_documents(db, paths_to_delete)
     print(f"Cleaned up import '{import_id}': deleted {deleted} documents.")
+
+
+@app.command("set-cors")
+def set_cors_cmd(
+    cors_file: Path = typer.Option(None, "--file", help="Path to CORS configuration JSON"),
+    bucket: str = typer.Option(DEFAULT_R2_BUCKET, "--bucket", help="R2 bucket name"),
+) -> None:
+    """Apply CORS configuration to Cloudflare R2 bucket using pnpm wrangler."""
+    _load_env()
+    success = apply_r2_cors(cors_file=cors_file, bucket=bucket)
+    if not success:
+        raise typer.Exit(code=1)
+
+
+@app.command("upload-media")
+def upload_media_cmd(
+    source: Path = typer.Argument(..., exists=True, readable=True, help="Path to APKG archive or folder of images"),
+    bucket: str = typer.Option(DEFAULT_R2_BUCKET, "--bucket", help="R2 bucket name"),
+) -> None:
+    """Extract and upload media assets to Cloudflare R2 bucket (asumed.eduvour.com)."""
+    _load_env()
+    if source.is_dir():
+        files = [p for p in source.iterdir() if p.is_file()]
+        print(f"Uploading {len(files)} files from {source} to R2 bucket '{bucket}'...")
+        res = upload_files_to_r2(files, bucket=bucket)
+        print(f"Done! Uploaded {len(res)} files to {DEFAULT_R2_PUBLIC_DOMAIN}.")
+    else:
+        # APKG archive
+        print(f"Extracting media from APKG {source.name}...")
+        temp = extract_collection(source)
+        try:
+            media_dir = Path(temp.name) / "media"
+            if not media_dir.exists():
+                files = [p for p in Path(temp.name).iterdir() if p.is_file() and p.name not in ("collection.anki2", "media.json")]
+            else:
+                files = [p for p in media_dir.iterdir() if p.is_file()]
+            print(f"Found {len(files)} media files. Uploading to R2 bucket '{bucket}'...")
+            res = upload_files_to_r2(files, bucket=bucket)
+            print(f"Done! Uploaded {len(res)} files to {DEFAULT_R2_PUBLIC_DOMAIN}.")
+        finally:
+            temp.cleanup()
+
+
+@app.command("link-images")
+def link_images_cmd(
+    service_account: Path = typer.Option(None, "--service-account"),
+    dry_run: bool = typer.Option(False, "--dry-run", help="Scan and preview without writing to Firestore"),
+) -> None:
+    """Scan existing cards in Firestore, rewrite relative image paths to Cloudflare R2, and link media."""
+    _load_env()
+    sa = service_account or _default_service_account()
+    if not sa or not sa.exists():
+        typer.echo("Error: Service account JSON file not found.", err=True)
+        raise typer.Exit(code=1)
+
+    db = get_db(sa)
+    decks = list(db.collection("flashcard_decks").stream())
+    print(f"Inspecting {len(decks)} flashcard decks in Firestore...")
+
+    total_cards_scanned = 0
+    cards_updated = 0
+    updates: list[tuple[str, dict[str, Any]]] = []
+
+    img_src_regex = re.compile(r'(\bsrc\s*=\s*)["\']([^"\']+)["\']', re.IGNORECASE)
+
+    for deck_doc in decks:
+        deck_data = deck_doc.to_dict() or {}
+        deck_id = deck_doc.id
+        active_rev = deck_data.get("activeRevisionId")
+        if not active_rev:
+            rev_docs = list(db.collection("flashcard_decks").document(deck_id).collection("revisions").limit(1).stream())
+            if rev_docs:
+                active_rev = rev_docs[0].id
+        if not active_rev:
+            continue
+
+        cards_ref = db.collection("flashcard_decks").document(deck_id).collection("revisions").document(active_rev).collection("cards")
+        for card_doc in cards_ref.stream():
+            total_cards_scanned += 1
+            card_data = card_doc.to_dict() or {}
+            q_html = card_data.get("questionHtml", "")
+            a_html = card_data.get("answerHtml", "")
+            needs_update = False
+
+            # Check if relative img src exists
+            new_q = rewrite_media_urls(q_html)
+            new_a = rewrite_media_urls(a_html)
+
+            if new_q != q_html or new_a != a_html:
+                needs_update = True
+
+            # Extract media URLs
+            media_list = card_data.get("media") or []
+            discovered_urls = set()
+            for html_part in (new_q, new_a):
+                for match in img_src_regex.finditer(html_part):
+                    src_val = match.group(2).strip()
+                    if src_val and not src_val.startswith("data:"):
+                        discovered_urls.add(src_val)
+
+            existing_storage_paths = {m.get("storagePath") for m in media_list if isinstance(m, dict)}
+            for u in discovered_urls:
+                if u not in existing_storage_paths:
+                    mime = mimetypes.guess_type(u)[0] or "image/jpeg"
+                    media_list.append({
+                        "storagePath": u,
+                        "contentType": mime,
+                    })
+                    needs_update = True
+
+            if needs_update:
+                card_path = f"flashcard_decks/{deck_id}/revisions/{active_rev}/cards/{card_doc.id}"
+                card_patch = {
+                    "questionHtml": new_q,
+                    "answerHtml": new_a,
+                    "media": media_list,
+                }
+                if "<img" in new_q.lower() or "<img" in new_a.lower():
+                    card_patch["kind"] = "image"
+                updates.append((card_path, card_patch))
+                cards_updated += 1
+
+    print(f"Total cards scanned: {total_cards_scanned}")
+    print(f"Cards requiring image linkage updates: {cards_updated}")
+
+    if dry_run:
+        print("[Dry Run] No writes committed.")
+        return
+
+    if updates:
+        print(f"Committing {len(updates)} card updates to Firestore...")
+        write_documents(db, updates)
+        print("Done! All image references linked to Cloudflare R2 (asumed.eduvour.com).")
+    else:
+        print("All cards in Firestore are verified and cleanly linked. No updates needed.")
 
 
 if __name__ == "__main__":

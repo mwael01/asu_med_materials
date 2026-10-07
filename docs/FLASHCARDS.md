@@ -45,11 +45,25 @@ uv run --project scripts/flashcards flashcards <command> [args]
 - **`classify <deck_id> --module <mod> --subject <subj> --year <y>`**: Manually assigns or overrides classification for a deck.
 - **`validate <import_id>`**: Validates that all decks have assigned subjects, modules, and error-free renders before publication.
 - **`publish <import_id>`**: Atomically marks decks and revisions as `published`, and generates linked entries in `materials` with `author: "ASU Anki Flashcards"`.
+- **`set-cors`**: Applies CORS rules to the Cloudflare R2 bucket `asumed` via `pnpm wrangler`.
+- **`upload-media <archive_or_dir>`**: Extracts and uploads image assets directly to Cloudflare R2 (`asumed.eduvour.com`).
+- **`link-images`**: Scans all cards in Firestore, rewrites relative image paths to Cloudflare R2, populates `media` metadata, and commits updates.
 - **`cleanup <import_id>`**: Deletes draft cards and revisions for abandoned imports.
 
 ---
 
-## 3. Study Player & Offline Caching
+## 3. Media & Image Hosting (Cloudflare R2 & eduvour.com)
+
+Flashcard image and diagram hosting is powered by **Cloudflare R2** and generously covered by **eduvour.com**.
+
+- **R2 Bucket**: `asumed`
+- **Public Domain**: `https://asumed.eduvour.com/`
+- **Provider & Attribution**: Image hosting is sponsored and covered by **[eduvour.com](https://eduvour.com)** using Cloudflare R2 object storage.
+- **CORS Configuration**: Stored in `cloudflare/r2-cors.json`. Configured using `pnpm exec wrangler r2 bucket cors set asumed --file cloudflare/r2-cors.json --force` (or `uv run --project scripts/flashcards flashcards set-cors`). Permitted origins include `https://asumedmaterials.vercel.app`, `https://asumed.eduvour.com`, and local development environments.
+
+---
+
+## 4. Study Player & On-Demand Image Caching
 
 ### Study Player (`/flashcards/[id]`)
 - **Loop:** Simple **Reveal → Again / Known** flow without complex SRS algorithms.
@@ -65,15 +79,14 @@ uv run --project scripts/flashcards flashcards <command> [args]
 - **Stores:** `progress`, `decks`, `cards`, `manifests`.
 - **Guest / Auth Sync:** Guests save progress locally; upon login, guest progress is safely merged into the user's private Firestore checkpoint (`users/{uid}/flashcard_progress/{deckId}`).
 
-### Background Prefetching (`src/utils/flashcards/caching.ts`)
-- Automatically caches published decks and card revisions for the student's selected academic year in IndexedDB.
-- Bounded concurrency limit: **4 parallel requests**.
-- Automatically cancels prefetching when the student switches their academic year.
-- Service Worker (`public/sw.js`) caches the `/flashcards` app shell and media for offline study.
+### On-Demand Image Caching Policy (`src/utils/flashcards/caching.ts`)
+- **No Upfront Network Burden:** Background prefetching for the student's selected academic year (`prefetchYearFlashcards`) downloads only deck metadata, manifests, and card JSON into IndexedDB. **Image binary files are intentionally excluded from upfront prefetching** so they never slow down initial website loading or waste student bandwidth.
+- **On-Demand Deck Open Caching:** When a student explicitly opens a deck in the study player (`/flashcards/[id]`), `cacheDeckImagesOnOpen(cards)` extracts all image URLs (from card `media` and HTML `<img>` tags) and asynchronously caches them into the `asumed-flashcard-media` Cache Storage.
+- **Service Worker Interception:** The Service Worker (`public/sw.js`) intercepts all image requests directed to `https://asumed.eduvour.com` (and `.eduvour.com`), serving them offline from `asumed-flashcard-media` with network fallback and cache-put.
 
 ---
 
-## 4. Admin Management (`/admin`)
+## 5. Admin Management (`/admin`)
 
 The admin dashboard includes a dedicated **Flashcards** tab (`FlashcardsManager.astro`):
 - Filter by Publication Status (All, Published, Draft) and Academic Year.

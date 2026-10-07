@@ -216,6 +216,7 @@ const { deck, initialCards } = Astro.props;
   } from '../../utils/flashcards/persistence';
   import { getCachedUserProfile } from '../../firebase/auth';
   import { getCachedCards } from '../../utils/flashcards/persistence';
+  import { cacheDeckImagesOnOpen } from '../../utils/flashcards/caching';
 
   function initStudyPlayer() {
     const container = document.getElementById('study-player-container');
@@ -259,6 +260,12 @@ const { deck, initialCards } = Astro.props;
         if (cached && cached.length > 0) {
           cards = cached;
         }
+      }
+
+      // On-demand caching: Cache images for this specific deck into Cache Storage
+      // without imposing network burden during initial website load
+      if (cards && cards.length > 0) {
+        cacheDeckImagesOnOpen(cards).catch(() => {});
       }
 
       const savedProgress = await loadFlashcardProgress(uid, deckData.id);
