@@ -7,6 +7,8 @@ The ASU Med Materials Flashcards system allows medicine students at Ain Shams Un
 Decks are authored by the **ASU Anki Flashcards** team and organized hierarchically:
 `Medical Subject > Unit > Chapter` (e.g., *Biochemistry > Unit 2 > Chapter 1*).
 
+Students discover, filter, bookmark, and study flashcards directly from the curriculum module pages (`/module/[id]`) using the **Flashcards** filter chip in the resource toolbar, opening the interactive player (`/flashcards/[id]`) directly in the same tab.
+
 ---
 
 ## 1. Architecture & Single Source of Truth

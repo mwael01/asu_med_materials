@@ -236,6 +236,7 @@ export interface TranslationsSchema {
     noDecks: string;
     cardsCount: string;
     progress: string;
+    backToModule: string;
     resetConfirm: string;
   };
   pwa: {

@@ -31,7 +31,6 @@ const PRECACHE_ROUTES = [
   '/contribute',
   '/search',
   '/playlists',
-  '/flashcards',
   '/year/1',
   '/year/2',
   '/year/3',
@@ -283,13 +282,7 @@ self.addEventListener('fetch', (event) => {
           if (matched) return matched;
         }
 
-        // 5. If under /flashcards/*, fall back to cached /flashcards shell
-        if (path.startsWith('/flashcards/')) {
-          const flashcardsShell =
-            (await cache.match('/flashcards', { ignoreSearch: true })) ||
-            (await cache.match('/flashcards/', { ignoreSearch: true }));
-          if (flashcardsShell) return flashcardsShell;
-        }
+
 
         // 6. Fall back to cached home page or offline.html
         const fallback =

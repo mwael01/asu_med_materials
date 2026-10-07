@@ -338,23 +338,9 @@ The homepage reuses canonical shared components directly rather than bespoke car
 
 ---
 
-### Flashcards (`/flashcards` & `/flashcards/[id]`)
+### Flashcards (`/flashcards/[id]`)
 
-#### [`DeckList.astro`](file:///home/mwael/work/asu_med_materials/src/components/flashcards/DeckList.astro)
-- **Location**: `src/components/flashcards/DeckList.astro`
-- **Purpose**: Displays the hierarchical library of flashcards organized by `Medical Subject > Unit > Chapter`, authored by `ASU Anki Flashcards`. Supports year pills, instant search filtering, and subject selector.
-- **Props**:
-  ```typescript
-  interface Props {
-    decks: FlashcardDeck[];
-    modules?: ModuleInfo[];
-    selectedYear?: number;
-  }
-  ```
-
-#### [`DeckCard.astro`](file:///home/mwael/work/asu_med_materials/src/components/flashcards/DeckCard.astro)
-- **Location**: `src/components/flashcards/DeckCard.astro`
-- **Purpose**: Compact card showing subject badge, unit tag, chapter title, author credit (`ASU Anki Flashcards`), total cards, and dynamic Start/Continue Study CTA based on local progress.
+Flashcard decks are integrated directly into module pages ([`src/pages/module/[id].astro`](file:///home/mwael/work/asu_med_materials/src/pages/module/[id].astro)) and filtered via [`FilterToolbar.astro`](file:///home/mwael/work/asu_med_materials/src/components/search/FilterToolbar.astro). Students can bookmark them, mark them as studied, and launch interactive study directly.
 
 #### [`StudyPlayer.astro`](file:///home/mwael/work/asu_med_materials/src/components/flashcards/StudyPlayer.astro)
 - **Location**: `src/components/flashcards/StudyPlayer.astro`

@@ -243,6 +243,7 @@ export const translations: Record<SupportedLanguage, TranslationsSchema> = {
       noDecks: 'لا توجد مجموعات بطاقات متاحة حالياً.',
       cardsCount: '{n} بطاقة',
       progress: 'بطاقة {current} من {total}',
+      backToModule: 'العودة للموديول',
       resetConfirm: 'هل تريد بالتأكيد إعادة ضبط تقدمك في هذه المجموعة؟'
     },
     pwa: {
@@ -613,6 +614,7 @@ export const translations: Record<SupportedLanguage, TranslationsSchema> = {
       noDecks: 'No flashcard decks available yet.',
       cardsCount: '{n} cards',
       progress: 'Card {current} of {total}',
+      backToModule: 'Back to Module',
       resetConfirm: 'Are you sure you want to reset your progress for this deck?'
     },
     pwa: {
