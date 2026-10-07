@@ -52,21 +52,48 @@ HINT_BTN_RE = re.compile(r"<div\s+[^>]*class=[\"']hint_btn[\"'][^>]*>[\s\S]*?</d
 SNACKBAR_RE = re.compile(r"<div\s+[^>]*id=[\"']snackbar[\"'][^>]*>[\s\S]*?</div>", re.IGNORECASE)
 
 
-def clean_anki_boilerplate(html_str: str) -> str:
+SECTION_NAMES = ("Etymology", "Mnemonics", "Extra Section", "Images")
+
+
+def clean_anki_boilerplate(html_str: str, question_html: str | None = None) -> str:
     """Strip empty Anki template boilerplate like empty Images/Etymology sections and dead buttons."""
     if not html_str:
         return ""
-    def check_empty_sec(m: re.Match[str]) -> str:
-        inner = m.group(1).strip()
-        if "<img" in inner.lower() or re.sub(r"<[^>]+>", "", inner).strip():
-            return m.group(0)
-        return ""
-    html_str = EMPTY_SECTION_RE.sub(check_empty_sec, html_str)
+
+    # 1. Strip FrontSide / repeated question from start of answer
+    if question_html:
+        hr_match = re.search(r"\s*<hr[^>]*>\s*", html_str)
+        if hr_match:
+            before_hr = html_str[:hr_match.start()]
+            after_hr = html_str[hr_match.end():]
+            q_text = re.sub(r"<[^>]+>", " ", question_html).strip().lower()
+            before_text = re.sub(r"<[^>]+>", " ", before_hr).strip().lower()
+            if before_text and (before_text == q_text or before_text.startswith(q_text) or q_text.startswith(before_text)):
+                html_str = after_hr
+
+    # 2. Strip empty sections (with or without id attributes)
+    for name in SECTION_NAMES:
+        pat = rf"(?:<hr[^>]*>\s*)?(?:<div[^>]*>\s*)?<h[1-6][^>]*>\s*{name}\s*</h[1-6]>\s*(?:<div[^>]*>(.*?)</div>)?\s*(?:<hr[^>]*>)?\s*(?:</div>)?"
+        def repl(m: re.Match[str]) -> str:
+            content = m.group(1) or ""
+            has_img = "<img" in content.lower()
+            text = re.sub(r"<[^>]+>", "", content).strip()
+            if has_img:
+                return content  # Keep image without section title!
+            elif text:
+                return f"<div>{content}</div>"
+            return ""
+        html_str = re.sub(pat, repl, html_str, flags=re.IGNORECASE | re.DOTALL)
+
     html_str = HINT_BTN_RE.sub("", html_str)
     html_str = SNACKBAR_RE.sub("", html_str)
+    html_str = re.sub(r"<(?:button|a|span|div)[^>]*>\s*Show hint\s*</(?:button|a|span|div)>", "", html_str, flags=re.IGNORECASE)
+    html_str = re.sub(r"<div>\s*</div>", "", html_str)
     html_str = re.sub(r"(?:<br\s*/?>\s*){2,}", "<br>", html_str)
     html_str = re.sub(r"(?:\s*<hr[^>]*>\s*)+$", "", html_str.strip())
     html_str = re.sub(r"^(?:\s*<hr[^>]*>\s*)+", "", html_str.strip())
+    html_str = re.sub(r"(?:\s*<br\s*/?>\s*)+$", "", html_str.strip())
+    html_str = re.sub(r"^(?:\s*<br\s*/?>\s*)+", "", html_str.strip())
     return html_str.strip()
 
 
@@ -130,4 +157,6 @@ def render_card(model: dict, field_names: list[str], field_values: list[str], te
         kind = "image"
     if "occlusion" in str(model).lower():
         kind = "occlusion"
-    return RenderedCard(safe_html(question), safe_html(answer), kind)
+    clean_q = safe_html(question)
+    clean_a = clean_anki_boilerplate(safe_html(answer), clean_q)
+    return RenderedCard(clean_q, clean_a, kind)

@@ -3,12 +3,51 @@ interface Props {
   html: string;
   kind?: string;
   isAnswer?: boolean;
+  questionHtml?: string;
 }
 
-const { html } = Astro.props;
+const { html, questionHtml } = Astro.props;
+
+// Clean HTML defensively
+let cleanHtml = html || '';
+
+if (questionHtml) {
+  const hrMatch = /<hr[^>]*>/i.exec(cleanHtml);
+  if (hrMatch) {
+    const beforeHr = cleanHtml.substring(0, hrMatch.index);
+    const afterHr = cleanHtml.substring(hrMatch.index + hrMatch[0].length);
+    const cleanQText = questionHtml.replace(/<[^>]+>/g, '').trim().toLowerCase();
+    const cleanBeforeText = beforeHr.replace(/<[^>]+>/g, '').trim().toLowerCase();
+    if (cleanBeforeText && (cleanBeforeText === cleanQText || cleanBeforeText.startsWith(cleanQText) || cleanQText.startsWith(cleanBeforeText))) {
+      cleanHtml = afterHr;
+    }
+  }
+}
+
+// Remove empty sections: Etymology, Mnemonics, Extra Section, Images
+const sectionNames = ['Etymology', 'Mnemonics', 'Extra Section', 'Images'];
+for (const name of sectionNames) {
+  const pattern = new RegExp(`(?:<hr[^>]*>\\s*)?(?:<div[^>]*>\\s*)?<h[1-6][^>]*>\\s*${name}\\s*<\\/h[1-6]>\\s*(?:<div[^>]*>(.*?)<\\/div>)?\\s*(?:<hr[^>]*>)?\\s*(?:<\\/div>)?`, 'gis');
+  cleanHtml = cleanHtml.replace(pattern, (_m, content) => {
+    const inner = content || '';
+    const hasImg = /<img\b/i.test(inner);
+    const text = inner.replace(/<[^>]+>/g, '').trim();
+    if (hasImg) {
+      return inner;
+    } else if (text) {
+      return `<div>${inner}</div>`;
+    }
+    return '';
+  });
+}
+
+cleanHtml = cleanHtml.replace(/<div\s*>\s*<\/div>/gi, '');
+cleanHtml = cleanHtml.replace(/(?:<br\s*\/?>\s*){2,}/gi, '<br>');
+cleanHtml = cleanHtml.replace(/^\s*(?:<hr[^>]*>|<br\s*\/?>)+/gi, '');
+cleanHtml = cleanHtml.replace(/(?:<hr[^>]*>|<br\s*\/?>)+\s*$/gi, '').trim();
 
 // Detect text direction from content independently of the site-wide language
-const hasArabic = /[\u0600-\u06FF]/.test(html.replace(/<[^>]+>/g, ''));
+const hasArabic = /[\u0600-\u06FF]/.test(cleanHtml.replace(/<[^>]+>/g, ''));
 const direction = hasArabic ? 'rtl' : 'ltr';
 ---
 
@@ -16,7 +55,7 @@ const direction = hasArabic ? 'rtl' : 'ltr';
   class="card-content-wrapper prose dark:prose-invert max-w-none text-zinc-900 dark:text-zinc-100 text-center"
   dir={direction}
 >
-  <div class="card-html text-base sm:text-lg leading-relaxed select-text text-center" set:html={html} />
+  <div class="card-html text-base sm:text-lg leading-relaxed select-text text-center" set:html={cleanHtml} />
 </div>
 
 <style is:global>

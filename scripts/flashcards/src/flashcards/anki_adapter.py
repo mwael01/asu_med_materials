@@ -78,13 +78,15 @@ def read_source_cards(archive: Path) -> tuple[dict[str, dict], list[SourceCard]]
             template_index = min(int(ord_), max(0, len(templates) - 1))
             official = official_renders.get((str(guid), int(ord_)))
             if official:
-                from .render import safe_html
+                from .render import safe_html, clean_anki_boilerplate
                 question, answer = official
                 model_name = str(model.get("name", "")).lower()
                 kind = "cloze" if "cloze" in model_name or "{{c" in question else "basic"
                 if "<img" in question.lower() or "<img" in answer.lower():
                     kind = "image"
-                rendered = RenderedCard(safe_html(question), safe_html(answer), kind)
+                clean_q = safe_html(question)
+                clean_a = clean_anki_boilerplate(safe_html(answer), clean_q)
+                rendered = RenderedCard(clean_q, clean_a, kind)
             else:
                 rendered = render_card(model, field_names[mid], values, template_index)
             result.append(SourceCard(str(guid), deck_names.get(did, "Untitled"), template_index, None, values, field_names[mid], model, rendered))
