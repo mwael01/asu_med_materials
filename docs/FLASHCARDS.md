@@ -66,13 +66,22 @@ Flashcard image and diagram hosting is powered by **Cloudflare R2** and generous
 ## 4. Study Player & On-Demand Image Caching
 
 ### Study Player (`/flashcards/[id]`)
-- **Loop:** Simple **Reveal → Again / Known** flow without complex SRS algorithms.
-- **Queue:** Cards are studied in source ordinal order. Cards marked "Again" return to the queue for a second pass until all cards are known.
-- **Keyboard Shortcuts:**
-  - `Space`: Reveal answer
-  - `1`: Again (repeat card)
-  - `2`: Known (mark card as memorized)
-- **Transitions:** 150ms opacity/slide transition, zero layout jumps, accessible contrast, and text direction detection (RTL/LTR) based on card content.
+- **Loop:** Clean **Reveal → Again / Known** study flow without complex SRS burden.
+- **Queue & Deduplication:** Cards are studied in canonical source ordinal order. The database and client engines enforce strict deduplication by `(sourceNoteGuid, sourceTemplateOrdinal)` so no duplicate cards are ever displayed. Cards marked "Again" return to the end of the queue for a second pass until all cards are mastered.
+- **Visual Design & Centering:** Modern, elevated 3D card presentation with subtle borders, dark/light theme adaptation, and centered card typography (`text-center`) for questions, answers, and medical diagrams.
+- **Direct Image Rendering:** Card images hosted on Cloudflare R2 (`asumed.eduvour.com`) load eagerly with responsive containment, smooth shadow frames, and click-to-zoom modal lightbox (`ImageViewer.astro`).
+- **Interactive Hints:** Cards with hints feature a clean `💡 إظهار التلميح` pill button that reveals the hint with smooth fade/slide animation, while dead or empty Anki hint boilerplate is cleanly stripped.
+- **Touch Screen Gestures:**
+  - **Tap to Reveal:** Tapping the card stage when unrevealed triggers the answer reveal with smooth animation.
+  - **Toss on Either Side:** When revealed, students can drag and toss cards horizontally:
+    - **Toss Right (Known):** Reveals an emerald green side shade with an "أعرفها ✓" badge; releasing past the threshold marks the card as known and advances.
+    - **Toss Left (Again):** Reveals a pale red side shade with an "أعد البطاقة ↺" badge; releasing past the threshold repeats the card.
+    - **Spring Return:** Releasing before the threshold smoothly springs the card back to center without advancing.
+- **Desktop Keyboard Accessibility:**
+  - `Space` or `↑` (Up Arrow): Reveal answer
+  - `→` (Right Arrow) or `2`: Known (answered correctly / memorized)
+  - `←` (Left Arrow) or `1`: Again (answered incorrectly / repeat card)
+- **Animated Progress Bar:** Top header includes a live gradient progress bar (`emerald → teal → cyan`) tracking completion percentage through the study queue.
 
 ### Client-Side Persistence (`IndexedDB`)
 - **Database:** `asumed_flashcards_db` (version 1)

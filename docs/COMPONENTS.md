@@ -344,15 +344,15 @@ Flashcard decks are integrated directly into module pages ([`src/pages/module/[i
 
 #### [`StudyPlayer.astro`](file:///home/mwael/work/asu_med_materials/src/components/flashcards/StudyPlayer.astro)
 - **Location**: `src/components/flashcards/StudyPlayer.astro`
-- **Purpose**: Interactive study player providing the **Reveal → Again / Known** flow, keyboard shortcuts (Space, 1, 2), pause/resume, and reset modal.
+- **Purpose**: Interactive study player providing the **Reveal → Again / Known** flow, touch gestures (tap to reveal, horizontal toss with green/pale red side shades), desktop keyboard navigation (`Space / ↑` to reveal, `← / →` for Again/Known), centered typography, interactive hint button/panel, animated gradient progress bar, and pause/reset dialog.
 
 #### [`CardContent.astro`](file:///home/mwael/work/asu_med_materials/src/components/flashcards/CardContent.astro)
 - **Location**: `src/components/flashcards/CardContent.astro`
-- **Purpose**: Renders sanitized card HTML with automatic RTL/LTR detection and scoped styling for cloze deletions.
+- **Purpose**: Renders sanitized card HTML with automatic RTL/LTR detection, centered typography (`text-center`), responsive eager image framing, cloze deletions highlighting, and automatic suppression of empty Anki boilerplate sections.
 
 #### [`ImageViewer.astro`](file:///home/mwael/work/asu_med_materials/src/components/flashcards/ImageViewer.astro)
 - **Location**: `src/components/flashcards/ImageViewer.astro`
-- **Purpose**: Accessible modal lightbox dialog for zooming and enlarging medical diagrams and cards.
+- **Purpose**: Accessible modal lightbox dialog for zooming and enlarging medical diagrams and cards with full backdrop dismissal.
 
 #### [`FlashcardsManager.astro`](file:///home/mwael/work/asu_med_materials/src/components/admin/FlashcardsManager.astro)
 - **Location**: `src/components/admin/FlashcardsManager.astro`

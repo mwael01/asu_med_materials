@@ -83,7 +83,21 @@ export async function getFlashcardCards(deckId: string, revisionId: string): Pro
   if (!db || !deckId || !revisionId) return [];
   const cardsRef = collection(db, DECKS, deckId, 'revisions', revisionId, 'cards');
   const snap = await getDocs(query(cardsRef, orderBy('ordinal'), limit(5000)));
-  return snap.docs.map((item) => toCard(item.data(), item.id));
+  const mapped = snap.docs.map((item) => toCard(item.data(), item.id));
+
+  // Defensive deduplication to ensure no duplicated cards are ever returned
+  const seen = new Set<string>();
+  const deduped: FlashcardCard[] = [];
+  for (const card of mapped) {
+    const key = (card.sourceNoteGuid && typeof card.sourceTemplateOrdinal === 'number')
+      ? `${card.sourceNoteGuid}:${card.sourceTemplateOrdinal}`
+      : card.id;
+    if (!seen.has(key)) {
+      seen.add(key);
+      deduped.push(card);
+    }
+  }
+  return deduped;
 }
 
 export async function updateFlashcardDeckMetadata(

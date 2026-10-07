@@ -10,10 +10,20 @@ export interface ReviewState {
 }
 
 export function createReviewState(cards: FlashcardCard[], progress?: FlashcardProgress): ReviewState {
-  // 1. Filter out quarantined cards and sort strictly in source ordinal order
-  const valid = cards
-    .filter((card) => !card.quarantined)
-    .sort((a, b) => (a.ordinal || 0) - (b.ordinal || 0));
+  // 1. Filter out quarantined cards, deduplicate defensively, and sort strictly in source ordinal order
+  const seen = new Set<string>();
+  const valid: FlashcardCard[] = [];
+  for (const card of cards) {
+    if (card.quarantined) continue;
+    const key = (card.sourceNoteGuid && typeof card.sourceTemplateOrdinal === 'number')
+      ? `${card.sourceNoteGuid}:${card.sourceTemplateOrdinal}`
+      : card.id;
+    if (!seen.has(key)) {
+      seen.add(key);
+      valid.push(card);
+    }
+  }
+  valid.sort((a, b) => (a.ordinal || 0) - (b.ordinal || 0));
 
   const statusById = progress?.cards || {};
   const currentResetVersion = progress?.resetVersion || 0;

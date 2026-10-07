@@ -60,7 +60,12 @@ export function extractCardImageUrls(cards: FlashcardCard[]): string[] {
     if (card.media && Array.isArray(card.media)) {
       for (const m of card.media) {
         if (m.storagePath) {
-          urls.add(m.storagePath);
+          let path = m.storagePath.trim();
+          if (!path.startsWith('http://') && !path.startsWith('https://')) {
+            const filename = path.split('/').pop() || path;
+            path = `https://asumed.eduvour.com/${filename}`;
+          }
+          urls.add(path);
         }
       }
     }
@@ -68,8 +73,12 @@ export function extractCardImageUrls(cards: FlashcardCard[]): string[] {
     const html = `${card.questionHtml || ''} ${card.answerHtml || ''}`;
     let match: RegExpExecArray | null;
     while ((match = imgRegex.exec(html)) !== null) {
-      const src = match[1]?.trim();
+      let src = match[1]?.trim();
       if (src && !src.startsWith('data:')) {
+        if (!src.startsWith('http://') && !src.startsWith('https://')) {
+          const filename = src.split('/').pop() || src;
+          src = `https://asumed.eduvour.com/${filename}`;
+        }
         urls.add(src);
       }
     }

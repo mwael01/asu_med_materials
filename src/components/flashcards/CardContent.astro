@@ -13,24 +13,33 @@ const direction = hasArabic ? 'rtl' : 'ltr';
 ---
 
 <div
-  class:list={[
-    'card-content-wrapper prose dark:prose-invert max-w-none text-zinc-900 dark:text-zinc-100',
-    direction === 'rtl' ? 'text-right' : 'text-left'
-  ]}
+  class="card-content-wrapper prose dark:prose-invert max-w-none text-zinc-900 dark:text-zinc-100 text-center"
   dir={direction}
 >
-  <div class="card-html text-base sm:text-lg leading-relaxed select-text" set:html={html} />
+  <div class="card-html text-base sm:text-lg leading-relaxed select-text text-center" set:html={html} />
 </div>
 
 <style is:global>
   .card-html {
     word-break: break-word;
+    text-align: center;
   }
   .card-html p {
     margin-bottom: 0.75rem;
+    text-align: center;
   }
   .card-html p:last-child {
     margin-bottom: 0;
+  }
+  /* Hide dead hint button and empty sections */
+  .card-html .hint_btn,
+  .card-html #hint_btn,
+  .card-html #snackbar,
+  .card-html #images_section:not(:has(img)),
+  .card-html #extra_section:not(:has(#extra:not(:empty))),
+  .card-html #Etymology_section:not(:has(#Etymology:not(:empty))),
+  .card-html #Mnemonics_section:not(:has(#Mnemonics:not(:empty))) {
+    display: none !important;
   }
   .card-html strong,
   .card-html b {

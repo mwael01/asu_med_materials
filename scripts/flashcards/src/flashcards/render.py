@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import html
+from pathlib import Path
 import re
 from dataclasses import dataclass
 
@@ -43,6 +44,32 @@ class RenderedCard:
     quarantine_reason: str | None = None
 
 
+EMPTY_SECTION_RE = re.compile(
+    r"<div\s+id=[\"'](?:images_section|extra_section|Etymology_section|Mnemonics_section)[\"'][^>]*>[\s\S]*?<div\s+id=[\"'](?:Images|extra|Etymology|Mnemonics)[\"'][^>]*>(.*?)</div>[\s\S]*?</div>",
+    re.IGNORECASE
+)
+HINT_BTN_RE = re.compile(r"<div\s+[^>]*class=[\"']hint_btn[\"'][^>]*>[\s\S]*?</div>", re.IGNORECASE)
+SNACKBAR_RE = re.compile(r"<div\s+[^>]*id=[\"']snackbar[\"'][^>]*>[\s\S]*?</div>", re.IGNORECASE)
+
+
+def clean_anki_boilerplate(html_str: str) -> str:
+    """Strip empty Anki template boilerplate like empty Images/Etymology sections and dead buttons."""
+    if not html_str:
+        return ""
+    def check_empty_sec(m: re.Match[str]) -> str:
+        inner = m.group(1).strip()
+        if "<img" in inner.lower() or re.sub(r"<[^>]+>", "", inner).strip():
+            return m.group(0)
+        return ""
+    html_str = EMPTY_SECTION_RE.sub(check_empty_sec, html_str)
+    html_str = HINT_BTN_RE.sub("", html_str)
+    html_str = SNACKBAR_RE.sub("", html_str)
+    html_str = re.sub(r"(?:<br\s*/?>\s*){2,}", "<br>", html_str)
+    html_str = re.sub(r"(?:\s*<hr[^>]*>\s*)+$", "", html_str.strip())
+    html_str = re.sub(r"^(?:\s*<hr[^>]*>\s*)+", "", html_str.strip())
+    return html_str.strip()
+
+
 def safe_html(value: str) -> str:
     value = EVENT_RE.sub("", SCRIPT_RE.sub("", value))
     cleaned = nh3.clean(
@@ -56,7 +83,7 @@ def safe_html(value: str) -> str:
         url_schemes={"http", "https", "data"},
         strip_comments=True,
     )
-    return rewrite_media_urls(cleaned)
+    return clean_anki_boilerplate(rewrite_media_urls(cleaned))
 
 
 def _fields_map(field_names: list[str], field_values: list[str]) -> dict[str, str]:
