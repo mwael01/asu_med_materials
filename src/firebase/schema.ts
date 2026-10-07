@@ -5,6 +5,7 @@ import type {
   DocumentData
 } from 'firebase/firestore';
 import type { MaterialItem, ModuleInfo, AcademicYear, ResourceType, MaterialCategory, PlaylistItem } from '../types/materials';
+import type { FlashcardCard, FlashcardDeck, FlashcardRevision } from '../types/flashcards';
 import type { UserProfile, UserRole } from '../types/profile';
 import type { PersonContacts } from '../types/contributors';
 
@@ -19,6 +20,8 @@ export const COLLECTIONS = {
   FEEDBACK: 'feedback',
   ADMIN_LOGS: 'admin_logs',
   CONTRIBUTORS: 'contributors'
+  ,FLASHCARD_DECKS: 'flashcard_decks'
+  ,FLASHCARD_IMPORTS: 'flashcard_imports'
 } as const;
 
 export type CollectionName = (typeof COLLECTIONS)[keyof typeof COLLECTIONS];
@@ -49,7 +52,12 @@ export interface MaterialDocument {
   playlistId?: string;
   videos?: PlaylistItem[];
   bookmarksCount?: number;
+  flashcardDeckId?: string;
 }
+
+export type FlashcardDeckDocument = FlashcardDeck;
+export type FlashcardRevisionDocument = FlashcardRevision;
+export type FlashcardCardDocument = FlashcardCard;
 
 /**
  * 2. Module Document Schema in Firestore
@@ -211,6 +219,7 @@ export const materialConverter: FirestoreDataConverter<MaterialItem> = {
       playlistId: material.playlistId || null,
       videos: Array.isArray(material.videos) ? material.videos : null,
       bookmarksCount: typeof material.bookmarksCount === 'number' ? material.bookmarksCount : 0,
+      flashcardDeckId: material.flashcardDeckId || null,
     };
   },
   fromFirestore(
@@ -241,6 +250,7 @@ export const materialConverter: FirestoreDataConverter<MaterialItem> = {
       playlistId: data.playlistId || undefined,
       videos: Array.isArray(data.videos) ? data.videos : undefined,
       bookmarksCount: typeof data.bookmarksCount === 'number' ? data.bookmarksCount : 0,
+      flashcardDeckId: data.flashcardDeckId || undefined,
     };
   }
 };
@@ -470,4 +480,3 @@ export const adminLogConverter: FirestoreDataConverter<AdminLogDocument> = {
     };
   }
 };
-

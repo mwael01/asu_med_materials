@@ -31,6 +31,7 @@ const PRECACHE_ROUTES = [
   '/contribute',
   '/search',
   '/playlists',
+  '/flashcards',
   '/year/1',
   '/year/2',
   '/year/3',
@@ -192,6 +193,24 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
+  // Cache Firebase Storage media assets (diagrams, images)
+  if (url.hostname.includes('firebasestorage.googleapis.com') || url.pathname.startsWith('/flashcard-media/')) {
+    event.respondWith(
+      caches.open('asumed-flashcard-media').then((mediaCache) =>
+        mediaCache.match(request).then((cached) => {
+          if (cached) return cached;
+          return fetch(request).then((res) => {
+            if (res && res.status === 200) {
+              mediaCache.put(request, res.clone());
+            }
+            return res;
+          }).catch(() => cached || new Response('', { status: 503 }));
+        })
+      )
+    );
+    return;
+  }
+
   // Ignore other external origins (YouTube iframe embeds, drives, etc.)
   if (url.origin !== self.location.origin) return;
 
@@ -264,7 +283,15 @@ self.addEventListener('fetch', (event) => {
           if (matched) return matched;
         }
 
-        // 5. Fall back to cached home page or offline.html
+        // 5. If under /flashcards/*, fall back to cached /flashcards shell
+        if (path.startsWith('/flashcards/')) {
+          const flashcardsShell =
+            (await cache.match('/flashcards', { ignoreSearch: true })) ||
+            (await cache.match('/flashcards/', { ignoreSearch: true }));
+          if (flashcardsShell) return flashcardsShell;
+        }
+
+        // 6. Fall back to cached home page or offline.html
         const fallback =
           (await cache.match('/', { ignoreSearch: true })) ||
           (await cache.match('/index.html', { ignoreSearch: true })) ||

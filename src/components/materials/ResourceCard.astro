@@ -47,8 +47,10 @@ const contributorProfileUrl = contributorProfileTarget ? `/profile?u=${encodeURI
 
 const isPlaylist = material.type === 'playlist' || Boolean(material.playlistId) || Boolean(material.videos);
 const isReferenceMaterial = Boolean(material.moduleId && /^year\d+-reference-books$/.test(material.moduleId));
+const isInternal = isPlaylist || material.type === 'flashcards' || Boolean(material.flashcardDeckId) || (material.url && material.url.startsWith('/'));
 const cardHref = isPlaylist ? `/playlist/${material.id}` : material.url;
-const targetAttr = isPlaylist ? '_self' : '_blank';
+const targetAttr = isInternal ? '_self' : '_blank';
+
 ---
 
 <div
@@ -124,7 +126,7 @@ const targetAttr = isPlaylist ? '_self' : '_blank';
 
     <!-- Title with Stretched Link (covers entire card) -->
     <h3 class="font-bold text-zinc-900 dark:text-zinc-100 text-sm leading-snug line-clamp-2 mb-1.5 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 group-hover:underline underline-offset-4 decoration-emerald-500 dark:decoration-emerald-400 transition-colors">
-      <a href={cardHref} target={targetAttr} rel={isPlaylist ? undefined : "noopener noreferrer"} class="focus:outline-none">
+      <a href={cardHref} target={targetAttr} rel={targetAttr === '_blank' ? "noopener noreferrer" : undefined} class="focus:outline-none">
         <span class="absolute inset-0 z-0" aria-hidden="true"></span>
         <span
           data-i18n-material-title={material.id}

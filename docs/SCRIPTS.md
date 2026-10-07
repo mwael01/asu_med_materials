@@ -56,7 +56,31 @@ pnpm run deploy:indexes
 firebase deploy --only firestore:indexes
 ```
 
+## 5. Official Anki Flashcards Importer & Processor
+
+- **Location**: [`scripts/flashcards/`](file:///home/mwael/work/asu_med_materials/scripts/flashcards)
+- **Tooling**: Managed with `uv` (Python 3.12+), official `anki` library, `nh3` HTML sanitization, and `firebase-admin`.
+- **Purpose**: Inspects, stages, classifies (`Subject > Unit > Chapter`), validates, and publishes Anki APKG/ZIP packages directly to Cloud Firestore.
+- **Usage**:
+```bash
+# Inspect archive without remote writes:
+uv run --project scripts/flashcards flashcards inspect "path/to/deck.apkg"
+
+# Stage archive into Firestore drafts:
+uv run --project scripts/flashcards flashcards stage "path/to/deck.apkg"
+
+# Review staged import findings:
+uv run --project scripts/flashcards flashcards review <import_id>
+
+# Validate import completeness:
+uv run --project scripts/flashcards flashcards validate <import_id>
+
+# Publish import atomically to active website decks and linked materials:
+uv run --project scripts/flashcards flashcards publish <import_id>
+```
+
 ---
+
 
 ## Instructions for AI Agents
 - **Single Source of Truth**: All study materials, curriculum modules, user profiles, and contributors live directly in Cloud Firestore. Never store or look for local JSON or static data files for materials.

@@ -18,7 +18,8 @@ export const translations: Record<SupportedLanguage, TranslationsSchema> = {
       toggleThemeTitle: 'تبديل المظهر',
       toggleLangTitle: 'Switch to English',
       menu: 'القائمة',
-      academicYears: 'السنوات الدراسية'
+      academicYears: 'السنوات الدراسية',
+      flashcards: 'البطاقات الاستذكارية'
     },
     home: {
       heroTitle: 'منصة مصادر كليّة الطب - جامعة عين شمس',
@@ -90,7 +91,8 @@ export const translations: Record<SupportedLanguage, TranslationsSchema> = {
       practical: 'عملي وسكاشن ومعامل',
       summaries: 'ورق ومذكرات وملخصات',
       exams: 'امتحانات سابقة وريكولات',
-      references: 'كتب ومراجع'
+      references: 'كتب ومراجع',
+      flashcards: 'بطاقات استذكار'
     },
     types: {
       drive: 'درايف جوجل',
@@ -101,6 +103,7 @@ export const translations: Record<SupportedLanguage, TranslationsSchema> = {
       book: 'مرجع',
       summary: 'مذكرات',
       exam: 'امتحانات',
+      flashcards: 'بطاقات استذكار',
       website: 'موقع',
       other: 'مصدر'
     },
@@ -221,6 +224,27 @@ export const translations: Record<SupportedLanguage, TranslationsSchema> = {
       lecturePrefix: 'محاضرة',
       resetConfirm: 'هل تريد بالتأكيد إعادة ضبط سجل المشاهدة لهذه القائمة؟'
     },
+    flashcards: {
+      breadcrumbHome: 'الرئيسية',
+      breadcrumbFlashcards: 'البطاقات الاستذكارية',
+      title: 'البطاقات الاستذكارية (Flashcards)',
+      subtitle: 'مجموعات بطاقات المذاكرة والأسئلة التفاعلية المحفوظة للمذاكرة أوفلاين.',
+      startStudy: 'ابدأ المذاكرة',
+      continueStudy: 'متابعة المذاكرة',
+      reviewAgain: 'مراجعة الكل من جديد',
+      resetProgress: 'إعادة ضبط التقدم',
+      revealAnswer: 'إظهار الإجابة',
+      again: 'أعد البطاقة',
+      known: 'أعرفها',
+      pause: 'إيقاف مؤقت',
+      resume: 'استئناف',
+      completedTitle: 'أحسنت! أكملت مراجعة هذه المجموعة 🎉',
+      completedSubtitle: 'تم حفظ تقدمك تلقائياً ويمكنك مراجعة البطاقات مرة أخرى متى شئت.',
+      noDecks: 'لا توجد مجموعات بطاقات متاحة حالياً.',
+      cardsCount: '{n} بطاقة',
+      progress: 'بطاقة {current} من {total}',
+      resetConfirm: 'هل تريد بالتأكيد إعادة ضبط تقدمك في هذه المجموعة؟'
+    },
     pwa: {
       installPrompt: 'تثبيت المنصة كتطبيق على جهازك للوصول السريع بدون إنترنت.',
       installBtn: 'تثبيت الآن',
@@ -269,6 +293,7 @@ export const translations: Record<SupportedLanguage, TranslationsSchema> = {
       tabFeedback: 'الملاحظات والشكاوى',
       tabTeam: 'فريق الإدارة',
       tabLogs: 'سجل النشاط',
+      tabFlashcards: 'البطاقات الاستذكارية (Anki)',
       // Direct Add & AI
       aiAssistantTitle: 'مساعد الذكاء الاصطناعي (Gemini 3.8 Flash)',
       aiAssistantSubtitle: 'الصق أي نص أو رسائل أو روابط لاستخراج بيانات المادة كاملة (عربي وإنجليزي)',
@@ -363,7 +388,8 @@ export const translations: Record<SupportedLanguage, TranslationsSchema> = {
       toggleThemeTitle: 'Toggle Theme',
       toggleLangTitle: 'التبديل إلى العربية',
       menu: 'Menu',
-      academicYears: 'Academic Years'
+      academicYears: 'Academic Years',
+      flashcards: 'Flashcards'
     },
     home: {
       heroTitle: 'ASU Faculty of Medicine Materials Hub',
@@ -435,7 +461,8 @@ export const translations: Record<SupportedLanguage, TranslationsSchema> = {
       practical: 'Practical, Labs & Sessions',
       summaries: 'Notes, Summaries & Handouts',
       exams: 'Past Exams & Recalls',
-      references: 'Books & Medical References'
+      references: 'Books & Medical References',
+      flashcards: 'Interactive Flashcards'
     },
     types: {
       drive: 'Google Drive',
@@ -446,6 +473,7 @@ export const translations: Record<SupportedLanguage, TranslationsSchema> = {
       book: 'Reference Book',
       summary: 'Notes / Summary',
       exam: 'Past Exams',
+      flashcards: 'Flashcards',
       website: 'Website',
       other: 'Resource'
     },
@@ -566,6 +594,27 @@ export const translations: Record<SupportedLanguage, TranslationsSchema> = {
       lecturePrefix: 'Lecture',
       resetConfirm: 'Are you sure you want to reset watch progress for this playlist?'
     },
+    flashcards: {
+      breadcrumbHome: 'Home',
+      breadcrumbFlashcards: 'Flashcards',
+      title: 'Flashcards & Study Decks',
+      subtitle: 'Interactive card decks cached automatically for full offline study.',
+      startStudy: 'Start Study',
+      continueStudy: 'Continue Study',
+      reviewAgain: 'Review All Again',
+      resetProgress: 'Reset Progress',
+      revealAnswer: 'Show Answer',
+      again: 'Again',
+      known: 'Known',
+      pause: 'Pause',
+      resume: 'Resume',
+      completedTitle: 'Well done! Deck Completed 🎉',
+      completedSubtitle: 'Your progress is saved and you can review the deck anytime.',
+      noDecks: 'No flashcard decks available yet.',
+      cardsCount: '{n} cards',
+      progress: 'Card {current} of {total}',
+      resetConfirm: 'Are you sure you want to reset your progress for this deck?'
+    },
     pwa: {
       installPrompt: 'Install app on your device for fast offline access anytime.',
       installBtn: 'Install Now',
@@ -614,6 +663,7 @@ export const translations: Record<SupportedLanguage, TranslationsSchema> = {
       tabFeedback: 'User Feedback',
       tabTeam: 'Admin Team',
       tabLogs: 'Activity Log',
+      tabFlashcards: 'Flashcards (Anki)',
       // Direct Add & AI
       aiAssistantTitle: 'AI Study Material Assistant (Gemini 3.8 Flash)',
       aiAssistantSubtitle: 'Paste any text, messages, or links to extract complete material details (Arabic & English)',

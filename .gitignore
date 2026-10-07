@@ -32,3 +32,14 @@ firebase-debug.log*
 .vscode
 .agy
 .gemini
+
+# Firebase service account credentials
+*-firebase-adminsdk-*.json
+
+# Flashcard binary packages
+*.apkg
+
+# Python virtual environment & cache
+.venv/
+__pycache__/
+*.pyc

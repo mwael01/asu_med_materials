@@ -9,6 +9,7 @@ export type ResourceType =
   | 'book'
   | 'summary'
   | 'exam'
+  | 'flashcards'
   | 'website'
   | 'other';
 
@@ -26,6 +27,7 @@ export type MaterialCategory =
   | 'practical'    // عملي وسكاشن ومعامل
   | 'summaries'    // ورق ومذكرات وملخصات
   | 'exams'        // امتحانات سابقة وريكولات
+  | 'flashcards'   // Interactive study decks
   | 'references';  // كتب ومراجع
 
 export interface ModuleInfo {
@@ -62,6 +64,7 @@ export interface MaterialItem {
   tags: string[];
   createdAt?: string;
   playlistId?: string; // YouTube playlist ID if applicable
+  flashcardDeckId?: string;
   videos?: PlaylistItem[]; // Individual videos for multi-part video series
   bookmarksCount?: number; // Total number of students who bookmarked/loved this material
 }
@@ -79,6 +82,5 @@ export interface UserPreferences {
   year?: AcademicYear;
   moduleId?: string;
 }
-
 
 

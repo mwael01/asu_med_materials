@@ -1,0 +1,339 @@
+---
+import { getAllFlashcardDecks, getAllFlashcardImports } from '../../firebase/flashcards';
+import { getAllModules } from '../../data/modules';
+
+const [decks, _imports, modules] = await Promise.all([
+  getAllFlashcardDecks(),
+  getAllFlashcardImports(),
+  getAllModules()
+]);
+---
+
+<div class="space-y-6 text-start" id="flashcards-admin-container">
+  <!-- Top Header & Summary -->
+  <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-zinc-200 dark:border-zinc-800">
+    <div>
+      <h2 class="text-base font-bold text-zinc-900 dark:text-zinc-100 flex items-center gap-2">
+        <span>🃏</span>
+        <span data-i18n="admin.tabFlashcards">إدارة البطاقات الاستذكارية (Anki)</span>
+      </h2>
+      <p class="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5">
+        مراجعة مجموعات البطاقات المسحوبة، تصنيف الموديولات والمواد، والنشر في الموقع.
+      </p>
+    </div>
+
+    <div class="flex items-center gap-2 text-xs">
+      <span class="px-2.5 py-1 rounded-lg bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 font-semibold">
+        إجمالي المجموعات: <strong id="admin-deck-total-count">{decks.length}</strong>
+      </span>
+      <span class="px-2.5 py-1 rounded-lg bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 font-semibold">
+        منشورة: <strong>{decks.filter(d => d.publicationStatus === 'published').length}</strong>
+      </span>
+    </div>
+  </div>
+
+  <!-- Filter Toolbar -->
+  <div class="flex flex-col sm:flex-row gap-2.5 items-center justify-between text-xs">
+    <div class="flex items-center gap-2 w-full sm:w-auto">
+      <select
+        id="admin-deck-status-filter"
+        class="px-3 py-1.5 rounded-xl bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-800 dark:text-zinc-200 cursor-pointer"
+      >
+        <option value="all">جميع الحالات</option>
+        <option value="published">منشورة فقط</option>
+        <option value="draft">مسودات فقط</option>
+      </select>
+
+      <select
+        id="admin-deck-year-filter"
+        class="px-3 py-1.5 rounded-xl bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-800 dark:text-zinc-200 cursor-pointer"
+      >
+        <option value="all">جميع السنوات</option>
+        <option value="1">سنة 1</option>
+        <option value="2">سنة 2</option>
+        <option value="3">سنة 3</option>
+        <option value="4">سنة 4</option>
+        <option value="5">سنة 5</option>
+      </select>
+    </div>
+
+    <input
+      type="text"
+      id="admin-deck-search"
+      placeholder="بحث في المجموعات والمواد..."
+      class="w-full sm:w-64 px-3 py-1.5 rounded-xl bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-800 dark:text-zinc-200 placeholder-zinc-400 focus:outline-none focus:border-emerald-500"
+    />
+  </div>
+
+  <!-- Decks List Table -->
+  <div class="overflow-x-auto rounded-2xl border border-zinc-200 dark:border-zinc-800">
+    <table class="w-full text-xs text-start">
+      <thead class="bg-zinc-50 dark:bg-zinc-800/80 text-zinc-500 dark:text-zinc-400 font-semibold border-b border-zinc-200 dark:border-zinc-800">
+        <tr>
+          <th class="py-2.5 px-3 text-start">المجموعة</th>
+          <th class="py-2.5 px-3 text-start">الموديول / المادة</th>
+          <th class="py-2.5 px-3 text-center">البطاقات</th>
+          <th class="py-2.5 px-3 text-center">الحالة</th>
+          <th class="py-2.5 px-3 text-end">الإجراءات</th>
+        </tr>
+      </thead>
+      <tbody id="admin-decks-tbody" class="divide-y divide-zinc-100 dark:divide-zinc-800/60">
+        {decks.map((deck) => (
+          <tr
+            class="admin-deck-row hover:bg-zinc-50/60 dark:hover:bg-zinc-800/40 transition-colors"
+            data-deck-id={deck.id}
+            data-status={deck.publicationStatus}
+            data-year={deck.year}
+            data-module={deck.moduleId}
+            data-subject={deck.subject || ''}
+            data-title={deck.title}
+            data-deck={JSON.stringify(deck)}
+          >
+            <td class="py-3 px-3 font-semibold text-zinc-900 dark:text-zinc-100 max-w-[220px] truncate">
+              {deck.title}
+              <div class="text-[10px] text-zinc-400 font-normal truncate mt-0.5">{deck.sourceDeckPath}</div>
+            </td>
+            <td class="py-3 px-3 text-zinc-600 dark:text-zinc-400 whitespace-nowrap">
+              <div>سنة {deck.year} · {deck.moduleId}</div>
+              <div class="text-[10px] font-semibold text-emerald-600 dark:text-emerald-400">{deck.subject || 'غير مصنف'}</div>
+            </td>
+            <td class="py-3 px-3 text-center font-bold text-zinc-700 dark:text-zinc-300 whitespace-nowrap">
+              {deck.cardCount}
+            </td>
+            <td class="py-3 px-3 text-center whitespace-nowrap">
+              {deck.publicationStatus === 'published' ? (
+                <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800">
+                  منشورة
+                </span>
+              ) : (
+                <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold bg-amber-100 dark:bg-amber-950 text-amber-800 dark:text-amber-300 border border-amber-300 dark:border-amber-800">
+                  مسودة
+                </span>
+              )}
+            </td>
+            <td class="py-3 px-3 text-end whitespace-nowrap">
+              <div class="inline-flex items-center gap-1.5">
+                <button
+                  type="button"
+                  class="btn-edit-deck px-2 py-1 rounded-lg text-zinc-600 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-700 text-[11px] font-semibold cursor-pointer"
+                  data-deck-id={deck.id}
+                >
+                  تعديل
+                </button>
+
+                {deck.publicationStatus === 'published' ? (
+                  <button
+                    type="button"
+                    class="btn-toggle-publish px-2.5 py-1 rounded-lg text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-950/60 hover:bg-amber-100 dark:hover:bg-amber-900/60 text-[11px] font-bold cursor-pointer transition-colors"
+                    data-action="unpublish"
+                    data-deck-id={deck.id}
+                  >
+                    إلغاء النشر
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    class="btn-toggle-publish px-2.5 py-1 rounded-lg text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/60 hover:bg-emerald-100 dark:hover:bg-emerald-900/60 text-[11px] font-bold cursor-pointer transition-colors"
+                    data-action="publish"
+                    data-deck-id={deck.id}
+                    data-rev-id={deck.activeRevisionId || `rev_${deck.sourceSha256?.slice(0, 16)}`}
+                  >
+                    نشر في الموقع
+                  </button>
+                )}
+              </div>
+            </td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Edit Deck Modal Dialog -->
+  <dialog
+    id="dialog-edit-deck"
+    class="fixed inset-0 m-auto p-6 max-w-md w-full rounded-2xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 shadow-2xl backdrop:bg-black/60 outline-none text-start text-xs"
+  >
+    <form id="form-edit-deck" class="space-y-4">
+      <div class="flex items-center justify-between border-b border-zinc-100 dark:border-zinc-800 pb-2">
+        <h3 class="font-bold text-sm text-zinc-900 dark:text-zinc-100">تعديل بيانات المجموعة</h3>
+        <button type="button" id="btn-close-edit-dialog" class="text-zinc-400 hover:text-zinc-600 text-base">✕</button>
+      </div>
+
+      <input type="hidden" id="edit-deck-id" />
+
+      <div class="space-y-1">
+        <label class="font-semibold text-zinc-700 dark:text-zinc-300">عنوان المجموعة</label>
+        <input
+          type="text"
+          id="edit-deck-title"
+          class="w-full px-3 py-2 rounded-xl bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-900 dark:text-zinc-100"
+          required
+        />
+      </div>
+
+      <div class="grid grid-cols-2 gap-3">
+        <div class="space-y-1">
+          <label class="font-semibold text-zinc-700 dark:text-zinc-300">السنة الدراسية</label>
+          <select id="edit-deck-year" class="w-full px-3 py-2 rounded-xl bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-900 dark:text-zinc-100">
+            <option value="1">سنة 1</option>
+            <option value="2">سنة 2</option>
+            <option value="3">سنة 3</option>
+            <option value="4">سنة 4</option>
+            <option value="5">سنة 5</option>
+          </select>
+        </div>
+
+        <div class="space-y-1">
+          <label class="font-semibold text-zinc-700 dark:text-zinc-300">الموديول</label>
+          <select id="edit-deck-module" class="w-full px-3 py-2 rounded-xl bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-900 dark:text-zinc-100">
+            {modules.map((m) => (
+              <option value={m.id}>{m.title}</option>
+            ))}
+          </select>
+        </div>
+      </div>
+
+      <div class="space-y-1">
+        <label class="font-semibold text-zinc-700 dark:text-zinc-300">المادة (Subject)</label>
+        <input
+          type="text"
+          id="edit-deck-subject"
+          placeholder="مثلاً: Anatomy, Physiology..."
+          class="w-full px-3 py-2 rounded-xl bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-900 dark:text-zinc-100"
+          required
+        />
+      </div>
+
+      <div class="flex items-center justify-end gap-2 pt-2 border-t border-zinc-100 dark:border-zinc-800">
+        <button type="button" id="btn-cancel-edit" class="px-3 py-1.5 rounded-lg text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800">
+          إلغاء
+        </button>
+        <button type="submit" id="btn-save-deck" class="px-4 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-semibold">
+          حفظ التعديلات
+        </button>
+      </div>
+    </form>
+  </dialog>
+</div>
+
+<script>
+  import {
+    updateFlashcardDeckMetadata,
+    publishFlashcardDeck,
+    unpublishFlashcardDeck
+  } from '../../firebase/flashcards';
+
+  function initFlashcardsAdmin() {
+    const statusFilter = document.getElementById('admin-deck-status-filter') as HTMLSelectElement | null;
+    const yearFilter = document.getElementById('admin-deck-year-filter') as HTMLSelectElement | null;
+    const searchInput = document.getElementById('admin-deck-search') as HTMLInputElement | null;
+    const rows = document.querySelectorAll<HTMLElement>('.admin-deck-row');
+
+    const editDialog = document.getElementById('dialog-edit-deck') as HTMLDialogElement | null;
+    const editForm = document.getElementById('form-edit-deck') as HTMLFormElement | null;
+    const editDeckId = document.getElementById('edit-deck-id') as HTMLInputElement | null;
+    const editDeckTitle = document.getElementById('edit-deck-title') as HTMLInputElement | null;
+    const editDeckYear = document.getElementById('edit-deck-year') as HTMLSelectElement | null;
+    const editDeckModule = document.getElementById('edit-deck-module') as HTMLSelectElement | null;
+    const editDeckSubject = document.getElementById('edit-deck-subject') as HTMLInputElement | null;
+    const closeDialogBtn = document.getElementById('btn-close-edit-dialog');
+    const cancelEditBtn = document.getElementById('btn-cancel-edit');
+
+    function filterTable() {
+      const status = statusFilter?.value || 'all';
+      const year = yearFilter?.value || 'all';
+      const query = (searchInput?.value || '').trim().toLowerCase();
+
+      rows.forEach((row) => {
+        const rowStatus = row.getAttribute('data-status');
+        const rowYear = row.getAttribute('data-year');
+        const title = (row.getAttribute('data-title') || '').toLowerCase();
+        const subject = (row.getAttribute('data-subject') || '').toLowerCase();
+
+        const matchStatus = status === 'all' || rowStatus === status;
+        const matchYear = year === 'all' || rowYear === year;
+        const matchQuery = !query || title.includes(query) || subject.includes(query);
+
+        row.classList.toggle('hidden', !(matchStatus && matchYear && matchQuery));
+      });
+    }
+
+    statusFilter?.addEventListener('change', filterTable);
+    yearFilter?.addEventListener('change', filterTable);
+    searchInput?.addEventListener('input', filterTable);
+
+    // Edit deck modal handlers
+    document.querySelectorAll<HTMLButtonElement>('.btn-edit-deck').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const deckId = btn.getAttribute('data-deck-id');
+        const row = document.querySelector<HTMLElement>(`.admin-deck-row[data-deck-id="${deckId}"]`);
+        if (!row || !editDialog) return;
+
+        const deck = JSON.parse(row.getAttribute('data-deck') || '{}');
+        if (editDeckId) editDeckId.value = deck.id;
+        if (editDeckTitle) editDeckTitle.value = deck.title;
+        if (editDeckYear) editDeckYear.value = String(deck.year);
+        if (editDeckModule) editDeckModule.value = deck.moduleId;
+        if (editDeckSubject) editDeckSubject.value = deck.subject || '';
+
+        editDialog.showModal();
+      });
+    });
+
+    closeDialogBtn?.addEventListener('click', () => editDialog?.close());
+    cancelEditBtn?.addEventListener('click', () => editDialog?.close());
+
+    editForm?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const deckId = editDeckId?.value;
+      if (!deckId) return;
+
+      const title = editDeckTitle?.value.trim() || '';
+      const year = parseInt(editDeckYear?.value || '2', 10) as any;
+      const moduleId = editDeckModule?.value || '';
+      const subject = editDeckSubject?.value.trim() || '';
+
+      const btn = document.getElementById('btn-save-deck') as HTMLButtonElement | null;
+      if (btn) btn.disabled = true;
+
+      const ok = await updateFlashcardDeckMetadata(deckId, { title, year, moduleId, subject });
+      if (ok) {
+        window.location.reload();
+      } else {
+        alert('حدث خطأ أثناء حفظ التعديلات');
+        if (btn) btn.disabled = false;
+      }
+    });
+
+    // Publish / Unpublish button handlers
+    document.querySelectorAll<HTMLButtonElement>('.btn-toggle-publish').forEach((btn) => {
+      btn.addEventListener('click', async () => {
+        const action = btn.getAttribute('data-action');
+        const deckId = btn.getAttribute('data-deck-id');
+        const revId = btn.getAttribute('data-rev-id');
+        if (!deckId) return;
+
+        btn.disabled = true;
+        if (action === 'publish' && revId) {
+          const ok = await publishFlashcardDeck(deckId, revId);
+          if (ok) window.location.reload();
+          else {
+            alert('تعذر نشر المجموعة');
+            btn.disabled = false;
+          }
+        } else if (action === 'unpublish') {
+          const ok = await unpublishFlashcardDeck(deckId);
+          if (ok) window.location.reload();
+          else {
+            alert('تعذر إلغاء نشر المجموعة');
+            btn.disabled = false;
+          }
+        }
+      });
+    });
+  }
+
+  initFlashcardsAdmin();
+  document.addEventListener('astro:after-swap', initFlashcardsAdmin);
+</script>

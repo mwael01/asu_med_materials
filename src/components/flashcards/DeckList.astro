@@ -1,0 +1,315 @@
+---
+import type { FlashcardDeck } from '../../types/flashcards';
+import type { ModuleInfo } from '../../types/materials';
+import DeckCard from './DeckCard.astro';
+
+interface Props {
+  decks: FlashcardDeck[];
+  modules?: ModuleInfo[];
+  selectedYear?: number;
+}
+
+const { decks, selectedYear = 2 } = Astro.props;
+
+interface SubjectGroup {
+  subject: string;
+  totalCards: number;
+  units: {
+    unit: string;
+    decks: FlashcardDeck[];
+  }[];
+}
+
+const subjectOrder = [
+  'Biochemistry',
+  'Physiology',
+  'Histology',
+  'Anatomy',
+  'Microbiology',
+  'Parasitology',
+  'Pathology',
+  'Pharmacology',
+  'Clinical Lectures',
+];
+
+const subjectGroupsMap = new Map<string, Map<string, FlashcardDeck[]>>();
+
+for (const deck of decks) {
+  const subj = deck.subject || 'General';
+  const unit = deck.unit || 'General';
+  if (!subjectGroupsMap.has(subj)) {
+    subjectGroupsMap.set(subj, new Map());
+  }
+  const unitMap = subjectGroupsMap.get(subj)!;
+  if (!unitMap.has(unit)) {
+    unitMap.set(unit, []);
+  }
+  unitMap.get(unit)!.push(deck);
+}
+
+const subjectGroups: SubjectGroup[] = [];
+
+const allSubjects = Array.from(subjectGroupsMap.keys()).sort((a, b) => {
+  const idxA = subjectOrder.indexOf(a);
+  const idxB = subjectOrder.indexOf(b);
+  if (idxA !== -1 && idxB !== -1) return idxA - idxB;
+  if (idxA !== -1) return -1;
+  if (idxB !== -1) return 1;
+  return a.localeCompare(b);
+});
+
+for (const subj of allSubjects) {
+  const unitMap = subjectGroupsMap.get(subj)!;
+  const units: { unit: string; decks: FlashcardDeck[] }[] = [];
+  let totalCards = 0;
+
+  const sortedUnitKeys = Array.from(unitMap.keys()).sort((a, b) => {
+    const numA = parseInt(a.replace(/\D/g, '') || '0', 10);
+    const numB = parseInt(b.replace(/\D/g, '') || '0', 10);
+    if (numA !== numB) return numA - numB;
+    return a.localeCompare(b);
+  });
+
+  for (const unitKey of sortedUnitKeys) {
+    const unitDecks = unitMap.get(unitKey)!.sort((a, b) => {
+      const chA = parseInt((a.chapter || '').replace(/\D/g, '') || '0', 10);
+      const chB = parseInt((b.chapter || '').replace(/\D/g, '') || '0', 10);
+      if (chA !== chB) return chA - chB;
+      return a.title.localeCompare(b.title);
+    });
+    units.push({ unit: unitKey, decks: unitDecks });
+    totalCards += unitDecks.reduce((sum, d) => sum + d.cardCount, 0);
+  }
+
+  subjectGroups.push({ subject: subj, totalCards, units });
+}
+---
+
+<div class="deck-list-container space-y-6">
+  <!-- Filters Bar -->
+  <div class="p-4 rounded-2xl bg-white dark:bg-zinc-900 border border-zinc-200/80 dark:border-zinc-800 shadow-2xs space-y-3">
+    <!-- Academic Years Pills -->
+    <div class="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-1 text-xs">
+      <span class="text-zinc-500 font-semibold px-1 shrink-0" data-i18n="search.yearFilterLabel">السنة:</span>
+      {[1, 2, 3, 4, 5].map((y) => (
+        <button
+          type="button"
+          class:list={[
+            'btn-year-filter px-3 py-1.5 rounded-xl font-semibold transition-all cursor-pointer shrink-0',
+            y === selectedYear
+              ? 'bg-emerald-600 text-white shadow-2xs'
+              : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-700'
+          ]}
+          data-year={y}
+        >
+          <span data-i18n="nav.year" data-i18n-params={JSON.stringify({ y })}>سنة {y}</span>
+        </button>
+      ))}
+    </div>
+
+    <!-- Search Input & Subject Filters -->
+    <div class="flex flex-col sm:flex-row gap-2">
+      <div class="relative flex-1">
+        <input
+          type="text"
+          id="deck-search-input"
+          placeholder="ابحث في بطاقات المذاكرة أو المواد..."
+          class="w-full px-3.5 py-2 pl-9 rtl:pl-3.5 rtl:pr-9 text-xs rounded-xl bg-zinc-50 dark:bg-zinc-800/80 border border-zinc-200 dark:border-zinc-700 text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 focus:outline-none focus:border-emerald-500 transition-colors"
+        />
+        <svg class="absolute top-2.5 left-3 rtl:left-auto rtl:right-3 w-4 h-4 text-zinc-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+        </svg>
+      </div>
+
+      <select
+        id="deck-subject-select"
+        class="px-3 py-2 text-xs rounded-xl bg-zinc-50 dark:bg-zinc-800/80 border border-zinc-200 dark:border-zinc-700 text-zinc-900 dark:text-zinc-100 focus:outline-none focus:border-emerald-500 cursor-pointer"
+      >
+        <option value="all">جميع المواد</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- Hierarchical Grouped Decks List (Subject > Unit > Chapter) -->
+  <div id="decks-container" class="space-y-6">
+    {subjectGroups.map((subjectGroup) => (
+      <section
+        class="subject-section rounded-2xl bg-white dark:bg-zinc-900 border border-zinc-200/80 dark:border-zinc-800 p-5 shadow-2xs space-y-4"
+        data-subject={subjectGroup.subject}
+      >
+        <!-- Subject Header -->
+        <div class="flex items-center justify-between pb-3 border-b border-zinc-100 dark:border-zinc-800">
+          <div class="flex items-center gap-2.5">
+            <h2 class="text-base sm:text-lg font-bold text-zinc-900 dark:text-zinc-100">
+              {subjectGroup.subject}
+            </h2>
+            <span class="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400 border border-emerald-200/60 dark:border-emerald-800/40">
+              {subjectGroup.totalCards} cards
+            </span>
+          </div>
+        </div>
+
+        <!-- Units inside this Subject -->
+        <div class="space-y-5">
+          {subjectGroup.units.map((unitGroup) => (
+            <div class="unit-section space-y-2.5" data-unit={unitGroup.unit}>
+              {unitGroup.unit !== 'General' && (
+                <div class="flex items-center gap-2">
+                  <h3 class="text-xs font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
+                    {unitGroup.unit}
+                  </h3>
+                  <span class="text-[11px] text-zinc-400">
+                    ({unitGroup.decks.reduce((s, d) => s + d.cardCount, 0)} cards)
+                  </span>
+                </div>
+              )}
+
+              <!-- Chapters / Decks Grid -->
+              <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                {unitGroup.decks.map((deck) => (
+                  <DeckCard deck={deck} />
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+    ))}
+  </div>
+
+  <!-- Empty Search/Filter State -->
+  <div id="decks-empty" class="hidden text-center py-12 px-4 rounded-2xl bg-white dark:bg-zinc-900 border border-zinc-200/80 dark:border-zinc-800">
+    <p class="text-sm font-semibold text-zinc-700 dark:text-zinc-300" data-i18n="flashcards.noDecks">
+      لا توجد مجموعات بطاقات مطابقة لبحثك في هذه السنة.
+    </p>
+  </div>
+</div>
+
+<script>
+  import { loadFlashcardProgress } from '../../utils/flashcards/persistence';
+  import { getCachedUserProfile } from '../../firebase/auth';
+
+  function initDeckList() {
+    const yearButtons = document.querySelectorAll<HTMLButtonElement>('.btn-year-filter');
+    const searchInput = document.getElementById('deck-search-input') as HTMLInputElement | null;
+    const subjectSelect = document.getElementById('deck-subject-select') as HTMLSelectElement | null;
+    const cards = document.querySelectorAll<HTMLElement>('.deck-card');
+    const subjectSections = document.querySelectorAll<HTMLElement>('.subject-section');
+    const unitSections = document.querySelectorAll<HTMLElement>('.unit-section');
+    const emptyState = document.getElementById('decks-empty');
+
+    let activeYear = parseInt(localStorage.getItem('asumed_user_year') || '2', 10);
+    if (isNaN(activeYear) || activeYear < 1 || activeYear > 5) activeYear = 2;
+
+    // 1. Update active year button style
+    function updateYearButtons(targetYear: number) {
+      activeYear = targetYear;
+      yearButtons.forEach((btn) => {
+        const y = parseInt(btn.getAttribute('data-year') || '0', 10);
+        if (y === targetYear) {
+          btn.className = 'btn-year-filter px-3 py-1.5 rounded-xl font-semibold transition-all cursor-pointer shrink-0 bg-emerald-600 text-white shadow-2xs';
+        } else {
+          btn.className = 'btn-year-filter px-3 py-1.5 rounded-xl font-semibold transition-all cursor-pointer shrink-0 bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-700';
+        }
+      });
+      populateSubjects();
+      filterCards();
+    }
+
+    // 2. Populate subjects dropdown based on active year cards
+    function populateSubjects() {
+      if (!subjectSelect) return;
+      const subjects = new Set<string>();
+      cards.forEach((card) => {
+        const cardYear = parseInt(card.getAttribute('data-year') || '0', 10);
+        if (cardYear === activeYear) {
+          const subj = card.getAttribute('data-subject');
+          if (subj) subjects.add(subj);
+        }
+      });
+
+      const currentVal = subjectSelect.value;
+      subjectSelect.innerHTML = '<option value="all">جميع المواد</option>';
+      Array.from(subjects).sort().forEach((s) => {
+        const opt = document.createElement('option');
+        opt.value = s;
+        opt.textContent = s;
+        subjectSelect.appendChild(opt);
+      });
+      if (subjects.has(currentVal)) subjectSelect.value = currentVal;
+    }
+
+    // 3. Filter cards and clean up empty sections
+    function filterCards() {
+      const q = (searchInput?.value || '').trim().toLowerCase();
+      const selectedSubject = subjectSelect?.value || 'all';
+      let visibleCount = 0;
+
+      cards.forEach((card) => {
+        const cardYear = parseInt(card.getAttribute('data-year') || '0', 10);
+        const cardSubj = card.getAttribute('data-subject') || '';
+        const cardUnit = card.getAttribute('data-unit') || '';
+        const title = (card.querySelector('h3')?.textContent || '').toLowerCase();
+
+        const matchesYear = cardYear === activeYear;
+        const matchesSubject = selectedSubject === 'all' || cardSubj === selectedSubject;
+        const matchesSearch = !q || title.includes(q) || cardSubj.toLowerCase().includes(q) || cardUnit.toLowerCase().includes(q);
+
+        if (matchesYear && matchesSubject && matchesSearch) {
+          card.classList.remove('hidden');
+          visibleCount++;
+        } else {
+          card.classList.add('hidden');
+        }
+      });
+
+      // Update unit sections visibility
+      unitSections.forEach((unitSec) => {
+        const visibleDecksInUnit = unitSec.querySelectorAll('.deck-card:not(.hidden)');
+        unitSec.classList.toggle('hidden', visibleDecksInUnit.length === 0);
+      });
+
+      // Update subject sections visibility
+      subjectSections.forEach((subjSec) => {
+        const visibleDecksInSubj = subjSec.querySelectorAll('.deck-card:not(.hidden)');
+        subjSec.classList.toggle('hidden', visibleDecksInSubj.length === 0);
+      });
+
+      if (emptyState) {
+        emptyState.classList.toggle('hidden', visibleCount > 0);
+      }
+    }
+
+    // 4. Attach event listeners
+    yearButtons.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const y = parseInt(btn.getAttribute('data-year') || '2', 10);
+        updateYearButtons(y);
+      });
+    });
+
+    searchInput?.addEventListener('input', filterCards);
+    subjectSelect?.addEventListener('change', filterCards);
+
+    // 5. Check local progress for each deck to update button CTA
+    const cachedUser = getCachedUserProfile();
+    cards.forEach(async (card) => {
+      const deckId = card.getAttribute('data-deck-id');
+      if (!deckId) return;
+      const progress = await loadFlashcardProgress(cachedUser?.uid || null, deckId);
+      if (progress && Object.keys(progress.cards || {}).length > 0) {
+        const btnText = card.querySelector('.deck-study-text');
+        if (btnText) {
+          btnText.textContent = 'متابعة المذاكرة';
+          btnText.setAttribute('data-i18n', 'flashcards.continueStudy');
+        }
+      }
+    });
+
+    // Initialize with active student year
+    updateYearButtons(activeYear);
+  }
+
+  initDeckList();
+  document.addEventListener('astro:after-swap', initDeckList);
+</script>

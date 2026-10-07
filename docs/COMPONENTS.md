@@ -336,6 +336,38 @@ The homepage reuses canonical shared components directly rather than bespoke car
   }
   ```
 
+---
 
+### Flashcards (`/flashcards` & `/flashcards/[id]`)
 
+#### [`DeckList.astro`](file:///home/mwael/work/asu_med_materials/src/components/flashcards/DeckList.astro)
+- **Location**: `src/components/flashcards/DeckList.astro`
+- **Purpose**: Displays the hierarchical library of flashcards organized by `Medical Subject > Unit > Chapter`, authored by `ASU Anki Flashcards`. Supports year pills, instant search filtering, and subject selector.
+- **Props**:
+  ```typescript
+  interface Props {
+    decks: FlashcardDeck[];
+    modules?: ModuleInfo[];
+    selectedYear?: number;
+  }
+  ```
 
+#### [`DeckCard.astro`](file:///home/mwael/work/asu_med_materials/src/components/flashcards/DeckCard.astro)
+- **Location**: `src/components/flashcards/DeckCard.astro`
+- **Purpose**: Compact card showing subject badge, unit tag, chapter title, author credit (`ASU Anki Flashcards`), total cards, and dynamic Start/Continue Study CTA based on local progress.
+
+#### [`StudyPlayer.astro`](file:///home/mwael/work/asu_med_materials/src/components/flashcards/StudyPlayer.astro)
+- **Location**: `src/components/flashcards/StudyPlayer.astro`
+- **Purpose**: Interactive study player providing the **Reveal → Again / Known** flow, keyboard shortcuts (Space, 1, 2), pause/resume, and reset modal.
+
+#### [`CardContent.astro`](file:///home/mwael/work/asu_med_materials/src/components/flashcards/CardContent.astro)
+- **Location**: `src/components/flashcards/CardContent.astro`
+- **Purpose**: Renders sanitized card HTML with automatic RTL/LTR detection and scoped styling for cloze deletions.
+
+#### [`ImageViewer.astro`](file:///home/mwael/work/asu_med_materials/src/components/flashcards/ImageViewer.astro)
+- **Location**: `src/components/flashcards/ImageViewer.astro`
+- **Purpose**: Accessible modal lightbox dialog for zooming and enlarging medical diagrams and cards.
+
+#### [`FlashcardsManager.astro`](file:///home/mwael/work/asu_med_materials/src/components/admin/FlashcardsManager.astro)
+- **Location**: `src/components/admin/FlashcardsManager.astro`
+- **Purpose**: Admin dashboard tab for inspecting, filtering, and publishing/unpublishing flashcard decks.
