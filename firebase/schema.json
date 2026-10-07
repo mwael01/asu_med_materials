@@ -272,6 +272,11 @@
           ],
           "default": "student"
         },
+        "adminRoleDescription": {
+          "type": "string",
+          "required": false,
+          "description": "Administrator title / responsibility description shown on core team card"
+        },
         "contributionsCount": {
           "type": "integer",
           "required": false,

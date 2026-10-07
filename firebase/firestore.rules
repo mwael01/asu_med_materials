@@ -1,75 +1,155 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
+
+    // =========================================================================
+    // Helper Functions
+    // =========================================================================
     
-    // 1. Study Materials: Anyone can read, anyone can update bookmarksCount (likes/bookmarks), authenticated users write
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    function getUserData(uid) {
+      return get(/databases/$(database)/documents/users/$(uid)).data;
+    }
+
+    function isAdmin() {
+      return isAuthenticated() &&
+        exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+        getUserData(request.auth.uid).get('role', 'student') == 'admin';
+    }
+
+    function isValidUserRole(role) {
+      return role in ['student', 'contributor', 'admin'];
+    }
+
+    // =========================================================================
+    // 1. Study Materials
+    // =========================================================================
     match /materials/{materialId} {
       allow read: if true;
-      allow update: if request.resource.data.diff(resource.data).affectedKeys().hasOnly(['bookmarksCount']) || request.auth != null;
-      allow create, delete: if request.auth != null;
+      allow update: if isAdmin() || (
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['bookmarksCount'])
+      );
+      allow create, delete: if isAdmin();
     }
 
-    // 2. User Profiles: Anyone can view public profile, owner or admin can edit
+    // =========================================================================
+    // 2. User Profiles (Protected against privilege escalation)
+    // =========================================================================
     match /users/{userId} {
       allow read: if true;
-      allow create: if request.auth != null && request.auth.uid == userId;
-      allow update, delete: if request.auth != null;
+
+      // Profile creation:
+      // Admins can create any user profile.
+      // Regular users can only create their own profile with 'student' role (or omit role)
+      // and cannot set adminRoleDescription.
+      allow create: if isAuthenticated() && (
+        isAdmin() ||
+        (
+          request.auth.uid == userId &&
+          request.resource.data.get('role', 'student') == 'student' &&
+          request.resource.data.get('adminRoleDescription', '') == ''
+        )
+      );
+
+      // Profile update:
+      // Admins can update any profile, assign valid roles, or modify adminRoleDescription.
+      // Non-admin owners can update their own profile fields, but CANNOT change their role
+      // or set/modify adminRoleDescription, and cannot tamper with UID.
+      allow update: if isAuthenticated() && (
+        (isAdmin() && isValidUserRole(request.resource.data.get('role', 'student'))) ||
+        (
+          isOwner(userId) &&
+          request.resource.data.uid == userId &&
+          request.resource.data.get('role', 'student') == resource.data.get('role', 'student') &&
+          request.resource.data.get('adminRoleDescription', '') == resource.data.get('adminRoleDescription', '')
+        )
+      );
+
+      // Profile deletion:
+      // Admins can delete any profile; users can delete their own profile.
+      allow delete: if isAdmin() || isOwner(userId);
     }
 
-    // 3. Submissions: Any authenticated or guest user can submit, authenticated admins manage
+    // =========================================================================
+    // 3. Submissions
+    // =========================================================================
     match /submissions/{submissionId} {
       allow create: if true;
-      allow read, update, delete: if request.auth != null;
+      allow read: if isAdmin() || (
+        isAuthenticated() && resource.data.contributorUid == request.auth.uid
+      );
+      allow update, delete: if isAdmin();
     }
 
-    // 4. Student Feedback: Any user can submit, authenticated admins manage
+    // =========================================================================
+    // 4. Student Feedback
+    // =========================================================================
     match /feedback/{feedbackId} {
       allow create: if true;
-      allow read, update, delete: if request.auth != null;
+      allow read, update, delete: if isAdmin();
     }
 
-    // 5. Admin Activity Audit Logs: Authenticated admins can read and create, immutable
+    // =========================================================================
+    // 5. Admin Activity Audit Logs (Immutable)
+    // =========================================================================
     match /admin_logs/{logId} {
-      allow read, create: if request.auth != null;
+      allow read, create: if isAdmin();
       allow update, delete: if false;
     }
 
-    // 6. Curriculum Modules: Public read for guests and offline cache, authenticated write
+    // =========================================================================
+    // 6. Curriculum Modules
+    // =========================================================================
     match /modules/{moduleId} {
       allow read: if true;
-      allow write: if request.auth != null;
+      allow write: if isAdmin();
     }
 
-    // 7. Contributors & Team: Public read, authenticated write
+    // =========================================================================
+    // 7. Contributors & Team
+    // =========================================================================
     match /contributors/{contributorId} {
       allow read: if true;
-      allow write: if request.auth != null;
+      allow write: if isAdmin();
     }
 
-    // 8. Flashcard Decks & Revisions: Public read for published decks, authenticated admins write
+    // =========================================================================
+    // 8. Flashcard Decks & Revisions
+    // =========================================================================
     match /flashcard_decks/{deckId} {
-      allow read: if resource.data.publicationStatus == 'published' || request.auth != null;
-      allow write: if request.auth != null;
+      allow read: if resource.data.publicationStatus == 'published' || isAdmin();
+      allow write: if isAdmin();
 
       match /revisions/{revisionId} {
-        allow read: if resource.data.status == 'published' || request.auth != null;
-        allow write: if request.auth != null;
+        allow read: if resource.data.status == 'published' || isAdmin();
+        allow write: if isAdmin();
 
         match /cards/{cardId} {
           allow read: if true;
-          allow write: if request.auth != null;
+          allow write: if isAdmin();
         }
       }
     }
 
-    // 9. Flashcard Imports: Authenticated admins only
+    // =========================================================================
+    // 9. Flashcard Imports
+    // =========================================================================
     match /flashcard_imports/{importId} {
-      allow read, write: if request.auth != null;
+      allow read, write: if isAdmin();
     }
 
-    // 10. Student Flashcard Progress: Private owner-only access
+    // =========================================================================
+    // 10. Student Flashcard Progress
+    // =========================================================================
     match /users/{userId}/flashcard_progress/{deckId} {
-      allow read, write: if request.auth != null && request.auth.uid == userId;
+      allow read, write: if isOwner(userId);
     }
   }
 }
