@@ -1,0 +1,30 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import StudyPlayer from '../../components/flashcards/StudyPlayer.astro';
+import { getFlashcardDeck, getFlashcardCards } from '../../firebase/flashcards';
+
+const { id } = Astro.params;
+
+if (!id) {
+  return Astro.redirect('/404');
+}
+
+const deck = await getFlashcardDeck(id);
+
+if (!deck) {
+  return Astro.redirect('/404');
+}
+
+const cards = deck.activeRevisionId
+  ? await getFlashcardCards(deck.id, deck.activeRevisionId)
+  : [];
+---
+
+<Layout
+  title={`${deck.title} | بطاقات الاستذكار`}
+  description={`مذاكرة تفاعلية لبطاقات ${deck.title} مع حفظ التقدم بدون إنترنت.`}
+>
+  <div class="py-2 sm:py-4 px-1 sm:px-0">
+    <StudyPlayer deck={deck} initialCards={cards} />
+  </div>
+</Layout>

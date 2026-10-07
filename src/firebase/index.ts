@@ -3,4 +3,5 @@ export * from './auth';
 export * from './firestore';
 export * from './app-check';
 export * from './schema';
+export * from './flashcards';
 export * from './ai';

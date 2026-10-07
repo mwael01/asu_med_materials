@@ -136,6 +136,31 @@
         { "fieldPath": "action", "order": "ASCENDING" },
         { "fieldPath": "timestamp", "order": "DESCENDING" }
       ]
+    },
+    {
+      "collectionGroup": "flashcard_decks",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "publicationStatus", "order": "ASCENDING" },
+        { "fieldPath": "title", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "flashcard_decks",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "year", "order": "ASCENDING" },
+        { "fieldPath": "publicationStatus", "order": "ASCENDING" },
+        { "fieldPath": "title", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "flashcard_decks",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "moduleId", "order": "ASCENDING" },
+        { "fieldPath": "publicationStatus", "order": "ASCENDING" }
+      ]
     }
   ],
   "fieldOverrides": [
@@ -147,6 +172,16 @@
     {
       "collectionGroup": "submissions",
       "fieldPath": "content",
+      "indexes": []
+    },
+    {
+      "collectionGroup": "cards",
+      "fieldPath": "questionHtml",
+      "indexes": []
+    },
+    {
+      "collectionGroup": "cards",
+      "fieldPath": "answerHtml",
       "indexes": []
     }
   ]

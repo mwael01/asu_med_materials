@@ -9,6 +9,7 @@ const { selectedType = 'all' } = Astro.props;
 
 const filterTypes: { label: string; value: ResourceType | 'all'; i18nKey: string; icon?: string }[] = [
   { label: 'All', value: 'all', i18nKey: 'search.allTypes' },
+  { label: 'Flashcards', value: 'flashcards', i18nKey: 'types.flashcards', icon: '/icons/flashcards.svg' },
   { label: 'Google Drive', value: 'drive', i18nKey: 'types.drive', icon: '/icons/google-drive.svg' },
   { label: 'Telegram', value: 'telegram', i18nKey: 'types.telegram', icon: '/icons/telegram.svg' },
   { label: 'YouTube', value: 'youtube', i18nKey: 'types.youtube', icon: '/icons/youtube.svg' },

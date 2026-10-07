@@ -772,14 +772,16 @@ const allMaterials = await getAllMaterials();
             emptyState?.classList.add('hidden');
             for (const item of userMaterials) {
               const cardDiv = document.createElement('div');
-              cardDiv.className = 'p-4 rounded-2xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 shadow-2xs hover:border-emerald-500/50 transition-all';
+              const isInternal = item.type === 'flashcards' || (item.url && item.url.startsWith('/'));
+              const targetAttr = isInternal ? '_self' : '_blank';
+              const relAttr = isInternal ? '' : 'rel="noopener noreferrer"';
               cardDiv.innerHTML = `
                 <div class="flex items-center justify-between mb-2">
                   <span class="text-[10px] uppercase font-bold px-2 py-0.5 rounded bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300">${escapeHtml(item.type)}</span>
                   <span class="text-xs text-zinc-400 font-medium">Year ${escapeHtml(String(item.year))}</span>
                 </div>
                 <h3 class="text-sm font-bold text-zinc-900 dark:text-zinc-100 line-clamp-2 mb-1">
-                  <a href="${escapeHtml(item.url)}" target="_blank" rel="noopener noreferrer" class="hover:text-emerald-600 dark:hover:text-emerald-400">
+                  <a href="${escapeHtml(item.url)}" target="${targetAttr}" ${relAttr} class="hover:text-emerald-600 dark:hover:text-emerald-400">
                     ${escapeHtml(item.title)}
                   </a>
                 </h3>
@@ -788,7 +790,7 @@ const allMaterials = await getAllMaterials();
                 </p>
                 <div class="flex items-center justify-between text-[11px] pt-2 border-t border-zinc-100 dark:border-zinc-800">
                   <span class="text-emerald-600 dark:text-emerald-400 font-semibold">${escapeHtml(item.subject || '')}</span>
-                  <a href="${escapeHtml(item.url)}" target="_blank" rel="noopener noreferrer" class="font-bold text-emerald-600 dark:text-emerald-400 hover:underline">Open &rarr;</a>
+                  <a href="${escapeHtml(item.url)}" target="${targetAttr}" ${relAttr} class="font-bold text-emerald-600 dark:text-emerald-400 hover:underline">Open &rarr;</a>
                 </div>
               `;
               grid.appendChild(cardDiv);
@@ -1008,6 +1010,9 @@ const allMaterials = await getAllMaterials();
           emptyState?.classList.add('hidden');
           for (const item of userMaterials) {
             const cardDiv = document.createElement('div');
+            const isInternal = item.type === 'flashcards' || (item.url && item.url.startsWith('/'));
+            const targetAttr = isInternal ? '_self' : '_blank';
+            const relAttr = isInternal ? '' : 'rel="noopener noreferrer"';
             cardDiv.className = 'p-4 rounded-2xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 shadow-2xs hover:border-emerald-500/50 transition-all';
             cardDiv.innerHTML = `
               <div class="flex items-center justify-between mb-2">
@@ -1015,7 +1020,7 @@ const allMaterials = await getAllMaterials();
                 <span class="text-xs text-zinc-400 font-medium">Year ${escapeHtml(String(item.year))}</span>
               </div>
               <h3 class="text-sm font-bold text-zinc-900 dark:text-zinc-100 line-clamp-2 mb-1">
-                <a href="${escapeHtml(item.url)}" target="_blank" rel="noopener noreferrer" class="hover:text-emerald-600 dark:hover:text-emerald-400">
+                <a href="${escapeHtml(item.url)}" target="${targetAttr}" ${relAttr} class="hover:text-emerald-600 dark:hover:text-emerald-400">
                   ${escapeHtml(item.title)}
                 </a>
               </h3>
@@ -1024,7 +1029,7 @@ const allMaterials = await getAllMaterials();
               </p>
               <div class="flex items-center justify-between text-[11px] pt-2 border-t border-zinc-100 dark:border-zinc-800">
                 <span class="text-emerald-600 dark:text-emerald-400 font-semibold">${escapeHtml(item.subject || '')}</span>
-                <a href="${escapeHtml(item.url)}" target="_blank" rel="noopener noreferrer" class="font-bold text-emerald-600 dark:text-emerald-400 hover:underline">Open &rarr;</a>
+                <a href="${escapeHtml(item.url)}" target="${targetAttr}" ${relAttr} class="font-bold text-emerald-600 dark:text-emerald-400 hover:underline">Open &rarr;</a>
               </div>
             `;
             grid.appendChild(cardDiv);

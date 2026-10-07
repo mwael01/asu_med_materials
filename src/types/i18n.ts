@@ -18,6 +18,7 @@ export interface TranslationsSchema {
     toggleLangTitle: string;
     menu: string;
     academicYears: string;
+    flashcards?: string;
   };
   home: {
     heroTitle: string;
@@ -84,6 +85,7 @@ export interface TranslationsSchema {
     summaries: string;
     exams: string;
     references: string;
+    flashcards: string;
   };
   types: {
     drive: string;
@@ -94,6 +96,7 @@ export interface TranslationsSchema {
     book: string;
     summary: string;
     exam: string;
+    flashcards: string;
     website: string;
     other: string;
   };
@@ -214,6 +217,28 @@ export interface TranslationsSchema {
     lecturePrefix: string;
     resetConfirm: string;
   };
+  flashcards?: {
+    breadcrumbHome: string;
+    breadcrumbFlashcards: string;
+    title: string;
+    subtitle: string;
+    startStudy: string;
+    continueStudy: string;
+    reviewAgain: string;
+    resetProgress: string;
+    revealAnswer: string;
+    again: string;
+    known: string;
+    pause: string;
+    resume: string;
+    completedTitle: string;
+    completedSubtitle: string;
+    noDecks: string;
+    cardsCount: string;
+    progress: string;
+    backToModule: string;
+    resetConfirm: string;
+  };
   pwa: {
     installPrompt: string;
     installBtn: string;
@@ -262,6 +287,7 @@ export interface TranslationsSchema {
     tabFeedback: string;
     tabTeam: string;
     tabLogs: string;
+    tabFlashcards?: string;
     aiAssistantTitle: string;
     aiAssistantSubtitle: string;
     aiInputPlaceholder: string;

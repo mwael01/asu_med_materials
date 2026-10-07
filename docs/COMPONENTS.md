@@ -336,10 +336,24 @@ The homepage reuses canonical shared components directly rather than bespoke car
   }
   ```
 
+---
 
+### Flashcards (`/flashcards/[id]`)
 
+Flashcard decks are integrated directly into module pages ([`src/pages/module/[id].astro`](file:///home/mwael/work/asu_med_materials/src/pages/module/[id].astro)) and filtered via [`FilterToolbar.astro`](file:///home/mwael/work/asu_med_materials/src/components/search/FilterToolbar.astro). Students can bookmark them, mark them as studied, and launch interactive study directly.
 
+#### [`StudyPlayer.astro`](file:///home/mwael/work/asu_med_materials/src/components/flashcards/StudyPlayer.astro)
+- **Location**: `src/components/flashcards/StudyPlayer.astro`
+- **Purpose**: Interactive study player providing the **Reveal → Again / Known** flow, touch gestures (tap to reveal, horizontal toss with green/pale red side shades), desktop keyboard navigation (`Space / ↑` to reveal, `← / →` for Again/Known), centered typography, interactive hint button/panel, animated gradient progress bar, and pause/reset dialog.
 
-### Admin material review
+#### [`CardContent.astro`](file:///home/mwael/work/asu_med_materials/src/components/flashcards/CardContent.astro)
+- **Location**: `src/components/flashcards/CardContent.astro`
+- **Purpose**: Renders sanitized card HTML with automatic RTL/LTR detection, centered typography (`text-center`), responsive eager image framing, cloze deletions highlighting, and automatic suppression of empty Anki boilerplate sections.
 
-`DirectMaterialForm.astro` delegates behavior to `src/scripts/admin/directMaterialForm.ts`. The reusable `MaterialReviewFields.astro` template and `materialEditor.ts` power both single and bulk editors, including bilingual metadata, tags, contributor credit, author lists, classification, and playlist videos. Draft validation and serialization are shared. See [Admin AI preparation](ADMIN_AI.md) for extraction, preview limits, failure handling, and validation.
+#### [`ImageViewer.astro`](file:///home/mwael/work/asu_med_materials/src/components/flashcards/ImageViewer.astro)
+- **Location**: `src/components/flashcards/ImageViewer.astro`
+- **Purpose**: Accessible modal lightbox dialog for zooming and enlarging medical diagrams and cards with full backdrop dismissal.
+
+#### [`FlashcardsManager.astro`](file:///home/mwael/work/asu_med_materials/src/components/admin/FlashcardsManager.astro)
+- **Location**: `src/components/admin/FlashcardsManager.astro`
+- **Purpose**: Admin dashboard tab for inspecting, filtering, and publishing/unpublishing flashcard decks.

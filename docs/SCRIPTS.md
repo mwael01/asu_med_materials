@@ -56,13 +56,49 @@ pnpm run deploy:indexes
 firebase deploy --only firestore:indexes
 ```
 
+## 5. Official Anki Flashcards Importer & Processor
+
+- **Location**: [`scripts/flashcards/`](file:///home/mwael/work/asu_med_materials/scripts/flashcards)
+- **Tooling**: Managed with `uv` (Python 3.12+), official `anki` library, `nh3` HTML sanitization, and `firebase-admin`.
+- **Purpose**: Inspects, stages, classifies (`Subject > Unit > Chapter`), validates, and publishes Anki APKG/ZIP packages directly to Cloud Firestore.
+- **Usage**:
+```bash
+# Inspect archive without remote writes:
+uv run --project scripts/flashcards flashcards inspect "path/to/deck.apkg"
+
+# Stage archive into Firestore drafts:
+uv run --project scripts/flashcards flashcards stage "path/to/deck.apkg"
+
+# Review staged import findings:
+uv run --project scripts/flashcards flashcards review <import_id>
+
+# Validate import completeness:
+uv run --project scripts/flashcards flashcards validate <import_id>
+
+# Publish import atomically to active website decks and linked materials:
+uv run --project scripts/flashcards flashcards publish <import_id>
+
+# Configure CORS rules on Cloudflare R2 bucket (asumed) via pnpm wrangler:
+uv run --project scripts/flashcards flashcards set-cors
+
+# Upload images from archive or directory to Cloudflare R2 (https://asumed.eduvour.com):
+uv run --project scripts/flashcards flashcards upload-media "path/to/archive.apkg"
+
+# Scan existing Firestore cards, rewrite relative image paths to R2, and link media:
+uv run --project scripts/flashcards flashcards link-images
+```
+
+> **Image Hosting Attribution**: Image and media asset hosting for flashcards is powered by **Cloudflare R2** and covered by **[eduvour.com](https://eduvour.com)** via bucket `asumed` and custom domain `https://asumed.eduvour.com/`. Images are cached on-demand when students open decks.
+
 ---
+
 
 ## Instructions for AI Agents
 - **Single Source of Truth**: All study materials, curriculum modules, user profiles, and contributors live directly in Cloud Firestore. Never store or look for local JSON or static data files for materials.
 - When adding new YouTube playlists, use YouTube fetch helpers to populate the `videos` array with accurate chapter titles and IDs directly in Cloud Firestore.
 - Maintain error handling and rate-limiting timeouts between YouTube fetches to prevent network bans.
 - Always run `pnpm run schema:sync` after adding or modifying Firestore documents to keep `firebase/schema.json` synchronized.
+- **Flashcards Direct Upload**: When uploading or updating flashcard decks and card documents, read [`docs/AI_FLASHCARDS_GUIDE.md`](file:///home/mwael/work/asu_med_materials/docs/AI_FLASHCARDS_GUIDE.md) for complete instructions on Anki package processing, R2 media hosting (sponsored by eduvour.com), sanitization invariants, and batch writes to Cloud Firestore.
 - Always run static validation (`pnpm astro check && pnpm build`) after code edits to ensure build and SSR integrity.
 
 ---

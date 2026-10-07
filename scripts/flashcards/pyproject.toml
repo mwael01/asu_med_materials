@@ -1,0 +1,21 @@
+[project]
+name = "asu-med-flashcards"
+version = "0.1.0"
+description = "Safe Anki import and Firebase staging tools for ASU Med Materials"
+requires-python = ">=3.11,<3.15"
+dependencies = [
+  "anki>=25.0",
+  "firebase-admin>=6.6",
+  "nh3>=0.2.20",
+  "Pillow>=11.0",
+  "typer>=0.15",
+]
+
+[project.scripts]
+flashcards = "flashcards.cli:app"
+
+[tool.uv]
+package = true
+
+[dependency-groups]
+dev = ["pytest>=8.3"]

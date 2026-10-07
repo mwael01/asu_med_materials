@@ -48,6 +48,7 @@ For deeper details on system design, component architecture, and the curriculum 
 
 - [System Architecture](file:///workspaces/asu_med_materials/docs/ARCHITECTURE.md) - Project structure, state management, and data flow.
 - [UI Components Specification](file:///workspaces/asu_med_materials/docs/COMPONENTS.md) - Component inventory, props, and design guidelines.
+- [Flashcards System](file:///workspaces/asu_med_materials/docs/FLASHCARDS.md) - Anki import, on-demand image caching, and Cloudflare R2 hosting supported by **eduvour.com**.
 - [Feedback & Submissions Setup](file:///workspaces/asu_med_materials/docs/FEEDBACK_SETUP.md) - Cloud Firestore collections and Admin Flow.
 - [Curriculum Mapping](file:///workspaces/asu_med_materials/docs/CURRICULUM_STRUCTURE.md) - Ain Shams University 5-year modular curriculum breakdown.
 - [Development Guidelines](file:///workspaces/asu_med_materials/AGENTS.md) - Code quality and contributor rules.
