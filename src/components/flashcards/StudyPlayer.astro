@@ -300,10 +300,12 @@ const { deck, initialCards } = Astro.props;
     loadFlashcardProgress,
     saveFlashcardProgress,
     rateProgress,
-    resetProgress
+    resetProgress,
+    getCachedCards,
+    cacheCardsPayload,
+    cacheDeckMetadata
   } from '../../utils/flashcards/persistence';
   import { getCachedUserProfile } from '../../firebase/auth';
-  import { getCachedCards } from '../../utils/flashcards/persistence';
   import { cacheDeckImagesOnOpen } from '../../utils/flashcards/caching';
   import { getCurrentLanguage, t } from '../../utils/i18n';
 
@@ -452,8 +454,10 @@ const { deck, initialCards } = Astro.props;
       }
       cards = deduped;
 
-      // On-demand caching: Cache images for this specific deck into Cache Storage
-      if (cards && cards.length > 0) {
+      // On-demand caching: Cache deck metadata, cards payload into IndexedDB, and image assets into Cache Storage
+      if (cards && cards.length > 0 && deckData.activeRevisionId) {
+        cacheDeckMetadata(deckData).catch(() => {});
+        cacheCardsPayload(deckData.id, deckData.activeRevisionId, cards).catch(() => {});
         cacheDeckImagesOnOpen(cards).catch(() => {});
       }
 
