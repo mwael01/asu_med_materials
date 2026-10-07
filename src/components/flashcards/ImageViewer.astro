@@ -30,32 +30,36 @@
 <script>
   function initImageViewer() {
     const dialog = document.getElementById('flashcard-image-modal') as HTMLDialogElement | null;
-    const modalImg = document.getElementById('flashcard-modal-img') as HTMLImageElement | null;
     const closeBtn = document.getElementById('btn-close-image-modal');
 
-    if (!dialog || !modalImg) return;
-
-    // Listen to click on any card image
-    document.addEventListener('click', (e) => {
-      const target = e.target as HTMLElement | null;
-      if (target && target.tagName === 'IMG' && target.closest('.card-html')) {
-        const src = (target as HTMLImageElement).src;
-        if (src) {
-          modalImg.src = src;
-          modalImg.alt = (target as HTMLImageElement).alt || 'Diagram preview';
-          dialog.showModal();
-        }
-      }
-    });
+    if (!dialog) return;
 
     closeBtn?.addEventListener('click', () => dialog.close());
 
-    // Click outside to close
+    // Click backdrop outside dialog box to close
     dialog.addEventListener('click', (e) => {
       if (e.target === dialog) {
         dialog.close();
       }
     });
+
+    // Delegate document image click listener once
+    if (!(window as any).__hasFlashcardImageListener) {
+      (window as any).__hasFlashcardImageListener = true;
+      document.addEventListener('click', (e) => {
+        const target = e.target as HTMLElement | null;
+        if (target && target.tagName === 'IMG' && target.closest('.card-html')) {
+          const currentDialog = document.getElementById('flashcard-image-modal') as HTMLDialogElement | null;
+          const currentModalImg = document.getElementById('flashcard-modal-img') as HTMLImageElement | null;
+          const src = (target as HTMLImageElement).src;
+          if (src && currentDialog && currentModalImg) {
+            currentModalImg.src = src;
+            currentModalImg.alt = (target as HTMLImageElement).alt || 'Diagram preview';
+            currentDialog.showModal();
+          }
+        }
+      });
+    }
   }
 
   initImageViewer();

@@ -37,7 +37,7 @@ export async function fetchHtml(url: URL, signal: AbortSignal, redirects = 0, tr
       signal,
       headers: {'User-Agent':'ASUMedMaterials/1.0 (public link previews)', Accept:'text/html,application/xhtml+xml', 'Accept-Encoding':'identity'},
       // Pin the socket lookup; do not resolve the hostname again after validation.
-      lookup: (_hostname, options, callback) => {
+      lookup: (_hostname, options, callback: any) => {
         if (options.all) callback(null, [address]); else callback(null, address.address, address.family);
       },
     }, response => {
@@ -60,7 +60,7 @@ export async function fetchHtml(url: URL, signal: AbortSignal, redirects = 0, tr
         chunks.push(chunk);
       });
       response.on('error', reject);
-      response.on('end', () => resolve(Buffer.concat(chunks).toString('utf8')));
+      response.on('end', () => resolve(Buffer.concat(chunks as any).toString('utf8')));
     });
     request.on('error', reject); request.end();
   });

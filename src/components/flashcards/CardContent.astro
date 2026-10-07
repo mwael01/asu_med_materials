@@ -62,6 +62,15 @@ const direction = hasArabic ? 'rtl' : 'ltr';
   .card-html {
     word-break: break-word;
     text-align: center;
+    color: #18181b;
+  }
+  .dark .card-html {
+    color: #f4f4f5;
+  }
+  .dark .card-html [style*="color: rgb(0, 0, 0)"],
+  .dark .card-html [style*="color: #000"],
+  .dark .card-html [style*="color:black"] {
+    color: #f4f4f5 !important;
   }
   .card-html p {
     margin-bottom: 0.75rem;

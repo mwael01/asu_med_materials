@@ -409,6 +409,10 @@ const { deck, initialCards } = Astro.props;
     const againBtn = document.getElementById('btn-rate-again');
     const knownBtn = document.getElementById('btn-rate-known');
 
+    if ((window as any).__studyPlayerCleanup) {
+      (window as any).__studyPlayerCleanup();
+    }
+
     let reviewState: ReviewState;
     let currentProgress: FlashcardProgress;
     let isTransitioning = false;
@@ -773,6 +777,9 @@ const { deck, initialCards } = Astro.props;
     });
 
     window.addEventListener('keydown', handleKeydown);
+    (window as any).__studyPlayerCleanup = () => {
+      window.removeEventListener('keydown', handleKeydown);
+    };
 
     start();
   }
@@ -786,6 +793,15 @@ const { deck, initialCards } = Astro.props;
   .card-html {
     word-break: break-word;
     text-align: center;
+    color: #18181b;
+  }
+  .dark .card-html {
+    color: #f4f4f5;
+  }
+  .dark .card-html [style*="color: rgb(0, 0, 0)"],
+  .dark .card-html [style*="color: #000"],
+  .dark .card-html [style*="color:black"] {
+    color: #f4f4f5 !important;
   }
   .card-html p {
     margin-bottom: 0.75rem;
