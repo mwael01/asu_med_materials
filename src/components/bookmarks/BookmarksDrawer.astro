@@ -116,15 +116,19 @@ const rawModules = await getAllModules();
 
 <script>
   import { getMaterialEnglishTitle } from '../../i18n/materialsTranslations';
-  import { getStoredBookmarkIds, saveBookmarkIds, getStoredStudiedIds } from '../../utils/storage';
-  import { syncBookmarkToggle } from '../../utils/userSync';
+  import { getStoredBookmarkIds, getStoredStudiedIds } from '../../utils/storage';
+  import { setMaterialBookmarked, renderBookmarkButtons, initBookmarkCounts, stopBookmarkCounts } from '../../utils/bookmarks';
   import { getCurrentLanguage, t } from '../../utils/i18n';
   import { escapeHtml } from '../../utils/sanitize';
   import type { MaterialItem, ModuleInfo } from '../../types/materials';
 
-  let drawerGlobalListenersAttached = false;
+  let drawerAbort: AbortController | undefined;
 
   function initBookmarksDrawer(): void {
+    drawerAbort?.abort();
+    drawerAbort = new AbortController();
+    const { signal } = drawerAbort;
+    initBookmarkCounts();
     const drawer = document.getElementById('bookmarks-drawer');
     const backdrop = document.getElementById('bookmarks-backdrop');
     const closeBtn = document.getElementById('close-bookmarks-drawer');
@@ -161,32 +165,29 @@ const rawModules = await getAllModules();
       lastFocusedElement?.focus();
     }
 
-    openBtns.forEach((btn) => btn.addEventListener('click', openDrawer));
-    closeBtn?.addEventListener('click', closeDrawer);
-    backdrop?.addEventListener('click', closeDrawer);
+    openBtns.forEach((btn) => btn.addEventListener('click', openDrawer, { signal }));
+    closeBtn?.addEventListener('click', closeDrawer, { signal });
+    backdrop?.addEventListener('click', closeDrawer, { signal });
 
-    const drawerAbort = new AbortController();
     window.addEventListener('keydown', (e) => {
       if (e.key === 'Escape' && !drawer?.classList.contains('-translate-x-full')) {
         closeDrawer();
       }
-    }, { signal: drawerAbort.signal });
+    }, { signal });
 
-    viewHomeLink?.addEventListener('click', () => {
-      closeDrawer();
-    });
+    viewHomeLink?.addEventListener('click', closeDrawer, { signal });
 
     filterAllBtn?.addEventListener('click', () => {
       activeFilterMode = 'all';
       updateFilterButtonsUI();
       renderSmartBookmarks();
-    });
+    }, { signal });
 
     filterUnstudiedBtn?.addEventListener('click', () => {
       activeFilterMode = 'unstudied';
       updateFilterButtonsUI();
       renderSmartBookmarks();
-    });
+    }, { signal });
 
     function updateFilterButtonsUI(): void {
       if (!filterAllBtn || !filterUnstudiedBtn) return;
@@ -203,61 +204,47 @@ const rawModules = await getAllModules();
       }
     }
 
-    if (!drawerGlobalListenersAttached) {
-      drawerGlobalListenersAttached = true;
+    // Capture-phase listener for card bookmark buttons
+    document.addEventListener(
+      'click',
+      (e) => {
+        const target = e.target instanceof Element ? e.target.closest<HTMLElement>('.bookmark-btn') : null;
+        if (!target) return;
+        e.preventDefault();
+        e.stopPropagation();
+        e.stopImmediatePropagation();
 
-      // Capture-phase listener for card bookmark buttons
-      document.addEventListener(
-        'click',
-        (e) => {
-          const target = (e.target as HTMLElement)?.closest('.bookmark-btn') as HTMLElement | null;
-          if (!target) return;
-          e.preventDefault();
-          e.stopPropagation();
-          e.stopImmediatePropagation();
+        const matId = target.getAttribute('data-id');
+        if (!matId) return;
 
-          const matId = target.getAttribute('data-id');
-          if (!matId) return;
+        const current = getStoredBookmarkIds();
+        const index = current.indexOf(matId);
+        setMaterialBookmarked(matId, index < 0);
 
-          const current = getStoredBookmarkIds();
-          const index = current.indexOf(matId);
-          let updated: string[];
-          if (index >= 0) {
-            updated = current.filter((x) => x !== matId);
-          } else {
-            updated = [...current, matId];
-          }
+        const showFn = (window as any).showToast;
+        if (typeof showFn === 'function') {
+          const isAr = getCurrentLanguage() === 'ar';
+          showFn({
+            type: index >= 0 ? 'info' : 'success',
+            message: index >= 0
+              ? (isAr ? 'تمت إزالة المصدر من المحفوظات' : 'Removed from saved library')
+              : (isAr ? 'تم حفظ المصدر في مكتبتك' : 'Saved to your study library'),
+            duration: 2000
+          });
+        }
+      },
+      { capture: true, signal }
+    );
 
-          const isNewlyAdded = index < 0;
-          saveBookmarkIds(updated);
-          syncBookmarkToggle(matId, isNewlyAdded);
-          renderSmartBookmarks();
-
-          const showFn = (window as any).showToast;
-          if (typeof showFn === 'function') {
-            const isAr = getCurrentLanguage() === 'ar';
-            showFn({
-              type: index >= 0 ? 'info' : 'success',
-              message: index >= 0
-                ? (isAr ? 'تمت إزالة المصدر من المحفوظات' : 'Removed from saved library')
-                : (isAr ? 'تم حفظ المصدر في مكتبتك' : 'Saved to your study library'),
-              duration: 2000
-            });
-          }
-        },
-        true
-      );
-
-      window.addEventListener('bookmarks-updated', () => {
-        renderSmartBookmarks();
-      });
-      window.addEventListener('studied-updated', () => {
-        renderSmartBookmarks();
-      });
-      window.addEventListener('asumed-language-changed', () => {
-        renderSmartBookmarks();
-      });
-    }
+    window.addEventListener('bookmarks-updated', () => {
+      renderSmartBookmarks();
+    }, { signal });
+    window.addEventListener('studied-updated', () => {
+      renderSmartBookmarks();
+    }, { signal });
+    window.addEventListener('asumed-language-changed', () => {
+      renderSmartBookmarks();
+    }, { signal });
 
     function sortGridsByArchived(): void {
       const ids = getStoredBookmarkIds();
@@ -305,34 +292,7 @@ const rawModules = await getAllModules();
       const bookmarked = allMaterials.filter((m) => ids.includes(m.id));
       const unstudiedBookmarked = bookmarked.filter((m) => !studiedIds.includes(m.id));
 
-      // Update card bookmark buttons in current document
-      document.querySelectorAll<HTMLElement>('.bookmark-btn[data-id]').forEach((btn) => {
-        const matId = btn.getAttribute('data-id');
-        const isSaved = matId ? ids.includes(matId) : false;
-        const emptyIcon = btn.querySelector('.bookmark-icon-empty');
-        const filledIcon = btn.querySelector('.bookmark-icon-filled');
-        const countEl = btn.querySelector<HTMLElement>('.bookmark-count');
-
-        if (isSaved) {
-          emptyIcon?.classList.add('hidden');
-          filledIcon?.classList.remove('hidden');
-          btn.classList.add('text-amber-500', 'dark:text-amber-400');
-          btn.classList.remove('text-zinc-400');
-          if (countEl) {
-            countEl.classList.add('text-amber-600', 'dark:text-amber-400');
-            countEl.classList.remove('text-zinc-500', 'dark:text-zinc-400');
-          }
-        } else {
-          emptyIcon?.classList.remove('hidden');
-          filledIcon?.classList.add('hidden');
-          btn.classList.remove('text-amber-500', 'dark:text-amber-400');
-          btn.classList.add('text-zinc-400');
-          if (countEl) {
-            countEl.classList.remove('text-amber-600', 'dark:text-amber-400');
-            countEl.classList.add('text-zinc-500', 'dark:text-zinc-400');
-          }
-        }
-      });
+      renderBookmarkButtons();
 
       // Sort materials in pages
       sortGridsByArchived();
@@ -517,9 +477,7 @@ const rawModules = await getAllModules();
           const matId = btn.getAttribute('data-drawer-remove-id');
           if (!matId) return;
 
-          const current = getStoredBookmarkIds().filter((id) => id !== matId);
-          saveBookmarkIds(current);
-          renderSmartBookmarks();
+          setMaterialBookmarked(matId, false);
 
           const showFn = (window as any).showToast;
           if (typeof showFn === 'function') {
@@ -536,6 +494,14 @@ const rawModules = await getAllModules();
     renderSmartBookmarks();
   }
 
+  document.addEventListener('astro:before-swap', () => {
+    drawerAbort?.abort();
+    stopBookmarkCounts();
+  });
+  window.addEventListener('pagehide', stopBookmarkCounts);
+  window.addEventListener('pageshow', (event) => {
+    if (event.persisted) initBookmarksDrawer();
+  });
   initBookmarksDrawer();
   document.addEventListener('astro:after-swap', initBookmarksDrawer);
 </script>

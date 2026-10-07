@@ -308,31 +308,26 @@ export async function saveMaterialsBulk(
 /**
  * Atomically increments or decrements the bookmark/love counter for a material in Firestore.
  */
-export async function incrementMaterialBookmarkCount(materialId: string, delta: 1 | -1): Promise<number> {
+export async function incrementMaterialBookmarkCount(materialId: string, delta: 1 | -1): Promise<void> {
   const db = getFirestoreDb();
-  if (!db || !materialId) return 0;
+  if (!db || !materialId) throw new Error('Bookmark count sync is unavailable');
+  await updateDoc(doc(db, MATERIALS_COLLECTION, materialId), {
+    bookmarksCount: increment(delta)
+  });
+}
 
-  try {
-    const matRef = doc(db, MATERIALS_COLLECTION, materialId);
-    await updateDoc(matRef, {
-      bookmarksCount: increment(delta)
-    });
-    return delta;
-  } catch {
-    try {
-      const matRef = doc(db, MATERIALS_COLLECTION, materialId);
-      const snap = await getDoc(matRef);
-      if (snap.exists()) {
-        const cur = (snap.data()?.bookmarksCount as number) || 0;
-        const next = Math.max(0, cur + delta);
-        await setDoc(matRef, { bookmarksCount: next }, { merge: true });
-        return next;
-      }
-    } catch (innerErr) {
-      console.warn(`[Firestore] Failed to update bookmark count for material ${materialId}:`, innerErr);
-    }
-    return 0;
-  }
+/** Subscribe independently of the cached public catalogue. */
+export function listenToMaterialBookmarkCount(
+  materialId: string,
+  callback: (count: number) => void
+): () => void {
+  const db = getFirestoreDb();
+  if (!db) return () => {};
+  return onSnapshot(doc(db, MATERIALS_COLLECTION, materialId), { includeMetadataChanges: true }, (snap) => {
+    if (snap.exists()) callback(snap.data().bookmarksCount ?? 0);
+  }, (error) => {
+    console.warn(`[Firestore] Bookmark count subscription failed for ${materialId}:`, error);
+  });
 }
 
 /**
