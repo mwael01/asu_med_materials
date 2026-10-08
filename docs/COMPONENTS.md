@@ -346,6 +346,17 @@ Flashcard decks are integrated directly into module pages ([`src/pages/module/[i
 - **Location**: `src/components/flashcards/StudyPlayer.astro`
 - **Purpose**: Interactive study player providing the **Reveal → Again / Known** flow, touch gestures (tap to reveal, horizontal toss with green/pale red side shades), desktop keyboard navigation (`Space / ↑` to reveal, `← / →` for Again/Known), centered typography, interactive hint button/panel, animated gradient progress bar, and pause/reset dialog.
 
+#### Touch interaction and controller lifecycle
+
+- Player orchestration lives in `src/scripts/flashcards/player.ts`; native pointer bindings, pure gesture decisions, animations, rating transactions, and HTML preparation have separate modules in that folder. Interaction types live in `src/types/flashcardInteraction.ts`.
+- Vertical gestures scroll the page normally. The card uses `touch-action: pan-y pinch-zoom`, preserving browser pinch zoom. Revealed cards capture deliberate horizontal drags after 10 px of movement and a 1.3:1 horizontal direction ratio. Physical left is Again and right is Known in either language.
+- Release distance must reach 22% of card width, bounded to 60–100 px, to rate; shorter drags settle back. Taps under 350 ms reveal an unrevealed card. Long presses, selection, interactive controls, and image taps do not reveal or rate. Image taps still open the viewer; drag-generated clicks are suppressed.
+- Pointer ID tracking, cancellation/capture-loss handling, and second-touch cancellation prevent stale drags. Painting is batched per animation frame, with no transform transition during dragging. A stationary viewport clips horizontal toss overflow without creating an inner vertical scroller.
+- Gestures, buttons, and keyboard shortcuts share one rating transaction. Accepted ratings update state and save in the background once; cancellable Web Animations API sequences then display the next card. Pause, reset, language changes, navigation, and tab suspension invalidate stale visual callbacks. Reduced motion skips decorative animations.
+- Initialization gates interaction until progress is loaded. Instance-owned abort signals remove listeners on disposal. Question/answer DOM is retained for the current card across reveal and language changes, preserving images and hint state. Reveal and advancement never programmatically scroll the page.
+- Run `pnpm run test:flashcards` for gesture, pointer-binding, rating-lock, interruption, and reduced-motion regressions; then `pnpm exec astro check` and `pnpm run build`.
+- Device acceptance: verify iOS Safari, Android Chrome, and installed PWA mode with long/image-heavy cards, portrait/landscape, Arabic/English, image taps, text selection, pinch zoom, and repeated ratings. Confirm vertical scrolling never displaces or rates the card and horizontal dragging follows the finger. Record a mobile performance trace to check for recurring layout work. Synthetic tests cannot validate browser scrolling arbitration.
+
 #### [`CardContent.astro`](file:///home/mwael/work/asu_med_materials/src/components/flashcards/CardContent.astro)
 - **Location**: `src/components/flashcards/CardContent.astro`
 - **Purpose**: Renders sanitized card HTML with automatic RTL/LTR detection, centered typography (`text-center`), responsive eager image framing, cloze deletions highlighting, and automatic suppression of empty Anki boilerplate sections.

@@ -85,120 +85,124 @@ const { deck, initialCards } = Astro.props;
     </div>
   </div>
 
-  <!-- Main Card Stage Container with 3D elevation and gesture feedback -->
-  <div
-    id="card-stage"
-    class="min-h-[380px] sm:min-h-[460px] p-5 sm:p-8 rounded-3xl bg-white dark:bg-zinc-900 border border-zinc-200/90 dark:border-zinc-800 shadow-xl dark:shadow-zinc-950/60 flex flex-col justify-between transition-transform duration-150 relative overflow-hidden select-none touch-manipulation cursor-pointer"
-  >
-    <!-- Left Shade (Toss Left = Again / Pale Red) -->
+  <!-- Stationary viewport keeps horizontal tosses out of page overflow. -->
+  <div id="card-stage-viewport" class="flashcard-stage-viewport">
+    <!-- Main Card Stage Container with gesture feedback -->
     <div
-      id="shade-again"
-      class="pointer-events-none absolute inset-0 bg-gradient-to-r from-rose-500/20 via-rose-500/5 to-transparent opacity-0 transition-opacity z-10 flex items-center justify-start p-6"
+      id="card-stage"
+      class="min-h-[380px] sm:min-h-[460px] p-5 sm:p-8 rounded-3xl bg-white dark:bg-zinc-900 border border-zinc-200/90 dark:border-zinc-800 shadow-xl dark:shadow-zinc-950/60 flex flex-col justify-between relative overflow-hidden cursor-pointer"
     >
-      <div class="px-3.5 py-1.5 rounded-full bg-rose-600 text-white font-bold text-xs sm:text-sm shadow-md flex items-center gap-1.5 transform -rotate-6">
-        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
-        <span data-i18n="flashcards.again">أعد البطاقة</span>
-      </div>
-    </div>
-
-    <!-- Right Shade (Toss Right = Known / Green) -->
-    <div
-      id="shade-known"
-      class="pointer-events-none absolute inset-0 bg-gradient-to-l from-emerald-500/20 via-emerald-500/5 to-transparent opacity-0 transition-opacity z-10 flex items-center justify-end p-6"
-    >
-      <div class="px-3.5 py-1.5 rounded-full bg-emerald-600 text-white font-bold text-xs sm:text-sm shadow-md flex items-center gap-1.5 transform rotate-6">
-        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
-        <span data-i18n="flashcards.known">أعرفها</span>
-      </div>
-    </div>
-
-    <!-- Card Question Section -->
-    <div id="card-question-container" class="space-y-4">
-      <div class="flex items-center justify-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-teal-600 dark:text-teal-400">
-        <span class="w-2 h-2 rounded-full bg-teal-500 animate-pulse"></span>
-        <span data-i18n="flashcards.question">سؤال</span>
-      </div>
-      <div id="card-question-body" class="card-html text-center text-lg sm:text-xl font-medium leading-relaxed select-text"></div>
-
-      <!-- Hint Section (Interactive Button & Panel) -->
-      <div id="card-hint-container" class="hidden flex flex-col items-center pt-2">
-        <button
-          type="button"
-          id="btn-toggle-hint"
-          class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-amber-500/10 hover:bg-amber-500/20 text-amber-600 dark:text-amber-400 border border-amber-500/30 transition-all cursor-pointer"
-        >
-          <span data-i18n="flashcards.showHint">💡 إظهار التلميح</span>
-        </button>
-        <div
-          id="card-hint-panel"
-          class="hidden mt-2 p-3 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200/60 dark:border-amber-800/40 text-xs text-amber-900 dark:text-amber-200 text-center max-w-md animate-fadeIn"
-        ></div>
-      </div>
-    </div>
-
-    <!-- Divider & Card Answer Section (Revealed with animation) -->
-    <div id="card-answer-container" class="hidden mt-6 pt-6 border-t border-zinc-100 dark:border-zinc-800">
-      <div class="flex items-center justify-center gap-1.5 mb-3 text-[11px] font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">
-        <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
-        <span data-i18n="flashcards.answer">الإجابة</span>
-      </div>
-      <div id="card-answer-body" class="card-html text-center text-base sm:text-lg leading-relaxed select-text"></div>
-    </div>
-
-    <!-- Touch Gesture Prompt on Mobile -->
-    <div id="touch-hint-prompt" class="text-[11px] text-zinc-400 dark:text-zinc-500 text-center mt-4 sm:hidden pointer-events-none" data-i18n="flashcards.touchPrompt">
-      المس البطاقة لإظهار الإجابة • اسحب يميناً أو يساراً للتقييم
-    </div>
-
-    <!-- Bottom Review Controls Bar -->
-    <div class="mt-6 sm:mt-8 pt-4 border-t border-zinc-100 dark:border-zinc-800/80">
-      <!-- Unrevealed State: Show Answer Button -->
-      <div id="controls-unrevealed" class="flex justify-center">
-        <button
-          type="button"
-          id="btn-reveal-answer"
-          class="w-full sm:w-auto min-w-[240px] py-3.5 sm:py-3 px-6 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 active:scale-[0.97] text-white font-bold text-sm shadow-md transition-all cursor-pointer flex items-center justify-center gap-2"
-        >
-          <span data-i18n="flashcards.revealAnswer">إظهار الإجابة</span>
-          <div class="hidden sm:inline-flex items-center gap-1">
-            <kbd class="px-1.5 py-0.5 text-[10px] bg-white/20 rounded border border-white/30 text-white font-mono">
-              Space
-            </kbd>
-            <span class="text-[10px] text-white/80" data-i18n="flashcards.or">أو</span>
-            <kbd class="px-1.5 py-0.5 text-[10px] bg-white/20 rounded border border-white/30 text-white font-mono">
-              ↑
-            </kbd>
-          </div>
-        </button>
-      </div>
-
-      <!-- Revealed State: Again & Known Buttons -->
-      <div id="controls-revealed" class="hidden grid grid-cols-2 gap-3">
-        <!-- Again Button (Wrong / Red side) -->
-        <button
-          type="button"
-          id="btn-rate-again"
-          class="py-3.5 sm:py-3 px-4 rounded-2xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800/60 hover:bg-rose-100 dark:hover:bg-rose-900/50 text-rose-700 dark:text-rose-200 font-bold text-sm active:scale-[0.97] transition-all cursor-pointer flex items-center justify-center gap-2"
-        >
+      <!-- Left Shade (Toss Left = Again / Pale Red) -->
+      <div
+        id="shade-again"
+        class="pointer-events-none absolute inset-0 bg-gradient-to-r from-rose-500/20 via-rose-500/5 to-transparent opacity-0 z-10 flex items-center justify-start p-6"
+      >
+        <div class="px-3.5 py-1.5 rounded-full bg-rose-600 text-white font-bold text-xs sm:text-sm shadow-md flex items-center gap-1.5 transform -rotate-6">
+          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
           <span data-i18n="flashcards.again">أعد البطاقة</span>
-          <kbd class="hidden sm:inline-block px-1.5 py-0.5 text-[10px] bg-rose-200/80 dark:bg-rose-900/80 rounded border border-rose-300 dark:border-rose-700 text-rose-900 dark:text-rose-100 font-mono">
-            ←
-          </kbd>
-        </button>
+        </div>
+      </div>
 
-        <!-- Known Button (Right / Green side) -->
-        <button
-          type="button"
-          id="btn-rate-known"
-          class="py-3.5 sm:py-3 px-4 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 active:scale-[0.97] text-white font-bold text-sm shadow-md transition-all cursor-pointer flex items-center justify-center gap-2"
-        >
+      <!-- Right Shade (Toss Right = Known / Green) -->
+      <div
+        id="shade-known"
+        class="pointer-events-none absolute inset-0 bg-gradient-to-l from-emerald-500/20 via-emerald-500/5 to-transparent opacity-0 z-10 flex items-center justify-end p-6"
+      >
+        <div class="px-3.5 py-1.5 rounded-full bg-emerald-600 text-white font-bold text-xs sm:text-sm shadow-md flex items-center gap-1.5 transform rotate-6">
+          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
           <span data-i18n="flashcards.known">أعرفها</span>
-          <kbd class="hidden sm:inline-block px-1.5 py-0.5 text-[10px] bg-white/20 rounded border border-white/30 text-white font-mono">
-            →
-          </kbd>
-        </button>
+        </div>
+      </div>
+
+      <!-- Card Question Section -->
+      <div id="card-question-container" class="space-y-4">
+        <div class="flex items-center justify-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-teal-600 dark:text-teal-400">
+          <span class="w-2 h-2 rounded-full bg-teal-500 animate-pulse"></span>
+          <span data-i18n="flashcards.question">سؤال</span>
+        </div>
+        <div id="card-question-body" class="card-html text-center text-lg sm:text-xl font-medium leading-relaxed select-text"></div>
+
+        <!-- Hint Section (Interactive Button & Panel) -->
+        <div id="card-hint-container" class="hidden flex flex-col items-center pt-2">
+          <button
+            type="button"
+            id="btn-toggle-hint"
+            class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-amber-500/10 hover:bg-amber-500/20 text-amber-600 dark:text-amber-400 border border-amber-500/30 transition-all cursor-pointer"
+          >
+            <span data-i18n="flashcards.showHint">💡 إظهار التلميح</span>
+          </button>
+          <div
+            id="card-hint-panel"
+            class="hidden mt-2 p-3 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200/60 dark:border-amber-800/40 text-xs text-amber-900 dark:text-amber-200 text-center max-w-md animate-fadeIn"
+          ></div>
+        </div>
+      </div>
+
+      <!-- Divider & Card Answer Section (Revealed with animation) -->
+      <div id="card-answer-container" class="hidden mt-6 pt-6 border-t border-zinc-100 dark:border-zinc-800">
+        <div class="flex items-center justify-center gap-1.5 mb-3 text-[11px] font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">
+          <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+          <span data-i18n="flashcards.answer">الإجابة</span>
+        </div>
+        <div id="card-answer-body" class="card-html text-center text-base sm:text-lg leading-relaxed select-text"></div>
+      </div>
+
+      <!-- Touch Gesture Prompt on Mobile -->
+      <div id="touch-hint-prompt" class="text-[11px] text-zinc-400 dark:text-zinc-500 text-center mt-4 sm:hidden pointer-events-none" data-i18n="flashcards.touchPrompt">
+        المس البطاقة لإظهار الإجابة • اسحب يميناً أو يساراً للتقييم
+      </div>
+
+      <!-- Bottom Review Controls Bar -->
+      <div class="mt-6 sm:mt-8 pt-4 border-t border-zinc-100 dark:border-zinc-800/80">
+        <!-- Unrevealed State: Show Answer Button -->
+        <div id="controls-unrevealed" class="flex justify-center">
+          <button
+            type="button"
+            id="btn-reveal-answer"
+            class="w-full sm:w-auto min-w-[240px] py-3.5 sm:py-3 px-6 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 active:scale-[0.97] text-white font-bold text-sm shadow-md transition-all cursor-pointer flex items-center justify-center gap-2"
+          >
+            <span data-i18n="flashcards.revealAnswer">إظهار الإجابة</span>
+            <div class="hidden sm:inline-flex items-center gap-1">
+              <kbd class="px-1.5 py-0.5 text-[10px] bg-white/20 rounded border border-white/30 text-white font-mono">
+                Space
+              </kbd>
+              <span class="text-[10px] text-white/80" data-i18n="flashcards.or">أو</span>
+              <kbd class="px-1.5 py-0.5 text-[10px] bg-white/20 rounded border border-white/30 text-white font-mono">
+                ↑
+              </kbd>
+            </div>
+          </button>
+        </div>
+
+        <!-- Revealed State: Again & Known Buttons -->
+        <div id="controls-revealed" class="hidden grid grid-cols-2 gap-3">
+          <!-- Again Button (Wrong / Red side) -->
+          <button
+            type="button"
+            id="btn-rate-again"
+            class="py-3.5 sm:py-3 px-4 rounded-2xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800/60 hover:bg-rose-100 dark:hover:bg-rose-900/50 text-rose-700 dark:text-rose-200 font-bold text-sm active:scale-[0.97] transition-all cursor-pointer flex items-center justify-center gap-2"
+          >
+            <span data-i18n="flashcards.again">أعد البطاقة</span>
+            <kbd class="hidden sm:inline-block px-1.5 py-0.5 text-[10px] bg-rose-200/80 dark:bg-rose-900/80 rounded border border-rose-300 dark:border-rose-700 text-rose-900 dark:text-rose-100 font-mono">
+              ←
+            </kbd>
+          </button>
+
+          <!-- Known Button (Right / Green side) -->
+          <button
+            type="button"
+            id="btn-rate-known"
+            class="py-3.5 sm:py-3 px-4 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 active:scale-[0.97] text-white font-bold text-sm shadow-md transition-all cursor-pointer flex items-center justify-center gap-2"
+          >
+            <span data-i18n="flashcards.known">أعرفها</span>
+            <kbd class="hidden sm:inline-block px-1.5 py-0.5 text-[10px] bg-white/20 rounded border border-white/30 text-white font-mono">
+              →
+            </kbd>
+          </button>
+        </div>
       </div>
     </div>
+
   </div>
 
   <!-- Session Paused Overlay -->
@@ -286,526 +290,7 @@ const { deck, initialCards } = Astro.props;
 </div>
 
 <script>
-  import type { FlashcardCard, FlashcardDeck, FlashcardProgress } from '../../types/flashcards';
-  import {
-    createReviewState,
-    currentCard,
-    reveal,
-    rate,
-    togglePaused,
-    reviewAll,
-    type ReviewState
-  } from '../../utils/flashcards/review';
-  import {
-    loadFlashcardProgress,
-    saveFlashcardProgress,
-    rateProgress,
-    resetProgress,
-    getCachedCards,
-    cacheCardsPayload,
-    cacheDeckMetadata
-  } from '../../utils/flashcards/persistence';
-  import { getCachedUserProfile } from '../../firebase/auth';
-  import { cacheDeckImagesOnOpen } from '../../utils/flashcards/caching';
-  import { getCurrentLanguage, t } from '../../utils/i18n';
-
-  /**
-   * Cleans card HTML defensively:
-   * - Rewrites relative image sources to Cloudflare R2 public URL
-   * - Strips dead "Show hint" buttons and empty snackbars
-   * - Extracts real hint if available
-   * - Removes empty Anki template sections (Images, Extra, Etymology, Mnemonics)
-   */
-  function prepareCardHtml(rawHtml: string, questionText?: string): { html: string; hintText: string | null } {
-    if (!rawHtml) return { html: '', hintText: null };
-
-    // 1. Rewrite relative image paths to Cloudflare R2 public domain
-    let html = rawHtml.replace(/<img([^>]+)src=["']([^"']+)["']/gi, (_match, prefix, src) => {
-      let cleanSrc = src.trim();
-      if (!cleanSrc.startsWith('http://') && !cleanSrc.startsWith('https://') && !cleanSrc.startsWith('data:')) {
-        const filename = cleanSrc.split('/').pop() || cleanSrc;
-        cleanSrc = `https://asumed.eduvour.com/${filename}`;
-      }
-      return `<img${prefix}src="${cleanSrc}" loading="eager" decoding="async"`;
-    });
-
-    // 2. Strip FrontSide / repeated question from start of answer
-    if (questionText) {
-      const hrMatch = /<hr[^>]*>/i.exec(html);
-      if (hrMatch) {
-        const beforeHr = html.substring(0, hrMatch.index);
-        const afterHr = html.substring(hrMatch.index + hrMatch[0].length);
-        const cleanQText = questionText.replace(/<[^>]+>/g, '').trim().toLowerCase();
-        const cleanBeforeText = beforeHr.replace(/<[^>]+>/g, '').trim().toLowerCase();
-        if (cleanBeforeText && (cleanBeforeText === cleanQText || cleanBeforeText.startsWith(cleanQText) || cleanQText.startsWith(cleanBeforeText))) {
-          html = afterHr;
-        }
-      }
-    }
-
-    // 3. Extract potential hint before stripping dead buttons
-    let hintText: string | null = null;
-    const snackbarMatch = /<div\s+id=["']snackbar["'][^>]*>(.*?)<\/div>/is.exec(html);
-    if (snackbarMatch && snackbarMatch[1].replace(/<[^>]+>/g, '').trim()) {
-      hintText = snackbarMatch[1].trim();
-    }
-    const hintMatch = /<div\s+[^>]*(?:id|class)=["'](?:card-)?hint["'][^>]*>(.*?)<\/div>/is.exec(html);
-    if (!hintText && hintMatch && hintMatch[1].replace(/<[^>]+>/g, '').trim()) {
-      hintText = hintMatch[1].trim();
-    }
-
-    // 4. Remove non-functional hint text & dead elements completely
-    html = html.replace(/<div\s+[^>]*(?:hint_btn|snackbar)[^>]*>.*?<\/div>/gis, '');
-    html = html.replace(/<(?:button|a|span|div)[^>]*>\s*Show hint\s*<\/(?:button|a|span|div)>/gis, '');
-
-    // 5. Remove empty boilerplate sections (Images, Extra Section, Etymology, Mnemonics)
-    const sectionNames = ['Etymology', 'Mnemonics', 'Extra Section', 'Images'];
-    for (const name of sectionNames) {
-      const pattern = new RegExp(`(?:<hr[^>]*>\\s*)?(?:<div[^>]*>\\s*)?<h[1-6][^>]*>\\s*${name}\\s*<\\/h[1-6]>\\s*(?:<div[^>]*>(.*?)<\\/div>)?\\s*(?:<hr[^>]*>)?\\s*(?:<\\/div>)?`, 'gis');
-      html = html.replace(pattern, (_m, content) => {
-        const inner = content || '';
-        const hasImg = /<img\b/i.test(inner);
-        const text = inner.replace(/<[^>]+>/g, '').trim();
-        if (hasImg) {
-          return inner; // Keep the image directly, remove the redundant header!
-        } else if (text) {
-          return `<div>${inner}</div>`;
-        }
-        return '';
-      });
-    }
-
-    // 6. Clean up empty divs, duplicate breaks and bounding horizontal rules
-    html = html.replace(/<div\s*>\s*<\/div>/gi, '');
-    html = html.replace(/(?:<br\s*\/?>\s*){2,}/gi, '<br>');
-    html = html.replace(/^\s*(?:<hr[^>]*>|<br\s*\/?>)+/gi, '');
-    html = html.replace(/(?:<hr[^>]*>|<br\s*\/?>)+\s*$/gi, '');
-
-    return { html: html.trim(), hintText };
-  }
-
-  function initStudyPlayer() {
-    const container = document.getElementById('study-player-container');
-    if (!container) return;
-
-    const deckData: FlashcardDeck = JSON.parse(container.getAttribute('data-deck') || '{}');
-    let cards: FlashcardCard[] = JSON.parse(container.getAttribute('data-initial-cards') || '[]');
-
-    const cardStage = document.getElementById('card-stage');
-    const questionBody = document.getElementById('card-question-body');
-    const answerContainer = document.getElementById('card-answer-container');
-    const answerBody = document.getElementById('card-answer-body');
-    const cardHintContainer = document.getElementById('card-hint-container');
-    const cardHintPanel = document.getElementById('card-hint-panel');
-    const btnToggleHint = document.getElementById('btn-toggle-hint');
-    const shadeAgain = document.getElementById('shade-again');
-    const shadeKnown = document.getElementById('shade-known');
-    const controlsUnrevealed = document.getElementById('controls-unrevealed');
-    const controlsRevealed = document.getElementById('controls-revealed');
-    const progressCounter = document.getElementById('player-progress-counter');
-    const progressPercent = document.getElementById('player-progress-percent');
-    const progressBar = document.getElementById('player-progress-bar');
-    const pausedScreen = document.getElementById('session-paused-screen');
-    const completeScreen = document.getElementById('session-complete-screen');
-    const pauseBtn = document.getElementById('btn-pause-session');
-    const pauseBtnText = document.getElementById('pause-btn-text');
-    const resumeBtn = document.getElementById('btn-resume-session');
-    const resetBtn = document.getElementById('btn-reset-session');
-    const reviewAgainBtn = document.getElementById('btn-review-again');
-
-    const resetDialog = document.getElementById('dialog-confirm-reset') as HTMLDialogElement | null;
-    const cancelResetBtn = document.getElementById('btn-cancel-reset');
-    const confirmResetBtn = document.getElementById('btn-confirm-reset');
-
-    const revealBtn = document.getElementById('btn-reveal-answer');
-    const againBtn = document.getElementById('btn-rate-again');
-    const knownBtn = document.getElementById('btn-rate-known');
-
-    if ((window as any).__studyPlayerCleanup) {
-      (window as any).__studyPlayerCleanup();
-    }
-
-    let reviewState: ReviewState;
-    let currentProgress: FlashcardProgress;
-    let isTransitioning = false;
-    const cachedUser = getCachedUserProfile();
-    const uid = cachedUser?.uid || null;
-
-    async function start() {
-      // If initialCards was empty (offline), try local IndexedDB cache
-      if ((!cards || cards.length === 0) && deckData.activeRevisionId) {
-        const cached = await getCachedCards(deckData.id, deckData.activeRevisionId);
-        if (cached && cached.length > 0) {
-          cards = cached;
-        }
-      }
-
-      // Defensive deduplication across cards
-      const seen = new Set<string>();
-      const deduped: FlashcardCard[] = [];
-      for (const c of cards) {
-        const key = (c.sourceNoteGuid && typeof c.sourceTemplateOrdinal === 'number')
-          ? `${c.sourceNoteGuid}:${c.sourceTemplateOrdinal}`
-          : c.id;
-        if (!seen.has(key)) {
-          seen.add(key);
-          deduped.push(c);
-        }
-      }
-      cards = deduped;
-
-      // On-demand caching: Cache deck metadata, cards payload into IndexedDB, and image assets into Cache Storage
-      if (cards && cards.length > 0 && deckData.activeRevisionId) {
-        cacheDeckMetadata(deckData).catch(() => {});
-        cacheCardsPayload(deckData.id, deckData.activeRevisionId, cards).catch(() => {});
-        cacheDeckImagesOnOpen(cards).catch(() => {});
-      }
-
-      const savedProgress = await loadFlashcardProgress(uid, deckData.id);
-      currentProgress = savedProgress || {
-        deckId: deckData.id,
-        revisionId: deckData.activeRevisionId || '',
-        checkpointIndex: 0,
-        resetVersion: 1,
-        updatedAt: Date.now(),
-        cards: {}
-      };
-
-      reviewState = createReviewState(cards, currentProgress);
-      render();
-    }
-
-    function render() {
-      if (!cardStage || !questionBody || !answerBody || !progressCounter) return;
-      const lang = getCurrentLanguage();
-
-      if (reviewState.completed) {
-        cardStage.classList.add('hidden');
-        pausedScreen?.classList.add('hidden');
-        completeScreen?.classList.remove('hidden');
-        progressCounter.textContent = t('common.completed', lang);
-        if (progressPercent) progressPercent.textContent = '100%';
-        if (progressBar) progressBar.style.width = '100%';
-        return;
-      }
-
-      completeScreen?.classList.add('hidden');
-
-      if (reviewState.paused) {
-        cardStage.classList.add('hidden');
-        pausedScreen?.classList.remove('hidden');
-        if (pauseBtnText) pauseBtnText.textContent = t('flashcards.resume', lang);
-        return;
-      }
-
-      cardStage.classList.remove('hidden');
-      pausedScreen?.classList.add('hidden');
-      if (pauseBtnText) pauseBtnText.textContent = t('flashcards.pause', lang);
-
-      const card = currentCard(reviewState);
-      if (!card) return;
-
-      // Update progress bar and counter
-      const currentPos = reviewState.currentIndex + 1;
-      const totalInQueue = reviewState.queue.length;
-      progressCounter.textContent = t('flashcards.progress', lang, { current: currentPos, total: totalInQueue });
-      const pct = totalInQueue > 0 ? Math.round(((currentPos - 1) / totalInQueue) * 100) : 0;
-      if (progressPercent) progressPercent.textContent = `${pct}%`;
-      if (progressBar) progressBar.style.width = `${pct}%`;
-
-      // Render front question
-      const { html: cleanQ, hintText } = prepareCardHtml(card.questionHtml);
-      const qDir = card.questionDirection || (/[\u0600-\u06FF]/.test(cleanQ.replace(/<[^>]+>/g, '')) ? 'rtl' : 'ltr');
-      questionBody.setAttribute('dir', qDir);
-      questionBody.className = `card-html text-center text-lg sm:text-xl font-medium leading-relaxed select-text`;
-      questionBody.innerHTML = cleanQ;
-
-      // Handle Hint UI
-      if (hintText && cardHintContainer && cardHintPanel) {
-        cardHintContainer.classList.remove('hidden');
-        cardHintPanel.innerHTML = hintText;
-        cardHintPanel.classList.add('hidden');
-        if (btnToggleHint) {
-          const btnSpan = btnToggleHint.querySelector('span');
-          if (btnSpan) btnSpan.textContent = '💡 إظهار التلميح';
-        }
-      } else if (cardHintContainer) {
-        cardHintContainer.classList.add('hidden');
-      }
-
-      // Render answer if revealed
-      if (reviewState.revealed) {
-        const { html: cleanA } = prepareCardHtml(card.answerHtml, cleanQ);
-        const aDir = card.answerDirection || (/[\u0600-\u06FF]/.test(cleanA.replace(/<[^>]+>/g, '')) ? 'rtl' : 'ltr');
-        answerBody.setAttribute('dir', aDir);
-        answerBody.className = `card-html text-center text-base sm:text-lg leading-relaxed select-text`;
-        answerBody.innerHTML = cleanA;
-        answerContainer?.classList.remove('hidden');
-        controlsUnrevealed?.classList.add('hidden');
-        controlsRevealed?.classList.remove('hidden');
-      } else {
-        answerContainer?.classList.add('hidden');
-        controlsUnrevealed?.classList.remove('hidden');
-        controlsRevealed?.classList.add('hidden');
-      }
-    }
-
-    function handleReveal() {
-      if (reviewState.revealed || reviewState.completed || reviewState.paused || isTransitioning) return;
-      reviewState = reveal(reviewState);
-      render();
-
-      if (answerContainer) {
-        answerContainer.classList.remove('answer-revealing');
-        void answerContainer.offsetWidth; // trigger reflow
-        answerContainer.classList.add('answer-revealing');
-
-        if (window.innerWidth < 640) {
-          answerContainer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-        }
-      }
-
-      if (controlsRevealed) {
-        controlsRevealed.classList.remove('controls-pop');
-        void controlsRevealed.offsetWidth;
-        controlsRevealed.classList.add('controls-pop');
-      }
-    }
-
-    async function handleRating(rating: 'again' | 'known') {
-      if (isTransitioning) return;
-      const card = currentCard(reviewState);
-      if (!card || !reviewState.revealed) return;
-
-      isTransitioning = true;
-
-      // 1. Play card exit animation
-      if (cardStage) {
-        cardStage.classList.add(rating === 'known' ? 'card-exit-known' : 'card-exit-again');
-      }
-
-      // 2. Save progress in background
-      currentProgress = rateProgress(
-        currentProgress,
-        card.id,
-        rating,
-        card.contentHash,
-        deckData.activeRevisionId || card.revisionId
-      );
-      currentProgress.checkpointIndex = reviewState.currentIndex + 1;
-      saveFlashcardProgress(uid, currentProgress).catch(console.error);
-
-      // 3. Advance state and render new card after exit animation
-      setTimeout(() => {
-        reviewState = rate(reviewState, rating);
-        render();
-
-        if (cardStage) {
-          cardStage.classList.remove('card-exit-known', 'card-exit-again');
-          cardStage.classList.add('card-enter');
-          setTimeout(() => {
-            cardStage.classList.remove('card-enter');
-            isTransitioning = false;
-          }, 180);
-        } else {
-          isTransitioning = false;
-        }
-
-        if (window.innerWidth < 640 && cardStage) {
-          cardStage.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-        }
-      }, 120);
-    }
-
-    function handlePause() {
-      reviewState = togglePaused(reviewState);
-      render();
-    }
-
-    // Toggle Hint panel
-    btnToggleHint?.addEventListener('click', (e) => {
-      e.stopPropagation();
-      if (!cardHintPanel) return;
-      const isCurrentlyHidden = cardHintPanel.classList.toggle('hidden');
-      const btnSpan = btnToggleHint.querySelector('span');
-      if (btnSpan) {
-        btnSpan.textContent = isCurrentlyHidden ? '💡 إظهار التلميح' : '💡 إخفاء التلميح';
-      }
-    });
-
-    // Touch & Pointer Gesture Tracking
-    let startX = 0;
-    let startY = 0;
-    let isPointerActive = false;
-    let hasDragged = false;
-
-    cardStage?.addEventListener('pointerdown', (e) => {
-      // Ignore click on interactive buttons or links inside the card
-      if ((e.target as HTMLElement).closest('button, a, dialog, input, [contenteditable]')) {
-        return;
-      }
-      startX = e.clientX;
-      startY = e.clientY;
-      isPointerActive = true;
-      hasDragged = false;
-    });
-
-    window.addEventListener('pointermove', (e) => {
-      if (!isPointerActive || !cardStage || isTransitioning) return;
-      const dx = e.clientX - startX;
-      const dy = e.clientY - startY;
-
-      if (Math.abs(dx) > 8 || Math.abs(dy) > 8) {
-        hasDragged = true;
-      }
-
-      // Drag toss logic active when revealed
-      if (reviewState.revealed && hasDragged) {
-        const rot = dx * 0.04;
-        cardStage.style.transform = `translate3d(${dx}px, ${dy * 0.15}px, 0) rotate(${rot}deg)`;
-
-        const ratio = Math.min(Math.abs(dx) / 100, 1);
-        if (dx > 0) {
-          // Moving Right -> Known (Green shade)
-          if (shadeKnown) shadeKnown.style.opacity = String(ratio);
-          if (shadeAgain) shadeAgain.style.opacity = '0';
-          cardStage.style.borderColor = `rgba(16, 185, 129, ${ratio * 0.8})`;
-        } else {
-          // Moving Left -> Again (Pale Red shade)
-          if (shadeAgain) shadeAgain.style.opacity = String(ratio);
-          if (shadeKnown) shadeKnown.style.opacity = '0';
-          cardStage.style.borderColor = `rgba(244, 63, 94, ${ratio * 0.8})`;
-        }
-      }
-    });
-
-    window.addEventListener('pointerup', (e) => {
-      if (!isPointerActive) return;
-      isPointerActive = false;
-
-      if (!hasDragged) {
-        // Tap detected: reveal answer if not yet revealed
-        if (!reviewState.revealed && !reviewState.completed && !reviewState.paused) {
-          handleReveal();
-        }
-        return;
-      }
-
-      if (reviewState.revealed && cardStage && !isTransitioning) {
-        const dx = e.clientX - startX;
-        if (dx > 75) {
-          // Tossed Right -> Known
-          tossCard('known');
-        } else if (dx < -75) {
-          // Tossed Left -> Again
-          tossCard('again');
-        } else {
-          // Spring back to center
-          resetCardPosition();
-        }
-      }
-    });
-
-    function tossCard(rating: 'again' | 'known') {
-      if (!cardStage || isTransitioning) return;
-      isTransitioning = true;
-      cardStage.style.transition = 'transform 200ms cubic-bezier(0.2, 0.8, 0.2, 1), opacity 200ms ease';
-      cardStage.style.transform = rating === 'known'
-        ? 'translate3d(120%, 0, 0) rotate(16deg)'
-        : 'translate3d(-120%, 0, 0) rotate(-16deg)';
-      cardStage.style.opacity = '0';
-
-      setTimeout(() => {
-        handleRating(rating);
-        if (cardStage) {
-          cardStage.style.transform = '';
-          cardStage.style.opacity = '';
-          cardStage.style.transition = '';
-          cardStage.style.borderColor = '';
-        }
-        if (shadeKnown) shadeKnown.style.opacity = '0';
-        if (shadeAgain) shadeAgain.style.opacity = '0';
-        isTransitioning = false;
-      }, 190);
-    }
-
-    function resetCardPosition() {
-      if (!cardStage) return;
-      cardStage.style.transition = 'transform 220ms cubic-bezier(0.175, 0.885, 0.32, 1.275), border-color 200ms, opacity 200ms';
-      cardStage.style.transform = 'translate3d(0, 0, 0) rotate(0)';
-      cardStage.style.borderColor = '';
-      if (shadeKnown) shadeKnown.style.opacity = '0';
-      if (shadeAgain) shadeAgain.style.opacity = '0';
-      setTimeout(() => {
-        if (cardStage) cardStage.style.transition = '';
-      }, 220);
-    }
-
-    // Keyboard navigation:
-    // - Space or ArrowUp: Reveal answer
-    // - ArrowRight (or 2): Known (Answered right)
-    // - ArrowLeft (or 1): Again (Answered wrong)
-    function handleKeydown(e: KeyboardEvent) {
-      const target = e.target as HTMLElement | null;
-      if (target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable)) {
-        return;
-      }
-
-      if (e.code === 'Space' || e.key === 'ArrowUp') {
-        if (!reviewState.revealed && !reviewState.completed && !reviewState.paused) {
-          e.preventDefault();
-          handleReveal();
-        }
-      } else if (e.key === 'ArrowRight' || e.key === '2') {
-        if (reviewState.revealed && !reviewState.completed && !reviewState.paused) {
-          e.preventDefault();
-          handleRating('known');
-        }
-      } else if (e.key === 'ArrowLeft' || e.key === '1') {
-        if (reviewState.revealed && !reviewState.completed && !reviewState.paused) {
-          e.preventDefault();
-          handleRating('again');
-        }
-      }
-    }
-
-    revealBtn?.addEventListener('click', handleReveal);
-    againBtn?.addEventListener('click', () => handleRating('again'));
-    knownBtn?.addEventListener('click', () => handleRating('known'));
-    pauseBtn?.addEventListener('click', handlePause);
-    resumeBtn?.addEventListener('click', handlePause);
-
-    // Reset progress handling
-    resetBtn?.addEventListener('click', () => resetDialog?.showModal());
-    cancelResetBtn?.addEventListener('click', () => resetDialog?.close());
-    confirmResetBtn?.addEventListener('click', async () => {
-      resetDialog?.close();
-      currentProgress = resetProgress(currentProgress);
-      await saveFlashcardProgress(uid, currentProgress);
-      reviewState = createReviewState(cards, currentProgress);
-      render();
-    });
-
-    reviewAgainBtn?.addEventListener('click', () => {
-      reviewState = reviewAll(cards);
-      render();
-    });
-
-    const handleLangChange = () => {
-      render();
-    };
-    window.addEventListener('asumed-language-changed', handleLangChange);
-    window.addEventListener('keydown', handleKeydown);
-    (window as any).__studyPlayerCleanup = () => {
-      window.removeEventListener('keydown', handleKeydown);
-      window.removeEventListener('asumed-language-changed', handleLangChange);
-    };
-
-    start();
-  }
-
-  initStudyPlayer();
-  document.addEventListener('astro:after-swap', initStudyPlayer);
+  import '../../scripts/flashcards/player';
 </script>
 
 <style is:global>
@@ -928,64 +413,6 @@ const { deck, initialCards } = Astro.props;
     display: none !important;
   }
 
-  /* Exit and Entry Animations */
-  .card-exit-known {
-    opacity: 0;
-    transform: translateX(40px) rotate(4deg) scale(0.96);
-    transition: all 130ms cubic-bezier(0.4, 0, 0.2, 1);
-  }
-  .card-exit-again {
-    opacity: 0;
-    transform: translateX(-40px) rotate(-4deg) scale(0.96);
-    transition: all 130ms cubic-bezier(0.4, 0, 0.2, 1);
-  }
-  .card-enter {
-    animation: cardEnterAnim 180ms cubic-bezier(0.175, 0.885, 0.32, 1.2) forwards;
-  }
-
-  @keyframes cardEnterAnim {
-    from {
-      opacity: 0;
-      transform: translateY(12px) scale(0.97);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0) scale(1);
-    }
-  }
-
-  /* Answer Revealing Animation */
-  .answer-revealing {
-    animation: answerRevealAnim 240ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
-  }
-
-  @keyframes answerRevealAnim {
-    from {
-      opacity: 0;
-      transform: translateY(14px) scale(0.98);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0) scale(1);
-    }
-  }
-
-  /* Controls Pop Animation */
-  .controls-pop {
-    animation: controlsPopAnim 180ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
-  }
-
-  @keyframes controlsPopAnim {
-    from {
-      opacity: 0;
-      transform: scale(0.95);
-    }
-    to {
-      opacity: 1;
-      transform: scale(1);
-    }
-  }
-
   @keyframes fadeIn {
     from {
       opacity: 0;
@@ -1000,16 +427,21 @@ const { deck, initialCards } = Astro.props;
     animation: fadeIn 200ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
   }
 
+  .flashcard-stage-viewport {
+    overflow-x: clip;
+  }
+  #card-stage {
+    touch-action: pan-y pinch-zoom;
+  }
+  #card-stage.is-dragging,
+  #card-stage.is-dragging * {
+    user-select: none !important;
+    -webkit-user-select: none !important;
+  }
+  #card-stage img {
+    -webkit-user-drag: none;
+  }
   @media (prefers-reduced-motion: reduce) {
-    .card-exit-known,
-    .card-exit-again,
-    .card-enter,
-    .answer-revealing,
-    .controls-pop,
-    .animate-fadeIn {
-      animation: none !important;
-      transition: opacity 80ms ease !important;
-      transform: none !important;
-    }
+    .animate-fadeIn { animation: none; }
   }
 </style>
