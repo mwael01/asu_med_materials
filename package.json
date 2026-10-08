@@ -9,7 +9,7 @@
     "dev": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
-    "test:flashcards": "node --import ./scripts/register-typescript.mjs tests/flashcard-interactions.test.mjs",
+    "test:flashcards": "node --import ./scripts/register-typescript.mjs tests/flashcards.test.mjs",
     "test:admin-ai": "node --import ./scripts/register-typescript.mjs tests/admin-ai.test.mjs",
     "astro": "astro",
     "seed:firestore": "node scripts/seed-firestore.mjs",

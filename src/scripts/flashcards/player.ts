@@ -3,6 +3,7 @@ import type {
   FlashcardDeck,
   FlashcardProgress,
   FlashcardRating,
+  ReviewState,
 } from '../../types/flashcards';
 import {
   createReviewState,
@@ -10,18 +11,16 @@ import {
   reveal,
   rate,
   togglePaused,
-  reviewAll,
-  type ReviewState,
+  reviewProgress,
 } from '../../utils/flashcards/review';
 import {
   loadFlashcardProgress,
   saveFlashcardProgress,
-  rateProgress,
-  resetProgress,
   getCachedCards,
   cacheCardsPayload,
   cacheDeckMetadata,
 } from '../../utils/flashcards/persistence';
+import { rateProgress, resetProgress } from '../../utils/flashcards/progress';
 import { getCachedUserProfile } from '../../firebase/auth';
 import { cacheDeckImagesOnOpen } from '../../utils/flashcards/caching';
 import { getCurrentLanguage, t } from '../../utils/i18n';
@@ -65,6 +64,7 @@ function initStudyPlayer() {
   const progressBar = document.getElementById('player-progress-bar');
   const pausedScreen = document.getElementById('session-paused-screen');
   const completeScreen = document.getElementById('session-complete-screen');
+  const emptyScreen = document.getElementById('session-empty-screen');
   const pauseBtn = document.getElementById('btn-pause-session');
   const pauseBtnText = document.getElementById('pause-btn-text');
   const resumeBtn = document.getElementById('btn-resume-session');
@@ -101,15 +101,16 @@ function initStudyPlayer() {
     commit: (rating) => {
       const card = currentCard(reviewState);
       if (!card) return;
+      reviewState = rate(reviewState, rating);
       currentProgress = rateProgress(
         currentProgress,
         card.id,
         rating,
         card.contentHash,
         deckData.activeRevisionId || card.revisionId,
+        reviewState.queue,
       );
-      currentProgress.checkpointIndex = reviewState.currentIndex + 1;
-      reviewState = rate(reviewState, rating);
+      renderedCardKey = '';
       saveFlashcardProgress(uid, currentProgress).catch(console.error);
     },
     exit: animations.exit,
@@ -133,7 +134,7 @@ function initStudyPlayer() {
         !lifetime.signal.aborted &&
         !isTransitioning &&
         !reviewState.paused &&
-        !reviewState.completed &&
+        !!currentCard(reviewState) &&
         !document.querySelector('dialog[open]'),
       canDrag: () => reviewState.revealed,
       reveal: handleReveal,
@@ -165,6 +166,8 @@ function initStudyPlayer() {
       if (button instanceof HTMLButtonElement) {
         button.disabled =
           !ready ||
+          (button === pauseBtn && !currentCard(reviewState)) ||
+          ([resetBtn, reviewAgainBtn].includes(button) && reviewState.cards.length === 0) ||
           ([revealBtn, againBtn, knownBtn, btnToggleHint].includes(button) &&
             isTransitioning);
       }
@@ -198,20 +201,8 @@ function initStudyPlayer() {
       }
     }
 
-    // Defensive deduplication across cards
-    const seen = new Set<string>();
-    const deduped: FlashcardCard[] = [];
-    for (const c of cards) {
-      const key =
-        c.sourceNoteGuid && typeof c.sourceTemplateOrdinal === 'number'
-          ? `${c.sourceNoteGuid}:${c.sourceTemplateOrdinal}`
-          : c.id;
-      if (!seen.has(key)) {
-        seen.add(key);
-        deduped.push(c);
-      }
-    }
-    cards = deduped;
+    // Use the review engine's eligibility and deduplication rules everywhere.
+    cards = createReviewState(cards).cards;
 
     // On-demand caching: Cache deck metadata, cards payload into IndexedDB, and image assets into Cache Storage
     if (cards && cards.length > 0 && deckData.activeRevisionId) {
@@ -234,6 +225,11 @@ function initStudyPlayer() {
     };
 
     reviewState = createReviewState(cards, currentProgress);
+    currentProgress = {
+      ...currentProgress,
+      checkpointIndex: 0,
+      pendingCardIds: [...reviewState.queue],
+    };
     ready = true;
     render();
     updateControls();
@@ -251,13 +247,23 @@ function initStudyPlayer() {
       return;
     const lang = getCurrentLanguage();
 
+    const { known, total, percent } = reviewProgress(reviewState);
+    progressCounter.setAttribute('data-i18n-params', JSON.stringify({ known, total }));
+    progressCounter.textContent = t('flashcards.progress', lang, { known, total });
+    if (progressPercent) progressPercent.textContent = `${percent}%`;
+    if (progressBar) progressBar.style.width = `${percent}%`;
+    emptyScreen?.classList.toggle('hidden', total > 0);
+    if (total === 0) {
+      viewport.classList.add('hidden');
+      pausedScreen?.classList.add('hidden');
+      completeScreen?.classList.add('hidden');
+      return;
+    }
+
     if (reviewState.completed) {
       viewport.classList.add('hidden');
       pausedScreen?.classList.add('hidden');
       completeScreen?.classList.remove('hidden');
-      progressCounter.textContent = t('common.completed', lang);
-      if (progressPercent) progressPercent.textContent = '100%';
-      if (progressBar) progressBar.style.width = '100%';
       return;
     }
 
@@ -277,22 +283,8 @@ function initStudyPlayer() {
     const card = currentCard(reviewState);
     if (!card) return;
 
-    // Update progress bar and counter
-    const currentPos = reviewState.currentIndex + 1;
-    const totalInQueue = reviewState.queue.length;
-    progressCounter.textContent = t('flashcards.progress', lang, {
-      current: currentPos,
-      total: totalInQueue,
-    });
-    const pct =
-      totalInQueue > 0
-        ? Math.round(((currentPos - 1) / totalInQueue) * 100)
-        : 0;
-    if (progressPercent) progressPercent.textContent = `${pct}%`;
-    if (progressBar) progressBar.style.width = `${pct}%`;
-
     // Preserve question DOM, images, selection, and hints when only reveal/language changes.
-    const cardKey = `${reviewState.currentIndex}:${card.id}:${card.contentHash}`;
+    const cardKey = `${card.id}:${card.contentHash}`;
     if (cardKey !== renderedCardKey) {
       renderedCardKey = cardKey;
       answerRendered = false;
@@ -475,30 +467,41 @@ function initStudyPlayer() {
     () => resetDialog?.close(),
     listenerOptions,
   );
+
+  async function startFreshPass() {
+    if (!ready) return;
+    interruptVisuals();
+    ready = false;
+    updateControls();
+    reviewState = createReviewState(cards);
+    currentProgress = resetProgress(currentProgress, reviewState.queue);
+    renderedCardKey = '';
+    try {
+      await saveFlashcardProgress(uid, currentProgress);
+    } catch (error) {
+      console.error('Unable to save fresh flashcard pass:', error);
+    } finally {
+      if (!lifetime.signal.aborted) {
+        ready = true;
+        render();
+        updateControls();
+      }
+    }
+  }
+
   confirmResetBtn?.addEventListener(
     'click',
     () => {
       if (!ready) return;
       resetDialog?.close();
-      interruptVisuals();
-      currentProgress = resetProgress(currentProgress);
-      saveFlashcardProgress(uid, currentProgress).catch(console.error);
-      reviewState = createReviewState(cards, currentProgress);
-      renderedCardKey = '';
-      render();
+      void startFreshPass();
     },
     listenerOptions,
   );
 
   reviewAgainBtn?.addEventListener(
     'click',
-    () => {
-      if (!ready) return;
-      interruptVisuals();
-      reviewState = reviewAll(cards);
-      renderedCardKey = '';
-      render();
-    },
+    () => { void startFreshPass(); },
     listenerOptions,
   );
 

@@ -247,6 +247,7 @@ export interface TranslationsSchema {
     completedTitle: string;
     completedSubtitle: string;
     noDecks: string;
+    noCards: string;
     cardsCount: string;
     progress: string;
     backToModule: string;

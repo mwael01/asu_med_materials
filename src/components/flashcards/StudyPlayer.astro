@@ -41,9 +41,9 @@ const { deck, initialCards } = Astro.props;
             <span
               id="player-progress-counter"
               data-i18n="flashcards.progress"
-              data-i18n-params={JSON.stringify({ current: 1, total: initialCards.length })}
+              data-i18n-params={JSON.stringify({ known: 0, total: initialCards.length })}
             >
-              بطاقة 1 من {initialCards.length}
+              اكتملت 0 من {initialCards.length} بطاقة
             </span>
             <span>•</span>
             <span id="player-progress-percent">0%</span>
@@ -221,6 +221,10 @@ const { deck, initialCards } = Astro.props;
     >
       استئناف المذاكرة
     </button>
+  </div>
+
+  <div id="session-empty-screen" class="hidden p-8 sm:p-12 text-center rounded-3xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800">
+    <p class="text-sm text-zinc-500 dark:text-zinc-400" data-i18n="flashcards.noCards">لا توجد بطاقات متاحة في هذه المجموعة.</p>
   </div>
 
   <!-- Session Complete Screen -->

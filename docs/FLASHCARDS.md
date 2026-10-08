@@ -67,7 +67,8 @@ Flashcard image and diagram hosting is powered by **Cloudflare R2** and generous
 
 ### Study Player (`/flashcards/[id]`)
 - **Loop:** Clean **Reveal → Again / Known** study flow without complex SRS burden.
-- **Queue & Deduplication:** Cards are studied in canonical source ordinal order. The database and client engines enforce strict deduplication by `(sourceNoteGuid, sourceTemplateOrdinal)` so no duplicate cards are ever displayed. Cards marked "Again" return to the end of the queue for a second pass until all cards are mastered.
+- **Queue & Deduplication:** Eligible cards start in canonical source ordinal order, deduplicated by card ID and `(sourceNoteGuid, sourceTemplateOrdinal)`, with quarantined cards excluded. The queue contains each pending card once. **Again** moves the current card to the end without duplicating it; **Known** removes it. Even a single remaining Again card stays pending and returns with its answer and hint hidden.
+- **Completion & Progress:** The counter shows Known cards out of the eligible deck total, with percentage `known / total`. Again does not advance progress or change the total. An unfinished deck never rounds up to 100%; completion requires every eligible card to be Known. Empty decks show an empty state at 0%. **Reset** and **Review again** both start a fresh saved pass from zero, incrementing the reset generation and restoring source order.
 - **Visual Design & Centering:** Modern, elevated 3D card presentation with subtle borders, dark/light theme adaptation, and centered card typography (`text-center`) for questions, answers, and medical diagrams.
 - **Direct Image Rendering:** Card images hosted on Cloudflare R2 (`asumed.eduvour.com`) load eagerly with responsive containment, smooth shadow frames, and click-to-zoom modal lightbox (`ImageViewer.astro`).
 - **Interactive Hints:** Cards with hints feature a clean `💡 إظهار التلميح` pill button that reveals the hint with smooth fade/slide animation, while dead or empty Anki hint boilerplate is cleanly stripped.
@@ -81,12 +82,18 @@ Flashcard image and diagram hosting is powered by **Cloudflare R2** and generous
   - `Space` or `↑` (Up Arrow): Reveal answer
   - `→` (Right Arrow) or `2`: Known (answered correctly / memorized)
   - `←` (Left Arrow) or `1`: Again (answered incorrectly / repeat card)
-- **Animated Progress Bar:** Top header includes a live gradient progress bar (`emerald → teal → cyan`) tracking completion percentage through the study queue.
+- **Animated Progress Bar:** The existing header counter and gradient progress bar (`emerald → teal → cyan`) track Known-card completion, including after reopening, pausing, or switching languages.
 
 ### Client-Side Persistence (`IndexedDB`)
-- **Database:** `asumed_flashcards_db` (version 1)
-- **Stores:** `progress`, `decks`, `cards`, `manifests`.
-- **Guest / Auth Sync:** Guests save progress locally; upon login, guest progress is safely merged into the user's private Firestore checkpoint (`users/{uid}/flashcard_progress/{deckId}`).
+- **Database:** `asumed_flashcards_db` (version 2); Firestore remains the authoritative data source and IndexedDB provides the existing offline cache.
+- **Stores:** `progress`, `decks`, `cards`, `manifests`, `checkpoints`.
+- **Saved Queue:** Progress snapshots include per-card ratings and optional `pendingCardIds`, ordered with the next card first. Each accepted rating saves both together. Reopening retains the exact pending order, removes duplicate/ineligible/Known IDs, and appends missing pending cards in source order (unseen before Again). Changed content hashes or reset generations invalidate older ratings. Legacy `checkpointIndex` is ignored and written as zero, so old progress resumes without skipping pending cards or requiring a bulk migration.
+- **Cloud Selection & Writes:** Authenticated online loads select the local/cloud snapshot by reset generation first, then timestamp, before starting the player. Cloud reads fall back to local progress on failure or after five seconds; late reads cannot overwrite the active session. Cache transactions complete before a save resolves. Local and cloud writes are serialized separately per user/deck, so cloud sync cannot block offline study. Cloud sync failures retain the local snapshot; this flow does not introduce a background retry service.
+- **Guest Merge:** The guest-merge helper preserves user ratings on conflicts and the user's pending order, then adds guest-only pending IDs. The review engine reconciles the merged queue with the actual deck when opened.
+
+### Regression checks
+
+Run `npm run test:flashcards` for queue/progress, persistence, player integration, gesture, and animation regressions. The player integration suite runs the real player against a simulated DOM and storage, including button/keyboard/gesture ratings, one-card Again presentation, pause/language changes, and fresh saved passes. Run `npm run astro -- check` and `npm run build` after player changes.
 
 ### On-Demand Image Caching Policy (`src/utils/flashcards/caching.ts`)
 - **No Upfront Network Burden:** Background prefetching for the student's selected academic year (`prefetchYearFlashcards`) downloads only deck metadata, manifests, and card JSON into IndexedDB. **Image binary files are intentionally excluded from upfront prefetching** so they never slow down initial website loading or waste student bandwidth.

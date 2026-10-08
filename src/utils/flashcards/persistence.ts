@@ -3,13 +3,13 @@ import type {
   FlashcardDeck,
   FlashcardManifest,
   FlashcardProgress,
-  FlashcardProgressCard,
-  FlashcardRating
 } from '../../types/flashcards';
 import {
   getFlashcardProgressFromFirestore,
   saveFlashcardProgressToFirestore
 } from '../../firebase/flashcards';
+import { mergeGuestProgress } from './progress';
+import { createProgressStorage } from './progressStorage';
 
 const DB_NAME = 'asumed_flashcards_db';
 const DB_VERSION = 2;
@@ -71,36 +71,15 @@ function cardsKey(deckId: string, revisionId: string): string {
 // Flashcard Progress Management (Local + Cloud Sync)
 // -------------------------------------------------------------
 
-export async function loadFlashcardProgress(
-  uid: string | null,
-  deckId: string
-): Promise<FlashcardProgress | null> {
+async function loadLocalProgress(uid: string | null, deckId: string): Promise<FlashcardProgress | null> {
   if (typeof indexedDB === 'undefined' || !deckId) return null;
-
-  try {
-    const db = await openDb();
-    const local = await new Promise<FlashcardProgress | null>((resolve, reject) => {
-      const tx = db.transaction(STORES.PROGRESS, 'readonly');
-      const req = tx.objectStore(STORES.PROGRESS).get(progressKey(uid, deckId));
-      req.onsuccess = () => resolve(req.result?.value || null);
-      req.onerror = () => reject(req.error);
-    });
-
-    // If authenticated and online, check Firestore for newer sync
-    if (uid && navigator.onLine) {
-      getFlashcardProgressFromFirestore(uid, deckId).then((remote) => {
-        if (!remote) return;
-        if (!local || remote.updatedAt > (local.updatedAt || 0) || remote.resetVersion > (local.resetVersion || 0)) {
-          saveLocalProgress(uid, remote);
-        }
-      }).catch(() => {});
-    }
-
-    return local;
-  } catch (err) {
-    console.warn('[Persistence] Error loading progress:', err);
-    return null;
-  }
+  const db = await openDb();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(STORES.PROGRESS, 'readonly');
+    const req = tx.objectStore(STORES.PROGRESS).get(progressKey(uid, deckId));
+    req.onsuccess = () => resolve(req.result?.value || null);
+    req.onerror = () => reject(req.error);
+  });
 }
 
 async function saveLocalProgress(uid: string | null, progress: FlashcardProgress): Promise<void> {
@@ -108,91 +87,35 @@ async function saveLocalProgress(uid: string | null, progress: FlashcardProgress
   const db = await openDb();
   await new Promise<void>((resolve, reject) => {
     const tx = db.transaction(STORES.PROGRESS, 'readwrite');
-    const req = tx.objectStore(STORES.PROGRESS).put({
+    tx.objectStore(STORES.PROGRESS).put({
       key: progressKey(uid, progress.deckId),
       value: progress
     });
-    req.onsuccess = () => resolve();
-    req.onerror = () => reject(req.error);
+    tx.oncomplete = () => resolve();
+    tx.onerror = () => reject(tx.error);
+    tx.onabort = () => reject(tx.error || new Error('Progress transaction aborted'));
   });
 }
 
-export async function saveFlashcardProgress(
-  uid: string | null,
-  progress: FlashcardProgress
-): Promise<void> {
-  await saveLocalProgress(uid, progress);
+const progressStorage = createProgressStorage({
+  loadLocal: loadLocalProgress,
+  saveLocal: saveLocalProgress,
+  loadRemote: getFlashcardProgressFromFirestore,
+  saveRemote: saveFlashcardProgressToFirestore,
+  isOnline: () => typeof navigator !== 'undefined' && navigator.onLine,
+});
 
-  // If user signed in, sync to Firestore
-  if (uid && navigator.onLine) {
-    saveFlashcardProgressToFirestore(uid, progress).catch((err) => {
-      console.warn('[Persistence] Cloud progress sync failed, will retry:', err);
-    });
-  }
-}
+export const loadFlashcardProgress = progressStorage.load;
+export const saveFlashcardProgress = progressStorage.save;
 
 export async function mergeGuestProgressOnLogin(uid: string, deckIds: string[]): Promise<void> {
   if (!uid || typeof indexedDB === 'undefined') return;
-
   for (const deckId of deckIds) {
-    const guestProgress = await loadFlashcardProgress(null, deckId);
-    if (!guestProgress || Object.keys(guestProgress.cards || {}).length === 0) continue;
-
-    const userProgress = await loadFlashcardProgress(uid, deckId);
-    if (!userProgress) {
-      // User has no progress for this deck, copy guest progress directly
-      const merged: FlashcardProgress = {
-        ...guestProgress,
-        updatedAt: Date.now()
-      };
-      await saveFlashcardProgress(uid, merged);
-    } else {
-      // Merge: user cards win on conflict, add guest-only reviewed cards
-      const mergedCards = { ...guestProgress.cards, ...userProgress.cards };
-      const merged: FlashcardProgress = {
-        deckId,
-        revisionId: userProgress.revisionId || guestProgress.revisionId,
-        checkpointIndex: userProgress.checkpointIndex,
-        resetVersion: Math.max(userProgress.resetVersion || 0, guestProgress.resetVersion || 0),
-        updatedAt: Date.now(),
-        cards: mergedCards
-      };
-      await saveFlashcardProgress(uid, merged);
-    }
+    const guest = await loadFlashcardProgress(null, deckId);
+    if (!guest || Object.keys(guest.cards || {}).length === 0) continue;
+    const user = await loadFlashcardProgress(uid, deckId);
+    await saveFlashcardProgress(uid, mergeGuestProgress(guest, user));
   }
-}
-
-export function rateProgress(
-  progress: FlashcardProgress,
-  cardId: string,
-  rating: FlashcardRating,
-  contentHash: string,
-  revisionId: string
-): FlashcardProgress {
-  const card: FlashcardProgressCard = {
-    cardId,
-    status: rating,
-    contentHash,
-    updatedAt: Date.now(),
-    revisionId,
-    resetVersion: progress.resetVersion
-  };
-  return {
-    ...progress,
-    revisionId,
-    updatedAt: Date.now(),
-    cards: { ...progress.cards, [cardId]: card }
-  };
-}
-
-export function resetProgress(progress: FlashcardProgress): FlashcardProgress {
-  return {
-    ...progress,
-    cards: {},
-    checkpointIndex: 0,
-    resetVersion: (progress.resetVersion || 0) + 1,
-    updatedAt: Date.now()
-  };
 }
 
 // -------------------------------------------------------------

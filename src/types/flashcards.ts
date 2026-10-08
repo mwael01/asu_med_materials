@@ -80,10 +80,35 @@ export interface FlashcardProgressCard {
 export interface FlashcardProgress {
   deckId: string;
   revisionId: string;
+  /** @deprecated Queue positions cannot be applied to a rebuilt pending queue. Always save zero. */
   checkpointIndex: number;
+  pendingCardIds?: string[];
   resetVersion: number;
   updatedAt: number;
   cards: Record<string, FlashcardProgressCard>;
+}
+
+export interface ReviewState {
+  cards: FlashcardCard[];
+  /** Unique pending IDs; the first entry is the current card. */
+  queue: string[];
+  revealed: boolean;
+  paused: boolean;
+  completed: boolean;
+}
+
+export interface ReviewProgress {
+  total: number;
+  known: number;
+  percent: number;
+}
+
+export interface FlashcardProgressStorageAdapter {
+  loadLocal(uid: string | null, deckId: string): Promise<FlashcardProgress | null>;
+  saveLocal(uid: string | null, progress: FlashcardProgress): Promise<void>;
+  loadRemote(uid: string, deckId: string): Promise<FlashcardProgress | null>;
+  saveRemote(uid: string, progress: FlashcardProgress): Promise<boolean>;
+  isOnline(): boolean;
 }
 
 export interface FlashcardFinding {
