@@ -123,13 +123,19 @@ export function bindCardGestures(
       active = moveGesture(active, event, callbacks.canDrag());
       if (active.phase !== 'dragging') return;
       if (previous !== 'dragging') {
+        // Capture before moving the card, including when touch began on a child.
+        try {
+          surface.setPointerCapture(event.pointerId);
+        } catch {
+          cancel();
+          return;
+        }
         surface.classList.add('is-dragging');
         surface.style.willChange = 'transform';
-        surface.setPointerCapture(event.pointerId);
       }
       if (!frame) frame = requestAnimationFrame(draw);
     },
-    options,
+    { ...options, capture: true },
   );
   window.addEventListener(
     'pointerup',
@@ -159,19 +165,26 @@ export function bindCardGestures(
           callbacks.reveal();
       } else if (state.phase === 'dragging') callbacks.settle();
     },
-    options,
+    { ...options, capture: true },
   );
   window.addEventListener(
     'pointercancel',
     (event) => {
       if (active?.pointerId === event.pointerId) cancel();
     },
-    options,
+    { ...options, capture: true },
   );
   surface.addEventListener(
     'lostpointercapture',
     (event) => {
-      if (active?.pointerId === event.pointerId) cancel();
+      // Implicit child capture is lost when capture transfers to this surface.
+      // That event bubbles here; only genuine loss by the surface cancels a drag.
+      if (
+        active?.pointerId === event.pointerId &&
+        event.target === surface &&
+        !surface.hasPointerCapture(event.pointerId)
+      )
+        cancel();
     },
     options,
   );

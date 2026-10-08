@@ -265,6 +265,20 @@ function gestureHarness() {
     });
   };
   const win = new EventTarget();
+  const windowCaptureListeners = new Map();
+  const addWindowListener = win.addEventListener.bind(win);
+  win.addEventListener = (type, listener, options) => {
+    if (options?.capture)
+      windowCaptureListeners.set(type, { listener, signal: options.signal });
+    addWindowListener(type, listener, options);
+  };
+  function dispatchWindow(e) {
+    if (!e.stopAtTarget) return win.dispatchEvent(e);
+    // A descendant stops bubbling; window capture still runs before that target.
+    const registration = windowCaptureListeners.get(e.type);
+    if (registration && !registration.signal?.aborted)
+      registration.listener(e);
+  }
   let selected = false;
   let selectionNode = null;
   win.getSelection = () => ({
@@ -289,6 +303,26 @@ function gestureHarness() {
   const surface = new TestElement();
   const image = new TestElement('img', surface);
   const button = new TestElement('button', surface);
+  const captureOwners = new Map();
+  const captureLosses = [];
+  function loseCapture(target, id) {
+    target.captured.delete(id);
+    if (captureOwners.get(id) === target) captureOwners.delete(id);
+    if (surface.contains(target))
+      surface.dispatchEvent(event('lostpointercapture', target, 0, 0, 0, id));
+  }
+  // hasPointerCapture reflects the pending owner during a browser handoff.
+  // Process the old owner's bubbling loss before the next pointer event.
+  surface.setPointerCapture = (id) => {
+    const previous = captureOwners.get(id);
+    if (previous && previous !== surface) {
+      previous.captured.delete(id);
+      captureLosses.push({ target: previous, id });
+    }
+    captureOwners.set(id, surface);
+    surface.captured.add(id);
+  };
+  surface.releasePointerCapture = (id) => loseCapture(surface, id);
   const controller = new AbortController();
   let interactive = true;
   let revealed = true;
@@ -314,14 +348,26 @@ function gestureHarness() {
     id = 1,
     extra = {},
   ) {
+    if (type.startsWith('pointer')) {
+      for (const { target: previous, id: pointerId } of captureLosses.splice(0))
+        loseCapture(previous, pointerId);
+    }
     const e = event(type, target, x, y, time, id, extra);
     if (type === 'pointerdown') {
+      const owner = target instanceof TestElement ? target : target.parentElement;
+      if (owner && e.pointerType !== 'mouse') {
+        captureOwners.set(id, owner);
+        owner.captured.add(id);
+      }
       doc.dispatchEvent(e);
       surface.dispatchEvent(e);
     } else if (type === 'pointerup' || type === 'pointercancel') {
       doc.dispatchEvent(e);
-      win.dispatchEvent(e);
-    } else if (type === 'pointermove') win.dispatchEvent(e);
+      dispatchWindow(e);
+      const owner = captureOwners.get(id);
+      if (owner) loseCapture(owner, id);
+    } else if (type === 'pointermove') dispatchWindow(e);
+    else if (type === 'lostpointercapture') loseCapture(target, id);
     else surface.dispatchEvent(e);
     return e;
   }
@@ -372,6 +418,73 @@ function withGestures(fn) {
     h.restore();
   }
 }
+test('implicit child capture transfers to the card without dropping either toss direction', () => {
+  for (const kind of ['span', 'strong', 'img', 'svg', 'path']) {
+    for (const direction of [-1, 1]) {
+      withGestures((h) => {
+        const child = new TestElement(kind, new TestElement('p', h.surface));
+        h.dispatch('pointerdown', child);
+        assert.equal(child.hasPointerCapture(1), true);
+        h.dispatch('pointermove', child, direction * 30, 0, 30);
+        assert.equal(h.surface.hasPointerCapture(1), true);
+        // The next move delivers the child's bubbling lostpointercapture first.
+        h.dispatch('pointermove', h.surface, direction * 110, 0, 60);
+        h.flush();
+        assert.equal(h.surface.hasPointerCapture(1), true);
+        assert.match(h.surface.style.transform, new RegExp(`${direction * 110}px`));
+        h.dispatch('pointerup', h.surface, direction * 120, 0, 80);
+        h.dispatch('pointerup', h.surface, direction * 120, 0, 90);
+        assert.deepEqual(h.calls, [direction < 0 ? 'again' : 'known']);
+        assert.equal(h.surface.hasPointerCapture(1), false);
+        assert.equal(h.frames.size, 0);
+      });
+    }
+  }
+});
+test('a short text-origin drag survives capture transfer and settles once', () =>
+  withGestures((h) => {
+    const child = new TestElement('span', h.surface);
+    h.dispatch('pointerdown', child);
+    h.dispatch('pointermove', child, 25, 0, 40);
+    h.dispatch('pointerup', h.surface, 30, 0, 80);
+    assert.deepEqual(h.calls, ['settle']);
+    assert.equal(h.dispatch('click', child).defaultPrevented, true);
+  }));
+test('queued surface capture loss is harmless when the surface holds capture again', () =>
+  withGestures((h) => {
+    h.dispatch('pointerdown');
+    h.dispatch('pointermove', h.surface, 100, 0, 40);
+    h.surface.dispatchEvent(event('lostpointercapture', h.surface));
+    h.dispatch('pointerup', h.surface, 110, 0, 80);
+    assert.deepEqual(h.calls, ['known']);
+  }));
+test('capture acquisition failure cancels before drag styling and never rates', () =>
+  withGestures((h) => {
+    h.surface.setPointerCapture = () => {
+      throw new DOMException('Pointer is no longer active', 'NotFoundError');
+    };
+    h.dispatch('pointerdown', new TestElement('span', h.surface));
+    h.dispatch('pointermove', h.surface, 100, 0, 40);
+    assert.equal(h.surface.classes.has('is-dragging'), false);
+    assert.equal(h.surface.style.willChange, '');
+    assert.equal(h.surface.style.transform, '');
+    assert.equal(h.frames.size, 0);
+    h.dispatch('pointerup', h.surface, 110, 0, 80);
+    assert.deepEqual(h.calls, []);
+  }));
+test('descendants stopping propagation cannot interrupt window capture tracking', () => {
+  for (const termination of ['pointerup', 'pointercancel']) {
+    withGestures((h) => {
+      const child = new TestElement('span', h.surface);
+      h.dispatch('pointerdown', child);
+      h.dispatch('pointermove', child, 100, 0, 40, 1, { stopAtTarget: true });
+      h.dispatch(termination, h.surface, 110, 0, 80, 1, { stopAtTarget: true });
+      assert.deepEqual(h.calls, termination === 'pointerup' ? ['known'] : []);
+      assert.equal(h.surface.hasPointerCapture(1), false);
+      assert.equal(h.frames.size, 0);
+    });
+  }
+});
 test('bindings capture horizontal drag, batch painting, and release outside the card', () =>
   withGestures((h) => {
     h.dispatch('pointerdown');
