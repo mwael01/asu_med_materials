@@ -434,9 +434,16 @@ const { deck, initialCards } = Astro.props;
     touch-action: pan-y pinch-zoom;
   }
   #card-stage.is-dragging,
-  #card-stage.is-dragging * {
+  #card-stage.is-dragging *,
+  #card-stage[data-input-mode='touch'],
+  #card-stage[data-input-mode='touch'] * {
     user-select: none !important;
     -webkit-user-select: none !important;
+  }
+  #card-stage[data-input-mode='touch'] :is(input, textarea, select, [contenteditable]),
+  #card-stage[data-input-mode='touch'] [contenteditable] * {
+    user-select: text !important;
+    -webkit-user-select: text !important;
   }
   #card-stage img {
     -webkit-user-drag: none;

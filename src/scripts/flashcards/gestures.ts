@@ -11,9 +11,18 @@ import {
 
 const INTERACTIVE =
   'button, a, input, textarea, select, label, dialog, [contenteditable], audio, video, [role="button"]';
-function hasSelection(): boolean {
+function targetElement(target: EventTarget | null): Element | null {
+  if (target instanceof Element) return target;
+  return target instanceof Node ? target.parentElement : null;
+}
+
+function hasCardSelection(surface: HTMLElement): boolean {
   const selection = window.getSelection();
-  return !!selection && !selection.isCollapsed;
+  if (!selection || selection.isCollapsed) return false;
+  for (let index = 0; index < selection.rangeCount; index++) {
+    if (selection.getRangeAt(index).intersectsNode(surface)) return true;
+  }
+  return false;
 }
 
 export function bindCardGestures(
@@ -84,23 +93,29 @@ export function bindCardGestures(
       // A new genuine contact must not inherit click suppression from an old drag.
       if (active || !event.isPrimary || event.button !== 0 || touches.size > 1)
         return;
+      // Run in capture phase before the browser can begin selecting child text.
+      // Keep the mode after release; the next mouse/pen contact restores selection.
+      surface.dataset.inputMode = event.pointerType || 'mouse';
       suppressClick = false;
-      const target = event.target instanceof Element ? event.target : null;
+      const target = targetElement(event.target);
       if (
         !callbacks.canInteract() ||
         target?.closest(INTERACTIVE) ||
-        hasSelection()
+        (event.pointerType !== 'touch' && hasCardSelection(surface))
       )
         return;
       active = beginGesture(event, surface.getBoundingClientRect().width);
     },
-    options,
+    { ...options, capture: true },
   );
   window.addEventListener(
     'pointermove',
     (event) => {
       if (!active || event.pointerId !== active.pointerId) return;
-      if (!callbacks.canInteract() || hasSelection()) {
+      if (
+        !callbacks.canInteract() ||
+        (active.pointerType !== 'touch' && hasCardSelection(surface))
+      ) {
         cancel();
         return;
       }
@@ -120,7 +135,10 @@ export function bindCardGestures(
     'pointerup',
     (event) => {
       if (!active || active.pointerId !== event.pointerId) return;
-      if (!callbacks.canInteract() || hasSelection()) {
+      if (
+        !callbacks.canInteract() ||
+        (active.pointerType !== 'touch' && hasCardSelection(surface))
+      ) {
         cancel();
         return;
       }
@@ -136,7 +154,7 @@ export function bindCardGestures(
       clearFeedback();
       if (result.type === 'rate') callbacks.rate(result.rating);
       else if (result.type === 'tap') {
-        const target = event.target instanceof Element ? event.target : null;
+        const target = targetElement(event.target);
         if (!target?.closest(`img, ${INTERACTIVE}`) && surface.contains(target))
           callbacks.reveal();
       } else if (state.phase === 'dragging') callbacks.settle();
@@ -193,7 +211,14 @@ export function bindCardGestures(
     },
     options,
   );
-  signal.addEventListener('abort', cancel, { once: true });
+  signal.addEventListener(
+    'abort',
+    () => {
+      cancel();
+      delete surface.dataset.inputMode;
+    },
+    { once: true },
+  );
   return {
     cancel,
     cancelActive: () => {

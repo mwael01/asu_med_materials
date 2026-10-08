@@ -194,12 +194,19 @@ test('cancelled exit still displays committed state and releases the lock', asyn
 
 // Minimal event targets exercise the production bindings without a DOM dependency.
 // Browser scrolling arbitration is verified separately on physical devices.
-class TestElement extends EventTarget {
-  constructor(kind = 'div', parent = null) {
+class TestNode extends EventTarget {
+  constructor(parent = null) {
     super();
+    this.parentElement = parent;
+  }
+}
+class TestElement extends TestNode {
+  constructor(kind = 'div', parent = null) {
+    super(parent);
     this.kind = kind;
     this.parent = parent;
     this.style = {};
+    this.dataset = {};
     this.classes = new Set();
     this.captured = new Set();
     this.classList = {
@@ -218,7 +225,7 @@ class TestElement extends EventTarget {
     return this.parent?.closest(selector) ?? null;
   }
   contains(target) {
-    return target === this || target?.parent === this;
+    return target === this || !!target?.parentElement && this.contains(target.parentElement);
   }
   getBoundingClientRect() {
     return { width: 360 };
@@ -259,7 +266,12 @@ function gestureHarness() {
   };
   const win = new EventTarget();
   let selected = false;
-  win.getSelection = () => ({ isCollapsed: !selected });
+  let selectionNode = null;
+  win.getSelection = () => ({
+    isCollapsed: !selected,
+    rangeCount: selected ? 1 : 0,
+    getRangeAt: () => ({ intersectsNode: node => node.contains(selectionNode) }),
+  });
   const doc = new EventTarget();
   doc.hidden = false;
   const frames = new Map();
@@ -267,6 +279,7 @@ function gestureHarness() {
   set('window', win);
   set('document', doc);
   set('Element', TestElement);
+  set('Node', TestNode);
   set('HTMLImageElement', TestElement);
   set('requestAnimationFrame', (fn) => {
     frames.set(++frameId, fn);
@@ -325,6 +338,11 @@ function gestureHarness() {
     doc,
     set selected(value) {
       selected = value;
+      selectionNode = value ? surface : null;
+    },
+    set selectionNode(value) {
+      selected = !!value;
+      selectionNode = value;
     },
     set revealed(value) {
       revealed = value;
@@ -404,13 +422,13 @@ test('image taps do not reveal; image drags suppress their generated click only'
     h.dispatch('pointerup', h.image, 0, 0, 100);
     assert.equal(h.dispatch('click', h.image).defaultPrevented, false);
   }));
-test('interactive controls, selection, nonprimary mouse buttons, and unready state are ignored', () =>
+test('interactive controls, mouse selection, nonprimary mouse buttons, and unready state are ignored', () =>
   withGestures((h) => {
     h.dispatch('pointerdown', h.button);
     h.dispatch('pointerup', h.button, 0, 0, 100);
     h.selected = true;
-    h.dispatch('pointerdown');
-    h.dispatch('pointerup', h.surface, 0, 0, 100);
+    h.dispatch('pointerdown', h.surface, 0, 0, 0, 1, { pointerType: 'mouse' });
+    h.dispatch('pointerup', h.surface, 0, 0, 100, 1, { pointerType: 'mouse' });
     h.selected = false;
     h.dispatch('pointerdown', h.surface, 0, 0, 0, 1, {
       pointerType: 'mouse',
@@ -612,5 +630,124 @@ test('image and control clicks are blocked during initialization or settling', (
     assert.equal(h.dispatch('click', h.button).defaultPrevented, true);
     h.interactive = true;
     assert.equal(h.dispatch('click', h.image).defaultPrevented, false);
+  }),
+);
+
+test('touch dragging starts from deeply nested text and decorative elements', () => {
+  for (const kind of ['span', 'strong', 'h2', 'li', 'svg', 'path']) {
+    withGestures((h) => {
+      const paragraph = new TestElement('p', h.surface);
+      const child = new TestElement(kind, paragraph);
+      h.selectionNode = new TestElement('p');
+      h.dispatch('pointerdown', child);
+      assert.equal(h.surface.dataset.inputMode, 'touch');
+      h.dispatch('pointermove', child, 100, 0, 40);
+      h.flush();
+      assert.equal(h.surface.hasPointerCapture(1), true);
+      assert.match(h.surface.style.transform, /100px/);
+      h.dispatch('pointerup', child, 110, 0, 80);
+      assert.deepEqual(h.calls, ['known']);
+    });
+  }
+});
+test('touch gestures are not cancelled by selection created after contact', () =>
+  withGestures((h) => {
+    const text = new TestElement('span', h.surface);
+    h.dispatch('pointerdown', text);
+    h.selected = true;
+    h.dispatch('pointermove', text, -100, 0, 40);
+    h.dispatch('pointerup', text, -110, 0, 80);
+    assert.deepEqual(h.calls, ['again']);
+  }),
+);
+test('touch contact with existing card selection still permits dragging', () =>
+  withGestures((h) => {
+    const text = new TestElement('span', h.surface);
+    h.selectionNode = text;
+    h.dispatch('pointerdown', text);
+    h.dispatch('pointermove', text, 100, 0, 40);
+    h.dispatch('pointerup', text, 100, 0, 80);
+    assert.deepEqual(h.calls, ['known']);
+  }),
+);
+test('text-node event targets normalize to their parent for drags and reveal taps', () =>
+  withGestures((h) => {
+    const span = new TestElement('span', h.surface);
+    const text = new TestNode(span);
+    h.dispatch('pointerdown', text);
+    h.dispatch('pointermove', text, 100, 0, 40);
+    h.dispatch('pointerup', text, 100, 0, 80);
+    assert.deepEqual(h.calls, ['known']);
+    h.revealed = false;
+    h.dispatch('pointerdown', text);
+    h.dispatch('pointerup', text, 0, 0, 100);
+    assert.deepEqual(h.calls, ['known', 'reveal']);
+  }),
+);
+test('buttons, links, and editable fields remain tap-only even through nested text', () => {
+  for (const kind of ['button', 'a', 'input', 'textarea', 'select', '[contenteditable]']) {
+    withGestures((h) => {
+      const control = new TestElement(kind, h.surface);
+      const label = new TestNode(new TestElement('span', control));
+      h.dispatch('pointerdown', label);
+      h.dispatch('pointermove', label, 100, 0, 40);
+      h.dispatch('pointerup', label, 100, 0, 80);
+      assert.deepEqual(h.calls, []);
+      assert.equal(h.surface.hasPointerCapture(1), false);
+      assert.equal(h.dispatch('click', label).defaultPrevented, false);
+    });
+  }
+});
+test('selection outside the card does not block mouse or pen grabbing', () => {
+  for (const pointerType of ['mouse', 'pen']) {
+    withGestures((h) => {
+      h.selectionNode = new TestElement('p');
+      const text = new TestElement('span', h.surface);
+      const input = { pointerType };
+      h.dispatch('pointerdown', text, 0, 0, 0, 1, input);
+      h.dispatch('pointermove', text, 100, 0, 40, 1, input);
+      h.dispatch('pointerup', text, 100, 0, 80, 1, input);
+      assert.deepEqual(h.calls, ['known']);
+    });
+  }
+});
+test('mouse or pen selection intersecting the card cancels a pending gesture', () => {
+  for (const pointerType of ['mouse', 'pen']) {
+    withGestures((h) => {
+      const text = new TestElement('span', new TestElement('p', h.surface));
+      const input = { pointerType };
+      h.dispatch('pointerdown', text, 0, 0, 0, 1, input);
+      h.selectionNode = text;
+      h.dispatch('pointermove', text, 100, 0, 40, 1, input);
+      h.dispatch('pointerup', text, 100, 0, 80, 1, input);
+      assert.deepEqual(h.calls, []);
+      assert.equal(h.surface.hasPointerCapture(1), false);
+    });
+  }
+});
+test('switching to mouse or pen restores selection mode, including control contacts', () =>
+  withGestures((h) => {
+    for (const pointerType of ['mouse', 'pen']) {
+      h.dispatch('pointerdown');
+      h.dispatch('pointerup', h.surface, 0, 0, 100);
+      assert.equal(h.surface.dataset.inputMode, 'touch');
+      h.dispatch('pointerdown', h.button, 0, 0, 0, 1, { pointerType });
+      assert.equal(h.surface.dataset.inputMode, pointerType);
+      h.dispatch('pointerup', h.button, 0, 0, 100, 1, { pointerType });
+    }
+    h.controller.abort();
+    assert.equal(h.surface.dataset.inputMode, undefined);
+  }),
+);
+test('vertical gestures beginning on nested text still scroll without rating', () =>
+  withGestures((h) => {
+    const text = new TestElement('span', new TestElement('p', h.surface));
+    h.selected = true;
+    h.dispatch('pointerdown', text);
+    h.dispatch('pointermove', text, 2, 50, 40);
+    h.dispatch('pointerup', text, 2, 100, 80);
+    assert.deepEqual(h.calls, []);
+    assert.equal(h.surface.hasPointerCapture(1), false);
+    assert.equal(h.frames.size, 0);
   }),
 );

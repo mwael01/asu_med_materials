@@ -12,6 +12,7 @@ export function tossThreshold(width: number): number {
 export function beginGesture(event: PointerSample, width: number): CardGesture {
   return {
     pointerId: event.pointerId,
+    pointerType: event.pointerType || 'mouse',
     startX: event.clientX,
     startY: event.clientY,
     startedAt: event.timeStamp,

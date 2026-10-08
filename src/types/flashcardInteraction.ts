@@ -3,6 +3,7 @@ import type { FlashcardRating } from './flashcards';
 export type GesturePhase = 'pending' | 'scrolling' | 'dragging';
 export interface CardGesture {
   pointerId: number;
+  pointerType: string;
   startX: number;
   startY: number;
   startedAt: number;
@@ -14,6 +15,7 @@ export interface CardGesture {
 }
 export interface PointerSample {
   pointerId: number;
+  pointerType?: string;
   clientX: number;
   clientY: number;
   timeStamp: number;
