@@ -34,7 +34,14 @@ node scripts/sync-all-playlists.js --id yr1-intro-physiology-m-fayez-practical
 
 ## 3. Module & Material Seeding Scripts
 
-- **Location**: [`scripts/seed-firestore.mjs`](file:///workspaces/asu_med_materials/scripts/seed-firestore.mjs)
+- **Location**: [`scripts/seed-first-year-materials.mjs`](file:///workspaces/asu_med_materials/scripts/seed-first-year-materials.mjs)
+- **Purpose**: Authenticates with Cloud Firestore via Service Account OAuth token, creates and updates First Year curriculum modules (`year1-introduction`, `year1-ict`, `year1-general-pharmacology`, `year1-general-pathology`, `year1-infection`, `year1-locomotor`), and populates all curated study materials with automatic URL deduplication and cache version increments.
+- **Usage**:
+```bash
+node scripts/seed-first-year-materials.mjs
+```
+
+- **General Seeding**: [`scripts/seed-firestore.mjs`](file:///workspaces/asu_med_materials/scripts/seed-firestore.mjs)
 - **Purpose**: Seeds new curriculum modules and batch materials directly into Cloud Firestore (`modules` and `materials` collections).
 - **Usage**:
 ```bash

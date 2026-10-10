@@ -12,20 +12,29 @@ The medical program spans 5 years divided into two primary phases:
 
 ---
 
-## 2. Currently Active Modules on the Platform
+## 2. Currently Active & Configured Modules on the Platform
 
+### Year 1 — Semester 1 (Active & Visible)
+- **Introduction Module (MED101)**: `year1-introduction`
+  - **Subjects**: Anatomy, Physiology, Histology, Biochemistry, Immunology, Genetics, Embryology, Presentation Skills.
+  - **Resources**: Central Drives, SharePoint revisions, MCQs, practical lab revisions, YouTube playlists, and previous year recordings.
+- **ICT Module (MED102)**: `year1-ict`
+  - **Subjects**: ICT.
+  - **Resources**: Office 365, Generative AI, Outlook, OneDrive, Microsoft Word, PowerPoint, Excel, Microsoft Forms, Teams, and OneNote comprehensive courses.
+
+### Year 1 — Semester 2 (Stored in Firestore & Hidden for Now)
 > [!NOTE]
-> Currently, the platform's live Cloud Firestore database features the **Introduction Module (MED101)** for Year 1 and the **Blood & Lymphatic System (MED201)** for Year 2 (Semester 3). Reference books across Years 1–5 are also available. Other modules will be activated as their respective curated study materials are submitted.
+> Second semester modules are stored directly in Cloud Firestore with `semester: 2`. The application code filters out second semester modules and materials from public views to keep the UI clean and relevant during Semester 1. When Semester 2 begins, removing the `semester !== 2` filter will instantly reveal all 79 curated resources across these modules.
 
-### Active Module: Year 1 — Introduction Module (MED101)
-- **Module ID**: `year1-introduction`
-- **Subjects**: Anatomy, Physiology, Histology, Biochemistry, Immunology, Genetics, Embryology, Presentation Skills.
-- **Resources**: Google Drive essay notes, MCQs, practical lab revisions, video lectures, and YouTube playlists with embedded chapter navigation.
+- **General Pharmacology (MED103)**: `year1-general-pharmacology` (`semester: 2`)
+- **General Pathology (MED104)**: `year1-general-pathology` (`semester: 2`)
+- **Infection Module (MED105)**: `year1-infection` (`semester: 2`)
+- **Locomotor Module (MED106)**: `year1-locomotor` (`semester: 2`)
 
-### Active Module: Year 2 — Blood & Lymphatic System (MED201)
-- **Module ID**: `year2-blood`
+### Year 2 — Blood & Lymphatic System (MED201)
+- **Module ID**: `year2-blood` (`semester: 1`)
 - **Subjects**: Anatomy, Physiology, Histology, Biochemistry, Pharmacology, Pathology, Parasitology, Microbiology, Clinical Lectures.
-- **Resources**: Central Drives (including Semester 3 Drive & Batch Lectures Drive), Video Playlists & Embedded Players, Telegram Lecture Recordings, Audio Revisions, MCQs & Essay Banks, Formatives, Telegram Bots (@ASUMedZonebot, @ASUbooksbot), and Past Finals.
+- **Resources**: Central Drives, Video Playlists & Embedded Players, Telegram Lecture Recordings, Audio Revisions, MCQs & Essay Banks, Formatives, and Past Finals.
 
 ---
 

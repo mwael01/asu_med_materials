@@ -16,9 +16,11 @@ export const REFERENCE_BOOK_SUBJECTS: string[] = [
 
 const loadModules = getPublicModules;
 
-/** Fetch active modules; reuse the same pending read across SSR components. */
+/** Fetch active modules; reuse the same pending read across SSR components. Hides second semester modules for now. */
 export async function getAllModules(): Promise<ModuleInfo[]> {
-  return (await loadModules()).filter((module) => module.active !== false);
+  return (await loadModules()).filter(
+    (module) => module.active !== false && module.semester !== 2
+  );
 }
 
 /**

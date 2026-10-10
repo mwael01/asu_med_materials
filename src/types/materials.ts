@@ -54,6 +54,7 @@ export interface MaterialItem {
   category?: MaterialCategory;
   year: AcademicYear;
   moduleId?: string;
+  semester?: 1 | 2;
   subject?: string;
   author?: string | string[]; // Creator / Doctor / Teacher who prepared the materials
   addedBy?: string | string[]; // Contributor / Student who added it to the platform

@@ -1,7 +1,7 @@
 import type { MaterialItem, AcademicYear } from '../../types/materials';
 import { getPublicMaterials } from '../catalogue.server';
+import { getAllModules } from '../modules';
 import { subjectToSlug } from '../../utils/slug';
-
 
 const isReferenceModuleId = (moduleId?: string): boolean =>
   Boolean(moduleId && /^year\d+-reference-books$/.test(moduleId));
@@ -9,9 +9,25 @@ const isReferenceModuleId = (moduleId?: string): boolean =>
 // One pending read per runtime, including concurrent page/component renders.
 const loadMaterials = getPublicMaterials;
 
-/** Fetch the public catalogue from Firestore with a bounded runtime cache. */
+/** Fetch the public catalogue from Firestore with a bounded runtime cache. Hides second semester materials. */
 export async function getAllMaterials(): Promise<MaterialItem[]> {
-  return loadMaterials();
+  const [materials, activeModules] = await Promise.all([loadMaterials(), getAllModules()]);
+  const activeModuleIds = new Set(activeModules.map((m) => m.id));
+
+  return materials.filter((item) => {
+    // Hide second semester materials
+    if (item.semester === 2) {
+      return false;
+    }
+    // If the material is bound to a module, ensure the module is currently active and visible
+    if (item.moduleId) {
+      if (isReferenceModuleId(item.moduleId)) {
+        return true;
+      }
+      return activeModuleIds.has(item.moduleId);
+    }
+    return true;
+  });
 }
 
 /**

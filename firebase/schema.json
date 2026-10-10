@@ -4,13 +4,13 @@
   "version": "1.0.0",
   "projectId": "medmaterials",
   "database": "(default)",
-  "lastSyncedAt": "2026-10-07T19:36:19.070Z",
+  "lastSyncedAt": "2026-10-10T17:22:41.286Z",
   "collections": {
     "materials": {
       "collectionName": "materials",
       "description": "Comprehensive catalog of medical study materials, batch drives, playlists, exam papers, and textbooks across all five academic years.",
       "idField": "id",
-      "totalDocuments": 289,
+      "totalDocuments": 458,
       "indexes": [
         {
           "fields": [
@@ -397,7 +397,7 @@
       "collectionName": "modules",
       "description": "Medical curriculum modules across all academic years including codes, subjects, and bilingual metadata.",
       "idField": "id",
-      "totalDocuments": 7,
+      "totalDocuments": 12,
       "fields": {
         "id": {
           "type": "string",
