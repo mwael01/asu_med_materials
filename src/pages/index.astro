@@ -380,17 +380,22 @@ if (generalMaterials.length > 0) {
       if (profile) {
         guestChangeYearBtn?.classList.add('hidden');
         userEditYearLink?.classList.remove('hidden');
+        if (profile.academicYear && !localStorage.getItem('asumed_user_year')) {
+          setUserStoredYear(profile.academicYear);
+        }
       } else {
         guestChangeYearBtn?.classList.remove('hidden');
         userEditYearLink?.classList.add('hidden');
       }
     }
 
-    // 2. Active Year Sync for Modules
+    // 2. Active Year Sync for Modules & Recent Materials
     const yearModulesLink = document.getElementById('home-year-modules-link') as HTMLAnchorElement | null;
     const moduleWrappers = document.querySelectorAll<HTMLElement>('.home-module-wrapper');
     const noModulesPlaceholder = document.getElementById('no-modules-placeholder');
     const switchToYear2Btn = document.getElementById('switch-to-year2-btn');
+    const recentSection = document.getElementById('home-recent-materials-section');
+    const recentWrappers = document.querySelectorAll<HTMLElement>('.home-recent-wrapper');
 
     function syncYear(): void {
       const y = getUserStoredYear() || 2;
@@ -409,6 +414,25 @@ if (generalMaterials.length > 0) {
 
       if (noModulesPlaceholder) {
         noModulesPlaceholder.classList.toggle('hidden', matchCount > 0);
+      }
+
+      let recentMatchCount = 0;
+      recentWrappers.forEach((el) => {
+        const recYear = parseInt(el.getAttribute('data-recent-year') || '0', 10);
+        if (recYear === y) {
+          if (el.getAttribute('data-has-items') === 'true') {
+            el.classList.remove('hidden');
+            recentMatchCount++;
+          } else {
+            el.classList.add('hidden');
+          }
+        } else {
+          el.classList.add('hidden');
+        }
+      });
+
+      if (recentSection) {
+        recentSection.classList.toggle('hidden', recentMatchCount === 0);
       }
     }
 

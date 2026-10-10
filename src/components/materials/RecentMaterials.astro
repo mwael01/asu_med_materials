@@ -1,17 +1,85 @@
 ---
 import ResourceCard from './ResourceCard.astro';
-import type { MaterialItem } from '../../types/materials';
-interface Props { materials: MaterialItem[] }
-const recent = Astro.props.materials
-  .filter((item) => item.createdAt && Number.isFinite(Date.parse(item.createdAt)))
-  .sort((a, b) => Date.parse(b.createdAt!) - Date.parse(a.createdAt!))
-  .slice(0, 6);
+import type { MaterialItem, AcademicYear } from '../../types/materials';
+import { groupRecentMaterialsByYear, getRecentMaterialsForYear, ACADEMIC_YEARS } from '../../utils/recentMaterials';
+
+interface Props {
+  materials: MaterialItem[];
+  year?: AcademicYear;
+}
+
+const { materials, year } = Astro.props;
+
+const recentByYear: Record<AcademicYear, MaterialItem[]> = year
+  ? {
+      1: [],
+      2: [],
+      3: [],
+      4: [],
+      5: [],
+      [year]: getRecentMaterialsForYear(materials, year)
+    }
+  : groupRecentMaterialsByYear(materials);
+
+const hasAnyRecent = Object.values(recentByYear).some((items) => items.length > 0);
+const hasInitialRecent = year ? recentByYear[year].length > 0 : recentByYear[2].length > 0;
 ---
-{recent.length > 0 && (
-  <section class="mb-12" aria-labelledby="recent-materials-title">
-    <h2 id="recent-materials-title" class="text-base sm:text-lg font-bold text-zinc-900 dark:text-zinc-100 mb-4" data-i18n="home.recentMaterials">Recently Added</h2>
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-      {recent.map((material) => <ResourceCard material={material} />)}
-    </div>
+
+{hasAnyRecent && (
+  <section
+    class:list={['mb-12', !hasInitialRecent && 'hidden']}
+    id="home-recent-materials-section"
+    aria-labelledby="recent-materials-title"
+  >
+    <h2 id="recent-materials-title" class="text-base sm:text-lg font-bold text-zinc-900 dark:text-zinc-100 mb-4" data-i18n="home.recentMaterials">
+      Recently Added
+    </h2>
+    {ACADEMIC_YEARS.map((y) => {
+      const items = recentByYear[y];
+      const isInitialActive = year ? y === year : y === 2;
+      return (
+        <div
+          data-recent-year={y}
+          data-has-items={items.length > 0 ? 'true' : 'false'}
+          class:list={['home-recent-wrapper', (!isInitialActive || items.length === 0) && 'hidden']}
+        >
+          {items.length > 0 && (
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {items.map((material) => (
+                <ResourceCard material={material} />
+              ))}
+            </div>
+          )}
+        </div>
+      );
+    })}
+
+    <!-- Zero-Flash Early Pre-Paint Year Setter for Recent Materials -->
+    <script is:inline>
+      (function () {
+        try {
+          var y = parseInt(localStorage.getItem('asumed_user_year') || '2', 10);
+          var wrappers = document.querySelectorAll('.home-recent-wrapper');
+          var section = document.getElementById('home-recent-materials-section');
+          var hasMatch = false;
+          wrappers.forEach(function (el) {
+            var yr = parseInt(el.getAttribute('data-recent-year') || '0', 10);
+            if (yr === y) {
+              if (el.getAttribute('data-has-items') === 'true') {
+                el.classList.remove('hidden');
+                hasMatch = true;
+              } else {
+                el.classList.add('hidden');
+              }
+            } else {
+              el.classList.add('hidden');
+            }
+          });
+          if (section) {
+            section.classList.toggle('hidden', !hasMatch);
+          }
+        } catch (e) {}
+      })();
+    </script>
   </section>
 )}
