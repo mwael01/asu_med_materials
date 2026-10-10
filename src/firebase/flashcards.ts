@@ -36,14 +36,39 @@ function toCard(data: DocumentData, id: string): FlashcardCard {
   };
 }
 
+// In-memory cache structures to drastically reduce Firestore reads
+const memoryCardsCache = new Map<string, FlashcardCard[]>();
+const memoryDeckCache = new Map<string, { deck: FlashcardDeck; expiresAt: number }>();
+const memoryPublishedDecksCache = new Map<string, { decks: FlashcardDeck[]; expiresAt: number }>();
+const DECK_CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes
+
+export function invalidateFlashcardDeckCache(deckId?: string): void {
+  if (deckId) {
+    memoryDeckCache.delete(deckId);
+  } else {
+    memoryDeckCache.clear();
+  }
+  memoryPublishedDecksCache.clear();
+}
+
 export async function getPublishedFlashcardDecks(year?: AcademicYear): Promise<FlashcardDeck[]> {
+  const cacheKey = year ? String(year) : 'all';
+  const now = Date.now();
+  const cached = memoryPublishedDecksCache.get(cacheKey);
+  if (cached && now < cached.expiresAt) {
+    return cached.decks;
+  }
+
   const db = getFirestoreDb();
-  if (!db) return [];
+  if (!db) return cached?.decks || [];
 
   const ref = collection(db, DECKS);
   const constraints = [where('publicationStatus', '==', 'published'), orderBy('title'), limit(200)];
   const snap = await getDocs(year ? query(ref, where('year', '==', year), ...constraints) : query(ref, ...constraints));
-  return snap.docs.map((item) => toDeck(item.data(), item.id));
+  const decks = snap.docs.map((item) => toDeck(item.data(), item.id));
+
+  memoryPublishedDecksCache.set(cacheKey, { decks, expiresAt: now + DECK_CACHE_TTL_MS });
+  return decks;
 }
 
 export async function getAllFlashcardDecks(): Promise<FlashcardDeck[]> {
@@ -56,10 +81,21 @@ export async function getAllFlashcardDecks(): Promise<FlashcardDeck[]> {
 }
 
 export async function getFlashcardDeck(deckId: string): Promise<FlashcardDeck | null> {
+  if (!deckId) return null;
+  const now = Date.now();
+  const cached = memoryDeckCache.get(deckId);
+  if (cached && now < cached.expiresAt) {
+    return cached.deck;
+  }
+
   const db = getFirestoreDb();
-  if (!db || !deckId) return null;
+  if (!db) return cached?.deck || null;
   const snap = await getDoc(doc(db, DECKS, deckId));
-  return snap.exists() ? toDeck(snap.data(), snap.id) : null;
+  if (!snap.exists()) return null;
+
+  const deck = toDeck(snap.data(), snap.id);
+  memoryDeckCache.set(deckId, { deck, expiresAt: now + DECK_CACHE_TTL_MS });
+  return deck;
 }
 
 export async function getFlashcardManifest(deckId: string): Promise<FlashcardManifest | null> {
@@ -79,8 +115,16 @@ export async function getFlashcardManifest(deckId: string): Promise<FlashcardMan
 }
 
 export async function getFlashcardCards(deckId: string, revisionId: string): Promise<FlashcardCard[]> {
+  if (!deckId || !revisionId) return [];
+
+  // Immutable revision cache: once a revision's cards are loaded, they never mutate.
+  const cacheKey = `${deckId}:${revisionId}`;
+  if (memoryCardsCache.has(cacheKey)) {
+    return memoryCardsCache.get(cacheKey)!;
+  }
+
   const db = getFirestoreDb();
-  if (!db || !deckId || !revisionId) return [];
+  if (!db) return [];
   const cardsRef = collection(db, DECKS, deckId, 'revisions', revisionId, 'cards');
   const snap = await getDocs(query(cardsRef, orderBy('ordinal'), limit(5000)));
   const mapped = snap.docs.map((item) => toCard(item.data(), item.id));
@@ -97,6 +141,8 @@ export async function getFlashcardCards(deckId: string, revisionId: string): Pro
       deduped.push(card);
     }
   }
+
+  memoryCardsCache.set(cacheKey, deduped);
   return deduped;
 }
 
@@ -112,6 +158,7 @@ export async function updateFlashcardDeckMetadata(
       updatedAt: new Date().toISOString()
     });
     await updateDoc(doc(db, DECKS, deckId), payload);
+    invalidateFlashcardDeckCache(deckId);
     return true;
   } catch (err) {
     console.warn(`[Firestore] Failed to update deck ${deckId}:`, err);
@@ -125,6 +172,7 @@ export async function publishFlashcardDeck(deckId: string, revisionId: string): 
 
   try {
     const now = new Date().toISOString();
+    invalidateFlashcardDeckCache(deckId);
     // 1. Update deck
     await updateDoc(doc(db, DECKS, deckId), {
       publicationStatus: 'published',

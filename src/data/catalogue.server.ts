@@ -51,13 +51,16 @@ export const getPublicMaterials = async (): Promise<MaterialItem[]> => {
   return internalMaterialsLoader(currentVersion);
 };
 
-const loadModulesSnapshot = () => {
+const loadModulesSnapshot = (version: number) => {
   const origin = () => fetchModulesFromFirestore(undefined, true);
-  return loadCachedCatalogue(getActiveCacheStore(), 'modules', origin, isModule, 1);
+  return loadCachedCatalogue(getActiveCacheStore(), 'modules', origin, isModule, version);
 };
 
-const internalModulesLoader = createTimedLoader(() => loadModulesSnapshot());
+const internalModulesLoader = createTimedLoader((version?: number) =>
+  loadModulesSnapshot(version || 1)
+);
 
 export const getPublicModules = async (): Promise<ModuleInfo[]> => {
-  return internalModulesLoader();
+  const currentVersion = await getMaterialsVersionFromFirestore();
+  return internalModulesLoader(currentVersion);
 };

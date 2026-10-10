@@ -101,13 +101,26 @@ const USERS_COLLECTION = 'users';
 const MATERIALS_VERSION_COLLECTION = 'materials_version';
 const MATERIALS_VERSION_DOC_ID = 'current';
 
+let cachedMaterialsVersion: { version: number; expiresAt: number } | null = null;
+const MATERIALS_VERSION_TTL_MS = 60_000; // 60 seconds
+
+export function invalidateMaterialsVersionCache(): void {
+  cachedMaterialsVersion = null;
+}
+
 /**
  * Fetches the current materials version number from Cloud Firestore.
+ * Caches in memory for 60 seconds to protect daily read quotas.
  * Defaults to 1 if not set or on network failure.
  */
 export async function getMaterialsVersionFromFirestore(): Promise<number> {
+  const now = Date.now();
+  if (cachedMaterialsVersion && now < cachedMaterialsVersion.expiresAt) {
+    return cachedMaterialsVersion.version;
+  }
+
   const db = getFirestoreDb();
-  if (!db) return 1;
+  if (!db) return cachedMaterialsVersion?.version || 1;
 
   try {
     const docRef = doc(db, MATERIALS_VERSION_COLLECTION, MATERIALS_VERSION_DOC_ID);
@@ -115,12 +128,14 @@ export async function getMaterialsVersionFromFirestore(): Promise<number> {
     if (snap.exists()) {
       const data = snap.data();
       const val = typeof data?.version === 'number' ? data.version : Number(data?.version);
-      return Number.isFinite(val) && val > 0 ? val : 1;
+      const version = Number.isFinite(val) && val > 0 ? val : 1;
+      cachedMaterialsVersion = { version, expiresAt: now + MATERIALS_VERSION_TTL_MS };
+      return version;
     }
   } catch (err) {
-    console.warn('[Firestore] Failed to fetch materials version, falling back to 1:', err);
+    console.warn('[Firestore] Failed to fetch materials version, falling back to cached or 1:', err);
   }
-  return 1;
+  return cachedMaterialsVersion?.version || 1;
 }
 
 /**
@@ -128,6 +143,7 @@ export async function getMaterialsVersionFromFirestore(): Promise<number> {
  * Called whenever materials are added, modified, or deleted by admins.
  */
 export async function incrementMaterialsVersionInFirestore(): Promise<number> {
+  invalidateMaterialsVersionCache();
   const db = getFirestoreDb();
   if (!db) return 1;
 
@@ -143,7 +159,9 @@ export async function incrementMaterialsVersionInFirestore(): Promise<number> {
     );
     urlCheckCache = null;
     const snap = await getDoc(docRef);
-    return snap.exists() ? snap.data()?.version || 1 : 1;
+    const newVersion = snap.exists() ? (snap.data()?.version || 1) : 1;
+    cachedMaterialsVersion = { version: newVersion, expiresAt: Date.now() + MATERIALS_VERSION_TTL_MS };
+    return newVersion;
   } catch (err) {
     console.warn('[Firestore] Failed to increment materials version:', err);
     return 1;
@@ -482,6 +500,7 @@ export async function upsertUserProfile(profile: UserProfile): Promise<boolean> 
       updatedAt: new Date().toISOString()
     };
     await setDoc(userDocRef, sanitizeFirestorePayload(payload), { merge: true });
+    invalidateUsersCache();
     return true;
   } catch (err) {
     console.error('[Firestore] Failed to save user profile:', err);
@@ -847,12 +866,29 @@ export async function deleteMaterialFromFirestore(
 
 const CONTRIBUTORS_COLLECTION = 'contributors';
 
+let cachedAdminUsers: { admins: UserProfile[]; expiresAt: number; limitCount: number } | null = null;
+const ADMIN_USERS_TTL_MS = 15 * 60 * 1000; // 15 minutes
+
+let cachedUsernamesMap: { map: Map<string, { displayName: string; photoURL: string }>; expiresAt: number } | null = null;
+const USERNAMES_TTL_MS = 15 * 60 * 1000; // 15 minutes
+
+export function invalidateUsersCache(): void {
+  cachedAdminUsers = null;
+  cachedUsernamesMap = null;
+}
+
 /**
  * Fetches administrators from Firestore (users where role == 'admin'), capped at limitCount.
+ * Caches in memory for 15 minutes to reduce repetitive queries.
  */
 export async function fetchAdminUsers(limitCount = 8): Promise<UserProfile[]> {
+  const now = Date.now();
+  if (cachedAdminUsers && now < cachedAdminUsers.expiresAt && cachedAdminUsers.limitCount >= limitCount) {
+    return cachedAdminUsers.admins.slice(0, limitCount);
+  }
+
   const db = getFirestoreDb();
-  if (!db) return [];
+  if (!db) return cachedAdminUsers?.admins.slice(0, limitCount) || [];
 
   try {
     const usersRef = collection(db, USERS_COLLECTION);
@@ -864,20 +900,27 @@ export async function fetchAdminUsers(limitCount = 8): Promise<UserProfile[]> {
       admins.push(docSnap.data() as UserProfile);
     });
 
+    cachedAdminUsers = { admins, expiresAt: now + ADMIN_USERS_TTL_MS, limitCount };
     return admins.slice(0, limitCount);
   } catch (err) {
     console.warn('[Firestore] Failed to fetch admin users:', err);
-    return [];
+    return cachedAdminUsers?.admins.slice(0, limitCount) || [];
   }
 }
 
 /**
  * Fetches a lightweight map of username → { displayName, photoURL } for all users.
  * Used for resolving contributor usernames to display names and photos in the UI.
+ * Caches in memory for 15 minutes to prevent scanning the entire users collection on every visit.
  */
 export async function fetchAllUsernames(): Promise<Map<string, { displayName: string; photoURL: string }>> {
+  const now = Date.now();
+  if (cachedUsernamesMap && now < cachedUsernamesMap.expiresAt) {
+    return cachedUsernamesMap.map;
+  }
+
   const db = getFirestoreDb();
-  if (!db) return new Map();
+  if (!db) return cachedUsernamesMap?.map || new Map();
 
   try {
     const usersRef = collection(db, USERS_COLLECTION);
@@ -894,10 +937,11 @@ export async function fetchAllUsernames(): Promise<Map<string, { displayName: st
       }
     });
 
+    cachedUsernamesMap = { map, expiresAt: now + USERNAMES_TTL_MS };
     return map;
   } catch (err) {
     console.warn('[Firestore] Failed to fetch usernames:', err);
-    return new Map();
+    return cachedUsernamesMap?.map || new Map();
   }
 }
 
@@ -1363,6 +1407,7 @@ export async function updateUserRole(
     }
 
     await setDoc(userDocRef, { role: newRole, updatedAt: new Date().toISOString() }, { merge: true });
+    invalidateUsersCache();
 
     if (actingAdmin) {
       await logAdminAction({

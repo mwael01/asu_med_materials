@@ -85,21 +85,18 @@ const {
       import { initStudiedMaterials } from '../utils/studied';
       import { initAppCheck } from '../firebase/app-check';
       import { initUserLibrarySync } from '../utils/userSync';
-      import { initFlashcardPrefetching } from '../utils/flashcards/caching';
 
       initLanguageClient();
       initStudiedMaterials();
       registerServiceWorker();
       initAppCheck();
       initUserLibrarySync();
-      initFlashcardPrefetching();
 
       document.addEventListener('astro:after-swap', () => {
         initLanguageClient();
         initStudiedMaterials();
         initAppCheck();
         initUserLibrarySync();
-        initFlashcardPrefetching();
       });
     </script>
 
