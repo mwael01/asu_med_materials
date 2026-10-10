@@ -101,9 +101,15 @@ export function initUserLibrarySync(): void {
       mergeAndSync(uid, remoteProfile);
     });
 
-    // 3. Re-sync when user returns to the tab (replaces 60s polling)
+    // 3. Re-sync when user returns to the tab with a 10-minute throttle (onSnapshot already handles live pushes)
+    let lastVisibilitySync = Date.now();
+    const VISIBILITY_SYNC_THROTTLE_MS = 10 * 60 * 1000; // 10 minutes
+
     const handleVisibilityChange = async () => {
       if (document.visibilityState !== 'visible' || !currentUid || !navigator.onLine) return;
+      const now = Date.now();
+      if (now - lastVisibilitySync < VISIBILITY_SYNC_THROTTLE_MS) return;
+      lastVisibilitySync = now;
 
       try {
         const { getDoc, doc } = await import('firebase/firestore');

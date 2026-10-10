@@ -638,31 +638,29 @@ export async function getUserContributions(usernameOrUid: string): Promise<Mater
   if (!db) return [];
 
   try {
-    const materialsRef = collection(db, MATERIALS_COLLECTION);
-    // Fetch materials and filter in-memory for flexible match across author/addedBy array or contributorUid/Username
-    const snapshot = await getDocs(materialsRef);
+    // Leverage cache-first materials fetcher instead of raw full collection read
+    const allMaterials = await fetchMaterialsFromFirestore();
     const contributions: MaterialItem[] = [];
 
-    snapshot.forEach((snap) => {
-      const mat = snap.data() as MaterialItem;
+    for (const mat of allMaterials) {
       // 1. Direct UID match
       if (mat.contributorUid && (mat.contributorUid === rawTarget || mat.contributorUid === target)) {
         contributions.push(mat);
-        return;
+        continue;
       }
 
       // 2. Direct Username match (new username fields take priority)
       if (mat.added_by_username && mat.added_by_username.toLowerCase().replace(/^@/, '') === target) {
         contributions.push(mat);
-        return;
+        continue;
       }
       if (mat.creator_username && mat.creator_username.toLowerCase().replace(/^@/, '') === target) {
         contributions.push(mat);
-        return;
+        continue;
       }
       if (mat.contributorUsername && mat.contributorUsername.toLowerCase().replace(/^@/, '') === target) {
         contributions.push(mat);
-        return;
+        continue;
       }
 
       // 3. Exact match in addedBy array (no substring matching)
@@ -680,7 +678,7 @@ export async function getUserContributions(usernameOrUid: string): Promise<Mater
       if (matches) {
         contributions.push(mat);
       }
-    });
+    }
 
     return contributions;
   } catch (err) {
