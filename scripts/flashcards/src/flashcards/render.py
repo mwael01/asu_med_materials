@@ -62,13 +62,19 @@ def clean_anki_boilerplate(html_str: str, question_html: str | None = None) -> s
 
     # 1. Strip FrontSide / repeated question from start of answer
     if question_html:
-        hr_match = re.search(r"\s*<hr[^>]*>\s*", html_str)
+        hr_match = re.search(r"\s*<hr(?:\s+id=[\"']?answer[\"']?)?[^>]*>\s*", html_str, re.IGNORECASE)
         if hr_match:
             before_hr = html_str[:hr_match.start()]
             after_hr = html_str[hr_match.end():]
+            q_clean = re.sub(r"\s+", " ", question_html).strip()
+            before_clean = re.sub(r"\s+", " ", before_hr).strip()
             q_text = re.sub(r"<[^>]+>", " ", question_html).strip().lower()
             before_text = re.sub(r"<[^>]+>", " ", before_hr).strip().lower()
-            if before_text and (before_text == q_text or before_text.startswith(q_text) or q_text.startswith(before_text)):
+            if (
+                "id=answer" in hr_match.group(0).lower()
+                or (before_clean and (before_clean == q_clean or before_clean.startswith(q_clean) or q_clean.startswith(before_clean)))
+                or (before_text and (before_text == q_text or before_text.startswith(q_text) or q_text.startswith(before_text)))
+            ):
                 html_str = after_hr
 
     # 2. Strip empty sections (with or without id attributes)

@@ -57,13 +57,17 @@ def _load_env() -> None:
 
 
 def _default_service_account() -> Path | None:
-    candidates = [
-        Path("medmaterials-firebase-adminsdk-fbsvc-849748c5bd.json"),
-        Path(__file__).resolve().parents[4] / "medmaterials-firebase-adminsdk-fbsvc-849748c5bd.json",
-    ]
-    for c in candidates:
-        if c.exists():
-            return c
+    if "GOOGLE_APPLICATION_CREDENTIALS" in os.environ:
+        p = Path(os.environ["GOOGLE_APPLICATION_CREDENTIALS"])
+        if p.exists():
+            return p
+    root_dir = Path(__file__).resolve().parents[4]
+    for p in root_dir.glob("medmaterials-firebase-adminsdk-*.json"):
+        if p.exists():
+            return p
+    for p in Path(".").glob("medmaterials-firebase-adminsdk-*.json"):
+        if p.exists():
+            return p
     return None
 
 
@@ -190,7 +194,7 @@ def stage(
             "title": classification.title,
             "sourceTitle": archive.stem.replace("__", " · "),
             "year": classification.year,
-            "semester": 1,
+            "semester": classification.semester,
             "moduleId": classification.moduleId,
             "subject": classification.subject,
             "unit": classification.unit,
@@ -293,6 +297,7 @@ def stage(
     print(f"  - Decks: {len(grouped)}")
     print(f"  - Cards: {len(card_rows)}")
     print(f"  - Findings: {len(findings)} ({sum(1 for f in findings if f['severity'] == 'error')} errors, {sum(1 for f in findings if f['severity'] == 'warning')} warnings)")
+    return import_id
 
 
 @app.command()
@@ -434,6 +439,7 @@ def validate(
             print(f"Warnings ({len(warnings)}):")
             for w in warnings:
                 print(f"  - {w}")
+        return True
 
 
 @app.command()
@@ -492,6 +498,7 @@ def publish(
             "type": "flashcards",
             "category": "flashcards",
             "year": d.get("year", 2),
+            "semester": d.get("semester", 1),
             "moduleId": d.get("moduleId", "year2-blood"),
             "subject": d.get("subject", "General"),
             "unit": d.get("unit", "General"),

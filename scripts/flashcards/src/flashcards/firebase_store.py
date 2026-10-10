@@ -54,17 +54,13 @@ def fetch_all_imports(db) -> list[dict[str, Any]]:
 
 
 def upload_source_archive(service_account: Path, archive: Path, import_id: str) -> str | None:
-    get_app(service_account)
     try:
-        bucket = storage.bucket()
-        path = f"flashcard-imports/{import_id}/source.apkg"
-        blob = bucket.blob(path)
-        blob.upload_from_filename(str(archive), content_type="application/zip")
-        blob.metadata = {"firebaseStorageDownloadTokens": str(uuid.uuid4()), "cacheControl": "no-store"}
-        blob.patch()
-        return path
+        from .r2_storage import upload_file_to_r2
+        remote_key = f"sources/{import_id}.apkg"
+        public_url = upload_file_to_r2(archive, remote_key=remote_key)
+        return public_url
     except Exception as exc:
-        print(f"warning: source archive was not uploaded to Storage: {exc}")
+        print(f"warning: source archive was not uploaded to R2: {exc}")
         return None
 
 

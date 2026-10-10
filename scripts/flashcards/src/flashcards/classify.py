@@ -7,6 +7,7 @@ SUBJECT_ALIASES: dict[str, str] = {
     "bio": "Biochemistry",
     "biochem": "Biochemistry",
     "biochemistry": "Biochemistry",
+    "biochemistery": "Biochemistry",
     "physio": "Physiology",
     "phsyio": "Physiology",
     "physiology": "Physiology",
@@ -16,12 +17,19 @@ SUBJECT_ALIASES: dict[str, str] = {
     "pathology": "Pathology",
     "para": "Parasitology",
     "parasitology": "Parasitology",
+    "parastology": "Parasitology",
     "micro": "Microbiology",
     "microbiology": "Microbiology",
     "pharma": "Pharmacology",
     "pharmacology": "Pharmacology",
     "anatomy": "Anatomy",
     "anat": "Anatomy",
+    "genetics": "Genetics",
+    "genetic": "Genetics",
+    "immuno": "Immunology",
+    "immunology": "Immunology",
+    "embryo": "Embryology",
+    "embryology": "Embryology",
     "clinical": "Clinical Lectures",
 }
 
@@ -62,6 +70,7 @@ BLOOD_CHAPTER_SUBJECTS: dict[str, str] = {
 class Classification:
     title: str
     year: int
+    semester: int
     moduleId: str
     subject: str | None
     unit: str
@@ -87,45 +96,72 @@ def classify_deck_path(
 ) -> Classification:
     parts = [part.strip() for part in path.split("::") if part.strip()]
     evidence: list[str] = [f"anki-deck:{path}"]
+    full_text = f"{path} {filename}"
 
     # 1. Detect Academic Year
     year = 2  # default
-    year_match = re.search(r"year\s*(\d)", f"{path} {filename}", re.IGNORECASE)
+    year_match = re.search(r"year\s*(\d)", full_text, re.IGNORECASE)
     if year_match:
         year = int(year_match.group(1))
         evidence.append(f"year-match:{year}")
 
-    # 2. Detect Curriculum Module
-    module_id = "year2-blood"  # default for Blood deck
-    if known_modules:
+    # 2. Detect Semester
+    semester = 1
+    sem_match = re.search(r"semester\s*(\d)", full_text, re.IGNORECASE)
+    if sem_match:
+        semester = int(sem_match.group(1))
+        evidence.append(f"semester-match:{semester}")
+
+    # 3. Detect Curriculum Module
+    module_id: str | None = None
+    if year == 1 and semester == 1:
+        if "ict" in full_text.lower():
+            module_id = "year1-ict"
+        else:
+            module_id = "year1-introduction"
+        evidence.append(f"matched-module:{module_id}")
+    elif year == 1 and semester == 2:
+        if "locomotor" in full_text.lower():
+            module_id = "year1-locomotor"
+        elif "infection" in full_text.lower():
+            module_id = "year1-infection"
+        elif "pharma" in full_text.lower():
+            module_id = "year1-general-pharmacology"
+        elif "patho" in full_text.lower():
+            module_id = "year1-general-pathology"
+        if module_id:
+            evidence.append(f"matched-module:{module_id}")
+    elif "blood" in full_text.lower():
+        module_id = "year2-blood"
+        evidence.append("blood-module-evidence")
+
+    # Match against known_modules from Firestore if available
+    if not module_id and known_modules:
         for mod in known_modules:
             mid = mod.get("id", "")
-            title = mod.get("title", "")
-            if mid and (mid.lower() in path.lower() or title.lower() in path.lower()):
+            title = mod.get("title", "") or mod.get("titleEn", "")
+            if mid and (mid.lower() in full_text.lower() or (title and title.lower() in full_text.lower())):
                 module_id = mid
                 evidence.append(f"matched-module:{mid}")
                 break
 
-    # If Blood is in path or filename
-    if "blood" in path.lower() or "blood" in filename.lower():
-        module_id = "year2-blood"
-        evidence.append("blood-module-evidence")
+    if not module_id:
+        module_id = "year2-blood" if year == 2 else f"year{year}-general"
 
-    # 3. Find subdeck elements after Module Name
-    blood_index = next(
-        (i for i, part in enumerate(parts) if part.lower() in ("blood", "foundation", "introduction")),
-        len(parts) - 1,
-    )
-    tail = parts[blood_index + 1 :]
-
+    # 4. Resolve Subject
     subject: str | None = None
     subject_index: int | None = None
 
-    # Check explicit alias in tail parts
-    for index, part in enumerate(tail):
-        clean_part = part.lower().replace(" ", "").replace("_", "")
+    # Check parts of deck path for subject alias
+    for index, part in enumerate(parts):
+        clean_part = part.lower().strip()
+        if clean_part in SUBJECT_ALIASES:
+            subject = SUBJECT_ALIASES[clean_part]
+            subject_index = index
+            evidence.append(f"subject-alias:{part}->{subject}")
+            break
         for alias, std_name in SUBJECT_ALIASES.items():
-            if clean_part == alias or clean_part.endswith(alias) or clean_part.startswith(alias):
+            if re.search(r"\b" + re.escape(alias) + r"\b", clean_part):
                 subject = std_name
                 subject_index = index
                 evidence.append(f"subject-alias:{part}->{std_name}")
@@ -133,30 +169,54 @@ def classify_deck_path(
         if subject:
             break
 
-    # Fallback: check topic-level clues in tail
+    # Check filename if not yet resolved
+    if not subject and filename:
+        for alias, std_name in SUBJECT_ALIASES.items():
+            if re.search(r"\b" + re.escape(alias) + r"\b", filename.lower()):
+                subject = std_name
+                evidence.append(f"subject-filename:{filename}->{std_name}")
+                break
+
+    # Topic fallbacks in path text
     if not subject:
-        tail_text = " ".join(tail).lower()
+        tail_text = " ".join(parts).lower()
         for keyword, fallback_subj in TOPIC_SUBJECT_FALLBACKS.items():
             if keyword in tail_text:
                 subject = fallback_subj
                 evidence.append(f"topic-keyword:{keyword}->{fallback_subj}")
                 break
 
-    # Fallback: check specific curriculum chapter mappings
-    if not subject:
-        tail_key = "::".join(tail).lower()
+    # Blood chapter mappings if blood module
+    if not subject and module_id == "year2-blood":
+        tail_key = "::".join(parts).lower()
         for chapter_key, chapter_subj in BLOOD_CHAPTER_SUBJECTS.items():
             if chapter_key in tail_key:
                 subject = chapter_subj
                 evidence.append(f"curriculum-chapter:{chapter_key}->{chapter_subj}")
                 break
 
-    # 4. Extract Unit and Chapter hierarchy
+    # Fallback for single-subject modules
+    if not subject:
+        if module_id == "year1-general-pharmacology":
+            subject = "Pharmacology"
+        elif module_id == "year1-general-pathology":
+            subject = "Pathology"
+
+    # 5. Extract Unit and Chapter hierarchy and meaningful Title
+    meaningful_parts: list[str] = []
+    for p in parts:
+        if re.match(r"^year\s*\d.*", p, re.IGNORECASE):
+            continue
+        if p.lower() in ("blood", "introduction", "locomotor", "infection", "pharmacology", "pathology", "ict"):
+            continue
+        meaningful_parts.append(p)
+
+    if not meaningful_parts:
+        meaningful_parts = parts[-1:] if parts else ["General"]
+
     unit = "General"
     chapter = "General"
-    topic = ""
-
-    for p in tail:
+    for p in meaningful_parts:
         m_unit = re.search(r"unit[_\s-]*(\d+)", p, re.IGNORECASE)
         if m_unit:
             unit = f"Unit {m_unit.group(1)}"
@@ -165,32 +225,15 @@ def classify_deck_path(
             ch_num = m_ch.group(1)
             extra = m_ch.group(2).replace("_", " ").strip()
             chapter = f"Chapter {ch_num}"
-            if extra and extra.lower() not in (
-                "bio", "histo", "physio", "micro", "patho", "para", "pharma", "anatomy", "clinical"
-            ):
-                topic = extra
+            if extra:
+                chapter = f"{chapter} · {extra}"
 
-    # Check last parts for topics not matching subject
-    if tail:
-        last_part = tail[-1].replace("_", " ")
-        if last_part.lower() not in (
-            (subject.lower() if subject else ""),
-            "bio", "histo", "physio", "micro", "patho", "para", "pharma", "anatomy", "clinical"
-        ):
-            if not topic and last_part != unit and not re.match(r"^ch\d+$", last_part, re.I):
-                topic = last_part
+    title = " · ".join(meaningful_parts).replace("_", " ")
+    if subject and not any(subject.lower() in p.lower() for p in meaningful_parts):
+        title = f"{subject} · {title}"
 
-    if topic:
-        chapter = f"{chapter} · {topic.strip()}"
-
-    unit_parts = tail[: subject_index if subject_index is not None else len(tail)]
-    unit_path = " · ".join(unit_parts) or (tail[0] if tail else "Blood")
-
-    # Author is the official ASU Anki Flashcards team
+    unit_path = " · ".join(meaningful_parts[:2]) if len(meaningful_parts) >= 2 else (meaningful_parts[0] if meaningful_parts else "General")
     author = "ASU Anki Flashcards"
-
-    # Human-readable title
-    title = f"{subject or 'Blood'} · {unit} · {chapter}" if subject else " · ".join(["Blood", *tail]).replace("_", " ")
 
     if filename:
         evidence.append(f"filename:{filename}")
@@ -198,6 +241,7 @@ def classify_deck_path(
     return Classification(
         title=title,
         year=year,
+        semester=semester,
         moduleId=module_id,
         subject=subject,
         unit=unit,

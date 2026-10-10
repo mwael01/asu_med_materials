@@ -10,9 +10,11 @@ import sys
 
 sys.path.insert(0, str(Path(__file__).resolve().parent / "src"))
 
-from flashcards.firebase_store import get_db
-
-db = get_db(Path(__file__).resolve().parents[2] / "medmaterials-firebase-adminsdk-fbsvc-849748c5bd.json")
+root_dir = Path(__file__).resolve().parents[2]
+sa_candidates = list(root_dir.glob("medmaterials-firebase-adminsdk-*.json"))
+if not sa_candidates:
+    raise FileNotFoundError("Service account file not found")
+db = get_db(sa_candidates[0])
 
 CLOZE_RE = re.compile(r"\{\{c(\d+)::(.*?)(?:::(.*?))?\}\}", re.IGNORECASE | re.DOTALL)
 R2_BASE = "https://asumed.eduvour.com"
