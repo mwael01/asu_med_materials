@@ -2244,8 +2244,8 @@ async function run() {
       id: docId,
       bookmarksCount: existing?.bookmarksCount ?? 0,
       createdAt: existing?.createdAt ?? new Date().toISOString(),
-      addedBy: existing?.addedBy ?? 'Faculty Archive',
-      added_by_username: existing?.added_by_username ?? 'asu_med_archive'
+      addedBy: 'Mazen Yasin',
+      added_by_username: 'mazenyasin'
     };
 
     await writeFirestoreDoc(token, 'materials', docId, payload);

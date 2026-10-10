@@ -32,6 +32,7 @@ for item in data:
                 'moduleId': f'year{year}-reference-books',
                 'author': book[1],
                 'addedBy': 'Mazen Yasin',
+                'added_by_username': 'mazenyasin',
                 'tags': ['anatomy', 'reference', 'book', 'medical', f'year{year}'],
             })
     else:
