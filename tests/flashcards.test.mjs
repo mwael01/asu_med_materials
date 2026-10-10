@@ -2,3 +2,4 @@
 import './flashcard-interactions.test.mjs';
 import './flashcard-review.test.mjs';
 import './flashcard-player.test.mjs';
+import './flashcard-html.test.mjs';

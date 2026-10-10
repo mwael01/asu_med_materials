@@ -54,6 +54,7 @@ class Element extends EventHub {
   getAttribute(name) { return this.attributes.get(name) ?? null; }
   setAttribute(name, value) { this.attributes.set(name, value); }
   querySelector() { return this.span ||= new Element(); }
+  querySelectorAll() { return []; }
   closest() { return null; }
   showModal() { this.open = true; }
   close() { this.open = false; }
@@ -241,3 +242,41 @@ test('empty and quarantined decks show an empty state, never completed or 100%',
     assert.equal(h.element('btn-reset-session').disabled, true);
   }
 });
+
+test('occlusion cards hide the top overlay on reveal and toggle via button', async () => {
+  const overlayMock = new Element();
+  overlayMock.id = 'io-overlay';
+  const cards = [{
+    id: 'io-1', deckId: 'test-deck', revisionId: 'r1', ordinal: 0, kind: 'occlusion',
+    questionHtml: '<div id="io-wrapper"><div id="io-overlay"><img src="q.svg"></div><div id="io-original"><img src="base.jpg"></div></div>',
+    answerHtml: '<div id="io-extra">Notes</div>',
+    contentHash: 'hash-io-1',
+    sourceNoteGuid: 'io-1', sourceTemplateOrdinal: 0, sourceDeckPath: '', media: [],
+  }];
+  const h = playerHarness(cards);
+  h.element('card-question-body').querySelectorAll = (sel) => {
+    if (sel.includes('#io-overlay')) return [overlayMock];
+    return [];
+  };
+  await tick();
+  // Question mode: overlay is visible
+  assert.equal(overlayMock.classList.contains('is-hidden'), false);
+  assert.equal(h.element('card-occlusion-container').classList.contains('hidden'), true);
+
+  // Reveal answer: top overlay is hidden
+  await h.click('btn-reveal-answer');
+  assert.equal(overlayMock.classList.contains('is-hidden'), true);
+  assert.equal(overlayMock.style.display, 'none');
+  assert.equal(h.element('card-occlusion-container').classList.contains('hidden'), false);
+
+  // Toggle mask button shows overlay again
+  await h.click('btn-toggle-occlusion');
+  assert.equal(overlayMock.classList.contains('is-hidden'), false);
+  assert.equal(overlayMock.style.display, '');
+
+  // Toggle again hides it
+  await h.click('btn-toggle-occlusion');
+  assert.equal(overlayMock.classList.contains('is-hidden'), true);
+  assert.equal(overlayMock.style.display, 'none');
+});
+

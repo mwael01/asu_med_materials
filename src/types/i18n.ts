@@ -256,6 +256,9 @@ export interface TranslationsSchema {
     answer?: string;
     showHint?: string;
     hideHint?: string;
+    showMask?: string;
+    hideMask?: string;
+    occlusionRevealed?: string;
     touchPrompt?: string;
     or?: string;
     pausedTitle?: string;

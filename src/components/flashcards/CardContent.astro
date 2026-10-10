@@ -1,4 +1,6 @@
 ---
+import { prepareCardHtml } from '../../scripts/flashcards/cardHtml';
+
 interface Props {
   html: string;
   kind?: string;
@@ -8,43 +10,8 @@ interface Props {
 
 const { html, questionHtml } = Astro.props;
 
-// Clean HTML defensively
-let cleanHtml = html || '';
-
-if (questionHtml) {
-  const hrMatch = /<hr[^>]*>/i.exec(cleanHtml);
-  if (hrMatch) {
-    const beforeHr = cleanHtml.substring(0, hrMatch.index);
-    const afterHr = cleanHtml.substring(hrMatch.index + hrMatch[0].length);
-    const cleanQText = questionHtml.replace(/<[^>]+>/g, '').trim().toLowerCase();
-    const cleanBeforeText = beforeHr.replace(/<[^>]+>/g, '').trim().toLowerCase();
-    if (cleanBeforeText && (cleanBeforeText === cleanQText || cleanBeforeText.startsWith(cleanQText) || cleanQText.startsWith(cleanBeforeText))) {
-      cleanHtml = afterHr;
-    }
-  }
-}
-
-// Remove empty sections: Etymology, Mnemonics, Extra Section, Images
-const sectionNames = ['Etymology', 'Mnemonics', 'Extra Section', 'Images'];
-for (const name of sectionNames) {
-  const pattern = new RegExp(`(?:<hr[^>]*>\\s*)?(?:<div[^>]*>\\s*)?<h[1-6][^>]*>\\s*${name}\\s*<\\/h[1-6]>\\s*(?:<div[^>]*>(.*?)<\\/div>)?\\s*(?:<hr[^>]*>)?\\s*(?:<\\/div>)?`, 'gis');
-  cleanHtml = cleanHtml.replace(pattern, (_m, content) => {
-    const inner = content || '';
-    const hasImg = /<img\b/i.test(inner);
-    const text = inner.replace(/<[^>]+>/g, '').trim();
-    if (hasImg) {
-      return inner;
-    } else if (text) {
-      return `<div>${inner}</div>`;
-    }
-    return '';
-  });
-}
-
-cleanHtml = cleanHtml.replace(/<div\s*>\s*<\/div>/gi, '');
-cleanHtml = cleanHtml.replace(/(?:<br\s*\/?>\s*){2,}/gi, '<br>');
-cleanHtml = cleanHtml.replace(/^\s*(?:<hr[^>]*>|<br\s*\/?>)+/gi, '');
-cleanHtml = cleanHtml.replace(/(?:<hr[^>]*>|<br\s*\/?>)+\s*$/gi, '').trim();
+// Clean HTML defensively using central cardHtml pipeline
+const { html: cleanHtml } = prepareCardHtml(html || '', questionHtml);
 
 // Detect text direction from content independently of the site-wide language
 const hasArabic = /[\u0600-\u06FF]/.test(cleanHtml.replace(/<[^>]+>/g, ''));
@@ -80,9 +47,86 @@ const direction = hasArabic ? 'rtl' : 'ltr';
     margin-bottom: 0;
   }
   /* Hide dead hint button and empty sections */
+  /* Image Occlusion Enhanced styles */
+  .card-html #io-wrapper,
+  .card-html .io-wrapper,
+  .card-html #image-occlusion-container,
+  .card-html .image-occlusion-container {
+    position: relative;
+    display: inline-block;
+    max-width: 100%;
+    margin: 0.5rem auto;
+    vertical-align: middle;
+  }
+  .card-html #io-original,
+  .card-html .io-original,
+  .card-html #image-occlusion-original {
+    position: relative;
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: 1;
+    display: block;
+  }
+  .card-html #io-original img,
+  .card-html .io-original img,
+  .card-html #image-occlusion-original img {
+    display: block;
+    max-width: 100%;
+    height: auto;
+    margin: 0 auto;
+    border-radius: 0.75rem;
+  }
+  .card-html #io-overlay,
+  .card-html .io-overlay,
+  .card-html #image-occlusion-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 2;
+    pointer-events: none;
+  }
+  .card-html #io-overlay img,
+  .card-html #io-overlay svg,
+  .card-html .io-overlay img,
+  .card-html .io-overlay svg,
+  .card-html #image-occlusion-overlay img {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: block;
+    margin: 0 !important;
+    padding: 0 !important;
+    border-radius: 0.75rem !important;
+    box-shadow: none !important;
+    border: none !important;
+    background: transparent !important;
+  }
+  .card-html #io-overlay.is-hidden,
+  .card-html .io-overlay.is-hidden,
+  .card-html #image-occlusion-overlay.is-hidden {
+    opacity: 0 !important;
+    visibility: hidden !important;
+    display: none !important;
+  }
+  .card-html #io-extra,
+  .card-html .io-extra {
+    margin-top: 0.75rem;
+    font-size: 0.95rem;
+    line-height: 1.6;
+  }
+
+  /* Hide dead hint button and empty sections */
   .card-html .hint_btn,
   .card-html #hint_btn,
   .card-html #snackbar,
+  .card-html #io-revl-btn,
+  .card-html #io-header,
+  .card-html #io-footer,
   .card-html #images_section:not(:has(img)),
   .card-html #extra_section:not(:has(#extra:not(:empty))),
   .card-html #Etymology_section:not(:has(#Etymology:not(:empty))),

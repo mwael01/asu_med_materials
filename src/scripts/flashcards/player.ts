@@ -55,6 +55,9 @@ function initStudyPlayer() {
   const cardHintContainer = document.getElementById('card-hint-container');
   const cardHintPanel = document.getElementById('card-hint-panel');
   const btnToggleHint = document.getElementById('btn-toggle-hint');
+  const cardOcclusionContainer = document.getElementById('card-occlusion-container');
+  const btnToggleOcclusion = document.getElementById('btn-toggle-occlusion');
+  const btnToggleOcclusionText = document.getElementById('btn-toggle-occlusion-text');
   const shadeAgain = document.getElementById('shade-again');
   const shadeKnown = document.getElementById('shade-known');
   const controlsUnrevealed = document.getElementById('controls-unrevealed');
@@ -89,6 +92,7 @@ function initStudyPlayer() {
   let preparedQuestion = '';
   let answerRendered = false;
   let visualGeneration = 0;
+  let isOcclusionMaskHidden = false;
   const animations = createCardAnimations(cardStage);
   const flow = createRatingFlow({
     canRate: () =>
@@ -159,6 +163,7 @@ function initStudyPlayer() {
       againBtn,
       knownBtn,
       btnToggleHint,
+      btnToggleOcclusion,
       pauseBtn,
       resetBtn,
       reviewAgainBtn,
@@ -168,7 +173,7 @@ function initStudyPlayer() {
           !ready ||
           (button === pauseBtn && !currentCard(reviewState)) ||
           ([resetBtn, reviewAgainBtn].includes(button) && reviewState.cards.length === 0) ||
-          ([revealBtn, againBtn, knownBtn, btnToggleHint].includes(button) &&
+          ([revealBtn, againBtn, knownBtn, btnToggleHint, btnToggleOcclusion].includes(button) &&
             isTransitioning);
       }
     }
@@ -283,10 +288,45 @@ function initStudyPlayer() {
     const card = currentCard(reviewState);
     if (!card) return;
 
+    function updateOcclusionVisibility(shouldHide: boolean) {
+      if (!questionBody || typeof questionBody.querySelectorAll !== 'function') return;
+      const overlays = questionBody.querySelectorAll<HTMLElement>(
+        '#io-overlay, .io-overlay, #image-occlusion-overlay',
+      );
+      if (overlays.length === 0) {
+        cardOcclusionContainer?.classList.add('hidden');
+        return;
+      }
+      isOcclusionMaskHidden = shouldHide;
+      for (const overlay of overlays) {
+        if (shouldHide) {
+          overlay.classList.add('is-hidden');
+          overlay.style.display = 'none';
+        } else {
+          overlay.classList.remove('is-hidden');
+          overlay.style.display = '';
+        }
+      }
+      const currentLang = getCurrentLanguage();
+      if (reviewState.revealed) {
+        cardOcclusionContainer?.classList.remove('hidden');
+        if (btnToggleOcclusionText) {
+          btnToggleOcclusionText.textContent = t(
+            shouldHide ? 'flashcards.showMask' : 'flashcards.hideMask',
+            currentLang,
+          );
+        }
+      } else {
+        cardOcclusionContainer?.classList.add('hidden');
+      }
+    }
+
     // Preserve question DOM, images, selection, and hints when only reveal/language changes.
     const cardKey = `${card.id}:${card.contentHash}`;
     if (cardKey !== renderedCardKey) {
       renderedCardKey = cardKey;
+      isOcclusionMaskHidden = false;
+      cardOcclusionContainer?.classList.add('hidden');
       answerRendered = false;
       answerBody.innerHTML = '';
       // Render front question
@@ -329,16 +369,23 @@ function initStudyPlayer() {
             : 'ltr');
         answerBody.setAttribute('dir', aDir);
         answerBody.className = `card-html text-center text-base sm:text-lg leading-relaxed select-text`;
-        answerBody.innerHTML = cleanA;
+        const hasContent =
+          cleanA.replace(/<[^>]+>/g, '').trim().length > 0 ||
+          /<img\b/i.test(cleanA);
+        answerBody.innerHTML = hasContent
+          ? cleanA
+          : `<p class="text-xs sm:text-sm text-zinc-400 dark:text-zinc-500 italic">${t('flashcards.occlusionRevealed', lang)}</p>`;
         answerRendered = true;
       }
       answerContainer?.classList.remove('hidden');
       controlsUnrevealed?.classList.add('hidden');
       controlsRevealed?.classList.remove('hidden');
+      updateOcclusionVisibility(true);
     } else {
       answerContainer?.classList.add('hidden');
       controlsUnrevealed?.classList.remove('hidden');
       controlsRevealed?.classList.add('hidden');
+      updateOcclusionVisibility(false);
     }
   }
 
@@ -384,6 +431,73 @@ function initStudyPlayer() {
           isCurrentlyHidden ? 'flashcards.showHint' : 'flashcards.hideHint',
           getCurrentLanguage(),
         );
+      }
+    },
+    listenerOptions,
+  );
+
+  // Toggle Occlusion Mask
+  btnToggleOcclusion?.addEventListener(
+    'click',
+    (e) => {
+      e.stopPropagation();
+      if (!questionBody) return;
+      const overlays = questionBody.querySelectorAll<HTMLElement>(
+        '#io-overlay, .io-overlay, #image-occlusion-overlay',
+      );
+      if (overlays.length === 0) return;
+      isOcclusionMaskHidden = !isOcclusionMaskHidden;
+      for (const overlay of overlays) {
+        if (isOcclusionMaskHidden) {
+          overlay.classList.add('is-hidden');
+          overlay.style.display = 'none';
+        } else {
+          overlay.classList.remove('is-hidden');
+          overlay.style.display = '';
+        }
+      }
+      if (btnToggleOcclusionText) {
+        btnToggleOcclusionText.textContent = t(
+          isOcclusionMaskHidden ? 'flashcards.showMask' : 'flashcards.hideMask',
+          getCurrentLanguage(),
+        );
+      }
+    },
+    listenerOptions,
+  );
+
+  // Click on diagram directly to toggle mask when revealed
+  questionBody?.addEventListener(
+    'click',
+    (e) => {
+      const target = e.target as HTMLElement | null;
+      if (
+        target?.closest(
+          '#io-wrapper, .io-wrapper, #image-occlusion-container, .image-occlusion-container',
+        )
+      ) {
+        if (reviewState.revealed) {
+          const overlays = questionBody.querySelectorAll<HTMLElement>(
+            '#io-overlay, .io-overlay, #image-occlusion-overlay',
+          );
+          if (overlays.length === 0) return;
+          isOcclusionMaskHidden = !isOcclusionMaskHidden;
+          for (const overlay of overlays) {
+            if (isOcclusionMaskHidden) {
+              overlay.classList.add('is-hidden');
+              overlay.style.display = 'none';
+            } else {
+              overlay.classList.remove('is-hidden');
+              overlay.style.display = '';
+            }
+          }
+          if (btnToggleOcclusionText) {
+            btnToggleOcclusionText.textContent = t(
+              isOcclusionMaskHidden ? 'flashcards.showMask' : 'flashcards.hideMask',
+              getCurrentLanguage(),
+            );
+          }
+        }
       }
     },
     listenerOptions,

@@ -49,6 +49,10 @@
       document.addEventListener('click', (e) => {
         const target = e.target as HTMLElement | null;
         if (target && target.tagName === 'IMG' && target.closest('.card-html')) {
+          // Inside Image Occlusion wrappers, clicking the diagram toggles masks instead of opening the single-image preview modal
+          if (target.closest('#io-wrapper, .io-wrapper, #image-occlusion-container, .image-occlusion-container')) {
+            return;
+          }
           const currentDialog = document.getElementById('flashcard-image-modal') as HTMLDialogElement | null;
           const currentModalImg = document.getElementById('flashcard-modal-img') as HTMLImageElement | null;
           const src = (target as HTMLImageElement).src;
