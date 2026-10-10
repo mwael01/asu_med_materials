@@ -1,27 +1,47 @@
 import { randomUUID } from 'node:crypto';
 import type { CatalogueCacheStore, CatalogueManifest } from '../types/catalogueCache';
 
-export const CATALOGUE_TTL_SECONDS = 86_400;
 const CHUNK_BYTES = 900_000;
 
-function isManifest(value: unknown): value is CatalogueManifest {
-  if (!value || typeof value !== 'object') return false;
-  const entry = value as Partial<CatalogueManifest>;
-  return entry.version === 1 && typeof entry.expiresAt === 'number'
-    && entry.expiresAt > Date.now() && Array.isArray(entry.chunks)
-    && entry.chunks.length > 0 && entry.chunks.every((key) => typeof key === 'string');
+/** In-memory cache store for local runtime and development environments */
+export function createMemoryCacheStore(): CatalogueCacheStore {
+  const store = new Map<string, unknown>();
+  return {
+    async get(key: string): Promise<unknown> {
+      return store.get(key);
+    },
+    async set(key: string, value: unknown): Promise<void> {
+      store.set(key, value);
+    }
+  };
 }
 
-/** Server-only cache adapter; publish a generation only after every chunk is stored. */
+function isManifest(value: unknown, expectedVersion?: number): value is CatalogueManifest {
+  if (!value || typeof value !== 'object') return false;
+  const entry = value as Partial<CatalogueManifest>;
+  const hasValidStructure = entry.version === 1
+    && typeof entry.dataVersion === 'number'
+    && Array.isArray(entry.chunks)
+    && entry.chunks.length > 0
+    && entry.chunks.every((key) => typeof key === 'string');
+  if (!hasValidStructure) return false;
+  if (typeof expectedVersion === 'number') {
+    return entry.dataVersion === expectedVersion;
+  }
+  return true;
+}
+
+/** Server-only cache adapter; serves snapshot when version matches, otherwise refreshes from origin. */
 export async function loadCachedCatalogue<T>(
   cache: CatalogueCacheStore,
   key: string,
   fetchOrigin: () => Promise<T[]>,
   isItem: (value: unknown) => value is T,
+  currentVersion: number = 1
 ): Promise<T[]> {
   try {
     const manifest = await cache.get(key);
-    if (isManifest(manifest)) {
+    if (isManifest(manifest, currentVersion)) {
       const chunks = await Promise.all(manifest.chunks.map((chunk) => cache.get(chunk)));
       if (chunks.every((chunk) => Array.isArray(chunk) && chunk.every(isItem))) {
         return (chunks as T[][]).flat();
@@ -51,11 +71,10 @@ export async function loadCachedCatalogue<T>(
     chunks.push(current);
     const generation = randomUUID();
     const keys = chunks.map((_, index) => `${key}:${generation}:${index}`);
-    const expiresAt = Date.now() + CATALOGUE_TTL_SECONDS * 1000;
-    await Promise.all(chunks.map((chunk, index) => cache.set(keys[index]!, chunk, { ttl: CATALOGUE_TTL_SECONDS + 60 })));
-    const manifest: CatalogueManifest = { version: 1, expiresAt, chunks: keys };
-    await cache.set(key, manifest, { ttl: CATALOGUE_TTL_SECONDS });
-    console.info(`[Catalogue cache] Filled ${key} (${items.length} records)`);
+    await Promise.all(chunks.map((chunk, index) => cache.set(keys[index]!, chunk, { ttl: 31_536_000 })));
+    const manifest: CatalogueManifest = { version: 1, dataVersion: currentVersion, chunks: keys };
+    await cache.set(key, manifest, { ttl: 31_536_000 });
+    console.info(`[Catalogue cache] Filled snapshot for ${key} (version ${currentVersion}, ${items.length} records)`);
   } catch (error) {
     console.warn('[Catalogue cache] Write failed:', error instanceof Error ? error.message : 'Unknown error');
   }

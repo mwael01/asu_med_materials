@@ -19,12 +19,21 @@ export const COLLECTIONS = {
   SUBMISSIONS: 'submissions',
   FEEDBACK: 'feedback',
   ADMIN_LOGS: 'admin_logs',
-  CONTRIBUTORS: 'contributors'
-  ,FLASHCARD_DECKS: 'flashcard_decks'
-  ,FLASHCARD_IMPORTS: 'flashcard_imports'
+  CONTRIBUTORS: 'contributors',
+  FLASHCARD_DECKS: 'flashcard_decks',
+  FLASHCARD_IMPORTS: 'flashcard_imports',
+  MATERIALS_VERSION: 'materials_version'
 } as const;
 
 export type CollectionName = (typeof COLLECTIONS)[keyof typeof COLLECTIONS];
+
+/**
+ * 0. Materials Version Document Schema in Firestore
+ */
+export interface MaterialsVersionDocument {
+  version: number;
+  updatedAt?: string;
+}
 
 /**
  * 1. Material Document Schema in Firestore

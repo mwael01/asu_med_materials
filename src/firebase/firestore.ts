@@ -98,6 +98,57 @@ export function sanitizeFirestorePayload<T extends Record<string, any>>(obj: T):
 // Collections
 const MATERIALS_COLLECTION = 'materials';
 const USERS_COLLECTION = 'users';
+const MATERIALS_VERSION_COLLECTION = 'materials_version';
+const MATERIALS_VERSION_DOC_ID = 'current';
+
+/**
+ * Fetches the current materials version number from Cloud Firestore.
+ * Defaults to 1 if not set or on network failure.
+ */
+export async function getMaterialsVersionFromFirestore(): Promise<number> {
+  const db = getFirestoreDb();
+  if (!db) return 1;
+
+  try {
+    const docRef = doc(db, MATERIALS_VERSION_COLLECTION, MATERIALS_VERSION_DOC_ID);
+    const snap = await getDoc(docRef);
+    if (snap.exists()) {
+      const data = snap.data();
+      const val = typeof data?.version === 'number' ? data.version : Number(data?.version);
+      return Number.isFinite(val) && val > 0 ? val : 1;
+    }
+  } catch (err) {
+    console.warn('[Firestore] Failed to fetch materials version, falling back to 1:', err);
+  }
+  return 1;
+}
+
+/**
+ * Atomically increments the materials version in Cloud Firestore.
+ * Called whenever materials are added, modified, or deleted by admins.
+ */
+export async function incrementMaterialsVersionInFirestore(): Promise<number> {
+  const db = getFirestoreDb();
+  if (!db) return 1;
+
+  try {
+    const docRef = doc(db, MATERIALS_VERSION_COLLECTION, MATERIALS_VERSION_DOC_ID);
+    await setDoc(
+      docRef,
+      {
+        version: increment(1),
+        updatedAt: new Date().toISOString()
+      },
+      { merge: true }
+    );
+    urlCheckCache = null;
+    const snap = await getDoc(docRef);
+    return snap.exists() ? snap.data()?.version || 1 : 1;
+  } catch (err) {
+    console.warn('[Firestore] Failed to increment materials version:', err);
+    return 1;
+  }
+}
 
 /**
  * Fetches all study materials from Firestore (or IndexedDB cache when offline).
@@ -159,6 +210,7 @@ export async function saveMaterialToFirestore(material: MaterialItem): Promise<b
     const docRef = doc(db, MATERIALS_COLLECTION, material.id);
     await setDoc(docRef, sanitizeFirestorePayload(material), { merge: true });
     urlCheckCache = null;
+    await incrementMaterialsVersionInFirestore();
     return true;
   } catch (err) {
     console.error('[Firestore] Failed to save material:', err);
@@ -274,6 +326,10 @@ export async function saveMaterialsBulk(
       console.error(`[Firestore] Failed to save material ${mat.id} in bulk:`, err);
       errors.push(`Material "${mat.title}": ${err?.message || 'Save failed'}`);
     }
+  }
+
+  if (savedCount > 0) {
+    await incrementMaterialsVersionInFirestore();
   }
 
   // Update submission status if source submission exists
@@ -781,6 +837,7 @@ export async function deleteMaterialFromFirestore(
         details: `Deleted material "${matData?.title}" (${matData?.type})`
       });
     }
+    await incrementMaterialsVersionInFirestore();
     return true;
   } catch (err) {
     console.error(`[Firestore] Failed to delete material ${materialId}:`, err);

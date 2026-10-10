@@ -1,6 +1,6 @@
 // Run with Node 22.12+: node --experimental-strip-types scripts/test-catalogue-cache.mjs
 import assert from 'node:assert/strict';
-import { loadCachedCatalogue, CATALOGUE_TTL_SECONDS } from '../src/utils/catalogueCache.ts';
+import { loadCachedCatalogue, createMemoryCacheStore } from '../src/utils/catalogueCache.ts';
 import { createTimedLoader } from '../src/utils/timedLoader.ts';
 
 const records = new Map();
@@ -12,19 +12,25 @@ const cache = {
 const valid = (item) => Boolean(item && typeof item.id === 'string');
 let reads = 0;
 const origin = async () => { reads++; return [{ id: 'one' }]; };
-await loadCachedCatalogue(cache, 'materials', origin, valid);
-await loadCachedCatalogue(cache, 'materials', origin, valid);
-assert.equal(reads, 1, 'a separate loader invocation must reuse the shared catalogue');
-assert.equal(writes.at(-1).options.ttl, CATALOGUE_TTL_SECONDS);
-const manifest = records.get('materials');
-manifest.expiresAt = Date.now() - 1;
-await loadCachedCatalogue(cache, 'materials', origin, valid);
-assert.equal(reads, 2, 'expired catalogue must refresh');
+await loadCachedCatalogue(cache, 'materials', origin, valid, 1);
+await loadCachedCatalogue(cache, 'materials', origin, valid, 1);
+assert.equal(reads, 1, 'matching version must reuse the shared cached snapshot');
+assert.equal(records.get('materials').dataVersion, 1);
+
+// When database version increments from 1 to 2:
+await loadCachedCatalogue(cache, 'materials', origin, valid, 2);
+assert.equal(reads, 2, 'incremented database version must refresh the snapshot once');
+assert.equal(records.get('materials').dataVersion, 2);
+
+// Subsequent request on version 2 must reuse the new snapshot:
+await loadCachedCatalogue(cache, 'materials', origin, valid, 2);
+assert.equal(reads, 2, 'subsequent request on version 2 must reuse updated snapshot');
+
 records.delete(records.get('materials').chunks[0]);
-await loadCachedCatalogue(cache, 'materials', origin, valid);
+await loadCachedCatalogue(cache, 'materials', origin, valid, 2);
 assert.equal(reads, 3, 'incomplete catalogue must refresh');
 records.set(records.get('materials').chunks[0], [{ unexpected: true }]);
-await loadCachedCatalogue(cache, 'materials', origin, valid);
+await loadCachedCatalogue(cache, 'materials', origin, valid, 2);
 assert.equal(reads, 4, 'invalid records must refresh');
 
 let emptyReads = 0;
@@ -69,4 +75,15 @@ const retry = createTimedLoader(async () => { if (++attempts === 1) throw new Er
 await assert.rejects(retry());
 assert.deepEqual(await retry(), []);
 assert.equal(attempts, 2);
+
+// Verify createMemoryCacheStore for local runtime
+const memStore = createMemoryCacheStore();
+let memReads = 0;
+const memOrigin = async () => { memReads++; return [{ id: 'local-item' }]; };
+const memRes1 = await loadCachedCatalogue(memStore, 'local-mat', memOrigin, valid, 1);
+const memRes2 = await loadCachedCatalogue(memStore, 'local-mat', memOrigin, valid, 1);
+assert.equal(memReads, 1, 'local memory store must cache across reads when version matches');
+assert.deepEqual(memRes1, [{ id: 'local-item' }]);
+assert.deepEqual(memRes2, [{ id: 'local-item' }]);
+
 console.log('Catalogue cache tests passed.');

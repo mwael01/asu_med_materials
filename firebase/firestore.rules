@@ -151,5 +151,13 @@ service cloud.firestore {
     match /users/{userId}/flashcard_progress/{deckId} {
       allow read, write: if isOwner(userId);
     }
+
+    // =========================================================================
+    // 11. Materials Version
+    // =========================================================================
+    match /materials_version/{docId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
   }
 }
