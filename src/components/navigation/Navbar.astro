@@ -7,11 +7,11 @@ const currentPath = Astro.url.pathname;
 const isYear = (y: number) => currentPath.startsWith(`/year/${y}`);
 ---
 
-<header class="sticky top-0 z-30 w-full border-b border-zinc-200 dark:border-zinc-800 bg-white/95 dark:bg-zinc-950/90 backdrop-blur-md">
+<header class="sticky top-0 z-30 w-full border-b border-zinc-200 dark:border-zinc-800 bg-white/95 dark:bg-zinc-950/90 backdrop-blur-md pt-[env(safe-area-inset-top,0px)]">
   <div class="max-w-6xl mx-auto px-4 sm:px-6 h-12 flex items-center justify-between gap-4">
     <!-- Brand Title -->
     <a href="/" class="inline-flex items-center text-zinc-900 dark:text-zinc-100 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors shrink-0">
-      <span class="font-bold text-xs sm:text-sm tracking-tight truncate max-w-[140px] sm:max-w-none shrink-0">ASU Med Materials</span>
+      <span class="font-bold text-xs sm:text-sm tracking-tight truncate max-w-[125px] sm:max-w-none shrink-0">ASU Med Materials</span>
     </a>
 
     <!-- Navigation Links (Desktop) -->

@@ -92,6 +92,7 @@ const allMaterials = await getAllMaterials();
                 <input
                   type="text"
                   id="auth-display-name"
+                  autocomplete="name"
                   placeholder="e.g. Mohamed Wael"
                   class="w-full text-xs px-3 py-2 rounded-xl border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 focus:outline-none focus:ring-2 focus:ring-emerald-500 dark:text-zinc-100"
                 />
@@ -109,6 +110,10 @@ const allMaterials = await getAllMaterials();
                   <input
                     type="text"
                     id="auth-username"
+                    autocomplete="username"
+                    autocapitalize="none"
+                    autocorrect="off"
+                    spellcheck="false"
                     placeholder="e.g. ahmed_wael"
                     class="w-full text-xs pl-7 pr-3 py-2 rounded-xl border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 focus:outline-none focus:ring-2 focus:ring-emerald-500 dark:text-zinc-100 font-mono"
                   />
@@ -123,6 +128,10 @@ const allMaterials = await getAllMaterials();
                 type="email"
                 id="auth-email"
                 required
+                autocomplete="email"
+                autocapitalize="none"
+                autocorrect="off"
+                spellcheck="false"
                 placeholder="name@std.asu.edu.eg or personal email"
                 class="w-full text-xs px-3 py-2 rounded-xl border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 focus:outline-none focus:ring-2 focus:ring-emerald-500 dark:text-zinc-100"
               />
@@ -134,6 +143,7 @@ const allMaterials = await getAllMaterials();
                 type="password"
                 id="auth-password"
                 required
+                autocomplete="current-password"
                 placeholder="••••••••"
                 class="w-full text-xs px-3 py-2 rounded-xl border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 focus:outline-none focus:ring-2 focus:ring-emerald-500 dark:text-zinc-100"
               />
@@ -532,6 +542,10 @@ const allMaterials = await getAllMaterials();
           <input
             type="text"
             id="modal-input-username"
+            autocomplete="username"
+            autocapitalize="none"
+            autocorrect="off"
+            spellcheck="false"
             placeholder="e.g. mohamed_wael"
             class="w-full text-xs pl-7 pr-3 py-2 rounded-xl border border-zinc-300 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800 focus:outline-none focus:ring-2 focus:ring-emerald-500 dark:text-zinc-100 font-mono"
           />
@@ -561,6 +575,7 @@ const allMaterials = await getAllMaterials();
   import {
     onAuthChange,
     signInWithGoogle,
+    checkRedirectAuthResult,
     signInWithEmail,
     signUpWithEmail,
     signOutUser,
@@ -810,10 +825,18 @@ const allMaterials = await getAllMaterials();
                 url: shareUrl
               });
               return;
-            } catch {}
+            } catch (shareErr: any) {
+              if (shareErr?.name === 'AbortError') {
+                return;
+              }
+            }
           }
-          await navigator.clipboard.writeText(shareUrl);
-          notify('Profile link copied to clipboard!', 'success');
+          try {
+            await navigator.clipboard.writeText(shareUrl);
+            notify('Profile link copied to clipboard!', 'success');
+          } catch {
+            notify('Could not copy link to clipboard', 'error');
+          }
         });
 
         showSection('public');
@@ -1089,6 +1112,19 @@ const allMaterials = await getAllMaterials();
     async function copyMyProfileLink() {
       if (!currentProfile) return;
       const shareUrl = `${window.location.origin}/profile?u=${encodeURIComponent(currentProfile.username)}`;
+      if (navigator.share) {
+        try {
+          await navigator.share({
+            title: `${currentProfile.displayName} (@${currentProfile.username}) - ASU Med Materials`,
+            url: shareUrl
+          });
+          return;
+        } catch (shareErr: any) {
+          if (shareErr?.name === 'AbortError') {
+            return;
+          }
+        }
+      }
       try {
         await navigator.clipboard.writeText(shareUrl);
         notify('Shareable profile link copied!', 'success');
@@ -1566,6 +1602,18 @@ const allMaterials = await getAllMaterials();
     }
 
     let hasShownProfile = false;
+
+    // Check for redirect result from Google sign-in (for iOS Safari & WebKit standalone PWAs)
+    checkRedirectAuthResult().then((redirectRes) => {
+      if (redirectRes) {
+        currentUser = redirectRes.user;
+        currentProfile = redirectRes.profile;
+        hasShownProfile = true;
+        clearTimeout(safetyTimer);
+        notify(`Welcome back, ${redirectRes.profile.displayName}!`, 'success');
+        renderMyProfile(redirectRes.profile);
+      }
+    }).catch(() => {});
 
     // Safety fallback: if Firebase Auth takes more than 2.5s (e.g. storage access blocked), never stay stuck on loading skeleton
     const safetyTimer = setTimeout(() => {

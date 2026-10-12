@@ -52,9 +52,9 @@ const videos = playlist.videos || [];
 // If discrete videos: https://www.youtube-nocookie.com/embed/{firstVideoId}
 // If playlistId: https://www.youtube-nocookie.com/embed/videoseries?list={playlistId}
 const initialEmbedUrl = hasDiscreteVideos
-  ? `https://www.youtube-nocookie.com/embed/${videos[0].youtubeId}?rel=0&enablejsapi=1`
+  ? `https://www.youtube-nocookie.com/embed/${videos[0].youtubeId}?rel=0&enablejsapi=1&playsinline=1`
   : playlist.playlistId
-    ? `https://www.youtube-nocookie.com/embed/videoseries?list=${playlist.playlistId}&rel=0&enablejsapi=1`
+    ? `https://www.youtube-nocookie.com/embed/videoseries?list=${playlist.playlistId}&rel=0&enablejsapi=1&playsinline=1`
     : playlist.url;
 ---
 
@@ -516,7 +516,7 @@ const initialEmbedUrl = hasDiscreteVideos
       const title = activeItem.getAttribute('data-title');
 
       if (playerIframe && ytId) {
-        playerIframe.src = `https://www.youtube-nocookie.com/embed/${ytId}?autoplay=1&rel=0&enablejsapi=1`;
+        playerIframe.src = `https://www.youtube-nocookie.com/embed/${ytId}?autoplay=1&rel=0&enablejsapi=1&playsinline=1`;
       }
       if (currentTitleEl && title) {
         currentTitleEl.textContent = title;

@@ -36,6 +36,10 @@ const isLarge = size === 'lg';
     placeholder={placeholder}
     data-i18n-attr="placeholder:home.searchPlaceholder"
     autofocus={autofocus}
+    autocomplete="off"
+    autocapitalize="none"
+    autocorrect="off"
+    spellcheck="false"
     class:list={[
       'w-full bg-white dark:bg-zinc-900 border text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 dark:placeholder-zinc-500 focus:outline-none transition-all text-start',
       isLarge

@@ -2,6 +2,8 @@ import {
   getAuth,
   onAuthStateChanged,
   signInWithPopup,
+  signInWithRedirect,
+  getRedirectResult,
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
   signOut,
@@ -14,6 +16,7 @@ import { getFirebaseApp } from './config';
 import { getUserProfileByUid, upsertUserProfile, checkUsernameAvailable } from './firestore';
 import type { UserProfile } from '../types/profile';
 import type { AcademicYear } from '../types/materials';
+import { isIosDevice, isPwaInstalledOrStandalone } from '../utils/pwa';
 
 let authInstance: Auth | null = null;
 let lastAuthenticatedUid: string | null = null;
@@ -173,20 +176,9 @@ export function onAuthChange(
 }
 
 /**
- * Sign in with Google Popup.
+ * Resolves an existing profile or creates a new one for authenticated users.
  */
-export async function signInWithGoogle(): Promise<{ user: User; profile: UserProfile } | null> {
-  const auth = getFirebaseAuth();
-  if (!auth) {
-    throw new Error('Firebase Auth is not configured');
-  }
-
-  const provider = new GoogleAuthProvider();
-  provider.setCustomParameters({ prompt: 'select_account' });
-
-  const result = await signInWithPopup(auth, provider);
-  const user = result.user;
-
+async function resolveOrCreateUserProfile(user: User): Promise<UserProfile> {
   let profile = await getUserProfileByUid(user.uid);
   if (!profile) {
     const rawName = user.displayName || user.email?.split('@')[0] || 'student';
@@ -205,9 +197,70 @@ export async function signInWithGoogle(): Promise<{ user: User; profile: UserPro
 
     await upsertUserProfile(profile);
   }
+  return profile;
+}
 
-  setCachedUserProfile(profile);
-  return { user, profile };
+/**
+ * Checks for pending redirect sign-in result (critical for Apple Safari, WebKit, and iOS PWAs).
+ */
+export async function checkRedirectAuthResult(): Promise<{ user: User; profile: UserProfile } | null> {
+  const auth = getFirebaseAuth();
+  if (!auth) return null;
+
+  try {
+    const result = await getRedirectResult(auth);
+    if (!result || !result.user) return null;
+
+    const user = result.user;
+    const profile = await resolveOrCreateUserProfile(user);
+    setCachedUserProfile(profile);
+    return { user, profile };
+  } catch (err: any) {
+    console.warn('[Auth] Redirect auth check warning:', err?.message || err);
+    return null;
+  }
+}
+
+/**
+ * Sign in with Google.
+ * Supports popup on standard desktop browsers with automatic redirect fallback for
+ * Apple Safari / WebKit when popups are blocked, and direct redirect in iOS standalone PWAs.
+ */
+export async function signInWithGoogle(): Promise<{ user: User; profile: UserProfile } | null> {
+  const auth = getFirebaseAuth();
+  if (!auth) {
+    throw new Error('Firebase Auth is not configured');
+  }
+
+  const provider = new GoogleAuthProvider();
+  provider.setCustomParameters({ prompt: 'select_account' });
+
+  // On iOS standalone PWA, popup window.open escapes into external Safari and loses session context.
+  // Use redirect directly so the WebClip sandbox retains the credentials.
+  if (isIosDevice() && isPwaInstalledOrStandalone()) {
+    await signInWithRedirect(auth, provider);
+    return null;
+  }
+
+  try {
+    const result = await signInWithPopup(auth, provider);
+    const user = result.user;
+    const profile = await resolveOrCreateUserProfile(user);
+    setCachedUserProfile(profile);
+    return { user, profile };
+  } catch (popupErr: any) {
+    // If Apple Safari / browser policy blocks popups, gracefully fall back to redirect
+    if (
+      popupErr?.code === 'auth/popup-blocked' ||
+      popupErr?.code === 'auth/cancelled-popup-request' ||
+      popupErr?.code === 'auth/operation-not-supported-in-this-environment'
+    ) {
+      console.warn('[Auth] Popup blocked by browser policy, falling back to redirect authentication...');
+      await signInWithRedirect(auth, provider);
+      return null;
+    }
+    throw popupErr;
+  }
 }
 
 /**
