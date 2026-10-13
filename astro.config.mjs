@@ -9,6 +9,24 @@ export default defineConfig({
   vite: {
     plugins: [
       tailwindcss()
-    ]
+    ],
+    build: {
+      chunkSizeWarningLimit: 600,
+      rollupOptions: {
+        output: {
+          manualChunks(id) {
+            if (id.includes('node_modules/firebase/firestore') || id.includes('node_modules/@firebase/firestore')) {
+              return 'vendor-firestore';
+            }
+            if (id.includes('node_modules/firebase/auth') || id.includes('node_modules/@firebase/auth')) {
+              return 'vendor-auth';
+            }
+            if (id.includes('node_modules/firebase/app') || id.includes('node_modules/@firebase/app')) {
+              return 'vendor-firebase-app';
+            }
+          }
+        }
+      }
+    }
   }
 });

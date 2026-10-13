@@ -22,6 +22,9 @@ export async function changeBookmarkCount(
   render();
   try {
     await write();
+    if (state.snapshot !== null) {
+      state.snapshot = normalizeBookmarkCount(state.snapshot + appliedDelta);
+    }
   } catch (error) {
     state.displayed = normalizeBookmarkCount(state.displayed - appliedDelta);
     throw error;

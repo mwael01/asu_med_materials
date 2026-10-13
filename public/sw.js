@@ -1,7 +1,7 @@
 // Service Worker for ASU Med Materials PWA
 // Cache visited pages for offline access without fetching the entire catalogue.
 
-const CACHE_NAME = 'asumed-cache-v3';
+const CACHE_NAME = 'asumed-cache-v4';
 
 // 1. Static brand assets & icons
 const PRECACHE_ASSETS = [
@@ -20,7 +20,8 @@ const PRECACHE_ASSETS = [
   '/icons/website.svg',
   '/icons/whatsapp.svg',
   '/icons/youtube.svg',
-  '/offline.html'
+  '/offline.html',
+  '/api/materials'
 ];
 
 // Helper: fetch with network timeout
@@ -143,7 +144,37 @@ self.addEventListener('fetch', (event) => {
   // Ignore other external origins (YouTube iframe embeds, drives, etc.)
   if (url.origin !== self.location.origin) return;
 
-  // Skip API routes — always network
+  // Stale-While-Revalidate strategy for catalogue materials endpoint
+  if (url.pathname === '/api/materials') {
+    event.respondWith(
+      (async () => {
+        const cache = await caches.open(CACHE_NAME);
+        const cached = await cache.match(request);
+        const fetchPromise = fetch(request).then((networkRes) => {
+          if (networkRes && networkRes.status === 200) {
+            cache.put(request, networkRes.clone());
+          }
+          return networkRes;
+        }).catch(() => null);
+
+        if (cached) {
+          // Serve from cache immediately; update cache in background
+          return cached;
+        }
+
+        const networkRes = await fetchPromise;
+        if (networkRes) return networkRes;
+
+        return new Response('[]', {
+          status: 200,
+          headers: { 'Content-Type': 'application/json' }
+        });
+      })()
+    );
+    return;
+  }
+
+  // Skip other API routes — always network
   if (url.pathname.startsWith('/api/')) return;
 
   // Private pages must never enter the offline response cache.

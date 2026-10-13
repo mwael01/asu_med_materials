@@ -1,11 +1,5 @@
 import { onAuthChange, getCachedUserProfile, setCachedUserProfile } from '../firebase/auth';
 import {
-  syncSingleUserBookmark,
-  syncSingleUserStudied,
-  syncUserLibraryToFirestore,
-  listenToUserProfile
-} from '../firebase/firestore';
-import {
   getStoredBookmarkIds,
   saveBookmarkIds,
   getStoredStudiedIds,
@@ -58,11 +52,15 @@ function mergeAndSync(uid: string, remoteProfile: { bookmarks?: string[]; comple
   }
 
   if (cloudNeedsUpdate) {
-    syncUserLibraryToFirestore(uid, {
-      bookmarks: mergedBookmarks,
-      completedMaterials: mergedStudied
+    import('../firebase/firestore').then(({ syncUserLibraryToFirestore }) => {
+      syncUserLibraryToFirestore(uid, {
+        bookmarks: mergedBookmarks,
+        completedMaterials: mergedStudied
+      }).catch((err) => {
+        console.warn('[Sync] Failed to push merged data to Firestore:', err);
+      });
     }).catch((err) => {
-      console.warn('[Sync] Failed to push merged data to Firestore:', err);
+      console.warn('[Sync] Failed to load Firestore module:', err);
     });
   }
 }
@@ -96,14 +94,19 @@ export function initUserLibrarySync(): void {
       unsubscribeProfileListener();
     }
 
-    unsubscribeProfileListener = listenToUserProfile(uid, async (remoteProfile) => {
-      if (!remoteProfile) return;
-      mergeAndSync(uid, remoteProfile);
-      const cached = getCachedUserProfile();
-      if (cached && cached.uid === uid) {
-        setCachedUserProfile({ ...cached, ...remoteProfile });
-      }
-    });
+    try {
+      const { listenToUserProfile } = await import('../firebase/firestore');
+      unsubscribeProfileListener = listenToUserProfile(uid, async (remoteProfile) => {
+        if (!remoteProfile) return;
+        mergeAndSync(uid, remoteProfile);
+        const cached = getCachedUserProfile();
+        if (cached && cached.uid === uid) {
+          setCachedUserProfile({ ...cached, ...remoteProfile });
+        }
+      });
+    } catch (err) {
+      console.warn('[Sync] Failed to load firestore listener:', err);
+    }
 
     // 3. Re-sync when user returns to the tab with a 10-minute throttle (onSnapshot already handles live pushes)
     let lastVisibilitySync = Date.now();
@@ -149,6 +152,7 @@ export async function syncBookmarkToggle(materialId: string, isAdded: boolean): 
   const cached = getCachedUserProfile();
   if (cached?.uid) {
     try {
+      const { syncSingleUserBookmark } = await import('../firebase/firestore');
       const synced = await syncSingleUserBookmark(cached.uid, materialId, isAdded);
       if (!synced) throw new Error('Bookmark profile sync failed');
     } catch (err) {
@@ -166,6 +170,7 @@ export async function syncStudiedToggle(materialId: string, isStudied: boolean):
   const cached = getCachedUserProfile();
   if (cached?.uid && !isUpdatingFromCloud) {
     try {
+      const { syncSingleUserStudied } = await import('../firebase/firestore');
       syncSingleUserStudied(cached.uid, materialId, isStudied);
     } catch (err) {
       console.warn(`[Sync] Failed to sync studied item for user ${cached.uid}:`, err);

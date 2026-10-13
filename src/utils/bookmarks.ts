@@ -1,11 +1,9 @@
-import { incrementMaterialBookmarkCount, listenToMaterialBookmarkCount } from '../firebase/firestore';
 import { getStoredBookmarkIds, saveBookmarkIds } from './storage';
 import { syncBookmarkToggle } from './userSync';
-import { changeBookmarkCount, normalizeBookmarkCount, receiveBookmarkCount } from './bookmarkCounts';
+import { changeBookmarkCount, normalizeBookmarkCount } from './bookmarkCounts';
 import type { BookmarkCountState } from '../types/bookmarks';
 
 const counts = new Map<string, BookmarkCountState>();
-const subscriptions = new Map<string, () => void>();
 let observer: MutationObserver | undefined;
 
 function stateFor(id: string): BookmarkCountState {
@@ -44,45 +42,31 @@ export function setMaterialBookmarked(id: string, added: boolean): void {
   if (!id || current.includes(id) === added) return;
   const state = stateFor(id);
   saveBookmarkIds(added ? [...current, id] : current.filter((entry) => entry !== id));
-  void changeBookmarkCount(state, added ? 1 : -1,
-    () => incrementMaterialBookmarkCount(id, added ? 1 : -1), renderBookmarkButtons
+  void changeBookmarkCount(
+    state,
+    added ? 1 : -1,
+    async () => {
+      const { incrementMaterialBookmarkCount } = await import('../firebase/firestore');
+      await incrementMaterialBookmarkCount(id, added ? 1 : -1);
+    },
+    renderBookmarkButtons
   ).catch((error) => console.warn(`[Bookmarks] Count sync failed for ${id}:`, error));
   void syncBookmarkToggle(id, added);
 }
 
-function refreshSubscriptions(): void {
-  const ids = new Set(Array.from(document.querySelectorAll<HTMLElement>('.bookmark-btn[data-id]'), (button) => button.dataset.id!));
-  for (const [id, unsubscribe] of subscriptions) {
-    if (!ids.has(id)) {
-      unsubscribe();
-      subscriptions.delete(id);
-    }
-  }
-  for (const id of ids) {
-    if (subscriptions.has(id)) continue;
-    const state = stateFor(id);
-    subscriptions.set(id, listenToMaterialBookmarkCount(id, (count) => {
-      receiveBookmarkCount(state, count);
-      renderBookmarkButtons();
-    }));
-  }
-  renderBookmarkButtons();
-}
-
 export function stopBookmarkCounts(): void {
   observer?.disconnect();
-  for (const unsubscribe of subscriptions.values()) unsubscribe();
-  subscriptions.clear();
+  observer = undefined;
   counts.clear();
 }
 
 export function initBookmarkCounts(): void {
   stopBookmarkCounts();
-  refreshSubscriptions();
+  renderBookmarkButtons();
   observer = new MutationObserver((mutations) => {
     if (mutations.some((mutation) => [...mutation.addedNodes, ...mutation.removedNodes].some(
       (node) => node instanceof Element && (node.matches('.bookmark-btn') || node.querySelector('.bookmark-btn'))
-    ))) refreshSubscriptions();
+    ))) renderBookmarkButtons();
   });
   observer.observe(document.body, { childList: true, subtree: true });
 }

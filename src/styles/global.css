@@ -95,3 +95,9 @@ html {
 .overflow-y-auto {
   -webkit-overflow-scrolling: touch;
 }
+
+/* Off-screen rendering optimization for material cards */
+.content-auto {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 160px;
+}

@@ -165,6 +165,9 @@ const allMaterials = rawMaterials.map((m) => ({
   import { getCurrentLanguage, t } from '../utils/i18n';
   import type { MaterialItem, ModuleInfo } from '../types/materials';
 
+  let cachedSearchDocs: SearchDocument[] | null = null;
+  let cachedDocsSourceLength = 0;
+
   function initSearchPage(): void {
     const input = document.getElementById('site-search-input') as HTMLInputElement | null;
     const yearBtns = document.querySelectorAll('.year-filter-btn');
@@ -190,10 +193,21 @@ const allMaterials = rawMaterials.map((m) => ({
     const allItems: MaterialItem[] = (window as unknown as { __ALL_SEARCH_MATERIALS?: MaterialItem[] }).__ALL_SEARCH_MATERIALS || [];
     const moduleMetaMap: Record<string, ModuleInfo> = (window as unknown as { __ALL_MODULE_META?: Record<string, ModuleInfo> }).__ALL_MODULE_META || {};
 
-    // Build SearchDocument index once in memory
-    const searchDocs: SearchDocument[] = allItems.map((m) =>
-      createSearchDocument(m, m.moduleId ? moduleMetaMap[m.moduleId] : undefined)
-    );
+    if (allItems.length > 0 && typeof window !== 'undefined') {
+      window.__CACHED_MATERIALS = allItems;
+    }
+
+    // Build SearchDocument index once in memory and cache it
+    let searchDocs: SearchDocument[];
+    if (cachedSearchDocs && cachedDocsSourceLength === allItems.length) {
+      searchDocs = cachedSearchDocs;
+    } else {
+      searchDocs = allItems.map((m) =>
+        createSearchDocument(m, m.moduleId ? moduleMetaMap[m.moduleId] : undefined)
+      );
+      cachedSearchDocs = searchDocs;
+      cachedDocsSourceLength = allItems.length;
+    }
 
     // Initial state from URL or Student Stored Academic Year
     let currentQuery = '';

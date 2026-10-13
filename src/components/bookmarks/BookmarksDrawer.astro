@@ -1,9 +1,6 @@
 ---
-  import { getAllMaterials } from '../../data/materials';
-  import { getAllModules } from '../../data/modules';
-
-const rawMaterials = await getAllMaterials();
-const rawModules = await getAllModules();
+// Smart Bookmarks Slide-over Drawer
+// Materials are loaded on demand via getClientMaterials() to eliminate HTML bloat
 ---
 
 <!-- Smart Bookmarks Slide-over Drawer (RTL Friendly) -->
@@ -109,17 +106,13 @@ const rawModules = await getAllModules();
   aria-hidden="true"
 ></div>
 
-<script define:vars={{ rawMaterials, rawModules }}>
-  window.__ALL_MATERIALS = rawMaterials;
-  window.__ALL_MODULES = rawModules;
-</script>
-
 <script>
   import { getMaterialEnglishTitle } from '../../i18n/materialsTranslations';
   import { getStoredBookmarkIds, getStoredStudiedIds } from '../../utils/storage';
   import { setMaterialBookmarked, renderBookmarkButtons, initBookmarkCounts, stopBookmarkCounts } from '../../utils/bookmarks';
   import { getCurrentLanguage, t } from '../../utils/i18n';
   import { escapeHtml } from '../../utils/sanitize';
+  import { getClientMaterials } from '../../utils/catalogueClient';
   import type { MaterialItem, ModuleInfo } from '../../types/materials';
 
   let drawerAbort: AbortController | undefined;
@@ -237,13 +230,13 @@ const rawModules = await getAllModules();
     );
 
     window.addEventListener('bookmarks-updated', () => {
-      renderSmartBookmarks();
+      void renderSmartBookmarks();
     }, { signal });
     window.addEventListener('studied-updated', () => {
-      renderSmartBookmarks();
+      void renderSmartBookmarks();
     }, { signal });
     window.addEventListener('asumed-language-changed', () => {
-      renderSmartBookmarks();
+      void renderSmartBookmarks();
     }, { signal });
 
     function sortGridsByArchived(): void {
@@ -282,15 +275,10 @@ const rawModules = await getAllModules();
       });
     }
 
-    function renderSmartBookmarks(): void {
+    async function renderSmartBookmarks(): Promise<void> {
       const ids = getStoredBookmarkIds();
       const studiedIds = getStoredStudiedIds();
-      const allMaterials: MaterialItem[] = (window as unknown as { __ALL_MATERIALS?: MaterialItem[] }).__ALL_MATERIALS || [];
-      const allModules: ModuleInfo[] = (window as unknown as { __ALL_MODULES?: ModuleInfo[] }).__ALL_MODULES || [];
       const isAr = getCurrentLanguage() === 'ar';
-
-      const bookmarked = allMaterials.filter((m) => ids.includes(m.id));
-      const unstudiedBookmarked = bookmarked.filter((m) => !studiedIds.includes(m.id));
 
       renderBookmarkButtons();
 
@@ -298,6 +286,25 @@ const rawModules = await getAllModules();
       sortGridsByArchived();
 
       if (!hierarchyContainer || !emptyState) return;
+
+      if (ids.length === 0) {
+        emptyState.classList.remove('hidden');
+        hierarchyContainer.classList.add('hidden');
+        filtersRow?.classList.add('hidden');
+        hierarchyContainer.innerHTML = '';
+        return;
+      }
+
+      let allMaterials: MaterialItem[] = (window as unknown as { __ALL_MATERIALS?: MaterialItem[] }).__ALL_MATERIALS || [];
+      if (allMaterials.length === 0) {
+        allMaterials = await getClientMaterials();
+        (window as unknown as { __ALL_MATERIALS?: MaterialItem[] }).__ALL_MATERIALS = allMaterials;
+      }
+
+      const allModules: ModuleInfo[] = (window as unknown as { __ALL_MODULES?: ModuleInfo[] }).__ALL_MODULES || [];
+
+      const bookmarked = allMaterials.filter((m) => ids.includes(m.id));
+      const unstudiedBookmarked = bookmarked.filter((m) => !studiedIds.includes(m.id));
 
       if (bookmarked.length === 0) {
         emptyState.classList.remove('hidden');
@@ -491,7 +498,7 @@ const rawModules = await getAllModules();
       });
     }
 
-    renderSmartBookmarks();
+    void renderSmartBookmarks();
   }
 
   document.addEventListener('astro:before-swap', () => {
