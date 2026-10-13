@@ -2,7 +2,9 @@
  * Single-flight deduplicating loader with version tracking.
  * Eliminates fixed time-based expiration and protects against concurrent thundering-herd calls.
  */
-export function createTimedLoader<T>(load: () => Promise<T>): (version?: number) => Promise<T> {
+export function createTimedLoader<T>(
+  load: (version?: number) => Promise<T>
+): (version?: number) => Promise<T> {
   let cached: { value: T; version?: number } | undefined;
   let pending: Promise<T> | undefined;
 
@@ -14,7 +16,7 @@ export function createTimedLoader<T>(load: () => Promise<T>): (version?: number)
     // Single-flight lock: reuse active in-flight Promise for concurrent calls
     if (pending) return pending;
 
-    pending = load()
+    pending = load(version)
       .then((value) => {
         cached = { value, version };
         return value;
