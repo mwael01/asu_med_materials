@@ -18,6 +18,20 @@ import type { UserProfile } from '../types/profile';
 import type { AcademicYear } from '../types/materials';
 import { isIosDevice, isPwaInstalledOrStandalone } from '../utils/pwa';
 
+let firestoreOps = {
+  getUserProfileByUid,
+  upsertUserProfile,
+  checkUsernameAvailable
+};
+
+export function setFirestoreOpsForTesting(ops?: Partial<typeof firestoreOps>): void {
+  if (!ops) {
+    firestoreOps = { getUserProfileByUid, upsertUserProfile, checkUsernameAvailable };
+  } else {
+    firestoreOps = { ...firestoreOps, ...ops };
+  }
+}
+
 let authInstance: Auth | null = null;
 let lastAuthenticatedUid: string | null = null;
 const CACHED_PROFILE_KEY = 'asumed_cached_profile';
@@ -49,7 +63,7 @@ export function getCachedUserProfile(): UserProfile | null {
   }
 }
 
-function setCachedUserProfile(profile: UserProfile | null): void {
+export function setCachedUserProfile(profile: UserProfile | null): void {
   if (typeof window === 'undefined') return;
   try {
     if (profile) {
@@ -117,43 +131,29 @@ export function onAuthChange(
         return;
       }
 
-      // If profile doesn't exist in Firestore yet (e.g. first Google sign in), generate initial profile
-      if (!currentProfile || currentProfile.uid !== firebaseUser.uid) {
-        try {
-          const generatedUsername = (
-            firebaseUser.displayName?.toLowerCase().replace(/\s+/g, '_').replace(/[^a-z0-9_]/g, '') ||
-            'student_' + firebaseUser.uid.substring(0, 5)
-          );
+      // If no local cache or UID mismatch (e.g. login from a different browser or cleared cache):
+      // Resolve existing profile from Firestore without overwriting custom avatar, or create initial profile if first time
+      try {
+        currentProfile = await resolveOrCreateUserProfile(firebaseUser);
+      } catch (e) {
+        console.warn('[Auth] Fallback profile generated in-memory:', e);
+        currentProfile = {
+          uid: firebaseUser.uid,
+          username: firebaseUser.displayName?.toLowerCase().replace(/\s+/g, '_') || 'student',
+          displayName: firebaseUser.displayName || 'ASU Med Student',
+          photoURL: firebaseUser.photoURL || undefined,
+          createdAt: new Date().toISOString()
+        };
+      }
 
-          const available = await checkUsernameAvailable(generatedUsername, firebaseUser.uid);
-          const finalUsername = available ? generatedUsername : `${generatedUsername}_${Date.now().toString(36).slice(-4)}`;
-
-          currentProfile = {
-            uid: firebaseUser.uid,
-            username: finalUsername,
-            displayName: firebaseUser.displayName || 'ASU Med Student',
-            photoURL: firebaseUser.photoURL || undefined,
-            createdAt: new Date().toISOString()
-          };
-
-          await upsertUserProfile(currentProfile);
-        } catch (e) {
-          console.warn('[Auth] Fallback profile generated in-memory:', e);
-          currentProfile = {
-            uid: firebaseUser.uid,
-            username: firebaseUser.displayName?.toLowerCase().replace(/\s+/g, '_') || 'student',
-            displayName: firebaseUser.displayName || 'ASU Med Student',
-            photoURL: firebaseUser.photoURL || undefined,
-            createdAt: new Date().toISOString()
-          };
-        }
-
-        if (!hasFired) {
-          hasFired = true;
-          clearTimeout(fallbackTimer);
-          setCachedUserProfile(currentProfile);
-          callback(firebaseUser, currentProfile);
-        }
+      if (!hasFired) {
+        hasFired = true;
+        clearTimeout(fallbackTimer);
+        setCachedUserProfile(currentProfile);
+        callback(firebaseUser, currentProfile);
+      } else {
+        setCachedUserProfile(currentProfile);
+        callback(firebaseUser, currentProfile);
       }
       } catch (outerErr) {
         if (!hasFired) {
@@ -177,26 +177,37 @@ export function onAuthChange(
 
 /**
  * Resolves an existing profile or creates a new one for authenticated users.
+ * Preserves the existing profile image if one exists, avoiding overwriting with Google's photo.
  */
-async function resolveOrCreateUserProfile(user: User): Promise<UserProfile> {
-  let profile = await getUserProfileByUid(user.uid);
-  if (!profile) {
-    const rawName = user.displayName || user.email?.split('@')[0] || 'student';
-    const baseUsername = rawName.toLowerCase().replace(/\s+/g, '_').replace(/[^a-z0-9_]/g, '');
-    const isAvail = await checkUsernameAvailable(baseUsername, user.uid);
-    const username = isAvail ? baseUsername : `${baseUsername}_${Math.random().toString(36).substring(2, 6)}`;
-
-    profile = {
-      uid: user.uid,
-      username,
-      hasCustomUsername: false, // User can customize and finalize their username once
-      displayName: user.displayName || rawName,
-      photoURL: user.photoURL || undefined,
-      createdAt: new Date().toISOString()
-    };
-
-    await upsertUserProfile(profile);
+export async function resolveOrCreateUserProfile(user: User): Promise<UserProfile> {
+  let profile = await firestoreOps.getUserProfileByUid(user.uid);
+  if (profile) {
+    // If the profile already has an existing avatar image, keep it untouched.
+    // Only if the profile does not have any photoURL, use Google's photo as initial fallback.
+    if (!profile.photoURL && user.photoURL) {
+      profile.photoURL = user.photoURL;
+      await firestoreOps.upsertUserProfile(profile);
+    }
+    setCachedUserProfile(profile);
+    return profile;
   }
+
+  const rawName = user.displayName || user.email?.split('@')[0] || 'student';
+  const baseUsername = rawName.toLowerCase().replace(/\s+/g, '_').replace(/[^a-z0-9_]/g, '');
+  const isAvail = await firestoreOps.checkUsernameAvailable(baseUsername, user.uid);
+  const username = isAvail ? baseUsername : `${baseUsername}_${Math.random().toString(36).substring(2, 6)}`;
+
+  profile = {
+    uid: user.uid,
+    username,
+    hasCustomUsername: false, // User can customize and finalize their username once
+    displayName: user.displayName || rawName,
+    photoURL: user.photoURL || undefined,
+    createdAt: new Date().toISOString()
+  };
+
+  await firestoreOps.upsertUserProfile(profile);
+  setCachedUserProfile(profile);
   return profile;
 }
 
@@ -276,7 +287,7 @@ export async function signInWithEmail(
   }
 
   const result = await signInWithEmailAndPassword(auth, email.trim(), pass);
-  const profile = await getUserProfileByUid(result.user.uid);
+  const profile = await firestoreOps.getUserProfileByUid(result.user.uid);
   if (profile) setCachedUserProfile(profile);
   return { user: result.user, profile };
 }
@@ -304,7 +315,7 @@ export async function signUpWithEmail(
     throw new Error('يسمح فقط بالأحرف الإنجليزية والأرقام والشرطة _ أو -');
   }
 
-  const isAvailable = await checkUsernameAvailable(cleanUsername);
+  const isAvailable = await firestoreOps.checkUsernameAvailable(cleanUsername);
   if (!isAvailable) {
     throw new Error('اسم المستخدم مستخدم بالفعل، يرجى اختيار اسم آخر');
   }
@@ -324,7 +335,7 @@ export async function signUpWithEmail(
     createdAt: new Date().toISOString()
   };
 
-  await upsertUserProfile(profile);
+  await firestoreOps.upsertUserProfile(profile);
   setCachedUserProfile(profile);
   return { user, profile };
 }
@@ -347,12 +358,12 @@ export async function setPermanentUsername(
     return { success: false, error: 'يسمح فقط بالأحرف الإنجليزية والأرقام والشرطة _ أو -' };
   }
 
-  const isAvailable = await checkUsernameAvailable(clean, uid);
+  const isAvailable = await firestoreOps.checkUsernameAvailable(clean, uid);
   if (!isAvailable) {
     return { success: false, error: 'اسم المستخدم مأخوذ بالفعل، يرجى اختيار اسم آخر' };
   }
 
-  const currentProfile = await getUserProfileByUid(uid);
+  const currentProfile = await firestoreOps.getUserProfileByUid(uid);
   if (!currentProfile) {
     return { success: false, error: 'تعذر العثور على بيانات المستخدم' };
   }
@@ -368,7 +379,7 @@ export async function setPermanentUsername(
     updatedAt: new Date().toISOString()
   };
 
-  const saved = await upsertUserProfile(updatedProfile);
+  const saved = await firestoreOps.upsertUserProfile(updatedProfile);
   if (saved) {
     setCachedUserProfile(updatedProfile);
     return { success: true, profile: updatedProfile };

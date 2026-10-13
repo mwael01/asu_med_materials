@@ -483,6 +483,7 @@ export async function upsertUserProfile(profile: UserProfile): Promise<boolean> 
     const existingSnap = await getDoc(userDocRef);
     let finalUsername = profile.username.trim().toLowerCase().replace(/^@/, '');
     let hasCustomUsername = profile.hasCustomUsername ?? false;
+    let finalPhotoURL = profile.photoURL;
 
     if (existingSnap.exists()) {
       const existing = existingSnap.data() as UserProfile;
@@ -491,12 +492,17 @@ export async function upsertUserProfile(profile: UserProfile): Promise<boolean> 
         finalUsername = existing.username;
         hasCustomUsername = true;
       }
+      // If existing profile already has an avatar image and incoming profile did not specify one, preserve existing
+      if (existing.photoURL && profile.photoURL === undefined) {
+        finalPhotoURL = existing.photoURL;
+      }
     }
 
     const payload = {
       ...profile,
       username: finalUsername,
       hasCustomUsername,
+      photoURL: finalPhotoURL,
       updatedAt: new Date().toISOString()
     };
     await setDoc(userDocRef, sanitizeFirestorePayload(payload), { merge: true });

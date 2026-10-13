@@ -1,4 +1,4 @@
-import { onAuthChange, getCachedUserProfile } from '../firebase/auth';
+import { onAuthChange, getCachedUserProfile, setCachedUserProfile } from '../firebase/auth';
 import {
   syncSingleUserBookmark,
   syncSingleUserStudied,
@@ -99,6 +99,10 @@ export function initUserLibrarySync(): void {
     unsubscribeProfileListener = listenToUserProfile(uid, async (remoteProfile) => {
       if (!remoteProfile) return;
       mergeAndSync(uid, remoteProfile);
+      const cached = getCachedUserProfile();
+      if (cached && cached.uid === uid) {
+        setCachedUserProfile({ ...cached, ...remoteProfile });
+      }
     });
 
     // 3. Re-sync when user returns to the tab with a 10-minute throttle (onSnapshot already handles live pushes)
@@ -119,7 +123,12 @@ export function initUserLibrarySync(): void {
 
         const userDoc = await getDoc(doc(db, 'users', currentUid));
         if (userDoc.exists()) {
-          mergeAndSync(currentUid, userDoc.data());
+          const remoteData = userDoc.data();
+          mergeAndSync(currentUid, remoteData);
+          const cached = getCachedUserProfile();
+          if (cached && cached.uid === currentUid) {
+            setCachedUserProfile({ ...cached, ...remoteData });
+          }
         }
       } catch (err) {
         console.warn('[Sync] Visibility re-sync failed:', err);
