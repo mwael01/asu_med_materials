@@ -8,6 +8,7 @@ import AdminActivityLogs from './AdminActivityLogs.astro';
 import AdminModuleManager from './AdminModuleManager.astro';
 import AdminMaterialManager from './AdminMaterialManager.astro';
 import FlashcardsManager from './FlashcardsManager.astro';
+import AdminCollectionManager from './AdminCollectionManager.astro';
 
 interface Props {
   modules: ModuleInfo[];
@@ -121,6 +122,15 @@ const { modules } = Astro.props;
       <span data-i18n="admin.tabFlashcards">البطاقات الاستذكارية (Anki)</span>
     </button>
 
+    <button
+      type="button"
+      data-tab="collections"
+      class="admin-nav-tab px-3.5 py-2 rounded-xl font-semibold text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-all cursor-pointer whitespace-nowrap flex items-center gap-1.5"
+    >
+      <span>📁</span>
+      <span data-i18n="admin.tabCollections">المجموعات الدراسية</span>
+    </button>
+
   </div>
 
   <!-- Tab Contents -->
@@ -165,6 +175,11 @@ const { modules } = Astro.props;
       <FlashcardsManager />
     </div>
 
+    <!-- 7. Collections Management -->
+    <div id="admin-view-collections" class="admin-view-section hidden">
+      <AdminCollectionManager modules={modules} />
+    </div>
+
   </div>
 </div>
 
@@ -179,7 +194,8 @@ const { modules } = Astro.props;
       feedback: document.getElementById('admin-view-feedback'),
       team: document.getElementById('admin-view-team'),
       logs: document.getElementById('admin-view-logs'),
-      flashcards: document.getElementById('admin-view-flashcards')
+      flashcards: document.getElementById('admin-view-flashcards'),
+      collections: document.getElementById('admin-view-collections')
     };
 
     tabs.forEach((tab) => {

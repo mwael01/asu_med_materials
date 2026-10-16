@@ -46,8 +46,18 @@ export function setMaterialBookmarked(id: string, added: boolean): void {
     state,
     added ? 1 : -1,
     async () => {
-      const { incrementMaterialBookmarkCount } = await import('../firebase/firestore');
-      await incrementMaterialBookmarkCount(id, added ? 1 : -1);
+      const isCollection = typeof document !== 'undefined' && Boolean(document.querySelector(`[data-collection-id="${CSS.escape(id)}"]`));
+      if (isCollection) {
+        const { incrementCollectionBookmarkCount } = await import('../firebase/firestore');
+        await incrementCollectionBookmarkCount(id, added ? 1 : -1);
+      } else {
+        const { incrementMaterialBookmarkCount, incrementCollectionBookmarkCount } = await import('../firebase/firestore');
+        try {
+          await incrementMaterialBookmarkCount(id, added ? 1 : -1);
+        } catch {
+          await incrementCollectionBookmarkCount(id, added ? 1 : -1).catch(() => {});
+        }
+      }
     },
     renderBookmarkButtons
   ).catch((error) => console.warn(`[Bookmarks] Count sync failed for ${id}:`, error));

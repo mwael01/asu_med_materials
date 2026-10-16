@@ -24,6 +24,7 @@ import {
 } from 'firebase/firestore';
 import { getFirebaseApp } from './config';
 import type { MaterialItem, AcademicYear, ModuleInfo } from '../types/materials';
+import type { MaterialCollection } from '../types/collections';
 import type { UserProfile, UserRole } from '../types/profile';
 import { handleFirestoreError } from '../utils/firestoreErrors';
 import type {
@@ -97,6 +98,7 @@ export function sanitizeFirestorePayload<T extends Record<string, any>>(obj: T):
 
 // Collections
 const MATERIALS_COLLECTION = 'materials';
+const COLLECTIONS_COLLECTION = 'collections';
 const USERS_COLLECTION = 'users';
 const MATERIALS_VERSION_COLLECTION = 'materials_version';
 const MATERIALS_VERSION_DOC_ID = 'current';
@@ -1484,6 +1486,107 @@ export async function fetchRecentAdminLogs(limitCount: number = 50): Promise<Adm
     return [];
   }
 }
+
+// =========================================================================
+// Collections & Curated Packs
+// =========================================================================
+
+/**
+ * Fetches all curated collections from Cloud Firestore.
+ */
+export async function fetchCollectionsFromFirestore(): Promise<MaterialCollection[]> {
+  const db = getFirestoreDb();
+  if (!db) return [];
+
+  try {
+    const collRef = collection(db, COLLECTIONS_COLLECTION);
+    const snap = await getDocs(collRef);
+    const collections: MaterialCollection[] = [];
+    snap.forEach((docSnap) => {
+      if (docSnap.exists()) {
+        collections.push({ id: docSnap.id, ...(docSnap.data() as Omit<MaterialCollection, 'id'>) });
+      }
+    });
+    collections.sort((a, b) => (a.order ?? 999) - (b.order ?? 999));
+    return collections;
+  } catch (err) {
+    handleFirestoreError('Failed to fetch collections', err);
+    return [];
+  }
+}
+
+/**
+ * Fetches a single curated collection by ID from Cloud Firestore.
+ */
+export async function fetchCollectionByIdFromFirestore(id: string): Promise<MaterialCollection | null> {
+  const db = getFirestoreDb();
+  if (!db || !id) return null;
+
+  try {
+    const docRef = doc(db, COLLECTIONS_COLLECTION, id);
+    const snap = await getDoc(docRef);
+    if (snap.exists()) {
+      return { id: snap.id, ...(snap.data() as Omit<MaterialCollection, 'id'>) };
+    }
+    return null;
+  } catch (err) {
+    handleFirestoreError(`Failed to fetch collection ${id}`, err);
+    return null;
+  }
+}
+
+/**
+ * Creates or updates a curated collection in Cloud Firestore.
+ */
+export async function saveCollectionToFirestore(
+  collectionData: Partial<MaterialCollection> & { id?: string }
+): Promise<string> {
+  const db = getFirestoreDb();
+  if (!db) throw new Error('Firestore is not available');
+
+  const id = collectionData.id || `col_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
+  const docRef = doc(db, COLLECTIONS_COLLECTION, id);
+
+  const cleanData: Record<string, any> = {
+    ...collectionData,
+    id,
+    updatedAt: new Date().toISOString()
+  };
+  if (!cleanData.createdAt) {
+    cleanData.createdAt = new Date().toISOString();
+  }
+
+  // Remove undefined fields
+  Object.keys(cleanData).forEach((key) => {
+    if (cleanData[key] === undefined) {
+      delete cleanData[key];
+    }
+  });
+
+  await setDoc(docRef, cleanData, { merge: true });
+  return id;
+}
+
+/**
+ * Deletes a collection from Cloud Firestore (admin-only).
+ */
+export async function deleteCollectionFromFirestore(id: string): Promise<void> {
+  const db = getFirestoreDb();
+  if (!db || !id) throw new Error('Firestore is not available');
+  await deleteDoc(doc(db, COLLECTIONS_COLLECTION, id));
+}
+
+/**
+ * Atomically increments or decrements the bookmark counter for a collection.
+ */
+export async function incrementCollectionBookmarkCount(collectionId: string, delta: 1 | -1): Promise<void> {
+  const db = getFirestoreDb();
+  if (!db || !collectionId) throw new Error('Bookmark count sync is unavailable');
+  await updateDoc(doc(db, COLLECTIONS_COLLECTION, collectionId), {
+    bookmarksCount: increment(delta)
+  });
+}
+
 
 
 

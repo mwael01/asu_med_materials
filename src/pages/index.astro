@@ -3,13 +3,19 @@ import Layout from '../layouts/Layout.astro';
 import SearchBar from '../components/search/SearchBar.astro';
 import ModuleCard from '../components/materials/ModuleCard.astro';
 import ResourceCard from '../components/materials/ResourceCard.astro';
+import CollectionCard from '../components/materials/CollectionCard.astro';
 import RecentMaterials from '../components/materials/RecentMaterials.astro';
 import { getAllMaterials } from '../data/materials';
 import { getAllModules } from '../data/modules';
+import { getAllCollections } from '../data/collections';
 import { subjectToSlug } from '../utils/slug';
 import type { MaterialItem, ModuleInfo } from '../types/materials';
 
-const [allMaterials, allModules] = await Promise.all([getAllMaterials(), getAllModules()]);
+const [allMaterials, allModules, allCollections] = await Promise.all([
+  getAllMaterials(),
+  getAllModules(),
+  getAllCollections()
+]);
 
 // Organize materials into Module > Subject groups for the student's personal library
 interface LibrarySubjectGroup {
@@ -281,6 +287,30 @@ if (generalMaterials.length > 0) {
 
     <!-- Library Content: Hierarchical Structure (Module > Subject > Materials) -->
     <div id="home-library-content" class="space-y-10 hidden">
+      <!-- Saved Collections & Packs Subsection -->
+      <div id="home-library-collections-group" class="space-y-4 hidden">
+        <div class="flex items-center justify-between pb-2 border-b-2 border-amber-500/30">
+          <div class="flex items-center gap-2">
+            <span class="w-2.5 h-2.5 rounded-full bg-amber-500"></span>
+            <h3 class="text-sm sm:text-base font-extrabold text-zinc-900 dark:text-zinc-100" data-i18n="collections.bookmarkedCollections">
+              المجموعات والحزم المحفوظة
+            </h3>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {allCollections.map((col) => (
+            <div
+              data-home-collection-id={col.id}
+              data-home-collection-module={col.moduleId || 'general'}
+              class="home-library-collection-item hidden"
+            >
+              <CollectionCard collection={col} showYear={true} />
+            </div>
+          ))}
+        </div>
+      </div>
+
       {libraryModules.map((modGroup) => (
         <div
           class="home-library-module-group space-y-6"
@@ -452,6 +482,8 @@ if (generalMaterials.length > 0) {
     const emptyFilterNotice = document.getElementById('home-library-filter-empty');
 
     const cardItems = document.querySelectorAll<HTMLElement>('.home-library-card-item');
+    const collectionItems = document.querySelectorAll<HTMLElement>('.home-library-collection-item');
+    const savedCollectionsGroup = document.getElementById('home-library-collections-group');
     const subjectGroups = document.querySelectorAll<HTMLElement>('.home-library-subject-group');
     const moduleGroups = document.querySelectorAll<HTMLElement>('.home-library-module-group');
 
@@ -491,6 +523,25 @@ if (generalMaterials.length > 0) {
           }
         }
       });
+
+      // Filter saved collections & populate module chips
+      let visibleCollectionsCount = 0;
+      collectionItems.forEach((colEl) => {
+        const colId = colEl.getAttribute('data-home-collection-id') || '';
+        const colMod = colEl.getAttribute('data-home-collection-module') || 'general';
+        const isSaved = bookmarks.includes(colId);
+        if (isSaved && colMod !== 'general') {
+          modulesWithSaved.set(colMod, (modulesWithSaved.get(colMod) || 0) + 1);
+        }
+        const matchesModule = activeModuleFilter === 'all' || colMod === activeModuleFilter;
+        const isVisible = isSaved && matchesModule;
+        colEl.classList.toggle('hidden', !isVisible);
+        if (isVisible) visibleCollectionsCount++;
+      });
+
+      if (savedCollectionsGroup) {
+        savedCollectionsGroup.classList.toggle('hidden', visibleCollectionsCount === 0);
+      }
 
       // Render module filter chips
       if (moduleFilterChipsContainer) {
@@ -569,7 +620,7 @@ if (generalMaterials.length > 0) {
       }
 
       // Filter individual cards and calculate group counts
-      let totalVisibleCards = 0;
+      let totalVisibleCards = visibleCollectionsCount;
 
       cardItems.forEach((card) => {
         const cid = card.getAttribute('data-home-card-id') || '';

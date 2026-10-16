@@ -95,6 +95,28 @@ export const translations: Record<SupportedLanguage, TranslationsSchema> = {
       suggestionsNoMatches: 'لم نعثر على نتائج سريعة. اضغط Enter للبحث الشامل.',
       playlistVideosCount: '{count} فيديو'
     },
+    collections: {
+      title: 'الحزم والمجموعات الدراسية',
+      subtitle: 'مجموعات منسقة للاستعداد العملي والفاينل ومراجعات الدكاترة',
+      resourcesCount: '{n} مصادر تعليمية',
+      emptyTitle: 'لا توجد حزم دراسية مضافة حتى الآن',
+      emptyDesc: 'يمكن للمسؤولين تجميع المذكرات والعملي والامتحانات في حزمة واحدة لتسهيل مذاكرتها.',
+      breadcrumbHome: 'الرئيسية',
+      breadcrumbYear: 'السنة {y}',
+      viewCollection: 'عرض الحزمة',
+      includedMaterials: 'المصادر المتضمنة في المجموعة',
+      materialCount: '{count} مصدر',
+      bookmarkCollection: 'حفظ المجموعة',
+      bookmarkedCollections: 'المجموعات والحزم المحفوظة',
+      savedCollectionsEmpty: 'لا توجد حزم محفوظة',
+      categories: {
+        practical: 'عملي ومعامل OSPE',
+        finals: 'مراجعات الفاينل',
+        midterm: 'الميدتيرم',
+        revision: 'ملخصات مركزة',
+        general: 'عام'
+      }
+    },
     categories: {
       central: 'درايفات وقنوات مركزية',
       lectures: 'محاضرات وشروحات الفيديو',
@@ -326,6 +348,7 @@ export const translations: Record<SupportedLanguage, TranslationsSchema> = {
       tabSubmissions: 'المساهمات المعلقة',
       tabModules: 'الموديولات',
       tabMaterials: 'المواد',
+      tabCollections: 'المجموعات والحزم',
       tabFeedback: 'الملاحظات والشكاوى',
       tabTeam: 'فريق الإدارة',
       tabLogs: 'سجل النشاط',
@@ -506,6 +529,28 @@ export const translations: Record<SupportedLanguage, TranslationsSchema> = {
       suggestionsAllResults: 'View all results for "{q}" ({count}) →',
       suggestionsNoMatches: 'No direct suggestions. Press Enter to search catalog.',
       playlistVideosCount: '{count} videos'
+    },
+    collections: {
+      title: 'Study Packs & Collections',
+      subtitle: 'Curated packs for practical OSPE, finals, and high-yield reviews',
+      resourcesCount: '{n} study resources',
+      emptyTitle: 'No study collections added yet',
+      emptyDesc: 'Administrators can group related notes, practicals, and exams into single cohesive packs.',
+      breadcrumbHome: 'Home',
+      breadcrumbYear: 'Year {y}',
+      viewCollection: 'View Pack',
+      includedMaterials: 'Resources in this Collection',
+      materialCount: '{count} resources',
+      bookmarkCollection: 'Bookmark Collection',
+      bookmarkedCollections: 'Saved Collections & Packs',
+      savedCollectionsEmpty: 'No saved collections',
+      categories: {
+        practical: 'Practical & OSPE',
+        finals: 'Finals Revision',
+        midterm: 'Midterms',
+        revision: 'High-Yield Summaries',
+        general: 'General'
+      }
     },
     categories: {
       central: 'Central Batch Drives & Channels',
@@ -738,6 +783,7 @@ export const translations: Record<SupportedLanguage, TranslationsSchema> = {
       tabSubmissions: 'Pending Submissions',
       tabModules: 'Modules',
       tabMaterials: 'Materials',
+      tabCollections: 'Collections & Packs',
       tabFeedback: 'User Feedback',
       tabTeam: 'Admin Team',
       tabLogs: 'Activity Log',

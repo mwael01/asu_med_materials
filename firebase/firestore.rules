@@ -159,5 +159,16 @@ service cloud.firestore {
       allow read: if true;
       allow write: if isAdmin();
     }
+
+    // =========================================================================
+    // 12. Collections & Study Packs
+    // =========================================================================
+    match /collections/{collectionId} {
+      allow read: if true;
+      allow update: if isAdmin() || (
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['bookmarksCount'])
+      );
+      allow create, delete: if isAdmin();
+    }
   }
 }
