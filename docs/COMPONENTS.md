@@ -181,14 +181,19 @@ This document details all UI components, their props, intended reuse guidelines,
 
 #### [`SearchBar.astro`](file:///workspaces/asu_med_materials/src/components/search/SearchBar.astro)
 - **Location**: `src/components/search/SearchBar.astro`
-- **Purpose**: RTL search input with debounce, search submit button, and keyboard shortcut (`/` to focus).
+- **Purpose**: High-performance search input with debounced input, keyboard shortcuts (`/` to focus, `ArrowUp`/`ArrowDown`/`Enter`/`Esc` to navigate), and realtime autocomplete suggestions dropdown.
+- **Features**:
+  - **Asynchronous Search Suggestions**: Lazy-loads catalogue data (`getClientMaterials()`) on hover/focus in the background with zero Firestore reads and zero initial page blocking.
+  - **Categorized Results**: Surfaces matching video playlists (opening `/playlist/[id]` directly in-app) and standalone YouTube videos separately from documents, past exams, and drives.
+  - **Fast Navigation**: Keyboard accessible combobox with direct click actions and Enter submission to the full catalog (`/search?q=...`).
 - **Props**:
   ```typescript
   interface Props {
     placeholder?: string;
     initialQuery?: string;
     autofocus?: boolean;
-    size?: 'default' | 'lg';
+    size?: 'md' | 'lg';
+    enableSuggestions?: boolean; // defaults to true; set to false on /search
   }
   ```
 

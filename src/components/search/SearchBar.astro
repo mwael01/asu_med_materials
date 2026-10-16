@@ -4,22 +4,24 @@ interface Props {
   initialQuery?: string;
   autofocus?: boolean;
   size?: 'md' | 'lg';
+  enableSuggestions?: boolean;
 }
 
 const {
   placeholder = 'Search modules, subjects (e.g. anatomy), professors, or resource types...',
   initialQuery = '',
   autofocus = false,
-  size = 'md'
+  size = 'md',
+  enableSuggestions = true
 } = Astro.props;
 
 const isLarge = size === 'lg';
 ---
 
-<div class="relative w-full">
+<div class="relative w-full search-bar-wrapper" data-enable-suggestions={enableSuggestions ? 'true' : 'false'}>
   <!-- Search Icon -->
   <div class:list={[
-    'absolute inset-y-0 start-0 flex items-center pointer-events-none text-zinc-400 dark:text-zinc-500',
+    'absolute inset-y-0 start-0 flex items-center pointer-events-none text-zinc-400 dark:text-zinc-500 z-10',
     isLarge ? 'ps-4' : 'ps-3.5'
   ]}>
     <svg class:list={[isLarge ? 'w-5 h-5' : 'w-4 h-4']} fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -40,8 +42,13 @@ const isLarge = size === 'lg';
     autocapitalize="none"
     autocorrect="off"
     spellcheck="false"
+    role="combobox"
+    aria-expanded="false"
+    aria-autocomplete="list"
+    aria-controls="search-suggestions-dropdown"
+    aria-haspopup="listbox"
     class:list={[
-      'w-full bg-white dark:bg-zinc-900 border text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 dark:placeholder-zinc-500 focus:outline-none transition-all text-start',
+      'w-full bg-white dark:bg-zinc-900 border text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 dark:placeholder-zinc-500 focus:outline-none transition-all text-start relative z-10',
       isLarge
         ? 'ps-11 pe-24 sm:pe-28 py-3 sm:py-3.5 rounded-2xl text-sm sm:text-base border-zinc-200/90 dark:border-zinc-800 shadow-xs hover:border-zinc-300 dark:hover:border-zinc-700 focus:border-emerald-500 dark:focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10'
         : 'ps-10 pe-12 py-2.5 rounded-xl text-sm border-zinc-200 dark:border-zinc-800 shadow-2xs focus:border-transparent focus:ring-2 focus:ring-emerald-500'
@@ -50,7 +57,7 @@ const isLarge = size === 'lg';
 
   <!-- Trailing Actions: Keyboard shortcut & Submit Button (if large) -->
   <div class:list={[
-    'absolute inset-y-0 end-0 flex items-center',
+    'absolute inset-y-0 end-0 flex items-center z-10',
     isLarge ? 'pe-2 sm:pe-2.5 gap-1.5' : 'pe-3 pointer-events-none'
   ]}>
     <kbd class="hidden sm:inline-block px-1.5 py-0.5 text-[10px] font-semibold text-zinc-400 dark:text-zinc-500 bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded shadow-2xs pointer-events-none">
@@ -70,23 +77,312 @@ const isLarge = size === 'lg';
       </button>
     )}
   </div>
+
+  {enableSuggestions && (
+    <div
+      id="search-suggestions-dropdown"
+      role="listbox"
+      aria-label="Search suggestions"
+      class="hidden absolute top-full start-0 end-0 mt-2 z-50 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl shadow-xl overflow-hidden transition-all text-start"
+    >
+      <div id="search-suggestions-content" class="max-h-[65vh] sm:max-h-[440px] overflow-y-auto divide-y divide-zinc-100 dark:divide-zinc-800/60 no-scrollbar">
+        <!-- Rendered dynamically via client JS -->
+      </div>
+      <div id="search-suggestions-footer" class="p-2 bg-zinc-50 dark:bg-zinc-950/60 border-t border-zinc-100 dark:border-zinc-800/80">
+        <!-- Footer action rendered dynamically -->
+      </div>
+    </div>
+  )}
 </div>
 
 <script>
-  function initSearchShortcuts(): void {
+  import { prefetchSearchIndex, getSearchSuggestions, type SearchSuggestionItem } from '../../utils/searchSuggestions';
+  import { getCurrentLanguage, t } from '../../utils/i18n';
+
+  function initSearchBar(): void {
+    const wrapper = document.querySelector('.search-bar-wrapper') as HTMLElement | null;
+    if (!wrapper) return;
+
+    const input = wrapper.querySelector('#site-search-input') as HTMLInputElement | null;
+    const dropdown = wrapper.querySelector('#search-suggestions-dropdown') as HTMLElement | null;
+    const content = wrapper.querySelector('#search-suggestions-content') as HTMLElement | null;
+    const footer = wrapper.querySelector('#search-suggestions-footer') as HTMLElement | null;
+    const enableSuggestions = wrapper.getAttribute('data-enable-suggestions') === 'true';
+
+    // Global keyboard shortcut '/' to focus search input
     const abort = new AbortController();
     window.addEventListener('keydown', (e) => {
       const activeEl = document.activeElement;
       const isInput = activeEl?.tagName === 'INPUT' || activeEl?.tagName === 'TEXTAREA';
       if (e.key === '/' && !isInput) {
         e.preventDefault();
-        const input = document.getElementById('site-search-input') as HTMLInputElement | null;
         input?.focus();
         input?.select();
       }
     }, { signal: abort.signal });
+
+    if (!enableSuggestions || !input || !dropdown || !content || !footer) {
+      return;
+    }
+
+    let activeIndex = -1;
+    let navigableElements: HTMLElement[] = [];
+    let debounceTimer: ReturnType<typeof setTimeout> | null = null;
+    let latestQuery = '';
+
+    // Warm up search catalogue on hover or focus without blocking
+    const prewarm = () => {
+      prefetchSearchIndex();
+    };
+    input.addEventListener('pointerenter', prewarm, { once: true, signal: abort.signal });
+    input.addEventListener('focus', prewarm, { once: true, signal: abort.signal });
+
+    function hideDropdown(): void {
+      dropdown?.classList.add('hidden');
+      input?.setAttribute('aria-expanded', 'false');
+      activeIndex = -1;
+      navigableElements = [];
+    }
+
+    function showDropdown(): void {
+      dropdown?.classList.remove('hidden');
+      input?.setAttribute('aria-expanded', 'true');
+    }
+
+    function updateActiveElement(): void {
+      navigableElements.forEach((el, idx) => {
+        if (idx === activeIndex) {
+          el.classList.add('bg-emerald-50', 'dark:bg-emerald-950/50', 'ring-1', 'ring-inset', 'ring-emerald-500/30');
+          el.scrollIntoView({ block: 'nearest' });
+          input?.setAttribute('aria-activedescendant', el.id || `sugg-item-${idx}`);
+        } else {
+          el.classList.remove('bg-emerald-50', 'dark:bg-emerald-950/50', 'ring-1', 'ring-inset', 'ring-emerald-500/30');
+        }
+      });
+      if (activeIndex === -1) {
+        input?.removeAttribute('aria-activedescendant');
+      }
+    }
+
+    function escapeHtml(str: string): string {
+      return str
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+
+    function renderItem(item: SearchSuggestionItem, idx: number, lang: string): string {
+      const isAr = lang === 'ar';
+      const title = (isAr ? item.title : (item.titleEn || item.title)) || item.title;
+      const safeTitle = escapeHtml(title);
+      const safeAuthor = item.author ? escapeHtml(item.author) : '';
+      const safeSubject = item.subject ? escapeHtml(item.subject) : '';
+      const targetAttr = item.target === '_blank' ? 'target="_blank" rel="noopener noreferrer"' : '';
+
+      // Type Badge / Icon
+      let iconMarkup = '';
+      if (item.isPlaylist) {
+        iconMarkup = `
+          <div class="w-8 h-8 rounded-xl bg-red-50 dark:bg-red-950/50 text-red-600 dark:text-red-400 flex items-center justify-center shrink-0">
+            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M19 9H2v2h17V9zm0-4H2v2h17V5zM2 15h13v-2H2v2zm15-2v6l5-3-5-3z"/>
+            </svg>
+          </div>
+        `;
+      } else if (item.type === 'youtube') {
+        iconMarkup = `
+          <div class="w-8 h-8 rounded-xl bg-red-50 dark:bg-red-950/50 text-red-600 dark:text-red-400 flex items-center justify-center shrink-0">
+            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M10 15l5.19-3L10 9v6m11.56-7.83c.13.47.22 1.1.28 1.9.07.8.1 1.49.1 2.09L22 12c0 2.19-.16 3.8-.44 4.83-.25.9-.83 1.48-1.73 1.73-.47.13-1.33.22-2.65.28-1.3.07-2.49.1-3.59.1L12 22c-4.19 0-6.8-.16-7.83-.44-.9-.25-1.48-.83-1.73-1.73-.13-.47-.22-1.1-.28-1.9-.07-.8-.1-1.49-.1-2.09L2 12c0-2.19.16-3.8.44-4.83.25-.9.83-1.48 1.73-1.73.47-.13 1.33-.22 2.65-.28 1.3-.07 2.49-.1 3.59-.1L12 2c4.19 0 6.8.16 7.83.44.9.25 1.48.83 1.73 1.73z"/>
+            </svg>
+          </div>
+        `;
+      } else if (item.type === 'drive') {
+        iconMarkup = `
+          <div class="w-8 h-8 rounded-xl bg-emerald-50 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
+            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 00-9.78 2.096A4.001 4.001 0 003 15z" />
+            </svg>
+          </div>
+        `;
+      } else if (item.type === 'telegram') {
+        iconMarkup = `
+          <div class="w-8 h-8 rounded-xl bg-sky-50 dark:bg-sky-950/50 text-sky-600 dark:text-sky-400 flex items-center justify-center shrink-0">
+            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69a.2.2 0 00-.05-.18c-.06-.05-.14-.03-.21-.02-.09.02-1.49.95-4.22 2.79-.4.27-.76.41-1.08.4-.36-.01-1.04-.2-1.55-.37-.63-.2-1.12-.31-1.08-.66.02-.18.27-.36.74-.55 2.92-1.27 4.86-2.11 5.83-2.51 2.78-1.16 3.35-1.36 3.73-1.36.08 0 .27.02.39.12.1.08.13.19.14.27-.01.06.01.24 0 .38z"/>
+            </svg>
+          </div>
+        `;
+      } else {
+        iconMarkup = `
+          <div class="w-8 h-8 rounded-xl bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 flex items-center justify-center shrink-0">
+            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
+            </svg>
+          </div>
+        `;
+      }
+
+      // Meta Pills
+      const yearText = isAr ? `السنة ${item.year}` : `Year ${item.year}`;
+      let extraMeta = '';
+      if (item.isPlaylist && item.videoCount) {
+        const countText = t('search.playlistVideosCount', lang, { count: item.videoCount });
+        extraMeta += `<span class="bg-red-50 dark:bg-red-950/50 text-red-600 dark:text-red-400 px-1.5 py-0.5 rounded text-[10px] font-bold">${escapeHtml(countText)}</span>`;
+      }
+
+      return `
+        <a
+          id="sugg-item-${idx}"
+          href="${escapeHtml(item.url)}"
+          ${targetAttr}
+          role="option"
+          tabindex="-1"
+          class="sugg-nav-item flex items-center gap-3 px-3.5 py-2.5 hover:bg-zinc-50 dark:hover:bg-zinc-800/60 transition-colors group cursor-pointer text-start"
+        >
+          ${iconMarkup}
+          <div class="min-w-0 flex-1">
+            <p class="text-xs sm:text-sm font-semibold text-zinc-900 dark:text-zinc-100 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors truncate">
+              ${safeTitle}
+            </p>
+            <div class="flex items-center gap-1.5 mt-0.5 text-[11px] text-zinc-500 dark:text-zinc-400 truncate">
+              <span class="bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300 px-1.5 py-0.5 rounded text-[10px] font-semibold">${escapeHtml(yearText)}</span>
+              ${extraMeta}
+              ${safeSubject ? `<span class="truncate">&bull; ${safeSubject}</span>` : ''}
+              ${safeAuthor ? `<span class="truncate">&bull; ${safeAuthor}</span>` : ''}
+            </div>
+          </div>
+          <svg class="w-4 h-4 text-zinc-400 dark:text-zinc-500 shrink-0 rtl:rotate-180 opacity-0 group-hover:opacity-100 transition-opacity" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+          </svg>
+        </a>
+      `;
+    }
+
+    async function handleSearchInput(): Promise<void> {
+      const q = input?.value.trim() || '';
+      latestQuery = q;
+
+      if (!q) {
+        hideDropdown();
+        return;
+      }
+
+      const lang = getCurrentLanguage();
+      const results = await getSearchSuggestions(q, 4);
+
+      // Guard against race conditions if user changed input while fetching
+      if (input?.value.trim() !== latestQuery) return;
+
+      const hasVideos = results.videosAndPlaylists.length > 0;
+      const hasMaterials = results.otherMaterials.length > 0;
+
+      if (!hasVideos && !hasMaterials) {
+        content.innerHTML = `
+          <div class="p-4 text-center text-xs text-zinc-500 dark:text-zinc-400">
+            ${escapeHtml(t('search.suggestionsNoMatches', lang))}
+          </div>
+        `;
+      } else {
+        let html = '';
+        let itemIndex = 0;
+
+        if (hasVideos) {
+          html += `
+            <div class="px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-zinc-400 dark:text-zinc-500 bg-zinc-50/90 dark:bg-zinc-950/50 sticky top-0 backdrop-blur-xs flex items-center justify-between">
+              <span>${escapeHtml(t('search.suggestionsVideos', lang))}</span>
+              <span class="text-[10px] text-emerald-600 dark:text-emerald-400 lowercase font-medium">(${results.videosAndPlaylists.length})</span>
+            </div>
+            <div>
+              ${results.videosAndPlaylists.map((item) => renderItem(item, itemIndex++, lang)).join('')}
+            </div>
+          `;
+        }
+
+        if (hasMaterials) {
+          html += `
+            <div class="px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-zinc-400 dark:text-zinc-500 bg-zinc-50/90 dark:bg-zinc-950/50 sticky top-0 backdrop-blur-xs flex items-center justify-between">
+              <span>${escapeHtml(t('search.suggestionsMaterials', lang))}</span>
+              <span class="text-[10px] text-emerald-600 dark:text-emerald-400 lowercase font-medium">(${results.otherMaterials.length})</span>
+            </div>
+            <div>
+              ${results.otherMaterials.map((item) => renderItem(item, itemIndex++, lang)).join('')}
+            </div>
+          `;
+        }
+
+        content.innerHTML = html;
+      }
+
+      // Update Footer
+      const viewAllText = t('search.suggestionsAllResults', lang, { q, count: results.totalMatches });
+      footer.innerHTML = `
+        <a
+          href="/search?q=${encodeURIComponent(q)}"
+          class="sugg-nav-item flex items-center justify-between w-full px-3 py-1.5 rounded-xl text-xs font-bold text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 transition-colors"
+        >
+          <span>${escapeHtml(viewAllText)}</span>
+          <svg class="w-3.5 h-3.5 rtl:rotate-180 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+          </svg>
+        </a>
+      `;
+
+      showDropdown();
+      navigableElements = Array.from(wrapper.querySelectorAll('.sugg-nav-item'));
+      activeIndex = -1;
+      updateActiveElement();
+    }
+
+    input.addEventListener('input', () => {
+      if (debounceTimer) clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(() => {
+        void handleSearchInput();
+      }, 80);
+    }, { signal: abort.signal });
+
+    // Keyboard navigation
+    input.addEventListener('keydown', (e) => {
+      if (dropdown.classList.contains('hidden') || navigableElements.length === 0) {
+        return;
+      }
+
+      if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        activeIndex = (activeIndex + 1) % navigableElements.length;
+        updateActiveElement();
+      } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        activeIndex = activeIndex <= 0 ? navigableElements.length - 1 : activeIndex - 1;
+        updateActiveElement();
+      } else if (e.key === 'Enter') {
+        if (activeIndex >= 0 && navigableElements[activeIndex]) {
+          e.preventDefault();
+          navigableElements[activeIndex].click();
+        }
+      } else if (e.key === 'Escape') {
+        e.preventDefault();
+        hideDropdown();
+      }
+    }, { signal: abort.signal });
+
+    // Close when clicking outside
+    document.addEventListener('click', (e) => {
+      if (!wrapper.contains(e.target as Node)) {
+        hideDropdown();
+      }
+    }, { signal: abort.signal });
+
+    // Re-open on focus if query exists
+    input.addEventListener('focus', () => {
+      if (input.value.trim().length > 0 && dropdown.classList.contains('hidden')) {
+        void handleSearchInput();
+      }
+    }, { signal: abort.signal });
   }
 
-  initSearchShortcuts();
-  document.addEventListener('astro:after-swap', initSearchShortcuts);
+  initSearchBar();
+  document.addEventListener('astro:after-swap', initSearchBar);
 </script>

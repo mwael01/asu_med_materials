@@ -41,7 +41,7 @@ const allMaterials = rawMaterials.map((m) => ({
 
     <!-- Search Input -->
     <div class="mb-4">
-      <SearchBar autofocus={true} />
+      <SearchBar autofocus={true} enableSuggestions={false} />
     </div>
 
     <!-- Filter Rows -->
@@ -118,6 +118,36 @@ const allMaterials = rawMaterials.map((m) => ({
     </button>
   </div>
 
+  <!-- Zero-Flash Early Pre-Paint Year Setter -->
+  <script is:inline>
+    (function () {
+      try {
+        var params = new URLSearchParams(window.location.search);
+        var y = params.get('year');
+        if (!y && !params.get('q')) {
+          var stored = localStorage.getItem('asumed_user_year');
+          if (stored && parseInt(stored, 10) >= 1 && parseInt(stored, 10) <= 5) {
+            y = stored;
+          }
+        }
+        if (y && y !== 'all') {
+          var grid = document.getElementById('search-results-grid');
+          if (grid) grid.setAttribute('data-active-year', y);
+        }
+      } catch (e) {}
+    })();
+  </script>
+
+  <style>
+    #search-results-grid[data-active-year="1"] .materials-grid > [data-material-year]:not([data-material-year="1"]),
+    #search-results-grid[data-active-year="2"] .materials-grid > [data-material-year]:not([data-material-year="2"]),
+    #search-results-grid[data-active-year="3"] .materials-grid > [data-material-year]:not([data-material-year="3"]),
+    #search-results-grid[data-active-year="4"] .materials-grid > [data-material-year]:not([data-material-year="4"]),
+    #search-results-grid[data-active-year="5"] .materials-grid > [data-material-year]:not([data-material-year="5"]) {
+      display: none !important;
+    }
+  </style>
+
   <!-- Materials Grid Container -->
   <div id="search-results-grid">
     <ResourceGrid materials={allMaterials} showYear={true} />
@@ -172,7 +202,8 @@ const allMaterials = rawMaterials.map((m) => ({
     const input = document.getElementById('site-search-input') as HTMLInputElement | null;
     const yearBtns = document.querySelectorAll('.year-filter-btn');
     const typeChips = document.querySelectorAll('.filter-chip');
-    const resultsGrid = document.querySelector('#search-results-grid .materials-grid');
+    const resultsGrid = document.querySelector('#search-results-grid .materials-grid') as HTMLElement | null;
+    const gridContainer = document.getElementById('search-results-grid') as HTMLElement | null;
     const cards = Array.from(document.querySelectorAll('#search-results-grid [data-material-id]')) as HTMLElement[];
     const resetBtn = document.getElementById('reset-filters-btn');
     const emptyResetBtn = document.getElementById('empty-reset-filters-btn');
@@ -181,9 +212,9 @@ const allMaterials = rawMaterials.map((m) => ({
     const crossYearText = document.getElementById('cross-year-text');
     const searchAllYearsBtn = document.getElementById('search-all-years-btn');
 
-    if (cards.length === 0) return;
+    if (cards.length === 0 || !resultsGrid) return;
 
-    // Card map for fast O(1) lookup
+    // Card map for fast O(1) lookup & preserve natural DOM order
     const cardMap = new Map<string, HTMLElement>();
     cards.forEach((card) => {
       const id = card.getAttribute('data-material-id');
@@ -197,22 +228,34 @@ const allMaterials = rawMaterials.map((m) => ({
       window.__CACHED_MATERIALS = allItems;
     }
 
-    // Build SearchDocument index once in memory and cache it
-    let searchDocs: SearchDocument[];
-    if (cachedSearchDocs && cachedDocsSourceLength === allItems.length) {
-      searchDocs = cachedSearchDocs;
-    } else {
-      searchDocs = allItems.map((m) =>
+    // Lazy SearchDocument index builder: defers heavy word tokenization and alias expansion until needed
+    function getSearchDocs(): SearchDocument[] {
+      if (cachedSearchDocs && cachedDocsSourceLength === allItems.length) {
+        return cachedSearchDocs;
+      }
+      cachedSearchDocs = allItems.map((m) =>
         createSearchDocument(m, m.moduleId ? moduleMetaMap[m.moduleId] : undefined)
       );
-      cachedSearchDocs = searchDocs;
       cachedDocsSourceLength = allItems.length;
+      return cachedSearchDocs;
     }
+
+    // Pre-warm index during idle time or on input focus without blocking initial paint
+    const prewarm = () => {
+      getSearchDocs();
+    };
+    if (typeof window !== 'undefined' && 'requestIdleCallback' in window) {
+      (window as Window & { requestIdleCallback: (cb: () => void) => void }).requestIdleCallback(prewarm);
+    } else {
+      setTimeout(prewarm, 400);
+    }
+    input?.addEventListener('focus', prewarm, { once: true });
 
     // Initial state from URL or Student Stored Academic Year
     let currentQuery = '';
     let currentYear = 'all';
     let currentType = 'all';
+    let hasCustomOrder = false;
 
     const params = new URLSearchParams(window.location.search);
     if (params.get('q')) {
@@ -223,7 +266,6 @@ const allMaterials = rawMaterials.map((m) => ({
     if (params.has('year')) {
       currentYear = params.get('year') || 'all';
     } else {
-      // Default to student's academic year if saved, otherwise 'all'
       const storedYear = getUserStoredYear();
       if (storedYear && storedYear >= 1 && storedYear <= 5) {
         currentYear = String(storedYear);
@@ -270,12 +312,74 @@ const allMaterials = rawMaterials.map((m) => ({
       if (filterTimeout) clearTimeout(filterTimeout);
       filterTimeout = setTimeout(() => {
         applyFilter();
-      }, 100);
+      }, 70);
     }
 
     function applyFilter(): void {
       const q = currentQuery.trim();
       const tokens = tokenizeQuery(q);
+      const isYearAll = currentYear === 'all';
+      const isTypeAll = currentType === 'all';
+      const lang = getCurrentLanguage();
+
+      // FAST PATH: Filtering purely by Year and/or Type (zero text search query)
+      // Eliminates heavy indexing, avoids relevance scoring, and NEVER reparents DOM elements
+      if (tokens.length === 0) {
+        // Restore natural catalog order if cards were re-ordered by a previous query
+        if (hasCustomOrder) {
+          const fragment = document.createDocumentFragment();
+          cards.forEach((card) => fragment.appendChild(card));
+          resultsGrid.appendChild(fragment);
+          hasCustomOrder = false;
+        }
+
+        // Use native container data attribute for instant CSS year matching when possible
+        if (isTypeAll && !isYearAll) {
+          gridContainer?.setAttribute('data-active-year', currentYear);
+        } else {
+          gridContainer?.removeAttribute('data-active-year');
+        }
+
+        let matchedCount = 0;
+        for (let i = 0; i < cards.length; i++) {
+          const card = cards[i];
+          const cYear = card.getAttribute('data-material-year') || '';
+          const cType = card.getAttribute('data-material-type') || '';
+
+          const yearMatch = isYearAll || cYear === currentYear;
+          const typeMatch =
+            isTypeAll ||
+            (currentType === 'youtube' ? (cType === 'youtube' || cType === 'playlist') : cType === currentType);
+
+          const isVisible = yearMatch && typeMatch;
+          if (isVisible) matchedCount++;
+
+          const currentDisplay = card.style.display;
+          if (isVisible && currentDisplay === 'none') {
+            card.style.display = '';
+          } else if (!isVisible && currentDisplay !== 'none') {
+            card.style.display = 'none';
+          }
+        }
+
+        const countContainer = document.getElementById('results-count-container');
+        if (countContainer) {
+          countContainer.textContent = t('search.resultsCount', lang, { n: matchedCount });
+        }
+
+        crossYearBanner?.classList.add('hidden');
+        if (emptyState) {
+          emptyState.classList.toggle('hidden', matchedCount > 0);
+        }
+
+        updateUrlParams();
+        syncUI();
+        return;
+      }
+
+      // TEXT QUERY SEARCH PATH: Score, rank, and batch re-order matches
+      gridContainer?.removeAttribute('data-active-year');
+      const searchDocs = getSearchDocs();
 
       interface MatchedItem {
         id: string;
@@ -290,7 +394,7 @@ const allMaterials = rawMaterials.map((m) => ({
         const doc = searchDocs[i];
 
         // Type filter check
-        if (currentType !== 'all') {
+        if (!isTypeAll) {
           const isYouTubeMatch = currentType === 'youtube' && (doc.type === 'youtube' || doc.type === 'playlist');
           if (!isYouTubeMatch && doc.type !== currentType) {
             continue;
@@ -298,13 +402,10 @@ const allMaterials = rawMaterials.map((m) => ({
         }
 
         // Search match & score check
-        let score = 0;
-        if (tokens.length > 0) {
-          score = scoreSearchDocument(doc, q, tokens);
-          if (score <= 0) continue;
-        }
+        const score = scoreSearchDocument(doc, q, tokens);
+        if (score <= 0) continue;
 
-        const isYearMatch = currentYear === 'all' || String(doc.year) === currentYear;
+        const isYearMatch = isYearAll || String(doc.year) === currentYear;
         if (isYearMatch) {
           matchesInCurrentYear.push({ id: doc.id, score, doc });
         } else {
@@ -312,58 +413,58 @@ const allMaterials = rawMaterials.map((m) => ({
         }
       }
 
-      // Sort matches by relevance score if a query is active
-      if (tokens.length > 0) {
-        matchesInCurrentYear.sort((a, b) => b.score - a.score);
-      }
+      // Sort matches by relevance score descending
+      matchesInCurrentYear.sort((a, b) => b.score - a.score);
 
-      // Hide all cards first
+      const matchedIdSet = new Set(matchesInCurrentYear.map((m) => m.id));
+
+      // Hide non-matching cards without layout thrashing
       cards.forEach((card) => {
-        card.style.display = 'none';
+        const id = card.getAttribute('data-material-id');
+        if (!id || !matchedIdSet.has(id)) {
+          card.style.display = 'none';
+        }
       });
 
-      // Display and re-order matched cards in the current year
-      if (resultsGrid) {
-        matchesInCurrentYear.forEach(({ id }) => {
-          const card = cardMap.get(id);
-          if (card) {
-            card.style.display = '';
-            resultsGrid.appendChild(card);
-          }
-        });
-      }
+      // Batch re-order matching cards using DocumentFragment
+      const fragment = document.createDocumentFragment();
+      matchesInCurrentYear.forEach(({ id }) => {
+        const card = cardMap.get(id);
+        if (card) {
+          card.style.display = '';
+          fragment.appendChild(card);
+        }
+      });
+      resultsGrid.appendChild(fragment);
+      hasCustomOrder = true;
 
-      // Update results count indicator
       const matchedCount = matchesInCurrentYear.length;
-      const lang = getCurrentLanguage();
       const countContainer = document.getElementById('results-count-container');
       if (countContainer) {
         countContainer.textContent = t('search.resultsCount', lang, { n: matchedCount });
       }
 
       // Cross-year suggestion logic
-      if (currentYear !== 'all' && matchedCount === 0 && matchesInOtherYears.length > 0 && q) {
+      if (!isYearAll && matchedCount === 0 && matchesInOtherYears.length > 0 && q) {
         if (crossYearBanner && crossYearText) {
           const otherCount = matchesInOtherYears.length;
           crossYearText.textContent = t('search.noYearResults', lang, { y: currentYear, count: otherCount });
           crossYearBanner.classList.remove('hidden');
         }
       } else {
-        if (crossYearBanner) {
-          crossYearBanner.classList.add('hidden');
-        }
+        crossYearBanner?.classList.add('hidden');
       }
 
-      // Empty state logic (0 matches anywhere)
       if (emptyState) {
-        if (matchedCount === 0 && (currentYear === 'all' || matchesInOtherYears.length === 0)) {
-          emptyState.classList.remove('hidden');
-        } else {
-          emptyState.classList.add('hidden');
-        }
+        const hasZeroAcrossAllYears = matchedCount === 0 && (isYearAll || matchesInOtherYears.length === 0);
+        emptyState.classList.toggle('hidden', !hasZeroAcrossAllYears);
       }
 
-      // Update URL search parameters without page reload
+      updateUrlParams();
+      syncUI();
+    }
+
+    function updateUrlParams(): void {
       const nextParams = new URLSearchParams();
       if (currentQuery) nextParams.set('q', currentQuery);
       if (currentYear !== 'all') nextParams.set('year', currentYear);
@@ -371,8 +472,6 @@ const allMaterials = rawMaterials.map((m) => ({
       const queryString = nextParams.toString();
       const newUrl = queryString ? `${window.location.pathname}?${queryString}` : window.location.pathname;
       window.history.replaceState({}, '', newUrl);
-
-      syncUI();
     }
 
     // Event listeners

@@ -88,7 +88,12 @@ export const translations: Record<SupportedLanguage, TranslationsSchema> = {
       emptyTitle: 'لم نجد مصادر مطابقة لبحثك',
       emptyDesc: 'جرب البحث بكلمات مفتاحية أخرى أو إلغاء بعض الفلاتر.',
       noYearResults: 'لم نجد نتائج في السنة {y} لبحثك. تم العثور على {count} نتيجة في السنوات الأخرى.',
-      searchAllYears: 'البحث في جميع السنوات'
+      searchAllYears: 'البحث في جميع السنوات',
+      suggestionsVideos: 'فيديوهات وقوائم تشغيل',
+      suggestionsMaterials: 'مذكرات ومصادر دراسية',
+      suggestionsAllResults: 'عرض كل النتائج لـ «{q}» ({count})',
+      suggestionsNoMatches: 'لم نعثر على نتائج سريعة. اضغط Enter للبحث الشامل.',
+      playlistVideosCount: '{count} فيديو'
     },
     categories: {
       central: 'درايفات وقنوات مركزية',
@@ -495,7 +500,12 @@ export const translations: Record<SupportedLanguage, TranslationsSchema> = {
       emptyTitle: 'No resources found matching your search',
       emptyDesc: 'Try different search keywords or remove some filters.',
       noYearResults: 'No results found in Year {y}. Found {count} results in other years.',
-      searchAllYears: 'Search All Years'
+      searchAllYears: 'Search All Years',
+      suggestionsVideos: 'Videos & Playlists',
+      suggestionsMaterials: 'Study Notes & Materials',
+      suggestionsAllResults: 'View all results for "{q}" ({count}) →',
+      suggestionsNoMatches: 'No direct suggestions. Press Enter to search catalog.',
+      playlistVideosCount: '{count} videos'
     },
     categories: {
       central: 'Central Batch Drives & Channels',
