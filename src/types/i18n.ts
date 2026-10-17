@@ -27,6 +27,9 @@ export interface TranslationsSchema {
     academicYears: string;
     comingSoon: string;
     recentMaterials: string;
+    featuredCollections?: string;
+    featuredCollectionsSubtitle?: string;
+    noFeaturedCollections?: string;
     browseAll: string;
     myModules: string;
     myLibrary: string;
@@ -82,6 +85,31 @@ export interface TranslationsSchema {
     emptyDesc: string;
     noYearResults: string;
     searchAllYears: string;
+    suggestionsVideos?: string;
+    suggestionsMaterials?: string;
+    suggestionsAllResults?: string;
+    suggestionsNoMatches?: string;
+    playlistVideosCount?: string;
+  };
+  collections?: {
+    title: string;
+    subtitle: string;
+    resourcesCount: string;
+    subgroupsCount?: string;
+    parentGroup?: string;
+    subgroupsTitle?: string;
+    directMaterialsTitle?: string;
+    emptyTitle: string;
+    emptyDesc: string;
+    breadcrumbHome: string;
+    breadcrumbYear: string;
+    viewCollection: string;
+    includedMaterials: string;
+    materialCount: string;
+    bookmarkCollection: string;
+    bookmarkedCollections: string;
+    savedCollectionsEmpty: string;
+    categories: Record<string, string>;
   };
   categories: {
     central: string;
@@ -318,6 +346,7 @@ export interface TranslationsSchema {
     adminPreviewNotice?: string;
     tabDirectAdd: string;
     tabSubmissions: string;
+    tabCollections?: string;
     tabModules: string;
     tabMaterials: string;
     tabFeedback: string;

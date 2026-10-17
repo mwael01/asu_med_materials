@@ -326,7 +326,7 @@ const allMaterials = rawMaterials.map((m) => ({
       // Eliminates heavy indexing, avoids relevance scoring, and NEVER reparents DOM elements
       if (tokens.length === 0) {
         // Restore natural catalog order if cards were re-ordered by a previous query
-        if (hasCustomOrder) {
+        if (hasCustomOrder && resultsGrid) {
           const fragment = document.createDocumentFragment();
           cards.forEach((card) => fragment.appendChild(card));
           resultsGrid.appendChild(fragment);
@@ -435,7 +435,9 @@ const allMaterials = rawMaterials.map((m) => ({
           fragment.appendChild(card);
         }
       });
-      resultsGrid.appendChild(fragment);
+      if (resultsGrid) {
+        resultsGrid.appendChild(fragment);
+      }
       hasCustomOrder = true;
 
       const matchedCount = matchesInCurrentYear.length;

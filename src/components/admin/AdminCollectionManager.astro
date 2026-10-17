@@ -111,6 +111,16 @@ const { modules } = Astro.props;
           />
         </div>
 
+        <div>
+          <label class="block text-xs font-semibold text-zinc-700 dark:text-zinc-300 mb-1">المجموعة الرئيسية (Parent Group) - اختياري</label>
+          <select
+            id="acm-input-parent"
+            class="w-full px-3 py-2 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+          >
+            <option value="">بدون مجموعة رئيسية (مجموعة أساسية/مستقلة)</option>
+          </select>
+        </div>
+
         <div class="md:col-span-2">
           <label class="block text-xs font-semibold text-zinc-700 dark:text-zinc-300 mb-1">وصف الحزمة (بالعربية)</label>
           <textarea
@@ -284,6 +294,7 @@ const { modules } = Astro.props;
     const inputCategory = document.getElementById('acm-input-category') as HTMLSelectElement | null;
     const inputModule = document.getElementById('acm-input-module') as HTMLSelectElement | null;
     const inputSubject = document.getElementById('acm-input-subject') as HTMLInputElement | null;
+    const inputParent = document.getElementById('acm-input-parent') as HTMLSelectElement | null;
     const inputDesc = document.getElementById('acm-input-desc') as HTMLTextAreaElement | null;
     const inputDescEn = document.getElementById('acm-input-desc-en') as HTMLTextAreaElement | null;
     const inputFeatured = document.getElementById('acm-input-featured') as HTMLInputElement | null;
@@ -298,6 +309,25 @@ const { modules } = Astro.props;
     let allCollections: MaterialCollection[] = [];
     let allMaterials: MaterialItem[] = [];
     let selectedMaterialIds: string[] = [];
+
+    function renderParentOptions(selectedYear: number, excludeId?: string, selectedParentId?: string): void {
+      if (!inputParent) return;
+      const eligibleParents = allCollections.filter(
+        (c) => c.year === selectedYear && (!c.parentId || c.parentId.trim() === '') && c.id !== excludeId
+      );
+
+      let html = '<option value="">بدون مجموعة رئيسية (مجموعة أساسية/مستقلة)</option>';
+      eligibleParents.forEach((p) => {
+        const isSelected = p.id === selectedParentId;
+        html += `<option value="${escapeHtml(p.id)}" ${isSelected ? 'selected' : ''}>${escapeHtml(p.title)}</option>`;
+      });
+      inputParent.innerHTML = html;
+    }
+
+    inputYear?.addEventListener('change', () => {
+      const y = parseInt(inputYear.value, 10);
+      renderParentOptions(y, inputId?.value || undefined, inputParent?.value || undefined);
+    });
 
     // Toggle Form visibility
     toggleBtn?.addEventListener('click', () => {
@@ -316,6 +346,9 @@ const { modules } = Astro.props;
       if (!form) return;
       form.reset();
       if (inputId) inputId.value = '';
+      if (inputParent) inputParent.value = '';
+      const y = parseInt(inputYear?.value || '1', 10);
+      renderParentOptions(y);
       selectedMaterialIds = [];
       renderSelectedMaterials();
       if (submitBtn) submitBtn.textContent = 'حفظ الحزمة';
@@ -328,6 +361,8 @@ const { modules } = Astro.props;
           fetchCollectionsFromFirestore(),
           getClientMaterials()
         ]);
+        const y = parseInt(inputYear?.value || '1', 10);
+        renderParentOptions(y, inputId?.value || undefined, inputParent?.value || undefined);
         renderCollectionsTable();
       } catch (err) {
         console.error('Failed to load collections data:', err);
@@ -523,6 +558,7 @@ const { modules } = Astro.props;
         category: inputCategory.value as any,
         moduleId: inputModule?.value || undefined,
         subject: inputSubject?.value.trim() || undefined,
+        parentId: inputParent?.value || undefined,
         description: inputDesc?.value.trim() || undefined,
         descriptionEn: inputDescEn?.value.trim() || undefined,
         featured: inputFeatured?.checked || false,
@@ -548,7 +584,7 @@ const { modules } = Astro.props;
             adminUid: user.uid,
             adminName: user.displayName || 'Admin',
             adminUsername: user.username,
-            action: isEditing ? 'edit_module' : 'create_module',
+            action: isEditing ? 'update_module' : 'create_module',
             targetId: savedId,
             targetTitle: title,
             details: `${isEditing ? 'Updated' : 'Created'} collection pack with ${selectedMaterialIds.length} materials`
@@ -603,6 +639,11 @@ const { modules } = Astro.props;
               <td class="py-3 px-3">
                 <div class="font-bold text-zinc-900 dark:text-zinc-100">${escapeHtml(col.title)}</div>
                 ${col.titleEn ? `<div class="text-[11px] text-zinc-400">${escapeHtml(col.titleEn)}</div>` : ''}
+                ${
+                  col.parentId
+                    ? `<div class="text-[10px] text-amber-600 dark:text-amber-400 font-medium mt-0.5">↳ فرعية من: ${escapeHtml(allCollections.find((p) => p.id === col.parentId)?.title || col.parentId)}</div>`
+                    : ''
+                }
               </td>
               <td class="py-3 px-3">
                 <span class="px-2 py-0.5 rounded bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 font-semibold">
@@ -682,6 +723,8 @@ const { modules } = Astro.props;
           if (inputTitle) inputTitle.value = col.title;
           if (inputTitleEn) inputTitleEn.value = col.titleEn || '';
           if (inputYear) inputYear.value = String(col.year);
+          renderParentOptions(col.year, col.id, col.parentId);
+          if (inputParent) inputParent.value = col.parentId || '';
           if (inputCategory) inputCategory.value = col.category;
           if (inputModule) inputModule.value = col.moduleId || '';
           if (inputSubject) inputSubject.value = col.subject || '';
@@ -713,7 +756,7 @@ const { modules } = Astro.props;
                 adminUsername: user.username,
                 action: 'delete_material',
                 targetId: id,
-                targetTitle: title,
+                targetTitle: title || id,
                 details: 'Deleted curated collection pack'
               });
             }

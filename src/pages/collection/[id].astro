@@ -56,6 +56,19 @@ const badgeClass = categoryBadgeClasses[collection.category] || categoryBadgeCla
           </a>
         </>
       )}
+      {collection.parent && (
+        <>
+          <span>/</span>
+          <a
+            href={`/collection/${collection.parent.id}`}
+            class="hover:text-emerald-600 dark:hover:text-emerald-400 whitespace-nowrap font-medium"
+            data-title-ar={collection.parent.title}
+            data-title-en={collection.parent.titleEn || collection.parent.title}
+          >
+            {collection.parent.title}
+          </a>
+        </>
+      )}
       <span>/</span>
       <span
         class="text-zinc-900 dark:text-zinc-100 font-bold truncate max-w-[200px] sm:max-w-xs"
@@ -93,6 +106,17 @@ const badgeClass = categoryBadgeClasses[collection.category] || categoryBadgeCla
               السنة {collection.year}
             </span>
 
+            {collection.parent && (
+              <a
+                href={`/collection/${collection.parent.id}`}
+                class="text-xs font-semibold px-3 py-1 rounded-xl bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 hover:underline inline-flex items-center gap-1"
+              >
+                <span>↳</span>
+                <span data-i18n="collections.parentGroup">المجموعة الرئيسية</span>:
+                <span>{collection.parent.title}</span>
+              </a>
+            )}
+
             {moduleInfo && (
               <a
                 href={`/module/${moduleInfo.id}`}
@@ -102,13 +126,32 @@ const badgeClass = categoryBadgeClasses[collection.category] || categoryBadgeCla
               </a>
             )}
 
-            <span
-              class="text-xs font-semibold px-3 py-1 rounded-xl bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400"
-              data-i18n="collections.materialCount"
-              data-i18n-params={JSON.stringify({ count: collection.materials.length })}
-            >
-              {collection.materials.length} مصدر
-            </span>
+            {collection.subcollections && collection.subcollections.length > 0 ? (
+              <>
+                <span
+                  class="text-xs font-semibold px-3 py-1 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300"
+                  data-i18n="collections.subgroupsCount"
+                  data-i18n-params={JSON.stringify({ n: collection.subcollections.length })}
+                >
+                  {collection.subcollections.length} مجموعات فرعية
+                </span>
+                <span
+                  class="text-xs font-semibold px-3 py-1 rounded-xl bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400"
+                  data-i18n="collections.materialCount"
+                  data-i18n-params={JSON.stringify({ count: collection.totalMaterialsCount ?? collection.materials.length })}
+                >
+                  {collection.totalMaterialsCount ?? collection.materials.length} مصدر
+                </span>
+              </>
+            ) : (
+              <span
+                class="text-xs font-semibold px-3 py-1 rounded-xl bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400"
+                data-i18n="collections.materialCount"
+                data-i18n-params={JSON.stringify({ count: collection.materials.length })}
+              >
+                {collection.materials.length} مصدر
+              </span>
+            )}
           </div>
 
           <!-- Collection Title -->
@@ -157,15 +200,63 @@ const badgeClass = categoryBadgeClasses[collection.category] || categoryBadgeCla
       </div>
     </header>
 
-    <!-- Included Materials Section -->
-    <section class="space-y-3">
-      <div class="flex items-center justify-between">
-        <h2 class="text-base sm:text-lg font-bold text-zinc-900 dark:text-zinc-100 flex items-center gap-2" data-i18n="collections.includedMaterials">
-          المصادر المتضمنة في المجموعة
-        </h2>
-      </div>
+    <!-- Direct Materials Section (if any direct materials exist) -->
+    {collection.materials.length > 0 && (
+      <section class="space-y-3">
+        <div class="flex items-center justify-between">
+          <h2 class="text-base sm:text-lg font-bold text-zinc-900 dark:text-zinc-100 flex items-center gap-2">
+            <span data-i18n={collection.subcollections && collection.subcollections.length > 0 ? "collections.directMaterialsTitle" : "collections.includedMaterials"}>
+              {collection.subcollections && collection.subcollections.length > 0 ? 'المصادر العامة' : 'المصادر المتضمنة في المجموعة'}
+            </span>
+          </h2>
+        </div>
 
-      <ResourceGrid materials={collection.materials} showYear={false} />
-    </section>
+        <ResourceGrid materials={collection.materials} showYear={false} />
+      </section>
+    )}
+
+    <!-- Nested Subgroups / Doctor Series Section -->
+    {collection.subcollections && collection.subcollections.length > 0 && (
+      <section class="space-y-8 pt-4">
+        <div class="pb-2 border-b-2 border-emerald-500/30">
+          <h2 class="text-base sm:text-lg font-bold text-zinc-900 dark:text-zinc-100 flex items-center gap-2" data-i18n="collections.subgroupsTitle">
+            الأقسام والمجموعات الفرعية
+          </h2>
+        </div>
+
+        <div class="space-y-8">
+          {collection.subcollections.map((sub) => (
+            <div class="space-y-3.5 p-4 sm:p-5 rounded-2xl bg-zinc-50/70 dark:bg-zinc-900/60 border border-zinc-200/80 dark:border-zinc-800">
+              <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-2.5 border-b border-zinc-200/60 dark:border-zinc-800">
+                <div class="flex items-center gap-2">
+                  <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 shrink-0"></span>
+                  <div>
+                    <h3 class="text-sm sm:text-base font-bold text-zinc-900 dark:text-zinc-100">
+                      <a href={`/collection/${sub.id}`} class="hover:text-emerald-600 dark:hover:text-emerald-400 hover:underline">
+                        {sub.title}
+                      </a>
+                    </h3>
+                    {sub.description && (
+                      <p class="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5">{sub.description}</p>
+                    )}
+                  </div>
+                </div>
+
+                <div class="flex items-center gap-2 shrink-0">
+                  <span class="text-xs font-semibold px-2.5 py-0.5 rounded-md bg-zinc-200/70 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300">
+                    {sub.materials.length} مصدر
+                  </span>
+                  <a href={`/collection/${sub.id}`} class="text-xs font-bold text-emerald-600 dark:text-emerald-400 hover:underline inline-flex items-center gap-1">
+                    <span data-i18n="collections.viewCollection">عرض الحزمة</span> &rarr;
+                  </a>
+                </div>
+              </div>
+
+              <ResourceGrid materials={sub.materials} showYear={false} />
+            </div>
+          ))}
+        </div>
+      </section>
+    )}
   </div>
 </Layout>

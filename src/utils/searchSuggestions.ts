@@ -46,19 +46,19 @@ export async function getOrBuildSearchIndex(): Promise<{ docs: SearchDocument[];
     return indexingPromise;
   }
 
-  indexingPromise = (async () => {
+  const p = (async () => {
     const materials = await getClientMaterials();
-    if (!cachedDocs || cachedMaterialsLength !== materials.length) {
-      cachedDocs = materials.map((m) => createSearchDocument(m));
-      cachedMaterials = materials;
-      cachedMaterialsLength = materials.length;
-    }
-    return { docs: cachedDocs, materials: cachedMaterials };
+    const docs = materials.map((m) => createSearchDocument(m));
+    cachedDocs = docs;
+    cachedMaterials = materials;
+    cachedMaterialsLength = materials.length;
+    return { docs, materials };
   })().finally(() => {
     indexingPromise = null;
   });
 
-  return indexingPromise;
+  indexingPromise = p;
+  return p;
 }
 
 /**

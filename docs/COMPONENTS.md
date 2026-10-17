@@ -375,3 +375,18 @@ Flashcard decks are integrated directly into module pages ([`src/pages/module/[i
 #### [`FlashcardsManager.astro`](file:///home/mwael/work/asu_med_materials/src/components/admin/FlashcardsManager.astro)
 - **Location**: `src/components/admin/FlashcardsManager.astro`
 - **Purpose**: Admin dashboard tab for inspecting, filtering, and publishing/unpublishing flashcard decks.
+
+---
+
+### Curated Collections & Featured Timeline Packs
+
+#### [`FeaturedCollections.astro`](file:///home/mwael/work/asu_med_materials/src/components/materials/FeaturedCollections.astro)
+- **Location**: `src/components/materials/FeaturedCollections.astro`
+- **Purpose**: Replaces the generic "Recently Added Materials" section on the home page. Pre-renders top-level curated collections and packs grouped for key timeline situations (practical exams, finals revision, midterms, high-yield summaries).
+- **Zero-Flash SSR Hydration**: Uses inline pre-paint scripts matching `localStorage.getItem('asumed_user_year') || '2'` to eliminate layout shifts when students switch years.
+- **Hierarchical Subgroups Support**: Only root collections (`!parentId`) are displayed on the home page to avoid timeline clutter. Clicking into any parent collection (e.g. *Practical Exam Pack*) displays organized doctor subgroups (e.g. *Dr. Marco*, *Dr. Sameh*) and their corresponding materials directly.
+
+#### [`CollectionCard.astro`](file:///home/mwael/work/asu_med_materials/src/components/materials/CollectionCard.astro)
+- **Location**: `src/components/materials/CollectionCard.astro`
+- **Purpose**: Unified card component representing a curated pack. Displays situation category badges (`practical`, `finals`, `midterm`, `revision`, `general`), year badge, bookmark button with live optimistic counter, and item/subgroup counts.
+

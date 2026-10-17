@@ -4,6 +4,7 @@ export type CollectionCategory = 'practical' | 'finals' | 'midterm' | 'revision'
 
 export interface MaterialCollection {
   id: string;
+  parentId?: string; // Optional parent collection ID for nested subgroups
   title: string;
   titleEn?: string;
   description?: string;
@@ -13,6 +14,7 @@ export interface MaterialCollection {
   subject?: string;
   category: CollectionCategory;
   materialIds: string[]; // Ordered list of material IDs
+  subcollectionIds?: string[]; // Optional ordered list of child collection IDs
   featured?: boolean;
   order?: number;
   bookmarksCount?: number;
@@ -23,4 +25,8 @@ export interface MaterialCollection {
 
 export interface CollectionWithMaterials extends MaterialCollection {
   materials: MaterialItem[];
+  subcollections?: CollectionWithMaterials[]; // Nested child groups with their resolved materials
+  parent?: MaterialCollection | null; // Resolved parent collection for breadcrumb trail
+  totalMaterialsCount?: number; // Recursive count of materials across parent and all subgroups
 }
+

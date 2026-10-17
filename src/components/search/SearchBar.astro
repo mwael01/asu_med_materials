@@ -229,7 +229,7 @@ const isLarge = size === 'lg';
       const yearText = isAr ? `السنة ${item.year}` : `Year ${item.year}`;
       let extraMeta = '';
       if (item.isPlaylist && item.videoCount) {
-        const countText = t('search.playlistVideosCount', lang, { count: item.videoCount });
+        const countText = t('search.playlistVideosCount', lang as any, { count: item.videoCount });
         extraMeta += `<span class="bg-red-50 dark:bg-red-950/50 text-red-600 dark:text-red-400 px-1.5 py-0.5 rounded text-[10px] font-bold">${escapeHtml(countText)}</span>`;
       }
 
@@ -274,7 +274,7 @@ const isLarge = size === 'lg';
       const results = await getSearchSuggestions(q, 4);
 
       // Guard against race conditions if user changed input while fetching
-      if (input?.value.trim() !== latestQuery) return;
+      if (input?.value.trim() !== latestQuery || !content || !footer || !wrapper) return;
 
       const hasVideos = results.videosAndPlaylists.length > 0;
       const hasMaterials = results.otherMaterials.length > 0;

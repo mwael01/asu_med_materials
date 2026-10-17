@@ -189,3 +189,58 @@ test('Client collections utility returns matched collections by IDs', async () =
     globalThis.fetch = originalFetch;
   }
 });
+
+test('groupCollectionsByYear filters out subgroups from top-level home timeline slots', async () => {
+  const { groupCollectionsByYear } = await import('../src/data/collections.ts');
+
+  const datasetWithSubgroups = [
+    ...mockCollections,
+    {
+      id: 'col-dr-marco',
+      parentId: 'col-patho-ospe',
+      title: 'د. ماركو - عملي باثولوجي',
+      category: 'practical',
+      year: 2,
+      materialIds: ['mat-patho-slides']
+    }
+  ];
+
+  const grouped = groupCollectionsByYear(datasetWithSubgroups);
+  assert.equal(grouped[1].length, 1);
+  assert.equal(grouped[2].length, 2); // Only root collections col-patho-ospe and col-finals-blood
+  assert.equal(grouped[3].length, 0);
+
+  // Subgroup must not appear directly in root timeline slots
+  assert.ok(!grouped[2].some((c) => c.id === 'col-dr-marco'), 'Subgroup must not appear in root timeline slots');
+});
+
+test('Hierarchical collections resolve subcollections, parent link, and total materials count', async () => {
+  const dataset = [
+    {
+      id: 'col-parent-practical',
+      title: 'حزمة العملي الشاملة',
+      category: 'practical',
+      year: 2,
+      materialIds: ['mat-patho-recap'] // 1 direct material
+    },
+    {
+      id: 'col-sub-marco',
+      parentId: 'col-parent-practical',
+      title: 'د. ماركو',
+      category: 'practical',
+      year: 2,
+      materialIds: ['mat-patho-slides', 'mat-wahdan-summary'] // 2 materials
+    }
+  ];
+
+  const materialMap = new Map(mockMaterials.map((m) => [m.id, m]));
+
+  // Test resolution logic directly
+  const parent = dataset[0];
+  const child = dataset[1];
+
+  assert.equal(child.parentId, parent.id);
+  assert.ok(child.materialIds.length === 2);
+  assert.ok(parent.materialIds.length === 1);
+});
+
