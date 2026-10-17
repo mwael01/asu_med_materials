@@ -438,30 +438,6 @@ export async function saveMaterialsBulk(
   return { savedCount, skippedCount, errors };
 }
 
-/**
- * Atomically increments or decrements the bookmark/love counter for a material in Firestore.
- */
-export async function incrementMaterialBookmarkCount(materialId: string, delta: 1 | -1): Promise<void> {
-  const db = getFirestoreDb();
-  if (!db || !materialId) throw new Error('Bookmark count sync is unavailable');
-  await updateDoc(doc(db, MATERIALS_COLLECTION, materialId), {
-    bookmarksCount: increment(delta)
-  });
-}
-
-/** Subscribe independently of the cached public catalogue. */
-export function listenToMaterialBookmarkCount(
-  materialId: string,
-  callback: (count: number) => void
-): () => void {
-  const db = getFirestoreDb();
-  if (!db) return () => {};
-  return onSnapshot(doc(db, MATERIALS_COLLECTION, materialId), { includeMetadataChanges: true }, (snap) => {
-    if (snap.exists()) callback(snap.data().bookmarksCount ?? 0);
-  }, (error) => {
-    console.warn(`[Firestore] Bookmark count subscription failed for ${materialId}:`, error);
-  });
-}
 
 /**
  * Retrieves a user profile by UID.
@@ -1633,16 +1609,6 @@ export async function deleteCollectionFromFirestore(id: string): Promise<void> {
   await deleteDoc(doc(db, COLLECTIONS_COLLECTION, id));
 }
 
-/**
- * Atomically increments or decrements the bookmark counter for a collection.
- */
-export async function incrementCollectionBookmarkCount(collectionId: string, delta: 1 | -1): Promise<void> {
-  const db = getFirestoreDb();
-  if (!db || !collectionId) throw new Error('Bookmark count sync is unavailable');
-  await updateDoc(doc(db, COLLECTIONS_COLLECTION, collectionId), {
-    bookmarksCount: increment(delta)
-  });
-}
 
 
 

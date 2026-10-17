@@ -1,43 +1,44 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { changeBookmarkCount, normalizeBookmarkCount } from '../src/utils/bookmarkCounts.ts';
+import { getStoredBookmarkIds } from '../src/utils/storage.ts';
+import { setMaterialBookmarked } from '../src/utils/bookmarks.ts';
 import { getClientMaterials, getClientMaterialsByIds, getClientMaterialById } from '../src/utils/catalogueClient.ts';
 
-test('Bookmark Counts Normalization and Optimistic Updates', async () => {
-  assert.equal(normalizeBookmarkCount(-5), 0);
-  assert.equal(normalizeBookmarkCount(NaN), 0);
-  assert.equal(normalizeBookmarkCount(12.8), 12);
+test('Bookmark Toggle and Storage Idempotency without Counter Network Overhead', () => {
+  const store = new Map();
+  globalThis.localStorage = {
+    getItem: (key) => store.get(key) || null,
+    setItem: (key, val) => store.set(key, String(val)),
+    removeItem: (key) => store.delete(key),
+    clear: () => store.clear(),
+  };
+  globalThis.window = {
+    localStorage: globalThis.localStorage,
+    dispatchEvent: () => true,
+    CustomEvent: class CustomEvent {},
+  };
 
-  const state = { displayed: 5, snapshot: 5, pending: 0 };
-  let renderCount = 0;
-  const mockRender = () => { renderCount++; };
+  assert.deepEqual(getStoredBookmarkIds(), []);
 
-  // 1. Successful increment
-  let writeExecuted = false;
-  await changeBookmarkCount(
-    state,
-    1,
-    async () => { writeExecuted = true; },
-    mockRender
-  );
-  assert.equal(writeExecuted, true);
-  assert.equal(state.displayed, 6);
-  assert.ok(renderCount >= 1);
+  // 1. Add bookmark
+  setMaterialBookmarked('mat-123', true);
+  assert.deepEqual(getStoredBookmarkIds(), ['mat-123']);
 
-  // 2. Failed decrement should rollback to previous
-  let threwError = false;
-  try {
-    await changeBookmarkCount(
-      state,
-      -1,
-      async () => { throw new Error('Firestore write simulated network failure'); },
-      mockRender
-    );
-  } catch {
-    threwError = true;
-  }
-  assert.equal(threwError, true);
-  assert.equal(state.displayed, 6, 'Should rollback to 6 on failure');
+  // 2. Idempotent re-add
+  setMaterialBookmarked('mat-123', true);
+  assert.deepEqual(getStoredBookmarkIds(), ['mat-123']);
+
+  // 3. Add second bookmark
+  setMaterialBookmarked('mat-456', true);
+  assert.deepEqual(getStoredBookmarkIds(), ['mat-123', 'mat-456']);
+
+  // 4. Remove bookmark
+  setMaterialBookmarked('mat-123', false);
+  assert.deepEqual(getStoredBookmarkIds(), ['mat-456']);
+
+  // 5. Idempotent remove
+  setMaterialBookmarked('mat-123', false);
+  assert.deepEqual(getStoredBookmarkIds(), ['mat-456']);
 });
 
 test('Client Catalogue Memory and Snapshot Resolution', async () => {

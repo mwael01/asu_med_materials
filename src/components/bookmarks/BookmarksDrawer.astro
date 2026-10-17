@@ -109,7 +109,7 @@
 <script>
   import { getMaterialEnglishTitle } from '../../i18n/materialsTranslations';
   import { getStoredBookmarkIds, getStoredStudiedIds } from '../../utils/storage';
-  import { setMaterialBookmarked, renderBookmarkButtons, initBookmarkCounts, stopBookmarkCounts } from '../../utils/bookmarks';
+  import { setMaterialBookmarked, renderBookmarkButtons, initBookmarkButtons, stopBookmarkButtons } from '../../utils/bookmarks';
   import { getCurrentLanguage, t } from '../../utils/i18n';
   import { escapeHtml } from '../../utils/sanitize';
   import { getClientMaterials } from '../../utils/catalogueClient';
@@ -121,7 +121,7 @@
     drawerAbort?.abort();
     drawerAbort = new AbortController();
     const { signal } = drawerAbort;
-    initBookmarkCounts();
+    initBookmarkButtons();
     const drawer = document.getElementById('bookmarks-drawer');
     const backdrop = document.getElementById('bookmarks-backdrop');
     const closeBtn = document.getElementById('close-bookmarks-drawer');
@@ -503,9 +503,9 @@
 
   document.addEventListener('astro:before-swap', () => {
     drawerAbort?.abort();
-    stopBookmarkCounts();
+    stopBookmarkButtons();
   });
-  window.addEventListener('pagehide', stopBookmarkCounts);
+  window.addEventListener('pagehide', stopBookmarkButtons);
   window.addEventListener('pageshow', (event) => {
     if (event.persisted) initBookmarksDrawer();
   });

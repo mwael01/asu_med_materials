@@ -1,5 +1,4 @@
-export interface BookmarkCountState {
-  displayed: number;
-  snapshot: number | null;
-  pending: number;
+export interface BookmarkEventDetail {
+  id: string;
+  added: boolean;
 }
