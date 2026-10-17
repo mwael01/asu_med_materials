@@ -14,11 +14,12 @@ Write expressive, concise Arabic title in title AND equivalent English title in 
 Remove greetings, requests to share, timestamps, emojis, unsupported praise. Never assert complete, official, answers included, duration, year, or topics without evidence.
 Write short factual Arabic description and equivalent English description, or omit both when there is no useful evidence beyond the title. Do not claim to have read linked documents.
 Return 2–8 useful tags covering evidenced topics, Arabic/English subject synonyms and familiar medical abbreviations; avoid generic filler.
-Authors are the people/organizations explicitly credited for creating the material, not message senders, students submitting links, or uploaders. Return authors as an array, preserve names, do not invent profile usernames. If ambiguous leave authors empty and add a review issue. Contributor identity is supplied by the application, not you.
-Choose moduleId ONLY from curriculum below when supported by module names/codes/context, never simply by subject alone. year must be integer 1–5, or omitted. Unknown moduleId is empty. A confidently matched module determines year; conflicting evidence must be flagged. subject uses the curriculum's canonical subject where available. Leave unknown subject/category empty or omitted.
+Authors are the doctors/professors/organizations explicitly credited for creating the material (e.g. د. حسام موافي, د. وهدان, د. شيرين, د. ماركو, د. ناجي, د. سامح غازي, د. عبد المتعال, د. فاتن, د. شريف حتة), not message senders, students submitting links, or uploaders. Return authors as an array, preserve names, do not invent profile usernames. If ambiguous leave authors empty and add a review issue. Contributor identity is supplied by the application, not you.
+Choose moduleId ONLY from curriculum below when supported by module names/codes/context, never simply by subject alone. Match medical synonyms: بلود/دم -> Blood, مخ/أعصاب -> CNS, قلب/دوري -> CVS, عظام/عضلي حركي -> Musculoskeletal, هضمي -> GIT, كلى/بولي -> Renal, غدد -> Endocrine, تناسلي -> Reproductive, تأسيسي -> Foundation. year must be integer 1–5, or omitted. Unknown moduleId is empty. A confidently matched module determines year; conflicting evidence must be flagged. subject uses the curriculum's canonical subject where available. Leave unknown subject/category empty or omitted.
+Classify study category accurately: تفريغات/ورق/مذكرات/ملخصات -> summaries; عملي/أوسبي/سكاشن/سلايدات -> practical; امتحانات/أسئلة/بنك/ريكول/MCQ -> exams; محاضرات/شرح/ريكوردات -> lectures; كتب/مراجع -> references.
 Use platform type for Drive, Telegram, WhatsApp, YouTube/playlist; classify the content independently using category. Otherwise book/exam/summary/website/other according to evidence.
 Use nearby headings and link-specific context. Do not transfer one resource's creator/topic to unrelated links. Prefer explicit message attribution over an uploader; flag disagreements with web metadata in issues [{field,message}]. Issue messages must be concise Arabic with English translation after /.
-Only include videos explicitly listed in the message, with actual YouTube IDs/URLs. Do not invent video lists or durations.
+Only include videos explicitly listed in the message, with actual YouTube IDs/URLs. If multiple videos belong to the same topic/doctor series, include them in the videos array.
 CURRICULUM: ${JSON.stringify(modules.filter(m => m.active !== false).map(({id, code, title, titleAr, year, semester, subjects}) => ({id, code, title, titleAr, year, semester, subjects})))}
 SOURCE URLS: ${JSON.stringify(extractMaterialUrls(rawMessage))}
 MESSAGE: ${JSON.stringify(rawMessage)}
@@ -28,7 +29,12 @@ export function normalizeParsedItem(value: unknown, sourceUrl: string, modules: 
   const item = record(value);
   const issues: ReviewIssue[] = Array.isArray(item.issues) ? item.issues.map(record).map(i => ({field: str(i.field, 60), message: str(i.message, 400)})).filter(i => i.message).slice(0, 12) : [];
   const platform = detectResourceType(sourceUrl);
-  const type = ['website', 'summary', 'other'].includes(platform) && ['book', 'exam', 'summary', 'website', 'other'].includes(String(item.type)) ? item.type as ResourceType : platform;
+  let type: ResourceType =
+    item.type === 'playlist' || (Array.isArray(item.videos) && item.videos.length > 0)
+      ? 'playlist'
+      : ['website', 'summary', 'other'].includes(platform) && ['book', 'exam', 'summary', 'website', 'other'].includes(String(item.type))
+        ? (item.type as ResourceType)
+        : platform;
   let year = Number.isInteger(item.year) && Number(item.year) >= 1 && Number(item.year) <= 5 ? item.year as AcademicYear : undefined;
   let module = modules.find(m => m.active !== false && m.id === str(item.moduleId));
   if (module && year && module.year !== year) {
@@ -41,8 +47,17 @@ export function normalizeParsedItem(value: unknown, sourceUrl: string, modules: 
   if (Array.isArray(item.videos) && type === 'playlist') for (const raw of item.videos.slice(0, 100)) {
     const v = record(raw); const youtubeId = str(v.youtubeId, 20);
     const url = str(v.url); const title = str(v.title, 200);
-    if (!title || !/^[\w-]{11}$/.test(youtubeId) || !evidence.includes(youtubeId)) continue;
-    videos.push({ id: youtubeId, title, youtubeId, url: isHttpUrl(url) && evidence.includes(url) ? url : `https://www.youtube.com/watch?v=${youtubeId}`, duration: str(v.duration, 30) || undefined });
+    const hasValidYt = /^[\w-]{11}$/.test(youtubeId) && evidence.includes(youtubeId);
+    const hasValidUrl = isHttpUrl(url) && evidence.includes(url);
+    if (!title || (!hasValidYt && !hasValidUrl)) continue;
+    const finalId = hasValidYt ? youtubeId : (url ? `vid_${materialUrlKey(url).slice(-10)}` : `vid_${videos.length + 1}`);
+    videos.push({
+      id: finalId,
+      title,
+      youtubeId: hasValidYt ? youtubeId : undefined,
+      url: hasValidUrl ? url : (hasValidYt ? `https://www.youtube.com/watch?v=${youtubeId}` : undefined),
+      duration: str(v.duration, 30) || undefined
+    });
   }
   const category = VALID_CATEGORIES.includes(item.category as MaterialCategory) ? item.category as MaterialCategory : undefined;
   return {

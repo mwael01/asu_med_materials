@@ -6,19 +6,22 @@ import type { ExtractionResult, LinkMetadata } from '../types/ai';
 import { buildExtractionPrompt, parseAIResponseJson, fallbackParseDumpText, VALID_TYPES, VALID_CATEGORIES } from '../utils/aiParser';
 import { extractMaterialUrls } from '../utils/materialLinks';
 let modelInstance: GenerativeModel | null = null;
-export function getGeminiModel(): GenerativeModel | null {
-  if (modelInstance) return modelInstance;
+let currentModelName: string | null = null;
+
+export function getGeminiModel(modelName: 'gemini-2.5-flash' | 'gemini-1.5-flash' = 'gemini-2.5-flash'): GenerativeModel | null {
+  if (modelInstance && currentModelName === modelName) return modelInstance;
   const app = getFirebaseApp(); if (!app) return null;
   const text = () => Schema.string();
   const schema = Schema.object({properties:{materials:Schema.array({items:Schema.object({
     properties:{title:text(), titleEn:text(), description:text(), descriptionEn:text(), url:text(), type:Schema.enumString({enum:VALID_TYPES}), category:Schema.enumString({enum:VALID_CATEGORIES}), year:Schema.integer(), moduleId:text(), subject:text(),
       author:Schema.array({items:text()}), tags:Schema.array({items:text()}),
       issues:Schema.array({items:Schema.object({properties:{field:text(), message:text()}})}),
-      videos:Schema.array({items:Schema.object({properties:{title:text(), youtubeId:text(), url:text(), duration:text()}, optionalProperties:['duration']})}),
+      videos:Schema.array({items:Schema.object({properties:{title:text(), youtubeId:text(), url:text(), duration:text()}, optionalProperties:['youtubeId','url','duration']})}),
     }, optionalProperties:['description','descriptionEn','category','year','moduleId','subject','author','videos','issues'],
   })})}});
+  currentModelName = modelName;
   modelInstance = getGenerativeModel(getAI(app, {backend:new GoogleAIBackend()}), {
-    model:'gemini-3.8-flash', generationConfig:{responseMimeType:'application/json', responseSchema:schema, temperature:0.2},
+    model:modelName, generationConfig:{responseMimeType:'application/json', responseSchema:schema, temperature:0.2},
   });
   return modelInstance;
 }
@@ -50,8 +53,18 @@ export async function parseMaterialMessageWithAI(rawMessage: string, modules: Mo
   let metadata: LinkMetadata[] = [];
   try {
     metadata = await enrichLinks(urls, signal);
-    const model = getGeminiModel(); if (!model) throw new Error('AI unavailable');
-    const response = await model.generateContent(buildExtractionPrompt(message, modules, metadata), {signal, timeout:90000});
+    let model = getGeminiModel('gemini-2.5-flash');
+    if (!model) throw new Error('AI unavailable');
+    let response;
+    try {
+      response = await model.generateContent(buildExtractionPrompt(message, modules, metadata), {signal, timeout:90000});
+    } catch (primaryErr) {
+      if (signal?.aborted) throw primaryErr;
+      console.warn('[AI] gemini-2.5-flash failed, trying gemini-1.5-flash fallback:', primaryErr);
+      const fallbackModel = getGeminiModel('gemini-1.5-flash');
+      if (!fallbackModel) throw primaryErr;
+      response = await fallbackModel.generateContent(buildExtractionPrompt(message, modules, metadata), {signal, timeout:90000});
+    }
     const items = parseAIResponseJson(response.response.text(), message, modules);
     for (const item of items) {
       if (metadata.find(m => m.url === item.url)?.status !== 'ok') item.issues?.push({field:'url', message:'تعذر جلب معاينة الرابط؛ راجع السياق / Link preview unavailable; review context'});

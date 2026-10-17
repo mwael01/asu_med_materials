@@ -159,7 +159,7 @@ export async function incrementMaterialsVersionInFirestore(): Promise<number> {
       },
       { merge: true }
     );
-    urlCheckCache = null;
+    clearUrlVerificationCache();
     const snap = await getDoc(docRef);
     const newVersion = snap.exists() ? (snap.data()?.version || 1) : 1;
     cachedMaterialsVersion = { version: newVersion, expiresAt: Date.now() + MATERIALS_VERSION_TTL_MS };
@@ -229,7 +229,7 @@ export async function saveMaterialToFirestore(material: MaterialItem): Promise<b
   try {
     const docRef = doc(db, MATERIALS_COLLECTION, material.id);
     await setDoc(docRef, sanitizeFirestorePayload(material), { merge: true });
-    urlCheckCache = null;
+    addUrlToVerificationCache(material);
     await incrementMaterialsVersionInFirestore();
     return true;
   } catch (err) {
@@ -238,14 +238,33 @@ export async function saveMaterialToFirestore(material: MaterialItem): Promise<b
   }
 }
 
-// Request-level deduplication cache for URL checks
-let urlCheckCache: { data: MaterialItem[]; timestamp: number } | null = null;
-const URL_CHECK_CACHE_TTL_MS = 30_000; // 30 seconds
+// Session-level URL verification cache (normalizedKey -> { item, expiresAt })
+const urlVerificationCache = new Map<string, { item: MaterialItem | null; expiresAt: number }>();
+const VERIFICATION_CACHE_TTL_MS = 300_000; // 5 minutes
+
+/**
+ * Inserts a material URL into the verification cache so subsequent duplicate checks cost 0 reads.
+ */
+export function addUrlToVerificationCache(material: MaterialItem): void {
+  if (material?.url) {
+    const key = materialUrlKey(material.url);
+    if (key) {
+      urlVerificationCache.set(key, { item: material, expiresAt: Date.now() + VERIFICATION_CACHE_TTL_MS });
+    }
+  }
+}
+
+/**
+ * Clears the session-level URL verification cache.
+ */
+export function clearUrlVerificationCache(): void {
+  urlVerificationCache.clear();
+}
 
 /**
  * Checks a batch of URLs against existing materials in Firestore.
- * Returns a map of the input URL to the matched existing MaterialItem if found.
- * Uses request-level deduplication to avoid multiple full collection scans.
+ * Uses targeted point queries ('url' == or 'url' in) and session memoization
+ * to protect Firestore read quotas instead of scanning the full collection.
  */
 export async function checkUrlsBatchInFirestore(urls: string[], strict = false): Promise<Map<string, MaterialItem>> {
   const result = new Map<string, MaterialItem>();
@@ -253,28 +272,65 @@ export async function checkUrlsBatchInFirestore(urls: string[], strict = false):
 
   try {
     const now = Date.now();
-    if (strict || !urlCheckCache || now - urlCheckCache.timestamp > URL_CHECK_CACHE_TTL_MS) {
-      urlCheckCache = {
-        data: await fetchMaterialsFromFirestore(undefined, strict),
-        timestamp: now
-      };
-    }
+    const missingUrls: string[] = [];
 
-    const allMaterials = urlCheckCache.data;
-    const index = new Map<string, MaterialItem>();
-
-    for (const mat of allMaterials) {
-      if (mat.url) {
-        const norm = materialUrlKey(mat.url);
-        if (norm && !index.has(norm)) index.set(norm, mat);
-      }
-    }
-
+    // 1. Check in-memory session cache first (costs 0 Firestore reads)
     for (const rawUrl of urls) {
       if (!rawUrl) continue;
       const norm = materialUrlKey(rawUrl);
-      if (norm && index.has(norm)) {
-        result.set(rawUrl, index.get(norm)!);
+      if (!norm) continue;
+
+      const cached = urlVerificationCache.get(norm);
+      if (!strict && cached && now < cached.expiresAt) {
+        if (cached.item) {
+          result.set(rawUrl, cached.item);
+        }
+      } else {
+        missingUrls.push(rawUrl);
+      }
+    }
+
+    if (missingUrls.length === 0) {
+      return result;
+    }
+
+    const db = getFirestoreDb();
+    if (!db) return result;
+
+    // 2. Query Firestore using targeted queries in chunks of 30 (never scan full collection)
+    const materialsRef = collection(db, MATERIALS_COLLECTION);
+
+    for (let i = 0; i < missingUrls.length; i += 30) {
+      const chunk = missingUrls.slice(i, i + 30);
+      const q = chunk.length === 1
+        ? query(materialsRef, where('url', '==', chunk[0]), limit(1))
+        : query(materialsRef, where('url', 'in', chunk));
+
+      const snapshot = strict ? await getDocsFromServer(q) : await getDocs(q);
+      const matchedNorms = new Set<string>();
+
+      snapshot.forEach((docSnap) => {
+        const mat = docSnap.data() as MaterialItem;
+        if (mat?.url) {
+          const norm = materialUrlKey(mat.url);
+          if (norm) {
+            matchedNorms.add(norm);
+            urlVerificationCache.set(norm, { item: mat, expiresAt: now + VERIFICATION_CACHE_TTL_MS });
+            for (const inputUrl of chunk) {
+              if (materialUrlKey(inputUrl) === norm) {
+                result.set(inputUrl, mat);
+              }
+            }
+          }
+        }
+      });
+
+      // Cache non-matches as null so repeated checks cost 0 reads
+      for (const inputUrl of chunk) {
+        const norm = materialUrlKey(inputUrl);
+        if (norm && !matchedNorms.has(norm)) {
+          urlVerificationCache.set(norm, { item: null, expiresAt: now + VERIFICATION_CACHE_TTL_MS });
+        }
       }
     }
   } catch (err) {
@@ -287,6 +343,7 @@ export async function checkUrlsBatchInFirestore(urls: string[], strict = false):
 
 /**
  * Checks whether a single URL already exists in the Firestore materials collection.
+ * Uses targeted point query with limit(1) and session memoization.
  */
 export async function checkUrlExistsInFirestore(
   url: string

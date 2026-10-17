@@ -372,6 +372,12 @@ export interface TranslationsSchema {
     skipDuplicatesBtn: string;
     clearBulkBtn: string;
     addManualItemBtn: string;
+    lockPresets: string;
+    presetsNotice: string;
+    groupAsPlaylist: string;
+    quickAdd: string;
+    freshLink: string;
+    quickAddPlaceholder: string;
     duplicateWarning: string;
     duplicateBadge: string;
     newLinkBadge: string;
