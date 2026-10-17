@@ -28,12 +28,10 @@ import type { MaterialCollection } from '../types/collections';
 import type { UserProfile, UserRole } from '../types/profile';
 import { handleFirestoreError } from '../utils/firestoreErrors';
 import type {
-  ContributorDocument,
   SubmissionDocument,
   FeedbackDocument,
   AdminLogDocument
 } from './schema';
-import type { AuthorEntry } from '../types/contributors';
 import { normalizeResourceUrl } from '../utils/url';
 import { materialUrlKey } from '../utils/materialLinks';
 
@@ -690,11 +688,7 @@ export async function getUserContributions(usernameOrUid: string): Promise<Mater
         continue;
       }
 
-      // 2. Direct Username match (new username fields take priority)
-      if (mat.added_by_username && mat.added_by_username.toLowerCase().replace(/^@/, '') === target) {
-        contributions.push(mat);
-        continue;
-      }
+      // 2. Direct Username match
       if (mat.creator_username && mat.creator_username.toLowerCase().replace(/^@/, '') === target) {
         contributions.push(mat);
         continue;
@@ -702,22 +696,6 @@ export async function getUserContributions(usernameOrUid: string): Promise<Mater
       if (mat.contributorUsername && mat.contributorUsername.toLowerCase().replace(/^@/, '') === target) {
         contributions.push(mat);
         continue;
-      }
-
-      // 3. Exact match in addedBy array (no substring matching)
-      const addedByArr = Array.isArray(mat.addedBy)
-        ? mat.addedBy
-        : mat.addedBy
-          ? [mat.addedBy]
-          : [];
-
-      const matches = addedByArr.some((c) => {
-        const norm = c.toLowerCase().trim().replace(/^@/, '');
-        return norm === target;
-      });
-
-      if (matches) {
-        contributions.push(mat);
       }
     }
 
@@ -903,7 +881,6 @@ export async function deleteMaterialFromFirestore(
   }
 }
 
-const CONTRIBUTORS_COLLECTION = 'contributors';
 
 let cachedAdminUsers: { admins: UserProfile[]; expiresAt: number; limitCount: number } | null = null;
 const ADMIN_USERS_TTL_MS = 15 * 60 * 1000; // 15 minutes
@@ -984,105 +961,6 @@ export async function fetchAllUsernames(): Promise<Map<string, { displayName: st
   }
 }
 
-/**
- * Fetches all platform authors and contributor profiles from Firestore.
- */
-export async function fetchContributorsFromFirestore(): Promise<{
-  authors: AuthorEntry[];
-  contributorProfiles: Array<{
-    id: string;
-    name: string;
-    photo?: string;
-    note?: string;
-    noteEn?: string;
-    year?: number;
-    matchNames: string[];
-    contacts?: AuthorEntry['contacts'];
-  }>;
-}> {
-  const db = getFirestoreDb();
-  if (!db) return { authors: [], contributorProfiles: [] };
-
-  try {
-    const contribRef = collection(db, CONTRIBUTORS_COLLECTION);
-    const snapshot = await getDocs(contribRef);
-    const authors: AuthorEntry[] = [];
-    const contributorProfiles: Array<{
-      id: string;
-      name: string;
-      photo?: string;
-      note?: string;
-      noteEn?: string;
-      year?: number;
-      matchNames: string[];
-      contacts?: AuthorEntry['contacts'];
-    }> = [];
-
-    snapshot.forEach((docSnap) => {
-      const data = docSnap.data() as ContributorDocument;
-      if (data.kind === 'author') {
-        let badge = data.badge;
-        if (
-          badge &&
-          (badge.text?.toLowerCase().includes('owner') ||
-            badge.textAr?.includes('المالك') ||
-            data.id === 'mohammed-wael')
-        ) {
-          badge = undefined;
-        }
-
-        authors.push({
-          id: data.id || docSnap.id,
-          name: data.name,
-          role: data.role || '',
-          roleAr: data.roleAr,
-          adminRoleDescription: data.adminRoleDescription,
-          bio: data.bio,
-          bioEn: data.bioEn,
-          photo: data.photo,
-          order: data.order ?? 99,
-          badge,
-          matchNames: data.matchNames || [],
-          contacts: data.contacts,
-        });
-      } else {
-        contributorProfiles.push({
-          id: data.id || docSnap.id,
-          name: data.name,
-          photo: data.photo,
-          note: data.note,
-          noteEn: data.noteEn,
-          year: data.year,
-          matchNames: data.matchNames || [],
-          contacts: data.contacts,
-        });
-      }
-    });
-
-    authors.sort((a, b) => a.order - b.order);
-    return { authors, contributorProfiles };
-  } catch (err) {
-    console.warn('[Firestore] Failed to fetch contributors, falling back:', err);
-    return { authors: [], contributorProfiles: [] };
-  }
-}
-
-/**
- * Saves or updates a contributor document in Firestore.
- */
-export async function saveContributorToFirestore(contributor: ContributorDocument): Promise<boolean> {
-  const db = getFirestoreDb();
-  if (!db) return false;
-
-  try {
-    const docRef = doc(db, CONTRIBUTORS_COLLECTION, contributor.id);
-    await setDoc(docRef, sanitizeFirestorePayload(contributor), { merge: true });
-    return true;
-  } catch (err) {
-    console.error(`[Firestore] Failed to save contributor ${contributor.id}:`, err);
-    return false;
-  }
-}
 
 // ==============================================================================
 // 1. Material Submissions (Pure Firestore)

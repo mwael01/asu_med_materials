@@ -3,7 +3,6 @@ import type { MaterialItem } from '../../types/materials';
 import TypeBadge from './TypeBadge.astro';
 import { subjectToSlug } from '../../utils/slug';
 import { getMaterialEnglishTitle, getMaterialEnglishDesc } from '../../i18n/materialsTranslations';
-import { formatShortName } from '../../utils/format';
 import { isEmbeddableDocument, getDocumentViewerPath } from '../../utils/documentViewer';
 
 interface Props {
@@ -29,22 +28,6 @@ const displayedAuthorText = hasMoreThanMax
   ? rawAuthors.slice(0, maxVisible).join(', ') + '...'
   : rawAuthors.join(', ');
 const fullAuthorTooltip = rawAuthors.join(', ');
-
-// Normalize addedBy (contributor who added it to the website)
-const rawAddedBy: string[] = Array.isArray(material.addedBy)
-  ? material.addedBy
-  : material.addedBy
-    ? [material.addedBy]
-    : material.added_by_username
-      ? [`@${material.added_by_username}`]
-      : [];
-const displayedAddedByText = rawAddedBy
-  .slice(0, maxVisible)
-  .map((name) => formatShortName(name))
-  .join(', ');
-const fullAddedByTooltip = rawAddedBy.join(', ');
-const contributorProfileTarget = material.added_by_username || material.contributorUsername || rawAddedBy[0];
-const contributorProfileUrl = contributorProfileTarget ? `/profile?u=${encodeURIComponent(contributorProfileTarget)}` : undefined;
 
 const isPlaylist = material.type === 'playlist' || Boolean(material.playlistId) || Boolean(material.videos);
 const hasDocuments = Boolean(material.documents && material.documents.length > 0);
@@ -167,18 +150,6 @@ const targetAttr = isInternal ? '_self' : '_blank';
           title={fullAuthorTooltip}
         >
           <span>By:</span> {displayedAuthorText}
-        </span>
-      )}
-      {displayedAddedByText && (
-        <span
-          class="text-zinc-400 dark:text-zinc-500 truncate max-w-[150px]"
-          title={fullAddedByTooltip}
-        >
-          &bull; <span>Added by:</span> {contributorProfileUrl ? (
-            <a href={contributorProfileUrl} class="hover:text-emerald-600 dark:hover:text-emerald-400 hover:underline">{displayedAddedByText}</a>
-          ) : (
-            <span>{displayedAddedByText}</span>
-          )}
         </span>
       )}
     </div>

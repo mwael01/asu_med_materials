@@ -147,7 +147,6 @@ export const enTranslations: TranslationsSchema = {
     },
     card: {
       by: 'By:',
-      addedBy: 'Added by:',
       lecturesCount: '{n} lectures / videos',
       copyLink: 'Copy Link',
       save: 'Save',

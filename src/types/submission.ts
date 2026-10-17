@@ -22,7 +22,7 @@ export interface DetailedSubmission {
   moduleId?: string;
   subject?: string;
   author?: string; // Content creator / Doctor / Lecturer
-  addedBy?: string; // Student contributor
+  contributor?: string; // Student contributor name (optional)
   contributorUid?: string; // UID of user if logged in
   contributorUsername?: string; // Username of user if logged in
   description?: string;

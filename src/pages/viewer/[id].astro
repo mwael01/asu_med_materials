@@ -6,7 +6,6 @@ import { getMaterialById, getMaterialsByModule } from '../../data/materials';
 import { getModuleById } from '../../data/modules';
 import { subjectToSlug } from '../../utils/slug';
 import { getMaterialEnglishTitle, getMaterialEnglishDesc } from '../../i18n/materialsTranslations';
-import { formatShortName } from '../../utils/format';
 import {
   getDocumentEmbedUrl,
   getDocumentExternalUrl,
@@ -72,18 +71,6 @@ const rawAuthors = Array.isArray(material.author)
     ? [material.author]
     : [];
 const authorText = rawAuthors.join(', ');
-
-// AddedBy normalization (who contributed it to the platform)
-const rawAddedBy = Array.isArray(material.addedBy)
-  ? material.addedBy
-  : material.addedBy
-    ? [material.addedBy]
-    : material.added_by_username
-      ? [`@${material.added_by_username}`]
-      : [];
-const addedByText = rawAddedBy.map((n) => formatShortName(n)).join(', ');
-const contributorProfileTarget = material.added_by_username || material.contributorUsername || rawAddedBy[0];
-const contributorProfileUrl = contributorProfileTarget ? `/profile?u=${encodeURIComponent(contributorProfileTarget)}` : undefined;
 
 // Related materials in the same module / subject
 let relatedMaterials: typeof material[] = [];
@@ -188,16 +175,6 @@ const backFallbackUrl = material.moduleId
           {descEn && (
             <p class="text-xs sm:text-sm text-zinc-600 dark:text-zinc-400 leading-relaxed">
               {descEn}
-            </p>
-          )}
-
-          {addedByText && (
-            <p class="text-[11px] text-zinc-400 dark:text-zinc-500">
-              Added by: {contributorProfileUrl ? (
-                <a href={contributorProfileUrl} class="hover:text-emerald-600 dark:hover:text-emerald-400 underline">{addedByText}</a>
-              ) : (
-                <span>{addedByText}</span>
-              )}
             </p>
           )}
         </div>

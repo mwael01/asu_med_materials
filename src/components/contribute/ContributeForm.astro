@@ -289,7 +289,7 @@ const { modules } = Astro.props;
           title: title || undefined,
           year: year !== 'general' ? (Number(year) as any) : 'general',
           moduleId: moduleId !== 'general' ? moduleId : undefined,
-          addedBy: contributor || undefined,
+          contributor: contributor || undefined,
           contributorUid: user?.uid,
           contributorUsername: user?.username
         };

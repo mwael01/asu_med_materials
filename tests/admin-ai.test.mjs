@@ -29,8 +29,8 @@ test('bilingual fields and multiple authors survive parsing, staging and seriali
   const draft = createDraft(parsed,draftCredit(admin));
   const saved = serializeDraft(draft,modules);
   for (const key of ['title','titleEn','description','descriptionEn','author','tags']) assert.deepEqual(saved[key],item[key]);
-  assert.equal(saved.addedBy,'Admin'); assert.equal(saved.contributorUid,'admin-id');
-  assert.equal(saved.added_by_username,'admin');
+  assert.equal(saved.contributorUid,'admin-id');
+  assert.equal(saved.contributorUsername,'admin');
   const stagedSave = serializeDraft({...draft},modules);
   assert.deepEqual({...stagedSave,createdAt:undefined},{...saved,createdAt:undefined});
 });
@@ -38,7 +38,7 @@ test('student credit is independent of author and later admin/source changes', (
   const source = {sourceSubmissionId:'sub-a',contributor:'Student A',contributorUid:'student-a',contributorUsername:'student'};
   const draft = createDraft(parse([item])[0],draftCredit(admin,source)); source.contributor = 'Student B';
   const saved = serializeDraft(draft,modules);
-  assert.equal(saved.addedBy,'Student A'); assert.equal(saved.added_by_username,'student'); assert.equal(saved.contributorUid,'student-a');
+  assert.equal(saved.contributorUsername,'student'); assert.equal(saved.contributorUid,'student-a');
   assert.deepEqual(saved.author,item.author);
   assert.equal(draftCredit(admin,{sourceSubmissionId:'guest',contributor:'Guest'}).contributorUid,undefined);
 });

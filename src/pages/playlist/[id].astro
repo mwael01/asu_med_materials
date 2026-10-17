@@ -5,7 +5,6 @@ import { getPlaylistById } from '../../data/materials';
 import { getModuleById } from '../../data/modules';
 import { subjectToSlug } from '../../utils/slug';
 import { getMaterialEnglishTitle, getMaterialEnglishDesc } from '../../i18n/materialsTranslations';
-import { formatShortName } from '../../utils/format';
 import {
   parseVideoSource,
   determinePrimaryPlaylistSource,
@@ -34,19 +33,6 @@ const rawAuthors = Array.isArray(playlist.author)
     ? [playlist.author]
     : [];
 const authorText = rawAuthors.join('، ');
-
-// AddedBy normalization (who added it to the platform)
-const rawAddedBy = Array.isArray(playlist.addedBy)
-  ? playlist.addedBy
-  : playlist.addedBy
-    ? [playlist.addedBy]
-    : playlist.added_by_username
-      ? [`@${playlist.added_by_username}`]
-      : [];
-const addedByText = rawAddedBy.map((n) => formatShortName(n)).join('، ');
-const fullAddedByTooltip = rawAddedBy.join('، ');
-const contributorProfileTarget = playlist.added_by_username || playlist.contributorUsername || rawAddedBy[0];
-const contributorProfileUrl = contributorProfileTarget ? `/profile?u=${encodeURIComponent(contributorProfileTarget)}` : undefined;
 
 // Discrete videos setup
 const hasDiscreteVideos = Boolean(playlist.videos && playlist.videos.length > 0);
@@ -201,15 +187,6 @@ const initialTitle = hasDiscreteVideos ? videos[0].title : (titleEn || playlist.
           {authorText && (
             <p>
               <span>By:</span> <span class="text-zinc-800 dark:text-zinc-200 font-semibold">{authorText}</span>
-            </p>
-          )}
-          {addedByText && (
-            <p title={fullAddedByTooltip}>
-              <span>Added by:</span> {contributorProfileUrl ? (
-                <a href={contributorProfileUrl} class="text-zinc-800 dark:text-zinc-200 font-semibold hover:text-emerald-600 dark:hover:text-emerald-400 hover:underline">{addedByText}</a>
-              ) : (
-                <span class="text-zinc-800 dark:text-zinc-200 font-semibold">{addedByText}</span>
-              )}
             </p>
           )}
         </div>

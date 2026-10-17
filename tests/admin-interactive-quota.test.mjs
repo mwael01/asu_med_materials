@@ -37,7 +37,6 @@ test('Firestore read quota: in-memory cache memoization protects read quota', as
     year: 2,
     type: 'drive',
     category: 'summaries',
-    addedBy: 'Admin',
     createdAt: new Date().toISOString(),
   };
 
@@ -196,5 +195,4 @@ test('Playlist Grouping: combines individual video items into a cohesive playlis
   const serialized = serializeDraft(groupedPlaylistDraft, testModules);
   assert.equal(serialized.type, 'playlist');
   assert.equal(serialized.videos?.length, 2);
-  assert.equal(serialized.addedBy, 'Doctor Admin');
 });

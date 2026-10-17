@@ -53,7 +53,7 @@ export async function submitMaterial(payload: MaterialSubmission): Promise<Submi
 
     const cachedProfile = getCachedUserProfile();
     const contributorName =
-      (payload.mode === 'single' ? payload.addedBy : payload.contributor) ||
+      payload.contributor ||
       cachedProfile?.displayName ||
       cachedProfile?.username ||
       'فاعل خير';

@@ -33,7 +33,6 @@ export interface SearchDocument {
   descNorm: string;
   descEnNorm: string;
   authorNorm: string;
-  addedByNorm: string;
   videosNorm: string;
   subjectNorm: string;
   moduleNorm: string;
@@ -76,16 +75,6 @@ export function createSearchDocument(
     ? material.author.join(' ')
     : (material.author || '');
   const authorNorm = normalizeSearchText(rawAuthor);
-
-  // Added by (contributor name + username handle)
-  const rawAddedBy = Array.isArray(material.addedBy)
-    ? material.addedBy.join(' ')
-    : (material.addedBy || '');
-  const username = material.added_by_username || material.contributorUsername || '';
-  const rawContributor = username
-    ? `${rawAddedBy} ${username} @${username}`
-    : rawAddedBy;
-  const addedByNorm = normalizeSearchText(rawContributor);
 
   // Playlist video titles
   const rawVideos = material.videos && material.videos.length > 0
@@ -144,7 +133,6 @@ export function createSearchDocument(
     titleNorm,
     titleEnNorm,
     authorNorm,
-    addedByNorm,
     subjectNorm,
     moduleNorm,
     videosNorm,
@@ -166,7 +154,6 @@ export function createSearchDocument(
     descNorm,
     descEnNorm,
     authorNorm,
-    addedByNorm,
     videosNorm,
     subjectNorm,
     moduleNorm,
@@ -232,10 +219,6 @@ export function scoreSearchDocument(
     }
     if (tokenMatchesText(doc.videosNorm, t, stem, aliases)) {
       tokenScore += 40;
-      tokenMatched = true;
-    }
-    if (tokenMatchesText(doc.addedByNorm, t, stem, aliases)) {
-      tokenScore += 30;
       tokenMatched = true;
     }
     if (tokenMatchesText(doc.tagsNorm, t, stem, aliases)) {

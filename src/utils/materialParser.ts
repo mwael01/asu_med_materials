@@ -29,7 +29,6 @@ export interface ParseOptions {
   subject?: string;
   author?: string;
   contributor?: string;
-  addedBy?: string;
 }
 
 export function parseDumpText(rawText: string, options: ParseOptions = {}): MaterialItem[] {
@@ -77,7 +76,6 @@ export function parseDumpText(rawText: string, options: ParseOptions = {}): Mate
         moduleId: options.moduleId || 'year2-blood',
         subject: options.subject || 'عام',
         author: options.author || undefined,
-        addedBy: options.contributor || options.addedBy || 'فاعل خير',
         tags: [type, options.subject || 'عام'].filter(Boolean)
       });
     }

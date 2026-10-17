@@ -1,0 +1,64 @@
+---
+import Layout from '../layouts/Layout.astro';
+import AuthorCard from '../components/contributors/AuthorCard.astro';
+import { fetchAdminUsers } from '../firebase/firestore';
+import type { AuthorEntry, PersonContacts } from '../types/contributors';
+
+const adminUsers = await fetchAdminUsers(8);
+
+// Dynamic Core Team from website administrators (strictly limited to 8)
+const coreTeam: AuthorEntry[] = adminUsers.map((admin, idx) => {
+  const contacts: PersonContacts = {};
+  if (admin.contacts && Array.isArray(admin.contacts) && admin.contacts.length > 0) {
+    for (const c of admin.contacts) {
+      if (!c.url?.trim()) continue;
+      const key = c.platform as keyof PersonContacts;
+      if (!contacts[key]) contacts[key] = [];
+      contacts[key]!.push({
+        label: c.label,
+        value: c.url,
+        href: c.url,
+      });
+    }
+  }
+
+  return {
+    id: admin.uid,
+    name: admin.displayName || admin.username,
+    role: 'Admin',
+    roleAr: 'مسؤول المنصة',
+    adminRoleDescription: admin.adminRoleDescription || 'إدارة المنصة',
+    photo: admin.photoURL,
+    order: idx + 1,
+    contacts: Object.keys(contacts).length > 0 ? contacts : undefined,
+  };
+}).slice(0, 8);
+---
+
+<Layout
+  title="Core Team - ASU Med Materials"
+  description="Meet the core administrative team behind ASU Med Materials platform."
+>
+  <div class="mb-8 text-start">
+    <div class="flex items-center gap-2 text-xs text-zinc-500 dark:text-zinc-400 mb-2">
+      <a href="/?redirect=false" class="hover:text-emerald-600 dark:hover:text-emerald-400">Home</a>
+      <span>/</span>
+      <span class="text-zinc-900 dark:text-zinc-100 font-bold">Team</span>
+    </div>
+    <h1 class="text-2xl font-extrabold text-zinc-900 dark:text-zinc-100 mb-1">
+      Core Team
+    </h1>
+    <p class="text-xs text-zinc-500 dark:text-zinc-400">
+      The administration team managing and developing the ASU Med Materials platform.
+    </p>
+  </div>
+
+  <section aria-labelledby="core-team-heading">
+    <h2 id="core-team-heading" class="sr-only">Core Team Members</h2>
+    <div id="core-team-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+      {coreTeam.map((author) => (
+        <AuthorCard author={author} />
+      ))}
+    </div>
+  </section>
+</Layout>

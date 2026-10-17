@@ -7,7 +7,6 @@ import type {
 import type { MaterialItem, ModuleInfo, AcademicYear, ResourceType, MaterialCategory, PlaylistItem } from '../types/materials';
 import type { FlashcardCard, FlashcardDeck, FlashcardRevision } from '../types/flashcards';
 import type { UserProfile, UserRole } from '../types/profile';
-import type { PersonContacts } from '../types/contributors';
 
 /**
  * Canonical Cloud Firestore collection identifiers.
@@ -19,7 +18,6 @@ export const COLLECTIONS = {
   SUBMISSIONS: 'submissions',
   FEEDBACK: 'feedback',
   ADMIN_LOGS: 'admin_logs',
-  CONTRIBUTORS: 'contributors',
   FLASHCARD_DECKS: 'flashcard_decks',
   FLASHCARD_IMPORTS: 'flashcard_imports',
   MATERIALS_VERSION: 'materials_version'
@@ -51,10 +49,8 @@ export interface MaterialDocument {
   moduleId?: string;
   subject?: string;
   author?: string | string[];
-  addedBy?: string | string[];
   contributorUid?: string;
   contributorUsername?: string;
-  added_by_username?: string;
   creator_username?: string;
   tags: string[];
   createdAt?: string;
@@ -175,30 +171,6 @@ export interface AdminLogDocument {
   timestamp: string;
 }
 
-/**
- * 7. Contributor & Team Document Schema in Firestore
- */
-export interface ContributorDocument {
-  id: string;
-  kind: 'author' | 'contributorProfile';
-  name: string;
-  role?: string;
-  roleAr?: string;
-  adminRoleDescription?: string;
-  bio?: string;
-  bioEn?: string;
-  photo?: string;
-  order?: number;
-  badge?: {
-    text: string;
-    textAr?: string;
-  };
-  matchNames: string[];
-  contacts?: PersonContacts;
-  note?: string;
-  noteEn?: string;
-  year?: number;
-}
 
 /**
  * Firestore Data Converter for Material Documents.
@@ -218,10 +190,8 @@ export const materialConverter: FirestoreDataConverter<MaterialItem> = {
       moduleId: material.moduleId || null,
       subject: material.subject || null,
       author: material.author || null,
-      addedBy: material.addedBy || null,
       contributorUid: material.contributorUid || null,
       contributorUsername: material.contributorUsername || null,
-      added_by_username: material.added_by_username || null,
       creator_username: material.creator_username || null,
       tags: Array.isArray(material.tags) ? material.tags : [],
       createdAt: material.createdAt || new Date().toISOString(),
@@ -249,10 +219,8 @@ export const materialConverter: FirestoreDataConverter<MaterialItem> = {
       moduleId: data.moduleId || undefined,
       subject: data.subject || undefined,
       author: data.author || undefined,
-      addedBy: data.addedBy || undefined,
       contributorUid: data.contributorUid || undefined,
       contributorUsername: data.contributorUsername || undefined,
-      added_by_username: data.added_by_username || undefined,
       creator_username: data.creator_username || undefined,
       tags: Array.isArray(data.tags) ? data.tags : [],
       createdAt: data.createdAt || undefined,
@@ -380,55 +348,6 @@ export const submissionConverter: FirestoreDataConverter<SubmissionDocument> = {
   }
 };
 
-/**
- * Firestore Data Converter for Contributor Documents.
- */
-export const contributorConverter: FirestoreDataConverter<ContributorDocument> = {
-  toFirestore(c: ContributorDocument): DocumentData {
-    return {
-      id: c.id,
-      kind: c.kind,
-      name: c.name,
-      role: c.role || null,
-      roleAr: c.roleAr || null,
-      adminRoleDescription: c.adminRoleDescription || null,
-      bio: c.bio || null,
-      bioEn: c.bioEn || null,
-      photo: c.photo || null,
-      order: c.order ?? null,
-      badge: c.badge || null,
-      matchNames: Array.isArray(c.matchNames) ? c.matchNames : [],
-      contacts: c.contacts || null,
-      note: c.note || null,
-      noteEn: c.noteEn || null,
-      year: c.year ?? null,
-    };
-  },
-  fromFirestore(
-    snapshot: QueryDocumentSnapshot,
-    options?: SnapshotOptions
-  ): ContributorDocument {
-    const data = snapshot.data(options);
-    return {
-      id: data.id || snapshot.id,
-      kind: data.kind || 'contributorProfile',
-      name: data.name || '',
-      role: data.role || undefined,
-      roleAr: data.roleAr || undefined,
-      adminRoleDescription: data.adminRoleDescription || undefined,
-      bio: data.bio || undefined,
-      bioEn: data.bioEn || undefined,
-      photo: data.photo || undefined,
-      order: data.order ?? undefined,
-      badge: data.badge || undefined,
-      matchNames: Array.isArray(data.matchNames) ? data.matchNames : [],
-      contacts: data.contacts || undefined,
-      note: data.note || undefined,
-      noteEn: data.noteEn || undefined,
-      year: data.year ?? undefined,
-    };
-  }
-};
 
 /**
  * Firestore Data Converter for Feedback Documents.

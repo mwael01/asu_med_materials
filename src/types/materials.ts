@@ -68,10 +68,8 @@ export interface MaterialItem {
   semester?: 1 | 2;
   subject?: string;
   author?: string | string[]; // Creator / Doctor / Teacher who prepared the materials
-  addedBy?: string | string[]; // Contributor / Student who added it to the platform
   contributorUid?: string; // Firebase Auth UID of the contributing user
   contributorUsername?: string; // Username handle of the contributing user
-  added_by_username?: string; // Username of the person who added the material
   creator_username?: string; // Username of the content creator (if they have a profile)
   tags: string[];
   createdAt?: string;

@@ -37,13 +37,13 @@ const isYear = (y: number) => currentPath.startsWith(`/year/${y}`);
       ))}
 
       <a
-        href="/contributors"
+        href="/team"
         class:list={[
           'px-2.5 py-1 rounded-md transition-colors',
-          currentPath === '/contributors' ? 'text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/50 font-bold' : 'text-zinc-600 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800'
+          currentPath === '/team' ? 'text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/50 font-bold' : 'text-zinc-600 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800'
         ]}
       >
-        Contributors
+        Team
       </a>
       <a
         href="/contribute"

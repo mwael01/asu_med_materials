@@ -4,7 +4,7 @@ import { parseDumpText } from '../../utils/materialParser';
 export const POST: APIRoute = async ({ request }) => {
   try {
     const body = await request.json();
-    const { text, year, moduleId, subject, author, addedBy } = body;
+    const { text, year, moduleId, subject, author, contributor } = body;
 
     if (!text) {
       return new Response(
@@ -13,7 +13,7 @@ export const POST: APIRoute = async ({ request }) => {
       );
     }
 
-    const items = parseDumpText(text, { year, moduleId, subject, author, addedBy });
+    const items = parseDumpText(text, { year, moduleId, subject, author, contributor });
     return new Response(
       JSON.stringify({ items }),
       { status: 200, headers: { 'Content-Type': 'application/json' } }

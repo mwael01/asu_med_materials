@@ -135,7 +135,6 @@ export interface TranslationsSchema {
   };
   card: {
     by: string; // "By:" / "إعداد:"
-    addedBy: string; // "Added by:" / "مساهمة:"
     lecturesCount: string; // "{n} lectures / videos" / "{n} فيديوهات / محاضرات"
     copyLink: string;
     save: string;

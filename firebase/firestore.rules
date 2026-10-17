@@ -112,13 +112,6 @@ service cloud.firestore {
       allow write: if isAdmin();
     }
 
-    // =========================================================================
-    // 7. Contributors & Team
-    // =========================================================================
-    match /contributors/{contributorId} {
-      allow read: if true;
-      allow write: if isAdmin();
-    }
 
     // =========================================================================
     // 8. Flashcard Decks & Revisions

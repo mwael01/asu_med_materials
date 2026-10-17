@@ -13,7 +13,7 @@ export const onRequest = defineMiddleware(async (context, next) => {
     });
   }
   const path = context.url.pathname;
-  const publicPage = path === '/' || path === '/search' || path === '/contributors'
+  const publicPage = path === '/' || path === '/search' || path === '/team' || path === '/contributors'
     || /^\/(year|module|playlist|flashcards)\//.test(path);
   if (context.request.method === 'GET' && publicPage && response.status === 200
     && !context.request.headers.has('authorization')
