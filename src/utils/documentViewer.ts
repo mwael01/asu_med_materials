@@ -1,4 +1,4 @@
-import type { MaterialItem } from '../types/materials';
+import type { DocumentItem, MaterialItem } from '../types/materials';
 
 /**
  * Extracts a Google Drive file ID from view/preview/open/uc/edit URLs.
@@ -22,11 +22,45 @@ export function extractDriveDocumentId(url?: string): string | null {
 }
 
 /**
+ * Checks if a material contains multiple grouped discrete documents.
+ */
+export function hasDiscreteDocuments(material?: MaterialItem | null): boolean {
+  return Boolean(material && Array.isArray(material.documents) && material.documents.length > 0);
+}
+
+/**
+ * Resolves discrete document items for a material, falling back to primary URL if singular.
+ */
+export function resolveDocumentItems(material?: MaterialItem | null): DocumentItem[] {
+  if (!material) return [];
+  if (hasDiscreteDocuments(material)) {
+    return material.documents || [];
+  }
+  if (material.url) {
+    return [
+      {
+        id: material.id || 'primary_doc',
+        title: material.title || 'Document',
+        url: material.url,
+        type: material.type,
+      },
+    ];
+  }
+  return [];
+}
+
+/**
  * Checks if a material or URL points to an embeddable document (Google Drive file or direct PDF).
  */
 export function isEmbeddableDocument(urlOrMaterial?: string | MaterialItem | null): boolean {
   if (!urlOrMaterial) return false;
-  const url = typeof urlOrMaterial === 'string' ? urlOrMaterial : urlOrMaterial.url;
+  if (typeof urlOrMaterial !== 'string') {
+    if (hasDiscreteDocuments(urlOrMaterial)) {
+      return (urlOrMaterial.documents || []).some((doc) => isEmbeddableDocument(doc.url));
+    }
+    return isEmbeddableDocument(urlOrMaterial.url);
+  }
+  const url = urlOrMaterial;
   if (!url) return false;
 
   if (extractDriveDocumentId(url)) return true;

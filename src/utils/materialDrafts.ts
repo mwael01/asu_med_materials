@@ -27,6 +27,9 @@ export function validateDraft(draft: ParsedAIMaterial, modules: ModuleInfo[]): R
   for (const video of draft.videos || []) {
     if (!video.title.trim() || !(video.youtubeId && /^[\w-]{11}$/.test(video.youtubeId) || video.url && isHttpUrl(video.url))) add('videos', 'Complete each video title and link');
   }
+  for (const doc of draft.documents || []) {
+    if (!doc.title?.trim() || !doc.url || !isHttpUrl(doc.url)) add('documents', 'Complete each document title and link');
+  }
   return issues;
 }
 export function serializeDraft(draft: MaterialDraft, modules: ModuleInfo[]): MaterialItem {
@@ -55,6 +58,7 @@ export function serializeDraft(draft: MaterialDraft, modules: ModuleInfo[]): Mat
     added_by_username: draft.contributorUsername,
     playlistId: draft.type === 'playlist' ? new URL(draft.url).searchParams.get('list') || draft.playlistId : undefined,
     videos: draft.type === 'playlist' ? draft.videos : undefined,
+    documents: draft.documents && draft.documents.length > 0 ? draft.documents : undefined,
     createdAt: new Date().toISOString(),
   };
 }

@@ -10,6 +10,7 @@ import {
 import type { DraftCredit, MaterialDraft } from '../../types/ai';
 import type {
   AcademicYear,
+  DocumentItem,
   MaterialCategory,
   ModuleInfo,
   PlaylistItem,
@@ -814,6 +815,123 @@ export function initDirectMaterialForm(): void {
         lang(
           `تم تجميع ${selected.length} عناصر في قائمة تشغيل واحدة بنجاح!`,
           `Grouped ${selected.length} items into a cohesive playlist!`
+        ),
+        'success'
+      );
+    };
+  }
+
+  // --- "Group Selected as Bundle / Pack" Toolbar Action ---
+  const groupBundleBtn = get<HTMLButtonElement>('admin-bulk-group-bundle-btn');
+  if (groupBundleBtn) {
+    groupBundleBtn.onclick = () => {
+      const selected = staged.filter((d) => d.selected);
+      if (selected.length < 2) {
+        showToast(
+          lang('حدد مادتين أو أكثر لتجميعهما كحزمة دراسية واحدة', 'Select 2 or more items to group as a study bundle/pack'),
+          'info'
+        );
+        return;
+      }
+
+      const documents: DocumentItem[] = [];
+      for (const d of selected) {
+        if (d.documents && d.documents.length > 0) {
+          documents.push(...d.documents);
+        } else if (d.url) {
+          documents.push({
+            id: crypto.randomUUID(),
+            title: d.title || `Document ${documents.length + 1}`,
+            url: d.url,
+            type: d.type || 'drive',
+          });
+        }
+      }
+
+      if (documents.length === 0) {
+        showToast(
+          lang('لم يتم العثور على مستندات صالحة في العناصر المحددة', 'No valid documents found in selected items'),
+          'error'
+        );
+        return;
+      }
+
+      const first = selected[0];
+      const subjectStr = presets.subject || first.subject || '';
+      const authorStr =
+        presets.author ||
+        (Array.isArray(first.author) && first.author.length
+          ? first.author.join('، ')
+          : typeof first.author === 'string'
+            ? first.author
+            : '');
+
+      // Determine appropriate category (practical, exams, summaries, etc.)
+      const catCount: Record<string, number> = {};
+      selected.forEach((d) => {
+        const cat = d.category || 'summaries';
+        catCount[cat] = (catCount[cat] || 0) + 1;
+      });
+      let dominantCategory: MaterialCategory = 'summaries';
+      let maxCount = 0;
+      for (const [c, count] of Object.entries(catCount)) {
+        if (count > maxCount) {
+          maxCount = count;
+          dominantCategory = c as MaterialCategory;
+        }
+      }
+
+      const packKind =
+        dominantCategory === 'practical'
+          ? lang('حزمة عملي', 'Practical Pack')
+          : dominantCategory === 'exams'
+            ? lang('حزمة امتحانات وريكول', 'Finals Exam Pack')
+            : lang('حزمة مذكرات', 'Study Bundle');
+
+      const defaultTitle =
+        [subjectStr, authorStr, packKind].filter(Boolean).join(' - ') || 'Study Bundle Pack';
+
+      const promptRes = window.prompt(lang('أدخل عنوان الحزمة الدراسية المجمعة:', 'Enter study pack title:'), defaultTitle);
+      const bundleTitle = promptRes != null && promptRes.trim() ? promptRes.trim() : defaultTitle;
+
+      const bundleDraft = createDraft(
+        {
+          title: bundleTitle,
+          titleEn: first.titleEn,
+          url: first.url || documents[0]?.url || '',
+          type: first.type === 'drive' || first.type === 'summary' || first.type === 'exam' ? first.type : 'drive',
+          category: presets.locked ? first.category || dominantCategory : dominantCategory,
+          year: presets.locked && presets.year ? presets.year : first.year,
+          moduleId: presets.locked && presets.moduleId ? presets.moduleId : first.moduleId,
+          subject: subjectStr,
+          author: authorStr
+            ? authorStr
+                .split(/[,،]/)
+                .map((s: string) => s.trim())
+                .filter(Boolean)
+            : Array.isArray(first.author)
+              ? first.author
+              : [],
+          documents,
+        },
+        draftCredit(getCachedUserProfile(), {
+          contributor: first.contributor,
+          contributorUid: first.contributorUid,
+          contributorUsername: first.contributorUsername,
+          sourceSubmissionId: first.sourceSubmissionId || source?.sourceSubmissionId,
+        })
+      );
+      bundleDraft.selected = true;
+
+      // Replace selected items with the new bundle draft
+      staged = staged.filter((d) => !selected.includes(d));
+      staged.unshift(bundleDraft);
+      renderStaged();
+
+      showToast(
+        lang(
+          `تم تجميع ${selected.length} عناصر في حزمة دراسية واحدة بنجاح!`,
+          `Grouped ${selected.length} items into a cohesive study pack!`
         ),
         'success'
       );

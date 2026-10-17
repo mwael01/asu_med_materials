@@ -1,4 +1,4 @@
-import type { AcademicYear, MaterialCategory, PlaylistItem, ResourceType } from './materials';
+import type { AcademicYear, DocumentItem, MaterialCategory, PlaylistItem, ResourceType } from './materials';
 
 export interface LinkMetadata {
   url: string;
@@ -27,6 +27,7 @@ export interface ParsedAIMaterial {
   tags: string[];
   playlistId?: string;
   videos?: PlaylistItem[];
+  documents?: DocumentItem[];
   issues?: ReviewIssue[];
 }
 export interface ExtractionResult {

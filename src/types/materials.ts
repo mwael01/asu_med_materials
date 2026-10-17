@@ -25,6 +25,13 @@ export interface PlaylistItem {
   sourceType?: VideoSourceType;
 }
 
+export interface DocumentItem {
+  id: string;
+  title: string;
+  url: string;
+  type?: ResourceType;
+}
+
 export type MaterialCategory =
   | 'central'      // درايفات وقنوات الدفعة المركزية
   | 'lectures'     // محاضرات وشروحات الفيديو
@@ -71,6 +78,7 @@ export interface MaterialItem {
   playlistId?: string; // YouTube playlist ID if applicable
   flashcardDeckId?: string;
   videos?: PlaylistItem[]; // Individual videos for multi-part video series
+  documents?: DocumentItem[]; // Individual documents for multi-file study bundles
   bookmarksCount?: number; // Total number of students who bookmarked/loved this material
 }
 
