@@ -1,0 +1,89 @@
+---
+import type { MaterialItem, ModuleInfo } from '../../types/materials';
+import ResourceCard from './ResourceCard.astro';
+
+interface Props {
+  module: ModuleInfo;
+  materials: MaterialItem[];
+}
+
+const { module, materials } = Astro.props;
+---
+
+<div
+  class="module-saved-shelf space-y-4"
+  data-saved-shelf-module={module.id}
+>
+  <!-- Shelf Header -->
+  <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 pb-2.5 border-b border-zinc-200/80 dark:border-zinc-800">
+    <div class="flex items-center gap-2">
+      <div class="w-7 h-7 rounded-lg bg-amber-50 dark:bg-amber-950/40 text-amber-500 flex items-center justify-center shrink-0">
+        <svg class="w-4 h-4 fill-amber-500" viewBox="0 0 24 24">
+          <path d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
+        </svg>
+      </div>
+
+      <h3 class="text-xs font-bold uppercase tracking-wider text-zinc-500 dark:text-zinc-400 flex items-center gap-2">
+        <span>Saved Resources</span>
+        <span class="module-saved-count text-[11px] font-bold px-2 py-0.2 rounded-full bg-amber-100 dark:bg-amber-950/60 text-amber-700 dark:text-amber-400">
+          0
+        </span>
+      </h3>
+    </div>
+
+    <div class="flex items-center gap-2">
+      <button
+        type="button"
+        class="shelf-completed-toggle inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-lg border transition-all cursor-pointer bg-emerald-50 text-emerald-700 border-emerald-200/80 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-800/60"
+        aria-pressed="true"
+      >
+        <span class="shelf-toggle-dot w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+        <span class="shelf-toggle-text">Hide Completed</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Cards Grid -->
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 module-saved-grid">
+    {materials.map((item) => (
+      <div
+        data-saved-card-id={item.id}
+        data-saved-card-module={module.id}
+        class="module-saved-card-wrapper hidden"
+      >
+        <ResourceCard material={item} showYear={false} />
+      </div>
+    ))}
+  </div>
+
+  <!-- Shelf Empty State: When no resources in this module are bookmarked -->
+  <div class="module-saved-empty hidden py-8 text-center border border-dashed border-zinc-200 dark:border-zinc-800 rounded-2xl p-6 bg-white dark:bg-zinc-900/60">
+    <div class="w-10 h-10 mx-auto rounded-full bg-amber-50 dark:bg-amber-950/40 text-amber-500 flex items-center justify-center mb-2">
+      <svg class="w-5 h-5 fill-amber-500" viewBox="0 0 24 24">
+        <path d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
+      </svg>
+    </div>
+    <h4 class="text-xs sm:text-sm font-bold text-zinc-800 dark:text-zinc-200 mb-1">
+      No saved resources in {module.title} yet
+    </h4>
+    <p class="text-xs text-zinc-500 dark:text-zinc-400 max-w-sm mx-auto mb-3">
+      Click the bookmark icon on any material to pin it here for quick access during your study sessions.
+    </p>
+    <a
+      href={`/module/${module.id}`}
+      class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-600 text-white hover:bg-emerald-700 text-xs font-bold transition-colors shadow-2xs"
+    >
+      <span>Browse {module.title} Resources</span>
+      <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+      </svg>
+    </a>
+  </div>
+
+  <!-- Filter Empty State: When all saved items are marked completed and hidden -->
+  <div class="module-saved-filter-empty hidden py-6 text-center border border-dashed border-zinc-200 dark:border-zinc-800 rounded-2xl p-4 bg-white dark:bg-zinc-900/60">
+    <p class="text-xs font-bold text-zinc-700 dark:text-zinc-300">
+      All saved resources in {module.title} are completed!
+    </p>
+  </div>
+</div>

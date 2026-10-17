@@ -1,6 +1,6 @@
 ---
 import Layout from '../../../layouts/Layout.astro';
-import GroupedResourceList from '../../../components/materials/GroupedResourceList.astro';
+import TeacherGroupedMaterials from '../../../components/materials/TeacherGroupedMaterials.astro';
 import FilterToolbar from '../../../components/search/FilterToolbar.astro';
 import SubjectBar from '../../../components/materials/SubjectBar.astro';
 import { getModuleById } from '../../../data/modules';
@@ -111,7 +111,11 @@ for (const sub of module.subjects) {
 
     {subjectMaterials.length > 0 ? (
       <div id="module-materials-container">
-        <GroupedResourceList materials={subjectMaterials} />
+        <TeacherGroupedMaterials materials={subjectMaterials} />
+
+        <div id="filter-empty-state" class="hidden py-12 text-center border border-dashed border-zinc-200 dark:border-zinc-800 rounded-2xl p-8 bg-white dark:bg-zinc-900/60 my-6">
+          <p class="text-xs text-zinc-500 dark:text-zinc-400">No resources match the selected filter.</p>
+        </div>
       </div>
     ) : (
       <div class="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl p-8 text-center my-6">
@@ -143,8 +147,9 @@ for (const sub of module.subjects) {
 <script>
   function initModuleFilters(): void {
     const chips = document.querySelectorAll('.filter-chip');
-    const cards = document.querySelectorAll('#module-materials-container [data-material-id]');
-    const sections = document.querySelectorAll('.material-group-section');
+    const cards = document.querySelectorAll<HTMLElement>('#module-materials-container .teacher-material-card-wrapper');
+    const sections = document.querySelectorAll<HTMLElement>('#module-materials-container .teacher-group-section');
+    const emptyNotice = document.getElementById('filter-empty-state');
 
     chips.forEach((chip) => {
       chip.addEventListener('click', () => {
@@ -159,18 +164,25 @@ for (const sub of module.subjects) {
 
         cards.forEach((cardEl) => {
           if (!selectedType || selectedType === 'all') {
-            (cardEl as HTMLElement).style.display = '';
+            cardEl.style.display = '';
           } else {
             const cardType = cardEl.getAttribute('data-material-type') || '';
             const matches = cardType === selectedType || (selectedType === 'youtube' && cardType === 'playlist');
-            (cardEl as HTMLElement).style.display = matches ? '' : 'none';
+            cardEl.style.display = matches ? '' : 'none';
           }
         });
 
+        let anyVisible = false;
         sections.forEach((sec) => {
-          const visibleCards = sec.querySelectorAll('[data-material-id]:not([style*="display: none"])');
-          (sec as HTMLElement).style.display = visibleCards.length > 0 ? '' : 'none';
+          const visibleCards = sec.querySelectorAll('.teacher-material-card-wrapper:not([style*="display: none"])');
+          const isVisible = visibleCards.length > 0;
+          sec.style.display = isVisible ? '' : 'none';
+          if (isVisible) anyVisible = true;
         });
+
+        if (emptyNotice) {
+          emptyNotice.classList.toggle('hidden', anyVisible);
+        }
       });
     });
   }
