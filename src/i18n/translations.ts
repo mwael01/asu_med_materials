@@ -269,7 +269,12 @@ export const translations: Record<SupportedLanguage, TranslationsSchema> = {
       prevVideo: 'الفيديو السابق',
       nextVideo: 'الفيديو التالي',
       lecturePrefix: 'محاضرة',
-      resetConfirm: 'هل تريد بالتأكيد إعادة ضبط سجل المشاهدة لهذه القائمة؟'
+      resetConfirm: 'هل تريد بالتأكيد إعادة ضبط سجل المشاهدة لهذه القائمة؟',
+      externalNotice: 'هذا الفيديو مستضاف على منصة خارجية. اضغط لفتحه ومتابعته، وحدده هنا كمكتمل لمتابعة دراستك.',
+      openIn: 'افتح في {source}',
+      openTelegram: 'افتح في تيليجرام',
+      openDrive: 'افتح في Google Drive',
+      openExternal: 'فتح الفيديو'
     },
     flashcards: {
       breadcrumbHome: 'الرئيسية',
@@ -711,7 +716,12 @@ export const translations: Record<SupportedLanguage, TranslationsSchema> = {
       prevVideo: 'Previous Video',
       nextVideo: 'Next Video',
       lecturePrefix: 'Lecture',
-      resetConfirm: 'Are you sure you want to reset watch progress for this playlist?'
+      resetConfirm: 'Are you sure you want to reset watch progress for this playlist?',
+      externalNotice: 'This video is hosted externally. Click below to open and watch, then mark it completed to track your progress.',
+      openIn: 'Open in {source}',
+      openTelegram: 'Open in Telegram',
+      openDrive: 'Open in Google Drive',
+      openExternal: 'Open Video'
     },
     flashcards: {
       breadcrumbHome: 'Home',

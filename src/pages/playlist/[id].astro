@@ -6,15 +6,20 @@ import { getModuleById } from '../../data/modules';
 import { subjectToSlug } from '../../utils/slug';
 import { getMaterialEnglishTitle, getMaterialEnglishDesc } from '../../i18n/materialsTranslations';
 import { formatShortName } from '../../utils/format';
+import {
+  parseVideoSource,
+  determinePrimaryPlaylistSource,
+  type ParsedVideoSource
+} from '../../utils/videoSources';
 
 const { id } = Astro.params;
 if (!id) {
-  return Astro.redirect('/playlists');
+  return Astro.redirect('/?redirect=false');
 }
 
 const playlist = await getPlaylistById(id);
 if (!playlist) {
-  return Astro.redirect('/playlists');
+  return Astro.redirect('/?redirect=false');
 }
 
 const moduleInfo = playlist.moduleId ? await getModuleById(playlist.moduleId) : undefined;
@@ -43,19 +48,47 @@ const fullAddedByTooltip = rawAddedBy.join('، ');
 const contributorProfileTarget = playlist.added_by_username || playlist.contributorUsername || rawAddedBy[0];
 const contributorProfileUrl = contributorProfileTarget ? `/profile?u=${encodeURIComponent(contributorProfileTarget)}` : undefined;
 
-// Initial video setup:
-// If has discrete videos, initial video is first video
+// Discrete videos setup
 const hasDiscreteVideos = Boolean(playlist.videos && playlist.videos.length > 0);
 const videos = playlist.videos || [];
 
-// Initial embed source:
-// If discrete videos: https://www.youtube-nocookie.com/embed/{firstVideoId}
-// If playlistId: https://www.youtube-nocookie.com/embed/videoseries?list={playlistId}
-const initialEmbedUrl = hasDiscreteVideos
-  ? `https://www.youtube-nocookie.com/embed/${videos[0].youtubeId}?rel=0&enablejsapi=1&playsinline=1`
-  : playlist.playlistId
-    ? `https://www.youtube-nocookie.com/embed/videoseries?list=${playlist.playlistId}&rel=0&enablejsapi=1&playsinline=1`
-    : playlist.url;
+// Parse all video items with multi-source video resolver
+const parsedVideos: ParsedVideoSource[] = videos.map((v) =>
+  parseVideoSource(v.url, v.youtubeId, v.sourceType)
+);
+
+// Determine initial video playback state
+let initialParsed: ParsedVideoSource;
+if (hasDiscreteVideos) {
+  initialParsed = parsedVideos[0];
+} else if (playlist.playlistId) {
+  initialParsed = {
+    sourceType: 'youtube',
+    embedType: 'iframe',
+    embedUrl: `https://www.youtube-nocookie.com/embed/videoseries?list=${playlist.playlistId}&rel=0&enablejsapi=1&playsinline=1`,
+    externalUrl: `https://www.youtube.com/playlist?list=${playlist.playlistId}`,
+    sourceLabelEn: 'YouTube',
+    sourceLabelAr: 'يوتيوب',
+    icon: '/icons/youtube.svg'
+  };
+} else {
+  initialParsed = parseVideoSource(playlist.url);
+}
+
+// Determine dominant source type for top badge
+const dominantSource = determinePrimaryPlaylistSource(playlist);
+const primaryBadgeType =
+  playlist.type !== 'playlist'
+    ? playlist.type
+    : dominantSource === 'youtube'
+      ? 'youtube'
+      : dominantSource === 'drive'
+        ? 'drive'
+        : dominantSource === 'telegram'
+          ? 'telegram'
+          : 'playlist';
+
+const initialTitle = hasDiscreteVideos ? videos[0].title : (titleEn || playlist.title);
 ---
 
 <Layout
@@ -103,7 +136,7 @@ const initialEmbedUrl = hasDiscreteVideos
     <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
       <div>
         <div class="flex flex-wrap items-center gap-2 mb-2">
-          <TypeBadge type="youtube" size="sm" />
+          <TypeBadge type={primaryBadgeType} size="sm" />
           {playlist.subject && (
             <span class="text-xs font-semibold px-2 py-0.5 rounded bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300">
               {playlist.subject}
@@ -237,22 +270,86 @@ const initialEmbedUrl = hasDiscreteVideos
     <div class="lg:col-span-8 space-y-4">
       <!-- Player Container (Responsive 16:9) -->
       <div class="relative w-full aspect-video rounded-2xl overflow-hidden bg-black shadow-lg border border-zinc-800">
+        <!-- 1. Iframe Embed (YouTube, Google Drive preview, Vimeo) -->
         <iframe
-          id="yt-embed-player"
-          src={initialEmbedUrl}
-          title={titleEn || playlist.title}
-          class="w-full h-full border-0"
-          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+          id="embed-iframe-player"
+          src={initialParsed.embedType === 'iframe' ? initialParsed.embedUrl : undefined}
+          title={initialTitle}
+          class:list={['w-full h-full border-0', initialParsed.embedType !== 'iframe' && 'hidden']}
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen"
           allowfullscreen
         ></iframe>
+
+        <!-- 2. Native HTML5 Video Player (Direct MP4, WebM) -->
+        <video
+          id="embed-video-player"
+          controls
+          playsinline
+          class:list={['w-full h-full object-contain bg-black', initialParsed.embedType !== 'video' && 'hidden']}
+          src={initialParsed.embedType === 'video' && initialParsed.embedUrl ? initialParsed.embedUrl : undefined}
+        ></video>
+
+        <!-- 3. External Fallback Action Card (Telegram, External / Non-embeddable links) -->
+        <div
+          id="embed-external-card"
+          class:list={[
+            'w-full h-full flex flex-col items-center justify-center p-6 text-center bg-gradient-to-br from-zinc-900 via-zinc-900 to-zinc-800 text-white select-none',
+            initialParsed.embedType !== 'none' && 'hidden'
+          ]}
+        >
+          <!-- Source Provider Badge -->
+          <div class="mb-3 inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-zinc-800/90 border border-zinc-700/80 text-zinc-200">
+            <img id="external-card-source-icon" src={initialParsed.icon} alt="" class="w-4 h-4 object-contain" />
+            <span id="external-card-source-name">{initialParsed.sourceLabelEn}</span>
+          </div>
+
+          <!-- Video Title -->
+          <h3 id="external-card-title" class="text-base sm:text-lg font-bold text-zinc-100 max-w-lg mb-2 line-clamp-2 leading-snug">
+            {initialTitle}
+          </h3>
+
+          <!-- Explanatory note -->
+          <p id="external-card-desc" class="text-xs sm:text-sm text-zinc-400 max-w-md mb-5 leading-relaxed" data-i18n="playlists.externalNotice">
+            This video is hosted externally. Click below to open and watch, then mark it completed to track your progress.
+          </p>
+
+          <!-- Buttons -->
+          <div class="flex flex-wrap items-center justify-center gap-3">
+            <a
+              id="external-card-action-btn"
+              href={initialParsed.externalUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-sm shadow-md transition-all active:scale-95 cursor-pointer"
+            >
+              <span id="external-card-btn-text">
+                {initialParsed.sourceType === 'telegram' ? 'Open in Telegram' : `Open in ${initialParsed.sourceLabelEn}`}
+              </span>
+              <svg class="w-4 h-4 rtl:rotate-180 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
+              </svg>
+            </a>
+
+            <button
+              type="button"
+              id="external-card-done-btn"
+              class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-zinc-700 bg-zinc-800/80 hover:bg-zinc-700/80 text-zinc-200 font-semibold text-sm transition-all active:scale-95 cursor-pointer"
+            >
+              <svg class="w-4 h-4 text-emerald-400 checkmark-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+              </svg>
+              <span id="external-card-done-text" data-i18n="playlists.markCompleted">Mark Completed</span>
+            </button>
+          </div>
+        </div>
       </div>
 
       <!-- Player Controls & Current Playing Bar -->
       <div class="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-start">
-        <div class="flex items-center gap-2.5">
-          <span class="w-2.5 h-2.5 rounded-full bg-red-600 shrink-0"></span>
+        <div class="flex items-center gap-2.5 min-w-0">
+          <span id="current-source-dot" class="w-2.5 h-2.5 rounded-full bg-emerald-500 shrink-0"></span>
           <h2 id="current-video-title" class="text-sm font-bold text-zinc-900 dark:text-zinc-100 truncate max-w-md">
-            {hasDiscreteVideos ? videos[0].title : (titleEn || playlist.title)}
+            {initialTitle}
           </h2>
         </div>
 
@@ -269,18 +366,17 @@ const initialEmbedUrl = hasDiscreteVideos
             <span id="toggle-done-text" data-i18n="playlists.markCompleted">Mark as Completed</span>
           </button>
 
-          <!-- External YouTube Link -->
+          <!-- Dynamic External Link (Adapts to YouTube, Google Drive, Telegram, Direct, External) -->
           <a
-            href={playlist.url}
+            id="current-video-external-btn"
+            href={initialParsed.externalUrl}
             target="_blank"
             rel="noopener noreferrer"
-            class="inline-flex items-center gap-1 text-xs font-medium px-3 py-1.5 rounded-lg border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors"
-            title="Open in YouTube"
+            class="inline-flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-lg border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors"
+            title={`Open on ${initialParsed.sourceLabelEn}`}
           >
-            <svg class="w-3.5 h-3.5 text-red-600" fill="currentColor" viewBox="0 0 24 24">
-              <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
-            </svg>
-            <span>YouTube</span>
+            <img id="current-source-icon" src={initialParsed.icon} alt="" class="w-3.5 h-3.5 object-contain" />
+            <span id="current-source-name">{initialParsed.sourceLabelEn}</span>
           </a>
         </div>
       </div>
@@ -325,50 +421,70 @@ const initialEmbedUrl = hasDiscreteVideos
       <!-- Items List -->
       <div class="space-y-2 max-h-[550px] overflow-y-auto pr-1" id="playlist-items-list">
         {hasDiscreteVideos ? (
-          videos.map((vid, idx) => (
-            <div
-              class="playlist-video-item group flex items-start justify-between gap-3 p-3 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50/70 dark:bg-zinc-800/40 hover:border-emerald-500/80 transition-all cursor-pointer select-none"
-              data-index={idx}
-              data-video-id={vid.id}
-              data-youtube-id={vid.youtubeId}
-              data-title={vid.title}
-            >
-              <!-- Video Title & Number (Clicking opens and plays the video) -->
-              <div class="video-select-trigger flex items-start gap-2.5 min-w-0 flex-1">
-                <span class="video-idx-badge w-6 h-6 rounded-md bg-zinc-200 dark:bg-zinc-700 text-zinc-700 dark:text-zinc-300 font-bold text-xs flex items-center justify-center shrink-0 mt-0.5 transition-colors">
-                  {idx + 1}
-                </span>
-                <div class="min-w-0 flex-1">
-                  <h4
-                    class="video-title text-xs font-bold text-zinc-900 dark:text-zinc-100 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 line-clamp-2 leading-relaxed transition-colors"
-                    title={vid.title}
-                  >
-                    {vid.title}
-                  </h4>
-                  <div class="now-playing-badge hidden items-center gap-1 text-[10px] font-bold text-emerald-600 dark:text-emerald-400 mt-1">
-                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                    <span data-i18n="playlists.nowPlaying">Now Playing</span>
+          videos.map((vid, idx) => {
+            const parsed = parsedVideos[idx];
+            return (
+              <div
+                class="playlist-video-item group flex items-start justify-between gap-3 p-3 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50/70 dark:bg-zinc-800/40 hover:border-emerald-500/80 transition-all cursor-pointer select-none"
+                data-index={idx}
+                data-video-id={vid.id}
+                data-youtube-id={vid.youtubeId || ''}
+                data-url={vid.url || ''}
+                data-source-type={parsed.sourceType}
+                data-embed-type={parsed.embedType}
+                data-embed-url={parsed.embedUrl || ''}
+                data-external-url={parsed.externalUrl}
+                data-source-label={parsed.sourceLabelEn}
+                data-source-label-ar={parsed.sourceLabelAr}
+                data-source-icon={parsed.icon}
+                data-title={vid.title}
+              >
+                <!-- Video Title & Number (Clicking opens and plays the video) -->
+                <div class="video-select-trigger flex items-start gap-2.5 min-w-0 flex-1">
+                  <span class="video-idx-badge w-6 h-6 rounded-md bg-zinc-200 dark:bg-zinc-700 text-zinc-700 dark:text-zinc-300 font-bold text-xs flex items-center justify-center shrink-0 mt-0.5 transition-colors">
+                    {idx + 1}
+                  </span>
+                  <div class="min-w-0 flex-1">
+                    <div class="flex items-center gap-1.5 mb-0.5">
+                      <h4
+                        class="video-title text-xs font-bold text-zinc-900 dark:text-zinc-100 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 line-clamp-2 leading-relaxed transition-colors flex-1"
+                        title={vid.title}
+                      >
+                        {vid.title}
+                      </h4>
+                      <img
+                        src={parsed.icon}
+                        alt={parsed.sourceLabelEn}
+                        title={parsed.sourceLabelEn}
+                        class="w-3.5 h-3.5 shrink-0 opacity-70 group-hover:opacity-100 transition-opacity"
+                        loading="lazy"
+                      />
+                    </div>
+                    <div class="now-playing-badge hidden items-center gap-1 text-[10px] font-bold text-emerald-600 dark:text-emerald-400 mt-1">
+                      <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                      <span data-i18n="playlists.nowPlaying">Now Playing</span>
+                    </div>
                   </div>
                 </div>
-              </div>
 
-              <!-- Done Checkbox (Clicking marks complete) -->
-              <button
-                type="button"
-                role="checkbox"
-                aria-checked="false"
-                class="video-done-checkbox w-6 h-6 rounded-md border border-zinc-300 dark:border-zinc-600 hover:border-emerald-500 flex items-center justify-center text-white transition-all shrink-0 cursor-pointer mt-0.5 focus:outline-none focus:ring-2 focus:ring-emerald-500/30"
-                data-video-id={vid.id}
-                title="Mark as completed"
-                data-i18n-attr="title:playlists.markCompleted"
-                aria-label={`Mark ${vid.title} as completed`}
-              >
-                <svg class="w-3.5 h-3.5 hidden checkmark-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
-                </svg>
-              </button>
-            </div>
-          ))
+                <!-- Done Checkbox (Clicking marks complete) -->
+                <button
+                  type="button"
+                  role="checkbox"
+                  aria-checked="false"
+                  class="video-done-checkbox w-6 h-6 rounded-md border border-zinc-300 dark:border-zinc-600 hover:border-emerald-500 flex items-center justify-center text-white transition-all shrink-0 cursor-pointer mt-0.5 focus:outline-none focus:ring-2 focus:ring-emerald-500/30"
+                  data-video-id={vid.id}
+                  title="Mark as completed"
+                  data-i18n-attr="title:playlists.markCompleted"
+                  aria-label={`Mark ${vid.title} as completed`}
+                >
+                  <svg class="w-3.5 h-3.5 hidden checkmark-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                  </svg>
+                </button>
+              </div>
+            );
+          })
         ) : (
           // Pre-populated Checkpoint items for Full Playlists (e.g. Dr. Nagi, Wahdan, Faten)
           Array.from({ length: 8 }).map((_, idx) => (
@@ -418,8 +534,22 @@ const initialEmbedUrl = hasDiscreteVideos
       if (saved) watchedMap = JSON.parse(saved);
     } catch {}
 
-    const playerIframe = document.getElementById('yt-embed-player');
+    const playerIframe = document.getElementById('embed-iframe-player');
+    const playerVideo = document.getElementById('embed-video-player');
+    const externalCard = document.getElementById('embed-external-card');
+    const extCardTitle = document.getElementById('external-card-title');
+    const extCardActionBtn = document.getElementById('external-card-action-btn');
+    const extCardBtnText = document.getElementById('external-card-btn-text');
+    const extCardSourceIcon = document.getElementById('external-card-source-icon');
+    const extCardSourceName = document.getElementById('external-card-source-name');
+    const extCardDoneBtn = document.getElementById('external-card-done-btn');
+    const extCardDoneText = document.getElementById('external-card-done-text');
+
     const currentTitleEl = document.getElementById('current-video-title');
+    const currentSourceIcon = document.getElementById('current-source-icon');
+    const currentSourceName = document.getElementById('current-source-name');
+    const currentExternalBtn = document.getElementById('current-video-external-btn');
+
     const progressBarFill = document.getElementById('progress-bar-fill');
     const progressPercentLabel = document.getElementById('progress-percent-label');
     const progressCountLabel = document.getElementById('progress-count-label');
@@ -481,20 +611,29 @@ const initialEmbedUrl = hasDiscreteVideos
         }
       });
 
-      // Update current playing toggle button
+      // Update current playing toggle button & card done button
       if (hasDiscreteVideos && videoItems.length > 0) {
         const currentId = videoItems[currentIndex]?.getAttribute('data-video-id');
         const isCurrentDone = Boolean(watchedMap[currentId]);
-        if (toggleDoneText) {
-          toggleDoneText.textContent = isCurrentDone
-            ? (isEn ? 'Completed ✓' : 'مكتمل ✓')
-            : (isEn ? 'Mark Completed' : 'تحديد كمكتمل');
-        }
+        const doneString = isCurrentDone
+          ? (isEn ? 'Completed ✓' : 'مكتمل ✓')
+          : (isEn ? 'Mark Completed' : 'تحديد كمكتمل');
+
+        if (toggleDoneText) toggleDoneText.textContent = doneString;
+        if (extCardDoneText) extCardDoneText.textContent = doneString;
+
         if (toggleCurrentDoneBtn) {
           if (isCurrentDone) {
             toggleCurrentDoneBtn.classList.add('bg-emerald-700');
           } else {
             toggleCurrentDoneBtn.classList.remove('bg-emerald-700');
+          }
+        }
+        if (extCardDoneBtn) {
+          if (isCurrentDone) {
+            extCardDoneBtn.classList.add('bg-emerald-700/80', 'border-emerald-600');
+          } else {
+            extCardDoneBtn.classList.remove('bg-emerald-700/80', 'border-emerald-600');
           }
         }
       } else {
@@ -508,27 +647,91 @@ const initialEmbedUrl = hasDiscreteVideos
       }
     }
 
-    function switchVideo(idx) {
+    function switchVideo(idx, userInitiated = false) {
       if (idx < 0 || idx >= videoItems.length) return;
       currentIndex = idx;
       const activeItem = videoItems[idx];
-      const ytId = activeItem.getAttribute('data-youtube-id');
-      const title = activeItem.getAttribute('data-title');
+      const embedType = activeItem.getAttribute('data-embed-type') || 'none';
+      const embedUrl = activeItem.getAttribute('data-embed-url') || '';
+      const externalUrl = activeItem.getAttribute('data-external-url') || '';
+      const sourceType = activeItem.getAttribute('data-source-type') || 'external';
+      const title = activeItem.getAttribute('data-title') || '';
+      const isEn = document.documentElement.lang === 'en';
+      const sourceLabel = isEn
+        ? activeItem.getAttribute('data-source-label') || 'Video Source'
+        : activeItem.getAttribute('data-source-label-ar') || 'مصدر الفيديو';
+      const sourceIcon = activeItem.getAttribute('data-source-icon') || '/icons/other.svg';
 
-      if (playerIframe && ytId) {
-        playerIframe.src = `https://www.youtube-nocookie.com/embed/${ytId}?autoplay=1&rel=0&enablejsapi=1&playsinline=1`;
+      // 1. Hide / stop players that are not active
+      if (embedType !== 'iframe') {
+        if (playerIframe) {
+          playerIframe.classList.add('hidden');
+          playerIframe.src = 'about:blank';
+        }
       }
-      if (currentTitleEl && title) {
-        currentTitleEl.textContent = title;
+      if (embedType !== 'video') {
+        if (playerVideo) {
+          playerVideo.classList.add('hidden');
+          try {
+            playerVideo.pause();
+          } catch {}
+          playerVideo.src = '';
+        }
       }
+      if (embedType !== 'none') {
+        if (externalCard) {
+          externalCard.classList.add('hidden');
+        }
+      }
+
+      // 2. Activate the corresponding player
+      if (embedType === 'iframe' && playerIframe) {
+        playerIframe.classList.remove('hidden');
+        let targetSrc = embedUrl;
+        if (userInitiated && sourceType === 'youtube' && !targetSrc.includes('autoplay=1')) {
+          targetSrc += (targetSrc.includes('?') ? '&' : '?') + 'autoplay=1';
+        }
+        if (playerIframe.src !== targetSrc) {
+          playerIframe.src = targetSrc;
+        }
+      } else if (embedType === 'video' && playerVideo) {
+        playerVideo.classList.remove('hidden');
+        if (playerVideo.src !== embedUrl) {
+          playerVideo.src = embedUrl;
+          if (userInitiated) {
+            playerVideo.play().catch(() => {});
+          }
+        }
+      } else if (embedType === 'none' && externalCard) {
+        externalCard.classList.remove('hidden');
+        if (extCardTitle) extCardTitle.textContent = title;
+        if (extCardActionBtn) extCardActionBtn.href = externalUrl;
+        if (extCardSourceIcon) extCardSourceIcon.src = sourceIcon;
+        if (extCardSourceName) extCardSourceName.textContent = sourceLabel;
+        if (extCardBtnText) {
+          extCardBtnText.textContent =
+            sourceType === 'telegram'
+              ? (isEn ? 'Open in Telegram' : 'افتح في تيليجرام')
+              : (isEn ? `Open on ${sourceLabel}` : `افتح في ${sourceLabel}`);
+        }
+      }
+
+      // 3. Update current playing bar metadata
+      if (currentTitleEl) currentTitleEl.textContent = title;
+      if (currentSourceIcon) currentSourceIcon.src = sourceIcon;
+      if (currentSourceName) currentSourceName.textContent = sourceLabel;
+      if (currentExternalBtn) {
+        currentExternalBtn.href = externalUrl;
+        currentExternalBtn.title = isEn ? `Open on ${sourceLabel}` : `فتح على ${sourceLabel}`;
+      }
+
       if (stepperLabel) {
-        const isEn = document.documentElement.lang === 'en';
         stepperLabel.textContent = isEn
           ? `${idx + 1} of ${videoItems.length}`
           : `${idx + 1} من ${videoItems.length}`;
       }
 
-      // Highlight active in list
+      // 4. Update tracklist sidebar active states
       videoItems.forEach((item, i) => {
         const badge = item.querySelector('.video-idx-badge');
         const nowPlaying = item.querySelector('.now-playing-badge');
@@ -567,10 +770,9 @@ const initialEmbedUrl = hasDiscreteVideos
     // Attach click events to video items in multipart
     videoItems.forEach((item) => {
       item.addEventListener('click', (e) => {
-        // If clicking directly on checkbox, only toggle checkbox
         if (e.target.closest('.video-done-checkbox')) return;
         const idx = parseInt(item.getAttribute('data-index') || '0', 10);
-        switchVideo(idx);
+        switchVideo(idx, true);
       });
     });
 
@@ -613,8 +815,8 @@ const initialEmbedUrl = hasDiscreteVideos
       });
     });
 
-    // Toggle current done button
-    toggleCurrentDoneBtn?.addEventListener('click', () => {
+    // Toggle current done button & external card done button
+    function toggleCurrentVideo() {
       if (hasDiscreteVideos) {
         const currentId = videoItems[currentIndex]?.getAttribute('data-video-id');
         if (currentId) {
@@ -622,14 +824,16 @@ const initialEmbedUrl = hasDiscreteVideos
           saveState();
         }
       } else {
-        // Toggle all checkpoints
         const anyUnchecked = Object.values(watchedMap).filter(Boolean).length < totalItemsCount;
         for (let i = 1; i <= totalItemsCount; i++) {
           watchedMap[`chk-${playlistId}-${i}`] = anyUnchecked;
         }
         saveState();
       }
-    });
+    }
+
+    toggleCurrentDoneBtn?.addEventListener('click', toggleCurrentVideo);
+    extCardDoneBtn?.addEventListener('click', toggleCurrentVideo);
 
     // Mark all done
     markAllDoneBtn?.addEventListener('click', () => {
@@ -659,23 +863,20 @@ const initialEmbedUrl = hasDiscreteVideos
     });
 
     // Steppers
-    prevBtn?.addEventListener('click', () => switchVideo(currentIndex - 1));
-    nextBtn?.addEventListener('click', () => switchVideo(currentIndex + 1));
+    prevBtn?.addEventListener('click', () => switchVideo(currentIndex - 1, true));
+    nextBtn?.addEventListener('click', () => switchVideo(currentIndex + 1, true));
 
     // React to language toggle
     window.addEventListener('asumed-language-changed', () => {
       updateProgressUI();
-      if (stepperLabel && videoItems.length > 0) {
-        const isEn = document.documentElement.lang === 'en';
-        stepperLabel.textContent = isEn
-          ? `${currentIndex + 1} of ${videoItems.length}`
-          : `${currentIndex + 1} من ${videoItems.length}`;
+      if (videoItems.length > 0) {
+        switchVideo(currentIndex, false);
       }
     });
 
     // Initialize first video highlight & progress
     if (hasDiscreteVideos && videoItems.length > 0) {
-      switchVideo(0);
+      switchVideo(0, false);
     } else {
       updateProgressUI();
     }

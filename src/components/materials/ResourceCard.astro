@@ -62,7 +62,7 @@ const targetAttr = isInternal ? '_self' : '_blank';
   <div>
     <!-- Top Metadata Header — z-20 sits above the stretched link (z-0) -->
     <div class="flex items-center justify-between gap-2 mb-2.5 relative z-20">
-      <TypeBadge type={material.type === 'playlist' ? 'youtube' : material.type} size="sm" />
+      <TypeBadge type={material.type} size="sm" />
 
       <div class="flex items-center gap-2 relative z-30">
         {showYear && (

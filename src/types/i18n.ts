@@ -257,6 +257,11 @@ export interface TranslationsSchema {
     nextVideo: string;
     lecturePrefix: string;
     resetConfirm: string;
+    externalNotice: string;
+    openIn: string;
+    openTelegram: string;
+    openDrive: string;
+    openExternal: string;
   };
   flashcards?: {
     breadcrumbHome: string;

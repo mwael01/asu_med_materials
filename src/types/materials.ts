@@ -13,12 +13,16 @@ export type ResourceType =
   | 'website'
   | 'other';
 
+export type VideoSourceType = 'youtube' | 'drive' | 'direct' | 'vimeo' | 'telegram' | 'external';
+export type VideoEmbedType = 'iframe' | 'video' | 'none';
+
 export interface PlaylistItem {
   id: string;
   title: string;
   youtubeId?: string;
   url?: string;
   duration?: string;
+  sourceType?: VideoSourceType;
 }
 
 export type MaterialCategory =
