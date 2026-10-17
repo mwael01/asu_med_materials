@@ -94,8 +94,8 @@ test('getSearchSuggestions correctly categorizes playlists and videos vs materia
   const summaryItem = res.otherMaterials.find((i) => i.id === 'summary-wahdan-notes');
   assert.ok(summaryItem, 'Expected summary-wahdan-notes in otherMaterials');
   assert.equal(summaryItem.isPlaylist, false);
-  assert.equal(summaryItem.url, 'https://drive.google.com/file/d/summary1');
-  assert.equal(summaryItem.target, '_blank');
+  assert.equal(summaryItem.url, '/viewer/summary-wahdan-notes');
+  assert.equal(summaryItem.target, '_self');
 });
 
 test('getSearchSuggestions supports Arabic doctor aliases and slang', async () => {

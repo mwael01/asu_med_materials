@@ -6,6 +6,7 @@ import {
   type SearchDocument
 } from './search';
 import { getClientMaterials } from './catalogueClient';
+import { isEmbeddableDocument, getDocumentViewerPath } from './documentViewer';
 
 export interface SearchSuggestionItem {
   id: string;
@@ -75,6 +76,9 @@ export function prefetchSearchIndex(): void {
 function resolveItemLink(material: MaterialItem, isPlaylist: boolean): { url: string; target: '_self' | '_blank' } {
   if (isPlaylist) {
     return { url: `/playlist/${material.id}`, target: '_self' };
+  }
+  if (isEmbeddableDocument(material.url)) {
+    return { url: getDocumentViewerPath(material.id), target: '_self' };
   }
   const isInternal =
     material.type === 'flashcards' ||

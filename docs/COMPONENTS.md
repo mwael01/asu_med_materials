@@ -74,7 +74,7 @@ This document details all UI components, their props, intended reuse guidelines,
 
 #### [`ResourceCard.astro`](file:///workspaces/asu_med_materials/src/components/materials/ResourceCard.astro)
 - **Location**: `src/components/materials/ResourceCard.astro`
-- **Purpose**: Fast, minimalist card that functions as a single clickable link opening the resource in a new tab.
+- **Purpose**: Fast, minimalist card that functions as a single clickable link opening external resources in a new tab, or routing playlists to `/playlist/[id]` and Drive PDF documents to the in-app document viewer at `/viewer/[id]`.
 - **Interactivity**:
   - Uses an accessible body-scoped link pattern (`<div class="relative group/body"><a href={material.url}><span class="absolute inset-0"></span>...</a></div>`) strictly bounded to the title and description, guaranteeing that the top action header and footer tags are completely separated from the link hit target.
   - Title shows a visible underline on hover and active click (`group-hover/body:underline underline-offset-4 decoration-emerald-500`) with smooth transition feedback.

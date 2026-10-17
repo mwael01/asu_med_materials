@@ -112,6 +112,7 @@
   import { t } from '../../utils/i18n';
   import { escapeHtml } from '../../utils/sanitize';
   import { getClientMaterials } from '../../utils/catalogueClient';
+  import { isEmbeddableDocument, getDocumentViewerPath } from '../../utils/documentViewer';
   import type { MaterialItem, ModuleInfo } from '../../types/materials';
 
   let drawerAbort: AbortController | undefined;
@@ -385,8 +386,10 @@
             const isStudied = studiedIds.includes(item.id);
             const titleText = item.titleEn || getMaterialEnglishTitle(item.id, item.title);
             const typeLabel = t(`types.${item.type}`);
-            const targetUrl = item.type === 'playlist' || item.playlistId ? `/playlist/${item.id}` : item.url;
-            const targetAttr = item.type === 'playlist' || item.playlistId ? '_self' : '_blank';
+            const isPl = item.type === 'playlist' || Boolean(item.playlistId);
+            const isDoc = isEmbeddableDocument(item.url);
+            const targetUrl = isPl ? `/playlist/${item.id}` : isDoc ? getDocumentViewerPath(item.id) : item.url;
+            const targetAttr = isPl || isDoc ? '_self' : '_blank';
 
             hierarchyHtml += `
               <div class="p-2.5 bg-zinc-50/80 dark:bg-zinc-800/50 hover:bg-zinc-100/90 dark:hover:bg-zinc-800 border border-zinc-200/80 dark:border-zinc-700/60 rounded-xl flex items-center justify-between gap-2.5 transition-all text-start group">

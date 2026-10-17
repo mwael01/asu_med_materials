@@ -64,6 +64,7 @@ asu_med_materials/
 │   │   ├── module/[id]/[subject].astro # Dedicated module subject page
 │   │   ├── playlists.astro      # Video playlists index & tracker
 │   │   ├── playlist/[id].astro  # Integrated video playlist player & curriculum checkpoint viewer
+│   │   ├── viewer/[id].astro    # In-app embedded Google Drive PDF & document reader
 │   │   ├── search.astro         # Global search & multi-filter explorer
 │   │   ├── contribute.astro     # Contribution guide & automatic submission form
 │   │   ├── feedback.astro       # Student feedback, issue reporting & suggestions
@@ -78,6 +79,7 @@ asu_med_materials/
 │   │   └── contributors.ts      # Author, contributor profile, contact, and stats types
 │   └── utils/                   # Shared pure TypeScript helper functions
 │       ├── contributors.ts      # Contributor stats aggregation + initials fallback
+│       ├── documentViewer.ts    # Drive file detection, preview URL generator, and embed routing
 │       ├── feedback.ts          # Feedback submission API client
 │       ├── filter.ts            # Search and filter matching logic
 │       ├── i18n.ts              # Language manager, DOM translation binding & reactivity
@@ -229,6 +231,12 @@ export interface MaterialItem {
    - **Security & Environment Architecture**:
      - Client-exposed variables strictly prefixed with `PUBLIC_FIREBASE_*` in `.env.local` and documented in `.env.example`.
      - Security rules version-controlled under `firebase/firestore.rules` and `firebase/storage.rules`.
+
+11. **In-App Embedded Google Drive & Document Viewer (`/viewer/[id]`)**:
+    - **In-App PDF Reading**: Eliminates external tab bouncing for Google Drive summaries, revision notes, textbooks, and past exams by rendering an embedded preview (`https://drive.google.com/file/d/{id}/preview` and Google Docs Viewer).
+    - **Folder Separation**: Preserves external Google Drive routing (`_blank`) for central batch drives and drive folders (`/drive/folders/...`), while routing discrete document files to the in-app viewer.
+    - **Study Workflow Integration**: Includes integrated Done/Studied toggle, Bookmark button, Share/Copy Link, and an always-accessible "Open in Google Drive" button for downloading or copying.
+    - **Cross-Platform Fullscreen**: Implements fixed viewport overlay expansion supporting distraction-free reading across iOS Safari, Android, iPad, and desktop browsers.
 
 ---
 

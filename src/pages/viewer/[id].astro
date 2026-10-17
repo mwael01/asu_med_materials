@@ -1,0 +1,492 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import TypeBadge from '../../components/materials/TypeBadge.astro';
+import ResourceCard from '../../components/materials/ResourceCard.astro';
+import { getMaterialById, getMaterialsByModule } from '../../data/materials';
+import { getModuleById } from '../../data/modules';
+import { subjectToSlug } from '../../utils/slug';
+import { getMaterialEnglishTitle, getMaterialEnglishDesc } from '../../i18n/materialsTranslations';
+import { formatShortName } from '../../utils/format';
+import {
+  getDocumentEmbedUrl,
+  getDocumentExternalUrl
+} from '../../utils/documentViewer';
+
+const { id } = Astro.params;
+if (!id) {
+  return Astro.redirect('/?redirect=false');
+}
+
+const material = await getMaterialById(id);
+if (!material) {
+  return Astro.redirect('/?redirect=false');
+}
+
+// Redirect playlists to the dedicated playlist player
+if (material.type === 'playlist' || material.playlistId || (material.videos && material.videos.length > 0)) {
+  return Astro.redirect(`/playlist/${material.id}`);
+}
+
+// If material is not embeddable (e.g. Drive folder or Telegram link), redirect to the direct URL
+const embedUrl = getDocumentEmbedUrl(material.url);
+if (!embedUrl) {
+  return Astro.redirect(material.url);
+}
+
+const externalUrl = getDocumentExternalUrl(material.url);
+const moduleInfo = material.moduleId ? await getModuleById(material.moduleId) : undefined;
+
+const titleEn = material.titleEn || getMaterialEnglishTitle(material.id, material.title);
+const descEn = material.descriptionEn || (material.description ? getMaterialEnglishDesc(material.id, material.description) : undefined);
+
+// Authors list normalization (who prepared the material)
+const rawAuthors = Array.isArray(material.author)
+  ? material.author
+  : material.author
+    ? [material.author]
+    : [];
+const authorText = rawAuthors.join(', ');
+
+// AddedBy normalization (who contributed it to the platform)
+const rawAddedBy = Array.isArray(material.addedBy)
+  ? material.addedBy
+  : material.addedBy
+    ? [material.addedBy]
+    : material.added_by_username
+      ? [`@${material.added_by_username}`]
+      : [];
+const addedByText = rawAddedBy.map((n) => formatShortName(n)).join(', ');
+const contributorProfileTarget = material.added_by_username || material.contributorUsername || rawAddedBy[0];
+const contributorProfileUrl = contributorProfileTarget ? `/profile?u=${encodeURIComponent(contributorProfileTarget)}` : undefined;
+
+// Related materials in the same module / subject
+let relatedMaterials: typeof material[] = [];
+if (material.moduleId) {
+  const moduleMaterials = await getMaterialsByModule(material.moduleId);
+  relatedMaterials = moduleMaterials
+    .filter((m) => m.id !== material.id)
+    .sort((a, b) => {
+      // Prioritize same subject
+      if (a.subject === material.subject && b.subject !== material.subject) return -1;
+      if (b.subject === material.subject && a.subject !== material.subject) return 1;
+      return 0;
+    })
+    .slice(0, 3);
+}
+
+const backFallbackUrl = material.moduleId
+  ? material.subject
+    ? `/module/${material.moduleId}/${subjectToSlug(material.subject)}`
+    : `/module/${material.moduleId}`
+  : `/year/${material.year}`;
+---
+
+<Layout
+  title={`${titleEn} | Document Viewer | ASU Med Materials`}
+  description={descEn || `Read and study ${titleEn} online on ASU Med Materials.`}
+>
+  <div class="max-w-6xl mx-auto px-4 sm:px-6 py-6 space-y-6">
+    <!-- Breadcrumbs & Back Navigation -->
+    <nav class="flex items-center justify-between text-xs text-zinc-500 dark:text-zinc-400">
+      <div class="flex items-center gap-1.5 flex-wrap">
+        <a href="/" class="hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">Home</a>
+        <span>&gt;</span>
+        <a href={`/year/${material.year}`} class="hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">
+          Year {material.year}
+        </a>
+        {moduleInfo && (
+          <>
+            <span>&gt;</span>
+            <a href={`/module/${moduleInfo.id}`} class="hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">
+              {moduleInfo.title}
+            </a>
+          </>
+        )}
+        {material.subject && moduleInfo && (
+          <>
+            <span>&gt;</span>
+            <a
+              href={`/module/${moduleInfo.id}/${subjectToSlug(material.subject)}`}
+              class="hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors"
+            >
+              {material.subject}
+            </a>
+          </>
+        )}
+        <span>&gt;</span>
+        <span class="text-zinc-800 dark:text-zinc-200 font-semibold truncate max-w-[200px] sm:max-w-[320px]">
+          {titleEn}
+        </span>
+      </div>
+
+      <button
+        type="button"
+        id="viewer-back-btn"
+        data-fallback={backFallbackUrl}
+        class="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-semibold rounded-lg bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-zinc-700 dark:text-zinc-300 transition-colors cursor-pointer shrink-0"
+        title="Go back"
+      >
+        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
+        </svg>
+        <span>Back</span>
+      </button>
+    </nav>
+
+    <!-- Document Info Card & Actions Header -->
+    <header class="bg-white dark:bg-zinc-900 border border-zinc-200/80 dark:border-zinc-800 rounded-2xl p-4 sm:p-5 shadow-xs space-y-4">
+      <div class="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
+        <!-- Title and Badges -->
+        <div class="space-y-2 min-w-0 flex-1">
+          <div class="flex items-center gap-2 flex-wrap">
+            <TypeBadge type={material.type} size="sm" />
+            <span class="text-[11px] font-semibold px-2 py-0.5 rounded bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400">
+              Year {material.year}
+            </span>
+            {material.subject && (
+              <span class="text-[11px] font-semibold px-2 py-0.5 rounded bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300">
+                {material.subject}
+              </span>
+            )}
+            {authorText && (
+              <span class="text-[11px] text-zinc-500 dark:text-zinc-400">
+                By: <strong class="text-zinc-700 dark:text-zinc-300">{authorText}</strong>
+              </span>
+            )}
+          </div>
+
+          <h1 class="text-lg sm:text-2xl font-extrabold text-zinc-900 dark:text-zinc-100 leading-snug">
+            {titleEn}
+          </h1>
+
+          {descEn && (
+            <p class="text-xs sm:text-sm text-zinc-600 dark:text-zinc-400 leading-relaxed">
+              {descEn}
+            </p>
+          )}
+
+          {addedByText && (
+            <p class="text-[11px] text-zinc-400 dark:text-zinc-500">
+              Added by: {contributorProfileUrl ? (
+                <a href={contributorProfileUrl} class="hover:text-emerald-600 dark:hover:text-emerald-400 underline">{addedByText}</a>
+              ) : (
+                <span>{addedByText}</span>
+              )}
+            </p>
+          )}
+        </div>
+
+        <!-- Action Toolbar -->
+        <div class="flex items-center gap-2 shrink-0 flex-wrap">
+          <!-- Mark as Studied Button -->
+          <button
+            type="button"
+            class="studied-btn inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-semibold transition-all cursor-pointer shadow-2xs border-zinc-200/80 dark:border-zinc-800 bg-white dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 hover:border-emerald-500"
+            data-id={material.id}
+            role="checkbox"
+            aria-checked="false"
+            title="Mark as studied"
+            aria-label="Mark as studied"
+          >
+            <span class="studied-box w-4 h-4 rounded border-2 border-zinc-300 dark:border-zinc-600 bg-white dark:bg-zinc-800 flex items-center justify-center transition-all">
+              <svg class="studied-checkmark w-2.5 h-2.5 text-white hidden drop-shadow-2xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                <polyline points="20 6 9 17 4 12"></polyline>
+              </svg>
+            </span>
+            <span class="studied-btn-text">Studied</span>
+          </button>
+
+          <!-- Bookmark Button -->
+          <button
+            type="button"
+            class="bookmark-btn inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-semibold transition-all cursor-pointer shadow-2xs border-zinc-200/80 dark:border-zinc-800 bg-white dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 hover:border-amber-400"
+            data-material-id={material.id}
+            title="Save to bookmarks"
+            aria-label="Save to bookmarks"
+          >
+            <svg class="w-4 h-4 bookmark-icon-empty text-zinc-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M17.593 3.322c1.1.128 1.907 1.077 1.907 2.185V21L12 17.25 4.5 21V5.507c0-1.108.806-2.057 1.907-2.185a48.507 48.507 0 0111.186 0z" />
+            </svg>
+            <svg class="w-4 h-4 bookmark-icon-filled hidden text-amber-500 fill-amber-500" viewBox="0 0 24 24">
+              <path d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
+            </svg>
+            <span class="bookmark-btn-text">Save</span>
+          </button>
+
+          <!-- Copy Link Button -->
+          <button
+            type="button"
+            id="viewer-copy-link-btn"
+            class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-semibold transition-all cursor-pointer shadow-2xs border-zinc-200/80 dark:border-zinc-800 bg-white dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-700/60"
+            title="Copy link to clipboard"
+          >
+            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-3.003l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244" />
+            </svg>
+            <span>Share</span>
+          </button>
+
+          <!-- Open in Google Drive External Link -->
+          <a
+            href={externalUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer shadow-2xs bg-emerald-600 hover:bg-emerald-700 text-white"
+            title="Open in Google Drive"
+          >
+            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
+            </svg>
+            <span>Open in Drive</span>
+          </a>
+
+          <!-- Fullscreen Toggle -->
+          <button
+            type="button"
+            id="viewer-fullscreen-btn"
+            class="inline-flex items-center justify-center p-1.5 rounded-lg border border-zinc-200/80 dark:border-zinc-800 bg-white dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-700/60 transition-colors cursor-pointer shadow-2xs"
+            title="Toggle fullscreen reading mode"
+            aria-label="Toggle fullscreen mode"
+          >
+            <svg id="fullscreen-enter-icon" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 3.75v4.5m0-4.5h4.5m-4.5 0L9 9M3.75 20.25v-4.5m0 4.5h4.5m-4.5 0L9 15M20.25 3.75h-4.5m4.5 0v4.5m0-4.5L15 9m5.25 11.25h-4.5m4.5 0v-4.5m0 4.5L15 15" />
+            </svg>
+            <svg id="fullscreen-exit-icon" class="w-4 h-4 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 9V4.5M9 9H4.5M9 9L3.75 3.75M9 15v4.5M9 15H4.5M9 15l-5.25 5.25M15 9h4.5M15 9V4.5M15 9l5.25-5.25M15 15h4.5M15 15v4.5m0-4.5l5.25 5.25" />
+            </svg>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- Document Viewer Container -->
+    <main
+      id="viewer-container"
+      class="relative w-full h-[76vh] min-h-[520px] lg:h-[84vh] rounded-2xl overflow-hidden border border-zinc-200/80 dark:border-zinc-800 bg-zinc-100 dark:bg-zinc-900 shadow-sm transition-all"
+    >
+      <!-- Exit Fullscreen Floating Button (visible only in fullscreen) -->
+      <button
+        type="button"
+        id="fullscreen-close-floating-btn"
+        class="hidden absolute top-4 right-4 z-40 items-center gap-1.5 px-3 py-1.5 rounded-xl bg-zinc-900/90 text-white text-xs font-semibold backdrop-blur-md shadow-lg hover:bg-zinc-800 transition-all cursor-pointer"
+        title="Exit Fullscreen"
+      >
+        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+        <span>Exit Fullscreen</span>
+      </button>
+
+      <!-- Skeleton Loading Indicator -->
+      <div
+        id="viewer-skeleton"
+        class="absolute inset-0 z-20 flex flex-col items-center justify-center bg-zinc-100 dark:bg-zinc-900 transition-opacity duration-300 pointer-events-none"
+      >
+        <div class="animate-pulse flex flex-col items-center gap-3 text-center p-6">
+          <div class="w-12 h-12 rounded-2xl bg-zinc-200 dark:bg-zinc-800 flex items-center justify-center text-zinc-400">
+            <svg class="w-6 h-6 animate-bounce" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
+            </svg>
+          </div>
+          <div class="space-y-1">
+            <p class="text-xs font-bold text-zinc-700 dark:text-zinc-300">Loading document preview...</p>
+            <p class="text-[11px] text-zinc-400">Please wait while the PDF stream connects</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Embedded Iframe -->
+      <iframe
+        id="viewer-iframe"
+        src={embedUrl}
+        class="w-full h-full border-0 rounded-2xl"
+        allow="autoplay; fullscreen"
+        loading="eager"
+        title={titleEn}
+      ></iframe>
+    </main>
+
+    <!-- Bottom Helper Note -->
+    <div class="flex items-center justify-between text-[11px] text-zinc-500 dark:text-zinc-400 px-1">
+      <div class="flex items-center gap-1.5">
+        <span>Having trouble reading?</span>
+        <a
+          href={externalUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          class="font-semibold text-emerald-600 dark:text-emerald-400 hover:underline inline-flex items-center gap-0.5"
+        >
+          <span>Open directly in Google Drive</span>
+          <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
+          </svg>
+        </a>
+      </div>
+      <span class="hidden sm:inline">Use the fullscreen icon or zoom controls for distraction-free reading</span>
+    </div>
+
+    <!-- Related Materials in Same Module/Subject -->
+    {relatedMaterials.length > 0 && (
+      <section class="pt-6 border-t border-zinc-200/80 dark:border-zinc-800 space-y-4">
+        <div class="flex items-center justify-between">
+          <h2 class="text-sm font-extrabold text-zinc-900 dark:text-zinc-100 flex items-center gap-2">
+            <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+            <span>Related Study Materials in this Module</span>
+          </h2>
+          {moduleInfo && (
+            <a
+              href={`/module/${moduleInfo.id}`}
+              class="text-xs font-semibold text-emerald-600 dark:text-emerald-400 hover:underline"
+            >
+              View module →
+            </a>
+          )}
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {relatedMaterials.map((item) => (
+            <ResourceCard material={item} showYear={false} />
+          ))}
+        </div>
+      </section>
+    )}
+  </div>
+</Layout>
+
+<style>
+  /* Fullscreen Viewport Mode (compatible with iOS Safari, Android, and Desktop) */
+  #viewer-container.doc-viewer-fullscreen {
+    position: fixed !important;
+    inset: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    max-width: 100vw !important;
+    max-height: 100vh !important;
+    z-index: 99999 !important;
+    border-radius: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    background-color: #09090b !important;
+  }
+
+  #viewer-container.doc-viewer-fullscreen iframe {
+    border-radius: 0 !important;
+  }
+</style>
+
+<script>
+  import { initBookmarkButtons, renderBookmarkButtons } from '../../utils/bookmarks';
+  import { initStudiedMaterials, updateStudiedCardUI } from '../../utils/studied';
+
+  let viewerAbort: AbortController | null = null;
+
+  function initDocumentViewer(): void {
+    if (viewerAbort) viewerAbort.abort();
+    viewerAbort = new AbortController();
+    const { signal } = viewerAbort;
+
+    initBookmarkButtons();
+    initStudiedMaterials();
+
+    const container = document.getElementById('viewer-container');
+    const iframe = document.getElementById('viewer-iframe') as HTMLIFrameElement | null;
+    const skeleton = document.getElementById('viewer-skeleton');
+    const fullscreenBtn = document.getElementById('viewer-fullscreen-btn');
+    const fullscreenEnterIcon = document.getElementById('fullscreen-enter-icon');
+    const fullscreenExitIcon = document.getElementById('fullscreen-exit-icon');
+    const fullscreenFloatingCloseBtn = document.getElementById('fullscreen-close-floating-btn');
+    const copyLinkBtn = document.getElementById('viewer-copy-link-btn');
+    const backBtn = document.getElementById('viewer-back-btn');
+
+    // 1. Hide skeleton when iframe loads
+    if (iframe && skeleton) {
+      const hideSkeleton = () => {
+        skeleton.classList.add('opacity-0');
+        setTimeout(() => {
+          skeleton.classList.add('hidden');
+        }, 300);
+      };
+
+      iframe.addEventListener('load', hideSkeleton, { once: true, signal });
+      // Fallback timeout in case load event was already fired
+      setTimeout(hideSkeleton, 6000);
+    }
+
+    // 2. Fullscreen Toggle (CSS-based viewport expansion)
+    let isFullscreen = false;
+    function setFullscreen(active: boolean): void {
+      isFullscreen = active;
+      if (!container) return;
+
+      container.classList.toggle('doc-viewer-fullscreen', isFullscreen);
+      fullscreenEnterIcon?.classList.toggle('hidden', isFullscreen);
+      fullscreenExitIcon?.classList.toggle('hidden', !isFullscreen);
+      fullscreenFloatingCloseBtn?.classList.toggle('hidden', !isFullscreen);
+      fullscreenFloatingCloseBtn?.classList.toggle('flex', isFullscreen);
+
+      if (isFullscreen) {
+        document.body.style.overflow = 'hidden';
+      } else {
+        document.body.style.overflow = '';
+      }
+    }
+
+    fullscreenBtn?.addEventListener('click', () => {
+      setFullscreen(!isFullscreen);
+    }, { signal });
+
+    fullscreenFloatingCloseBtn?.addEventListener('click', () => {
+      setFullscreen(false);
+    }, { signal });
+
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && isFullscreen) {
+        setFullscreen(false);
+      }
+    }, { signal });
+
+    // 3. Copy Link
+    copyLinkBtn?.addEventListener('click', async () => {
+      try {
+        if (navigator.clipboard && window.isSecureContext) {
+          await navigator.clipboard.writeText(window.location.href);
+        } else {
+          const input = document.createElement('textarea');
+          input.value = window.location.href;
+          input.style.position = 'fixed';
+          input.style.opacity = '0';
+          document.body.appendChild(input);
+          input.focus();
+          input.select();
+          (document as any).execCommand?.('copy');
+          document.body.removeChild(input);
+        }
+        const showFn = (window as any).showToast;
+        if (typeof showFn === 'function') {
+          showFn({
+            type: 'success',
+            message: 'Document link copied to clipboard!',
+            duration: 2500
+          });
+        }
+      } catch {}
+    }, { signal });
+
+    // 4. Back Button Navigation
+    backBtn?.addEventListener('click', () => {
+      if (window.history.length > 1) {
+        window.history.back();
+      } else {
+        const fallback = backBtn.getAttribute('data-fallback') || '/';
+        window.location.href = fallback;
+      }
+    }, { signal });
+
+    // Re-sync UI state for studied and bookmarks
+    renderBookmarkButtons();
+    updateStudiedCardUI();
+  }
+
+  initDocumentViewer();
+  document.addEventListener('astro:after-swap', initDocumentViewer);
+</script>

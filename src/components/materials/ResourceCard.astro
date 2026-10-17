@@ -4,6 +4,7 @@ import TypeBadge from './TypeBadge.astro';
 import { subjectToSlug } from '../../utils/slug';
 import { getMaterialEnglishTitle, getMaterialEnglishDesc } from '../../i18n/materialsTranslations';
 import { formatShortName } from '../../utils/format';
+import { isEmbeddableDocument, getDocumentViewerPath } from '../../utils/documentViewer';
 
 interface Props {
   material: MaterialItem;
@@ -46,9 +47,14 @@ const contributorProfileTarget = material.added_by_username || material.contribu
 const contributorProfileUrl = contributorProfileTarget ? `/profile?u=${encodeURIComponent(contributorProfileTarget)}` : undefined;
 
 const isPlaylist = material.type === 'playlist' || Boolean(material.playlistId) || Boolean(material.videos);
+const isDocument = isEmbeddableDocument(material.url);
 const isReferenceMaterial = Boolean(material.moduleId && /^year\d+-reference-books$/.test(material.moduleId));
-const isInternal = isPlaylist || material.type === 'flashcards' || Boolean(material.flashcardDeckId) || (material.url && material.url.startsWith('/'));
-const cardHref = isPlaylist ? `/playlist/${material.id}` : material.url;
+const isInternal = isPlaylist || isDocument || material.type === 'flashcards' || Boolean(material.flashcardDeckId) || (material.url && material.url.startsWith('/'));
+const cardHref = isPlaylist
+  ? `/playlist/${material.id}`
+  : isDocument
+    ? getDocumentViewerPath(material.id)
+    : material.url;
 const targetAttr = isInternal ? '_self' : '_blank';
 
 ---
