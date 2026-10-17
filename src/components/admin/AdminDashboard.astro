@@ -22,15 +22,15 @@ const { modules } = Astro.props;
   <div class="p-4 sm:p-5 rounded-2xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 shadow-2xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
     <div>
       <div class="flex items-center gap-2 mb-1">
-        <span class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-emerald-100 dark:bg-emerald-950/80 text-emerald-800 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800/40" data-i18n="admin.badge">
-          لوحة الإدارة
+        <span class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-emerald-100 dark:bg-emerald-950/80 text-emerald-800 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800/40">
+          Admin Panel
         </span>
-        <h1 class="text-base sm:text-lg font-extrabold text-zinc-900 dark:text-zinc-100" data-i18n="admin.title">
-          إدارة المحتوى والمساهمات
+        <h1 class="text-base sm:text-lg font-extrabold text-zinc-900 dark:text-zinc-100">
+          Content & Submissions Management
         </h1>
       </div>
-      <p class="text-xs text-zinc-500 dark:text-zinc-400" data-i18n="admin.subtitle">
-        إضافة المواد مباشرة، مراجعة المساهمات، متابعة الملاحظات، وإدارة فريق المسؤولين.
+      <p class="text-xs text-zinc-500 dark:text-zinc-400">
+        Direct material addition, submission reviews, feedback tracking, and admin team management.
       </p>
     </div>
 
@@ -44,7 +44,7 @@ const { modules } = Astro.props;
         <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
         <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
       </svg>
-      <span id="toggle-student-view-text" data-i18n="admin.previewStudent">معاينة صفحة الطالب</span>
+      <span id="toggle-student-view-text">Preview Student Page</span>
     </button>
   </div>
 
@@ -56,7 +56,7 @@ const { modules } = Astro.props;
       class="admin-nav-tab px-3.5 py-2 rounded-xl font-bold bg-emerald-600 text-white shadow-2xs transition-all cursor-pointer whitespace-nowrap flex items-center gap-1.5"
     >
       <span>✨</span>
-      <span data-i18n="admin.tabDirectAdd">إضافة المواد (فردي / دفعة)</span>
+      <span>Add Materials (Single / Batch)</span>
     </button>
 
     <button
@@ -65,7 +65,7 @@ const { modules } = Astro.props;
       class="admin-nav-tab px-3.5 py-2 rounded-xl font-semibold text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-all cursor-pointer whitespace-nowrap flex items-center gap-1.5"
     >
       <span>📥</span>
-      <span data-i18n="admin.tabSubmissions">المساهمات المعلقة</span>
+      <span>Pending Submissions</span>
     </button>
 
     <button
@@ -74,7 +74,7 @@ const { modules } = Astro.props;
       class="admin-nav-tab px-3.5 py-2 rounded-xl font-semibold text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-all cursor-pointer whitespace-nowrap flex items-center gap-1.5"
     >
       <span>📦</span>
-      <span data-i18n="admin.tabModules">إدارة الموديولات</span>
+      <span>Manage Modules</span>
     </button>
 
     <button
@@ -83,7 +83,7 @@ const { modules } = Astro.props;
       class="admin-nav-tab px-3.5 py-2 rounded-xl font-semibold text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-all cursor-pointer whitespace-nowrap flex items-center gap-1.5"
     >
       <span>🗑️</span>
-      <span data-i18n="admin.tabMaterials">إدارة المواد</span>
+      <span>Manage Materials</span>
     </button>
 
     <button
@@ -92,7 +92,7 @@ const { modules } = Astro.props;
       class="admin-nav-tab px-3.5 py-2 rounded-xl font-semibold text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-all cursor-pointer whitespace-nowrap flex items-center gap-1.5"
     >
       <span>💬</span>
-      <span data-i18n="admin.tabFeedback">الملاحظات والشكاوى</span>
+      <span>Feedback & Inquiries</span>
     </button>
 
     <button
@@ -101,7 +101,7 @@ const { modules } = Astro.props;
       class="admin-nav-tab px-3.5 py-2 rounded-xl font-semibold text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-all cursor-pointer whitespace-nowrap flex items-center gap-1.5"
     >
       <span>👥</span>
-      <span data-i18n="admin.tabTeam">فريق الإدارة</span>
+      <span>Admin Team</span>
     </button>
 
     <button
@@ -110,7 +110,7 @@ const { modules } = Astro.props;
       class="admin-nav-tab px-3.5 py-2 rounded-xl font-semibold text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-all cursor-pointer whitespace-nowrap flex items-center gap-1.5"
     >
       <span>📋</span>
-      <span data-i18n="admin.tabLogs">سجل النشاط</span>
+      <span>Activity Logs</span>
     </button>
 
     <button
@@ -119,7 +119,7 @@ const { modules } = Astro.props;
       class="admin-nav-tab px-3.5 py-2 rounded-xl font-semibold text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-all cursor-pointer whitespace-nowrap flex items-center gap-1.5"
     >
       <span>🃏</span>
-      <span data-i18n="admin.tabFlashcards">البطاقات الاستذكارية (Anki)</span>
+      <span>Flashcards (Anki)</span>
     </button>
 
     <button
@@ -128,7 +128,7 @@ const { modules } = Astro.props;
       class="admin-nav-tab px-3.5 py-2 rounded-xl font-semibold text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-all cursor-pointer whitespace-nowrap flex items-center gap-1.5"
     >
       <span>📁</span>
-      <span data-i18n="admin.tabCollections">المجموعات الدراسية</span>
+      <span>Collections</span>
     </button>
 
   </div>

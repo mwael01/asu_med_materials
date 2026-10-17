@@ -1,6 +1,5 @@
 import { getStoredStudiedIds, toggleItemStudied } from './storage';
 import { syncStudiedToggle } from './userSync';
-import { getCurrentLanguage, t } from './i18n';
 
 /**
  * Updates checkbox UI state for all materials cards, playlist headers, and drawer items in the current DOM.
@@ -77,8 +76,7 @@ export function updateStudiedCardUI(animateId?: string): void {
  */
 function updateSingleStudiedButton(btn: HTMLButtonElement, isStudied: boolean, animate: boolean): void {
   btn.setAttribute('aria-checked', isStudied ? 'true' : 'false');
-  const lang = getCurrentLanguage();
-  const label = isStudied ? t('card.unmarkStudied', lang) : t('card.markStudied', lang);
+  const label = isStudied ? 'Unmark as studied' : 'Mark as studied';
   btn.setAttribute('title', label);
   btn.setAttribute('aria-label', label);
 
@@ -144,8 +142,7 @@ function updateSingleStudiedButton(btn: HTMLButtonElement, isStudied: boolean, a
  * @param isStudied - Whether the material is studied
  */
 function updateSingleDrawerStudiedButton(btn: HTMLButtonElement, isStudied: boolean): void {
-  const lang = getCurrentLanguage();
-  const label = isStudied ? t('card.unmarkStudied', lang) : t('card.markStudied', lang);
+  const label = isStudied ? 'Unmark as studied' : 'Mark as studied';
   btn.setAttribute('title', label);
   btn.setAttribute('aria-label', label);
 
@@ -181,10 +178,9 @@ function handleStudiedClick(e: Event): void {
 
   const showFn = (window as any).showToast;
   if (typeof showFn === 'function') {
-    const lang = getCurrentLanguage();
     showFn({
       type: isNowStudied ? 'success' : 'info',
-      message: isNowStudied ? t('card.studiedToast', lang) : t('card.unstudiedToast', lang),
+      message: isNowStudied ? 'Marked as studied' : 'Unmarked as studied',
       duration: 2000
     });
   }
@@ -210,10 +206,6 @@ export function initStudiedMaterials(): void {
         ? customEvent.detail.sourceId
         : undefined;
       updateStudiedCardUI(sourceId);
-    });
-
-    window.addEventListener('asumed-language-changed', () => {
-      updateStudiedCardUI();
     });
 
     document.addEventListener('astro:after-swap', () => {

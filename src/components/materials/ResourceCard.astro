@@ -25,9 +25,9 @@ const rawAuthors: string[] = Array.isArray(material.author)
 const maxVisible = 2;
 const hasMoreThanMax = rawAuthors.length > maxVisible;
 const displayedAuthorText = hasMoreThanMax
-  ? rawAuthors.slice(0, maxVisible).join('، ') + '...'
-  : rawAuthors.join('، ');
-const fullAuthorTooltip = rawAuthors.join('، ');
+  ? rawAuthors.slice(0, maxVisible).join(', ') + '...'
+  : rawAuthors.join(', ');
+const fullAuthorTooltip = rawAuthors.join(', ');
 
 // Normalize addedBy (contributor who added it to the website)
 const rawAddedBy: string[] = Array.isArray(material.addedBy)
@@ -40,8 +40,8 @@ const rawAddedBy: string[] = Array.isArray(material.addedBy)
 const displayedAddedByText = rawAddedBy
   .slice(0, maxVisible)
   .map((name) => formatShortName(name))
-  .join('، ');
-const fullAddedByTooltip = rawAddedBy.join('، ');
+  .join(', ');
+const fullAddedByTooltip = rawAddedBy.join(', ');
 const contributorProfileTarget = material.added_by_username || material.contributorUsername || rawAddedBy[0];
 const contributorProfileUrl = contributorProfileTarget ? `/profile?u=${encodeURIComponent(contributorProfileTarget)}` : undefined;
 
@@ -66,11 +66,7 @@ const targetAttr = isInternal ? '_self' : '_blank';
 
       <div class="flex items-center gap-2 relative z-30">
         {showYear && (
-          <span
-            class="text-[11px] font-semibold px-2 py-0.5 rounded bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400"
-            data-i18n={isReferenceMaterial ? 'categories.references' : 'nav.year'}
-            data-i18n-params={isReferenceMaterial ? undefined : JSON.stringify({ y: material.year })}
-          >
+          <span class="text-[11px] font-semibold px-2 py-0.5 rounded bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400">
             {isReferenceMaterial ? 'References' : `Year ${material.year}`}
           </span>
         )}
@@ -81,7 +77,6 @@ const targetAttr = isInternal ? '_self' : '_blank';
           data-id={material.id}
           role="checkbox"
           aria-checked="false"
-          data-i18n-attr="title:card.markStudied,aria-label:card.markStudied"
           title="Mark as studied"
           aria-label="Mark as studied"
         >
@@ -106,7 +101,6 @@ const targetAttr = isInternal ? '_self' : '_blank';
           type="button"
           class="bookmark-btn relative z-30 inline-flex items-center justify-center p-1.5 -m-1 text-zinc-400 hover:text-amber-500 dark:hover:text-amber-400 rounded-lg hover:bg-amber-50/60 dark:hover:bg-amber-950/40 active:scale-95 transition-all cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-500"
           data-id={material.id}
-          data-i18n-attr="title:card.save,aria-label:card.save"
           title="Save to bookmarks"
           aria-label="Save to bookmarks"
         >
@@ -124,22 +118,13 @@ const targetAttr = isInternal ? '_self' : '_blank';
     <h3 class="font-bold text-zinc-900 dark:text-zinc-100 text-sm leading-snug line-clamp-2 mb-1.5 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 group-hover:underline underline-offset-4 decoration-emerald-500 dark:decoration-emerald-400 transition-colors">
       <a href={cardHref} target={targetAttr} rel={targetAttr === '_blank' ? "noopener noreferrer" : undefined} class="focus:outline-none">
         <span class="absolute inset-0 z-0" aria-hidden="true"></span>
-        <span
-          data-i18n-material-title={material.id}
-          data-title-ar={material.title}
-          data-title-en={titleEn}
-        >{titleEn || material.title}</span>
+        <span>{titleEn || material.title}</span>
       </a>
     </h3>
 
     <!-- Description -->
     {material.description && (
-      <p
-        class="text-xs text-zinc-600 dark:text-zinc-400 line-clamp-2 mb-3"
-        data-i18n-material-desc={material.id}
-        data-desc-ar={material.description}
-        data-desc-en={descEn}
-      >
+      <p class="text-xs text-zinc-600 dark:text-zinc-400 line-clamp-2 mb-3">
         {descEn || material.description}
       </p>
     )}
@@ -164,7 +149,7 @@ const targetAttr = isInternal ? '_self' : '_blank';
           class="text-zinc-600 dark:text-zinc-300 truncate max-w-[170px]"
           title={fullAuthorTooltip}
         >
-          <span data-i18n="card.by">By:</span> {displayedAuthorText}
+          <span>By:</span> {displayedAuthorText}
         </span>
       )}
       {displayedAddedByText && (
@@ -172,7 +157,7 @@ const targetAttr = isInternal ? '_self' : '_blank';
           class="text-zinc-400 dark:text-zinc-500 truncate max-w-[150px]"
           title={fullAddedByTooltip}
         >
-          &bull; <span data-i18n="card.addedBy">Added by:</span> {contributorProfileUrl ? (
+          &bull; <span>Added by:</span> {contributorProfileUrl ? (
             <a href={contributorProfileUrl} class="hover:text-emerald-600 dark:hover:text-emerald-400 hover:underline">{displayedAddedByText}</a>
           ) : (
             <span>{displayedAddedByText}</span>

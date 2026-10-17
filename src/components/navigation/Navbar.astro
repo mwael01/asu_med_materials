@@ -1,6 +1,5 @@
 ---
 import ThemeToggle from '../common/ThemeToggle.astro';
-import LanguageToggle from '../common/LanguageToggle.astro';
 import MobileMenu from './MobileMenu.astro';
 
 const currentPath = Astro.url.pathname;
@@ -18,7 +17,6 @@ const isYear = (y: number) => currentPath.startsWith(`/year/${y}`);
     <nav class="hidden lg:flex items-center gap-0.5 text-xs font-medium">
       <a
         href="/"
-        data-i18n="nav.home"
         class:list={[
           'px-2.5 py-1 rounded-md transition-colors',
           currentPath === '/' ? 'text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/50 font-bold' : 'text-zinc-600 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800'
@@ -29,8 +27,6 @@ const isYear = (y: number) => currentPath.startsWith(`/year/${y}`);
       {[1, 2, 3, 4, 5].map((y) => (
         <a
           href={`/year/${y}`}
-          data-i18n="nav.year"
-          data-i18n-params={JSON.stringify({ y })}
           class:list={[
             'px-2 py-1 rounded-md transition-colors',
             isYear(y) ? 'text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/50 font-bold' : 'text-zinc-600 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800'
@@ -42,7 +38,6 @@ const isYear = (y: number) => currentPath.startsWith(`/year/${y}`);
 
       <a
         href="/contributors"
-        data-i18n="nav.contributors"
         class:list={[
           'px-2.5 py-1 rounded-md transition-colors',
           currentPath === '/contributors' ? 'text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/50 font-bold' : 'text-zinc-600 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800'
@@ -52,12 +47,12 @@ const isYear = (y: number) => currentPath.startsWith(`/year/${y}`);
       </a>
       <a
         href="/contribute"
-        class="inline-flex items-center gap-1.5 px-3 py-1 ml-1 rtl:ml-0 rtl:mr-1 rounded-lg text-xs font-semibold bg-emerald-600 hover:bg-emerald-700 active:scale-[0.98] text-white transition-all shadow-2xs"
+        class="inline-flex items-center gap-1.5 px-3 py-1 ml-1 rounded-lg text-xs font-semibold bg-emerald-600 hover:bg-emerald-700 active:scale-[0.98] text-white transition-all shadow-2xs"
       >
         <svg class="w-3.5 h-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
           <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
         </svg>
-        <span data-i18n="nav.contribute">Contribute</span>
+        <span>Contribute</span>
       </a>
     </nav>
 
@@ -68,20 +63,18 @@ const isYear = (y: number) => currentPath.startsWith(`/year/${y}`);
         type="button"
         id="nav-change-year-btn"
         class="trigger-multistage-selector hidden sm:inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium text-zinc-600 dark:text-zinc-300 hover:text-emerald-600 dark:hover:text-emerald-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 cursor-pointer"
-        data-i18n-attr="title:nav.changeYearTitle"
         title="Change Year & Module"
       >
         <svg class="w-3.5 h-3.5 text-zinc-400 dark:text-zinc-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
           <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" />
         </svg>
-        <span id="nav-user-year-badge" class="text-xs font-semibold hidden sm:inline" data-i18n="nav.changeYear">Change Year</span>
+        <span id="nav-user-year-badge" class="text-xs font-semibold hidden sm:inline">Change Year</span>
       </button>
 
       <!-- Search Link -->
       <a
         href="/search"
         class="p-1.5 text-zinc-600 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-md transition-colors"
-        data-i18n-attr="title:nav.searchTitle,aria-label:nav.search"
         title="Search Materials & Subjects"
         aria-label="Search"
       >
@@ -94,7 +87,6 @@ const isYear = (y: number) => currentPath.startsWith(`/year/${y}`);
       <button
         type="button"
         class="open-bookmarks-trigger hidden sm:inline-flex relative p-1.5 text-zinc-600 dark:text-zinc-300 hover:text-amber-500 dark:hover:text-amber-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-md transition-colors cursor-pointer"
-        data-i18n-attr="title:nav.savedResourcesTitle,aria-label:nav.savedResourcesTitle"
         title="Saved Bookmarks"
         aria-label="Saved Bookmarks"
       >
@@ -113,7 +105,6 @@ const isYear = (y: number) => currentPath.startsWith(`/year/${y}`);
             ? 'text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/50'
             : 'text-zinc-600 dark:text-zinc-300 hover:text-emerald-600 dark:hover:text-emerald-400 hover:bg-zinc-100 dark:hover:bg-zinc-800'
         ]}
-        data-i18n-attr="title:nav.profile,aria-label:nav.profile"
         title="Profile"
         aria-label="Profile"
       >
@@ -132,9 +123,6 @@ const isYear = (y: number) => currentPath.startsWith(`/year/${y}`);
         </span>
       </a>
 
-      <!-- Language Switcher -->
-      <LanguageToggle />
-
       <!-- Theme Switcher -->
       <ThemeToggle />
 
@@ -143,7 +131,6 @@ const isYear = (y: number) => currentPath.startsWith(`/year/${y}`);
         type="button"
         id="mobile-menu-trigger"
         class="lg:hidden p-1.5 text-zinc-600 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-md transition-colors cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500"
-        data-i18n-attr="aria-label:nav.menu,title:nav.menu"
         aria-label="Navigation Menu"
         title="Navigation Menu"
         aria-expanded="false"
@@ -164,7 +151,6 @@ const isYear = (y: number) => currentPath.startsWith(`/year/${y}`);
 </header>
 
 <script>
-  import { getCurrentLanguage } from '../../utils/i18n';
   import { onAuthChange, getCachedUserProfile } from '../../firebase/auth';
 
   let unsubscribeAuth: (() => void) | undefined;
@@ -174,11 +160,10 @@ const isYear = (y: number) => currentPath.startsWith(`/year/${y}`);
     if (!badge) return;
     try {
       const year = localStorage.getItem('asumed_user_year');
-      const lang = getCurrentLanguage();
       if (year) {
-        badge.textContent = lang === 'ar' ? `السنة ${year}` : `Year ${year}`;
+        badge.textContent = `Year ${year}`;
       } else {
-        badge.textContent = lang === 'ar' ? 'اختر سنتك' : 'Choose Year';
+        badge.textContent = 'Change Year';
       }
     } catch {}
   }
@@ -224,7 +209,6 @@ const isYear = (y: number) => currentPath.startsWith(`/year/${y}`);
     syncNavYearBadge();
   });
   window.addEventListener('user-preferences-updated', syncNavYearBadge);
-  window.addEventListener('asumed-language-changed', syncNavYearBadge);
   document.addEventListener('astro:after-swap', () => {
     syncNavYearBadge();
     syncNavAuthState();

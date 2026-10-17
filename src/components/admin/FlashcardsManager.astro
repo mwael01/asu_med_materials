@@ -10,19 +10,19 @@ const modules = await getAllModules();
     <div>
       <h2 class="text-base font-bold text-zinc-900 dark:text-zinc-100 flex items-center gap-2">
         <span>🃏</span>
-        <span data-i18n="admin.tabFlashcards">إدارة البطاقات الاستذكارية (Anki)</span>
+        <span>Flashcards Management (Anki)</span>
       </h2>
       <p class="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5">
-        مراجعة مجموعات البطاقات المسحوبة، تصنيف الموديولات والمواد، والنشر في الموقع.
+        Review ingested flashcard decks, configure modules and subjects, and publish to students.
       </p>
     </div>
 
     <div class="flex items-center gap-2 text-xs">
       <span class="px-2.5 py-1 rounded-lg bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 font-semibold">
-        إجمالي المجموعات: <strong id="admin-deck-total-count">0</strong>
+        Total Decks: <strong id="admin-deck-total-count">0</strong>
       </span>
       <span class="px-2.5 py-1 rounded-lg bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 font-semibold">
-        منشورة: <strong id="admin-deck-published-count">0</strong>
+        Published: <strong id="admin-deck-published-count">0</strong>
       </span>
     </div>
   </div>
@@ -34,28 +34,28 @@ const modules = await getAllModules();
         id="admin-deck-status-filter"
         class="px-3 py-1.5 rounded-xl bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-800 dark:text-zinc-200 cursor-pointer"
       >
-        <option value="all">جميع الحالات</option>
-        <option value="published">منشورة فقط</option>
-        <option value="draft">مسودات فقط</option>
+        <option value="all">All Statuses</option>
+        <option value="published">Published Only</option>
+        <option value="draft">Drafts Only</option>
       </select>
 
       <select
         id="admin-deck-year-filter"
         class="px-3 py-1.5 rounded-xl bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-800 dark:text-zinc-200 cursor-pointer"
       >
-        <option value="all">جميع السنوات</option>
-        <option value="1">سنة 1</option>
-        <option value="2">سنة 2</option>
-        <option value="3">سنة 3</option>
-        <option value="4">سنة 4</option>
-        <option value="5">سنة 5</option>
+        <option value="all">All Years</option>
+        <option value="1">Year 1</option>
+        <option value="2">Year 2</option>
+        <option value="3">Year 3</option>
+        <option value="4">Year 4</option>
+        <option value="5">Year 5</option>
       </select>
     </div>
 
     <input
       type="text"
       id="admin-deck-search"
-      placeholder="بحث في المجموعات والمواد..."
+      placeholder="Search decks and subjects..."
       class="w-full sm:w-64 px-3 py-1.5 rounded-xl bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-800 dark:text-zinc-200 placeholder-zinc-400 focus:outline-none focus:border-emerald-500"
     />
   </div>
@@ -63,12 +63,12 @@ const modules = await getAllModules();
   <!-- Loading State -->
   <div id="admin-decks-loading" class="flex flex-col items-center justify-center py-8 space-y-3">
     <div class="w-6 h-6 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin"></div>
-    <span class="text-xs text-zinc-500 dark:text-zinc-400">جاري تحميل البطاقات الاستذكارية...</span>
+    <span class="text-xs text-zinc-500 dark:text-zinc-400">Loading flashcards...</span>
   </div>
 
   <!-- Empty State -->
   <div id="admin-decks-empty" class="hidden flex flex-col items-center justify-center py-8 text-center space-y-2">
-    <span class="text-xs text-zinc-600 dark:text-zinc-400">لا توجد مجموعات بطاقات استذكارية مطابقة.</span>
+    <span class="text-xs text-zinc-600 dark:text-zinc-400">No matching flashcard decks found.</span>
   </div>
 
   <!-- Decks List Table Container -->
@@ -76,11 +76,11 @@ const modules = await getAllModules();
     <table class="w-full text-xs text-start">
       <thead class="bg-zinc-50 dark:bg-zinc-800/80 text-zinc-500 dark:text-zinc-400 font-semibold border-b border-zinc-200 dark:border-zinc-800">
         <tr>
-          <th class="py-2.5 px-3 text-start">المجموعة</th>
-          <th class="py-2.5 px-3 text-start">الموديول / المادة</th>
-          <th class="py-2.5 px-3 text-center">البطاقات</th>
-          <th class="py-2.5 px-3 text-center">الحالة</th>
-          <th class="py-2.5 px-3 text-end">الإجراءات</th>
+          <th class="py-2.5 px-3 text-start">Deck</th>
+          <th class="py-2.5 px-3 text-start">Module / Subject</th>
+          <th class="py-2.5 px-3 text-center">Cards</th>
+          <th class="py-2.5 px-3 text-center">Status</th>
+          <th class="py-2.5 px-3 text-end">Actions</th>
         </tr>
       </thead>
       <tbody id="admin-decks-tbody" class="divide-y divide-zinc-100 dark:divide-zinc-800/60">
@@ -95,14 +95,14 @@ const modules = await getAllModules();
   >
     <form id="form-edit-deck" class="space-y-4">
       <div class="flex items-center justify-between border-b border-zinc-100 dark:border-zinc-800 pb-2">
-        <h3 class="font-bold text-sm text-zinc-900 dark:text-zinc-100">تعديل بيانات المجموعة</h3>
+        <h3 class="font-bold text-sm text-zinc-900 dark:text-zinc-100">Edit Deck Details</h3>
         <button type="button" id="btn-close-edit-dialog" class="text-zinc-400 hover:text-zinc-600 text-base cursor-pointer">✕</button>
       </div>
 
       <input type="hidden" id="edit-deck-id" />
 
       <div class="space-y-1">
-        <label class="font-semibold text-zinc-700 dark:text-zinc-300">عنوان المجموعة</label>
+        <label class="font-semibold text-zinc-700 dark:text-zinc-300">Deck Title</label>
         <input
           type="text"
           id="edit-deck-title"
@@ -113,18 +113,18 @@ const modules = await getAllModules();
 
       <div class="grid grid-cols-2 gap-3">
         <div class="space-y-1">
-          <label class="font-semibold text-zinc-700 dark:text-zinc-300">السنة الدراسية</label>
+          <label class="font-semibold text-zinc-700 dark:text-zinc-300">Academic Year</label>
           <select id="edit-deck-year" class="w-full px-3 py-2 rounded-xl bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-900 dark:text-zinc-100 cursor-pointer">
-            <option value="1">سنة 1</option>
-            <option value="2">سنة 2</option>
-            <option value="3">سنة 3</option>
-            <option value="4">سنة 4</option>
-            <option value="5">سنة 5</option>
+            <option value="1">Year 1</option>
+            <option value="2">Year 2</option>
+            <option value="3">Year 3</option>
+            <option value="4">Year 4</option>
+            <option value="5">Year 5</option>
           </select>
         </div>
 
         <div class="space-y-1">
-          <label class="font-semibold text-zinc-700 dark:text-zinc-300">الموديول</label>
+          <label class="font-semibold text-zinc-700 dark:text-zinc-300">Module</label>
           <select id="edit-deck-module" class="w-full px-3 py-2 rounded-xl bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-900 dark:text-zinc-100 cursor-pointer">
             {modules.map((m) => (
               <option value={m.id}>{m.title}</option>
@@ -134,11 +134,11 @@ const modules = await getAllModules();
       </div>
 
       <div class="space-y-1">
-        <label class="font-semibold text-zinc-700 dark:text-zinc-300">المادة (Subject)</label>
+        <label class="font-semibold text-zinc-700 dark:text-zinc-300">Subject</label>
         <input
           type="text"
           id="edit-deck-subject"
-          placeholder="مثلاً: Anatomy, Physiology..."
+          placeholder="e.g. Anatomy, Physiology..."
           class="w-full px-3 py-2 rounded-xl bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-900 dark:text-zinc-100"
           required
         />
@@ -146,10 +146,10 @@ const modules = await getAllModules();
 
       <div class="flex items-center justify-end gap-2 pt-2 border-t border-zinc-100 dark:border-zinc-800">
         <button type="button" id="btn-cancel-edit" class="px-3 py-1.5 rounded-lg text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 cursor-pointer">
-          إلغاء
+          Cancel
         </button>
         <button type="submit" id="btn-save-deck" class="px-4 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-semibold cursor-pointer">
-          حفظ التعديلات
+          Save Changes
         </button>
       </div>
     </form>
@@ -239,8 +239,8 @@ const modules = await getAllModules();
             <div class="text-[10px] text-zinc-400 font-normal truncate mt-0.5">${escapeHtml(deck.sourceDeckPath || '')}</div>
           </td>
           <td class="py-3 px-3 text-zinc-600 dark:text-zinc-400 whitespace-nowrap">
-            <div>سنة ${deck.year} · ${escapeHtml(deck.moduleId || '')}</div>
-            <div class="text-[10px] font-semibold text-emerald-600 dark:text-emerald-400">${escapeHtml(deck.subject || 'غير مصنف')}</div>
+            <div>Year ${deck.year} · ${escapeHtml(deck.moduleId || '')}</div>
+            <div class="text-[10px] font-semibold text-emerald-600 dark:text-emerald-400">${escapeHtml(deck.subject || 'Uncategorized')}</div>
           </td>
           <td class="py-3 px-3 text-center font-bold text-zinc-700 dark:text-zinc-300 whitespace-nowrap">
             ${deck.cardCount || 0}
@@ -249,10 +249,10 @@ const modules = await getAllModules();
             ${
               isPublished
                 ? `<span class="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800">
-                    منشورة
+                    Published
                   </span>`
                 : `<span class="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold bg-amber-100 dark:bg-amber-950 text-amber-800 dark:text-amber-300 border border-amber-300 dark:border-amber-800">
-                    مسودة
+                    Draft
                   </span>`
             }
           </td>
@@ -263,7 +263,7 @@ const modules = await getAllModules();
                 class="btn-edit-deck px-2 py-1 rounded-lg text-zinc-600 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-700 text-[11px] font-semibold cursor-pointer"
                 data-deck-id="${escapeHtml(deck.id)}"
               >
-                تعديل
+                Edit
               </button>
               ${
                 isPublished
@@ -273,7 +273,7 @@ const modules = await getAllModules();
                       data-action="unpublish"
                       data-deck-id="${escapeHtml(deck.id)}"
                     >
-                      إلغاء النشر
+                      Unpublish
                     </button>`
                   : `<button
                       type="button"
@@ -282,7 +282,7 @@ const modules = await getAllModules();
                       data-deck-id="${escapeHtml(deck.id)}"
                       data-rev-id="${escapeHtml(revId)}"
                     >
-                      نشر في الموقع
+                      Publish
                     </button>`
               }
             </div>
@@ -326,7 +326,7 @@ const modules = await getAllModules();
             if (ok) {
               await loadDecks();
             } else {
-              alert('تعذر نشر المجموعة');
+              alert('Failed to publish deck');
               btn.disabled = false;
             }
           } else if (action === 'unpublish') {
@@ -334,7 +334,7 @@ const modules = await getAllModules();
             if (ok) {
               await loadDecks();
             } else {
-              alert('تعذر إلغاء نشر المجموعة');
+              alert('Failed to unpublish deck');
               btn.disabled = false;
             }
           }
@@ -389,7 +389,7 @@ const modules = await getAllModules();
         editDialog?.close();
         await loadDecks();
       } else {
-        alert('حدث خطأ أثناء حفظ التعديلات');
+        alert('An error occurred while saving changes');
       }
       if (btn) btn.disabled = false;
     });

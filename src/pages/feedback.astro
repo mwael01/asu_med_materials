@@ -14,14 +14,14 @@ const modules = await getAllModules();
     <!-- Breadcrumb & Header -->
     <div class="mb-5">
       <div class="flex items-center gap-1.5 text-xs text-zinc-500 dark:text-zinc-400 mb-2">
-        <a href="/?redirect=false" data-i18n="nav.home" class="hover:text-emerald-600 dark:hover:text-emerald-400">Home</a>
+        <a href="/?redirect=false" class="hover:text-emerald-600 dark:hover:text-emerald-400">Home</a>
         <span>/</span>
-        <span class="text-zinc-900 dark:text-zinc-100 font-bold" data-i18n="feedback.breadcrumbFeedback">Feedback</span>
+        <span class="text-zinc-900 dark:text-zinc-100 font-bold">Feedback</span>
       </div>
-      <h1 class="text-xl sm:text-2xl font-extrabold text-zinc-900 dark:text-zinc-100 mb-1" data-i18n="feedback.title">
+      <h1 class="text-xl sm:text-2xl font-extrabold text-zinc-900 dark:text-zinc-100 mb-1">
         Feedback & Suggestions
       </h1>
-      <p class="text-xs text-zinc-500 dark:text-zinc-400 leading-relaxed" data-i18n="feedback.subtitle">
+      <p class="text-xs text-zinc-500 dark:text-zinc-400 leading-relaxed">
         Help us improve ASU Med Materials by sharing ideas, reporting broken links, or reporting technical issues.
       </p>
     </div>
@@ -32,13 +32,13 @@ const modules = await getAllModules();
     <!-- Reciprocal Link to Contribute -->
     <div class="mt-5 p-4 rounded-2xl bg-zinc-50 dark:bg-zinc-900/60 border border-zinc-200 dark:border-zinc-800 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
       <div class="text-zinc-600 dark:text-zinc-400 font-medium text-center sm:text-start">
-        <span data-i18n="feedback.toContributePrompt">Looking to share batch drives, lecture playlists, or study notes?</span>
+        <span>Looking to share batch drives, lecture playlists, or study notes?</span>
       </div>
       <a
         href="/contribute"
         class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-emerald-700 dark:text-emerald-400 hover:text-emerald-800 dark:hover:text-emerald-300 font-bold transition-all shrink-0 shadow-2xs hover:border-emerald-300 dark:hover:border-emerald-700/50"
       >
-        <span data-i18n="feedback.toContributeLink">Share study materials here →</span>
+        <span>Share study materials here &rarr;</span>
       </a>
     </div>
   </div>

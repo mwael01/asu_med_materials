@@ -19,7 +19,6 @@ import { createDraft, draftCredit, validateDraft } from '../../utils/materialDra
 import { publishMaterialDrafts } from '../../utils/publishMaterialDrafts';
 import { materialUrlKey, isHttpUrl } from '../../utils/materialLinks';
 import { extractYouTubeId } from '../../utils/videoSources';
-import { getCurrentLanguage } from '../../utils/i18n';
 import { showToast } from '../../utils/toast';
 import { mountMaterialEditor } from './materialEditor';
 
@@ -98,7 +97,7 @@ export function initDirectMaterialForm(): void {
   };
 
   const lifecycle = new AbortController();
-  const lang = (ar: string, en: string) => (getCurrentLanguage() === 'en' ? en : ar);
+  const lang = (_ar: string, en: string) => en;
   const allDrafts = () => [...staged, ...(single.url || single.title ? [single] : [])];
 
   function invalidate() {
@@ -912,17 +911,6 @@ export function initDirectMaterialForm(): void {
     { signal: lifecycle.signal }
   );
 
-  window.addEventListener(
-    'asumed-language-changed',
-    () => {
-      if (!publishing) {
-        refreshPresetModules();
-        renderSingle();
-        renderStaged();
-      }
-    },
-    { signal: lifecycle.signal }
-  );
 
   document.addEventListener(
     'astro:before-swap',

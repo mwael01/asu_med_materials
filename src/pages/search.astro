@@ -32,10 +32,10 @@ const allMaterials = rawMaterials.map((m) => ({
   description="Search and browse all batch drives, lecture notes, and study resources for ASU Faculty of Medicine."
 >
   <div class="mb-6 text-start">
-    <h1 class="text-2xl font-extrabold text-zinc-900 dark:text-zinc-100 mb-1" data-i18n="search.title">
+    <h1 class="text-2xl font-extrabold text-zinc-900 dark:text-zinc-100 mb-1">
       Comprehensive Resource Catalog & Search
     </h1>
-    <p class="text-xs text-zinc-500 dark:text-zinc-400 mb-4" data-i18n="search.subtitle">
+    <p class="text-xs text-zinc-500 dark:text-zinc-400 mb-4">
       Search by keywords, subject names (Anatomy, Physiology, etc.), module codes, or resource types across all five years.
     </p>
 
@@ -48,7 +48,7 @@ const allMaterials = rawMaterials.map((m) => ({
     <div class="space-y-2">
       <!-- Year Selectors -->
       <div class="flex items-center gap-1.5 overflow-x-auto py-1 no-scrollbar" id="year-filter-row">
-        <span class="text-xs font-bold text-zinc-400 mr-1 shrink-0" data-i18n="search.yearFilterLabel">Year:</span>
+        <span class="text-xs font-bold text-zinc-400 mr-1 shrink-0">Year:</span>
         {['all', '1', '2', '3', '4', '5'].map((y) => (
           <button
             type="button"
@@ -61,9 +61,9 @@ const allMaterials = rawMaterials.map((m) => ({
             ]}
           >
             {y === 'all' ? (
-              <span data-i18n="search.allYears">All Years</span>
+              <span>All Years</span>
             ) : (
-              <span data-i18n="nav.year" data-i18n-params={JSON.stringify({ y })}>Year {y}</span>
+              <span>Year {y}</span>
             )}
           </button>
         ))}
@@ -71,7 +71,7 @@ const allMaterials = rawMaterials.map((m) => ({
 
       <!-- Type Filter Chips -->
       <div class="flex items-center gap-1.5 overflow-x-auto py-1 no-scrollbar">
-        <span class="text-xs font-bold text-zinc-400 mr-1 shrink-0" data-i18n="search.typeFilterLabel">Type:</span>
+        <span class="text-xs font-bold text-zinc-400 mr-1 shrink-0">Type:</span>
         <FilterToolbar />
       </div>
     </div>
@@ -81,8 +81,6 @@ const allMaterials = rawMaterials.map((m) => ({
   <div class="flex items-center justify-between py-2 border-b border-zinc-200 dark:border-zinc-800 mb-4 text-xs text-zinc-500 dark:text-zinc-400">
     <div
       id="results-count-container"
-      data-i18n="search.resultsCount"
-      data-i18n-params={JSON.stringify({ n: allMaterials.length })}
     >
       Showing {allMaterials.length} study resources
     </div>
@@ -91,7 +89,7 @@ const allMaterials = rawMaterials.map((m) => ({
       id="reset-filters-btn"
       class="text-emerald-600 dark:text-emerald-400 hover:underline font-bold hidden cursor-pointer"
     >
-      <span data-i18n="search.resetFilters">Reset Filters</span>
+      <span>Reset Filters</span>
     </button>
   </div>
 
@@ -102,7 +100,7 @@ const allMaterials = rawMaterials.map((m) => ({
   >
     <div class="flex items-center gap-2 text-zinc-800 dark:text-zinc-200">
       <svg class="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-        <path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+        <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
       </svg>
       <span id="cross-year-text"></span>
     </div>
@@ -111,8 +109,8 @@ const allMaterials = rawMaterials.map((m) => ({
       id="search-all-years-btn"
       class="px-2.5 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold transition-all shadow-2xs cursor-pointer inline-flex items-center gap-1 shrink-0 text-xs"
     >
-      <span data-i18n="search.searchAllYears">Search All Years</span>
-      <svg class="w-3 h-3 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+      <span>Search All Years</span>
+      <svg class="w-3 h-3 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
         <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
       </svg>
     </button>
@@ -162,10 +160,10 @@ const allMaterials = rawMaterials.map((m) => ({
           <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
         </svg>
       </div>
-      <h3 class="text-sm font-bold text-zinc-900 dark:text-zinc-100 mb-1" data-i18n="search.emptyTitle">
+      <h3 class="text-sm font-bold text-zinc-900 dark:text-zinc-100 mb-1">
         No resources found matching your search
       </h3>
-      <p class="text-xs text-zinc-500 dark:text-zinc-400 max-w-sm mx-auto mb-4" data-i18n="search.emptyDesc">
+      <p class="text-xs text-zinc-500 dark:text-zinc-400 max-w-sm mx-auto mb-4">
         Try different search keywords or remove some filters.
       </p>
       <button
@@ -173,7 +171,7 @@ const allMaterials = rawMaterials.map((m) => ({
         id="empty-reset-filters-btn"
         class="inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-semibold rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white transition-colors cursor-pointer shadow-2xs"
       >
-        <span data-i18n="search.resetFilters">Reset Filters</span>
+        <span>Reset Filters</span>
       </button>
     </div>
   </div>
@@ -192,7 +190,6 @@ const allMaterials = rawMaterials.map((m) => ({
     type SearchDocument
   } from '../utils/search';
   import { getUserStoredYear } from '../utils/storage';
-  import { getCurrentLanguage, t } from '../utils/i18n';
   import type { MaterialItem, ModuleInfo } from '../types/materials';
 
   let cachedSearchDocs: SearchDocument[] | null = null;
@@ -320,7 +317,6 @@ const allMaterials = rawMaterials.map((m) => ({
       const tokens = tokenizeQuery(q);
       const isYearAll = currentYear === 'all';
       const isTypeAll = currentType === 'all';
-      const lang = getCurrentLanguage();
 
       // FAST PATH: Filtering purely by Year and/or Type (zero text search query)
       // Eliminates heavy indexing, avoids relevance scoring, and NEVER reparents DOM elements
@@ -364,7 +360,7 @@ const allMaterials = rawMaterials.map((m) => ({
 
         const countContainer = document.getElementById('results-count-container');
         if (countContainer) {
-          countContainer.textContent = t('search.resultsCount', lang, { n: matchedCount });
+          countContainer.textContent = `Showing ${matchedCount} study resources`;
         }
 
         crossYearBanner?.classList.add('hidden');
@@ -443,14 +439,14 @@ const allMaterials = rawMaterials.map((m) => ({
       const matchedCount = matchesInCurrentYear.length;
       const countContainer = document.getElementById('results-count-container');
       if (countContainer) {
-        countContainer.textContent = t('search.resultsCount', lang, { n: matchedCount });
+        countContainer.textContent = `Showing ${matchedCount} study resources`;
       }
 
       // Cross-year suggestion logic
       if (!isYearAll && matchedCount === 0 && matchesInOtherYears.length > 0 && q) {
         if (crossYearBanner && crossYearText) {
           const otherCount = matchesInOtherYears.length;
-          crossYearText.textContent = t('search.noYearResults', lang, { y: currentYear, count: otherCount });
+          crossYearText.textContent = `No materials found in Year ${currentYear}. We found ${otherCount} matching resources in other academic years:`;
           crossYearBanner.classList.remove('hidden');
         }
       } else {
@@ -477,9 +473,6 @@ const allMaterials = rawMaterials.map((m) => ({
     }
 
     // Event listeners
-    const searchAbort = new AbortController();
-    window.addEventListener('asumed-language-changed', applyFilter, { signal: searchAbort.signal });
-
     input?.addEventListener('input', () => {
       currentQuery = input.value;
       debounceApplyFilter();

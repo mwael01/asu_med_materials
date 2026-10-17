@@ -7,7 +7,7 @@ This document details all UI components, their props, intended reuse guidelines,
 ## 1. Principles & Rules
 
 - **Minimalist & Convenient**: Omit fluff, boilerplate slogans, and filler copy. Prioritize getting students to the resource link in as few clicks as possible.
-- **Arabic UI with Technical English**: Use clear Arabic for all navigation, buttons, and system messages, while preserving English medical disciplines (Anatomy, Pathology, etc.), module codes (MED101), and resource brand names (Google Drive, Telegram, YouTube).
+- **English-First Platform with Arabic Search Tolerance**: Clean English interface tailored to the 100% English medical curriculum at Ain Shams University Faculty of Medicine, with full Arabic alias tolerance in search for Egyptian doctor names.
 - **Default White Theme**: Optimized for clean contrast on white backgrounds with subtle borders and emerald accents.
 - **Component Reuse**: Reuse shared components across Year views, Module views, and the Search page.
 - **Small Button Icons**: Use SVG icons for compact buttons and type badges; do not replace substantive visual elements with misleading standalone icons.
@@ -24,7 +24,7 @@ This document details all UI components, their props, intended reuse guidelines,
 - **Style**: Based on legacy multistage design (commit a207a03) - grid layout with year badge, title, and description.
 - **Persistence**: Saves choices to `localStorage` (`asumed_user_year`) and emits `user-preferences-updated`. Tracks first visit with `asumed_has_visited` flag.
 - **First-Visit Onboarding**: Automatically opens on first page load if no year is stored, prompting the student to select their academic year immediately.
-- **Module Preview**: Each year shows a description (e.g., "Blood & Lymphatic System" for Year 2, "قريباً" for others).
+- **Module Preview**: Each year shows a description (e.g., "Blood & Lymphatic System" for Year 2, "Coming Soon" for others).
 - **Props**: None (global client script).
 
 ---
@@ -33,7 +33,7 @@ This document details all UI components, their props, intended reuse guidelines,
 
 #### [`Navbar.astro`](file:///workspaces/asu_med_materials/src/components/navigation/Navbar.astro)
 - **Location**: `src/components/navigation/Navbar.astro`
-- **Purpose**: Compact top navigation bar (`h-12`) with clean text brand title (`ASU Med Materials`), desktop nav links, featured Contribute CTA with special emerald-teal gradient and glowing animations (`.contribute-glow-btn`), year indicator badge (`#nav-user-year-badge`), search shortcut, bookmark drawer trigger, language switcher (`LanguageToggle.astro`), theme switcher (`ThemeToggle.astro`), and mobile burger menu trigger (`#mobile-menu-trigger`).
+- **Purpose**: Compact top navigation bar (`h-12`) with clean text brand title (`ASU Med Materials`), desktop nav links, featured Contribute CTA with special emerald-teal gradient and glowing animations (`.contribute-glow-btn`), year indicator badge (`#nav-user-year-badge`), search shortcut, bookmark drawer trigger, theme switcher (`ThemeToggle.astro`), and mobile burger menu trigger (`#mobile-menu-trigger`).
 - **Props**: None.
 
 #### [`MobileMenu.astro`](file:///workspaces/asu_med_materials/src/components/navigation/MobileMenu.astro)
@@ -45,12 +45,6 @@ This document details all UI components, their props, intended reuse guidelines,
     currentPath: string;
   }
   ```
-
-
-#### [`LanguageToggle.astro`](file:///workspaces/asu_med_materials/src/components/common/LanguageToggle.astro)
-- **Location**: `src/components/common/LanguageToggle.astro`
-- **Purpose**: Instant topbar language toggle button with a globe icon and language indicator badge (`AR` / `EN`). Triggers instantaneous in-place DOM translation without reloading or changing the URL route, updates `document.documentElement.lang` and `dir="ltr"` / `dir="rtl"`, persists user choice in `localStorage.getItem('asumed_lang')`, and dispatches `asumed-language-changed` for dynamic client components.
-- **Props**: None.
 
 #### [`Footer.astro`](file:///workspaces/asu_med_materials/src/components/navigation/Footer.astro)
 - **Location**: `src/components/navigation/Footer.astro`

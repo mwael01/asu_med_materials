@@ -115,10 +115,10 @@ if (generalMaterials.length > 0) {
   <!-- Hero & Search Section -->
   <section class="mb-8">
     <div class="mb-4">
-      <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-zinc-900 dark:text-zinc-50 mb-1.5" data-i18n="home.heroTitle">
+      <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-zinc-900 dark:text-zinc-50 mb-1.5">
         ASU Faculty of Medicine Materials Hub
       </h1>
-      <p class="text-xs sm:text-sm text-zinc-600 dark:text-zinc-400" data-i18n="home.heroSubtitle">
+      <p class="text-xs sm:text-sm text-zinc-600 dark:text-zinc-400">
         Batch drives, Telegram channels, YouTube lectures, and study notes across all five years.
       </p>
     </div>
@@ -133,7 +133,7 @@ if (generalMaterials.length > 0) {
   <section class="mb-12" id="home-modules-section">
     <div class="flex items-center justify-between mb-3.5">
       <div class="flex items-center gap-2">
-        <h2 class="text-base sm:text-lg font-bold text-zinc-900 dark:text-zinc-100" data-i18n="home.myModules">
+        <h2 class="text-base sm:text-lg font-bold text-zinc-900 dark:text-zinc-100">
           My Study Modules
         </h2>
         <button
@@ -141,19 +141,19 @@ if (generalMaterials.length > 0) {
           id="home-guest-change-year-btn"
           class="trigger-multistage-selector text-xs text-emerald-600 dark:text-emerald-400 hover:underline font-semibold cursor-pointer"
         >
-          (<span data-i18n="nav.chooseYear">Change Year</span>)
+          (<span>Change Year</span>)
         </button>
         <a
           href="/profile"
           id="home-user-edit-year-link"
           class="hidden text-xs text-emerald-600 dark:text-emerald-400 hover:underline font-semibold cursor-pointer"
         >
-          (<span data-i18n="nav.chooseYear">Change Year</span>)
+          (<span>Change Year</span>)
         </a>
       </div>
 
       <a id="home-year-modules-link" href="/year/2" class="text-xs font-bold text-emerald-600 dark:text-emerald-400 hover:underline">
-        <span data-i18n="year.modulesTitle">Year Modules</span> &rarr;
+        <span>Year Modules</span> &rarr;
       </a>
     </div>
 
@@ -195,7 +195,7 @@ if (generalMaterials.length > 0) {
 
     <!-- Fallback when selected year has no registered modules yet -->
     <div id="no-modules-placeholder" class="hidden py-8 text-center border border-dashed border-zinc-200 dark:border-zinc-800 rounded-xl p-6 bg-white dark:bg-zinc-900/60">
-      <p class="text-xs text-zinc-500 dark:text-zinc-400" data-i18n="home.noModulesFound">
+      <p class="text-xs text-zinc-500 dark:text-zinc-400">
         No modules added yet for this year. Blood Module (Year 2) is currently available.
       </p>
       <button
@@ -221,18 +221,18 @@ if (generalMaterials.length > 0) {
               <path d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
             </svg>
           </div>
-          <h2 class="text-base sm:text-lg font-bold text-zinc-900 dark:text-zinc-100" data-i18n="home.myLibrary">
+          <h2 class="text-base sm:text-lg font-bold text-zinc-900 dark:text-zinc-100">
             My Study Library
           </h2>
         </div>
-        <p class="text-xs text-zinc-500 dark:text-zinc-400 mt-1" data-i18n="home.myLibrarySubtitle">
+        <p class="text-xs text-zinc-500 dark:text-zinc-400 mt-1">
           Your saved study materials organized automatically by module and subject.
         </p>
       </div>
 
       <div class="flex items-center gap-2 shrink-0">
         <a href="/search" class="text-xs font-bold text-emerald-600 dark:text-emerald-400 hover:underline">
-          <span data-i18n="home.browseAll">Browse All Materials</span> &rarr;
+          <span>Browse All Materials</span> &rarr;
         </a>
       </div>
     </div>
@@ -252,7 +252,7 @@ if (generalMaterials.length > 0) {
         aria-pressed="true"
       >
         <span id="home-library-toggle-dot" class="w-2 h-2 rounded-full bg-emerald-500"></span>
-        <span id="home-library-toggle-text" data-i18n="home.hideCompleted">Hide Completed</span>
+        <span id="home-library-toggle-text">Hide Completed</span>
       </button>
     </div>
 
@@ -263,24 +263,24 @@ if (generalMaterials.length > 0) {
           <path d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
         </svg>
       </div>
-      <p class="text-sm font-bold text-zinc-700 dark:text-zinc-300" data-i18n="bookmarks.emptyTitle">
+      <p class="text-sm font-bold text-zinc-700 dark:text-zinc-300">
         No saved resources yet
       </p>
-      <p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 max-w-sm mx-auto leading-relaxed" data-i18n="bookmarks.emptyDesc">
+      <p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 max-w-sm mx-auto leading-relaxed">
         Click the Bookmark icon on any card to save it here for fast offline access.
       </p>
       <button
         type="button"
         class="trigger-multistage-selector mt-4 inline-flex items-center gap-1 text-xs font-bold px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white transition-colors cursor-pointer shadow-2xs"
       >
-        <span data-i18n="nav.chooseYear">Browse Modules</span>
+        <span>Browse Modules</span>
       </button>
     </div>
 
     <!-- Empty Notice when Filter yields 0 items -->
     <div id="home-library-filter-empty" class="hidden py-10 text-center border border-dashed border-zinc-200 dark:border-zinc-800 rounded-2xl p-6 bg-white dark:bg-zinc-900/60">
       <span class="text-2xl mb-1.5 block">🎉</span>
-      <p class="text-xs font-bold text-zinc-700 dark:text-zinc-300" data-i18n="home.allCompletedFilter">
+      <p class="text-xs font-bold text-zinc-700 dark:text-zinc-300">
         Great job! All saved resources in this filter are completed!
       </p>
     </div>
@@ -292,8 +292,8 @@ if (generalMaterials.length > 0) {
         <div class="flex items-center justify-between pb-2 border-b-2 border-amber-500/30">
           <div class="flex items-center gap-2">
             <span class="w-2.5 h-2.5 rounded-full bg-amber-500"></span>
-            <h3 class="text-sm sm:text-base font-extrabold text-zinc-900 dark:text-zinc-100" data-i18n="collections.bookmarkedCollections">
-              المجموعات والحزم المحفوظة
+            <h3 class="text-sm sm:text-base font-extrabold text-zinc-900 dark:text-zinc-100">
+              Saved Collections & Packs
             </h3>
           </div>
         </div>
@@ -315,17 +315,12 @@ if (generalMaterials.length > 0) {
         <div
           class="home-library-module-group space-y-6"
           data-home-module-group={modGroup.module.id}
-          data-home-module-title-en={modGroup.module.title}
-          data-home-module-title-ar={'titleAr' in modGroup.module && modGroup.module.titleAr ? modGroup.module.titleAr : modGroup.module.title}
+          data-home-module-title={modGroup.module.title}
         >
           <!-- Module Header Banner -->
           <div class="flex items-center gap-2.5 pb-2 border-b-2 border-emerald-500/30">
             <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
-            <h3
-              class="text-sm sm:text-base font-extrabold text-zinc-900 dark:text-zinc-100"
-              data-i18n-mod-title-en={modGroup.module.title}
-              data-i18n-mod-title-ar={'titleAr' in modGroup.module && modGroup.module.titleAr ? modGroup.module.titleAr : modGroup.module.title}
-            >
+            <h3 class="text-sm sm:text-base font-extrabold text-zinc-900 dark:text-zinc-100">
               {modGroup.module.title}
             </h3>
           </div>
@@ -341,19 +336,11 @@ if (generalMaterials.length > 0) {
                 <!-- Subject Header with Hierarchy: Module Name > Subject Name -->
                 <div class="flex items-center justify-between mb-3 pb-1.5 border-b border-zinc-200/80 dark:border-zinc-800">
                   <div class="flex items-center gap-1.5 text-xs text-zinc-500 dark:text-zinc-400">
-                    <span
-                      class="font-bold text-zinc-800 dark:text-zinc-200"
-                      data-i18n-mod-title-en={modGroup.module.title}
-                      data-i18n-mod-title-ar={'titleAr' in modGroup.module && modGroup.module.titleAr ? modGroup.module.titleAr : modGroup.module.title}
-                    >
+                    <span class="font-bold text-zinc-800 dark:text-zinc-200">
                       {modGroup.module.title}
                     </span>
                     <span>&gt;</span>
-                    <h4
-                      class="font-extrabold text-sm text-emerald-600 dark:text-emerald-400"
-                      data-i18n-subject-en={subGroup.nameEn}
-                      data-i18n-subject-ar={subGroup.nameAr}
-                    >
+                    <h4 class="font-extrabold text-sm text-emerald-600 dark:text-emerald-400">
                       {subGroup.name}
                     </h4>
                   </div>
@@ -388,7 +375,6 @@ if (generalMaterials.length > 0) {
     getStoredBookmarkIds,
     getStoredStudiedIds
   } from '../utils/storage';
-  import { getCurrentLanguage } from '../utils/i18n';
   import { getCachedUserProfile, onAuthChange } from '../firebase/auth';
 
   let unsubscribeAuth: (() => void) | null = null;
@@ -491,7 +477,6 @@ if (generalMaterials.length > 0) {
     let hideCompleted = true; // default: hide completed materials for a clean UI
 
     function renderHomeLibrary(): void {
-      const isAr = getCurrentLanguage() === 'ar';
       const bookmarks = getStoredBookmarkIds();
       const studiedIds = getStoredStudiedIds();
 
@@ -555,7 +540,7 @@ if (generalMaterials.length > 0) {
                 : 'bg-white dark:bg-zinc-900 text-zinc-700 dark:text-zinc-300 border-zinc-200/80 dark:border-zinc-800 hover:border-zinc-300'
             }"
           >
-            <span>${isAr ? 'كل الموديولات' : 'All Modules'}</span>
+            <span>All Modules</span>
           </button>
         `;
 
@@ -564,9 +549,7 @@ if (generalMaterials.length > 0) {
           const count = modulesWithSaved.get(modId) || 0;
           if (count === 0) return;
 
-          const titleEn = modEl.getAttribute('data-home-module-title-en') || modId;
-          const titleAr = modEl.getAttribute('data-home-module-title-ar') || titleEn;
-          const title = isAr ? titleAr : titleEn;
+          const title = modEl.getAttribute('data-home-module-title') || modId;
           const isSelected = activeModuleFilter === modId;
 
           chipsHtml += `
@@ -605,16 +588,14 @@ if (generalMaterials.length > 0) {
             'inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg border transition-all cursor-pointer shadow-2xs bg-emerald-50 text-emerald-700 border-emerald-200/80 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-800/60';
           if (completedToggleDot) completedToggleDot.className = 'w-2 h-2 rounded-full bg-emerald-500';
           if (completedToggleText) {
-            completedToggleText.textContent = isAr ? 'إخفاء المكتمل' : 'Hide Completed';
+            completedToggleText.textContent = 'Hide Completed';
           }
         } else {
           completedToggleBtn.className =
             'inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg border transition-all cursor-pointer shadow-2xs bg-white dark:bg-zinc-900 text-zinc-700 dark:text-zinc-300 border-zinc-200/80 dark:border-zinc-800 hover:border-zinc-300';
           if (completedToggleDot) completedToggleDot.className = 'w-2 h-2 rounded-full bg-zinc-400';
           if (completedToggleText) {
-            completedToggleText.textContent = isAr
-              ? `عرض المكتمل (${totalCompleted})`
-              : `Show Completed (${totalCompleted})`;
+            completedToggleText.textContent = `Show Completed (${totalCompleted})`;
           }
         }
       }
@@ -693,10 +674,6 @@ if (generalMaterials.length > 0) {
     }, { signal });
     window.addEventListener('bookmarks-updated', renderHomeLibrary, { signal });
     window.addEventListener('studied-updated', renderHomeLibrary, { signal });
-    window.addEventListener('asumed-language-changed', () => {
-      syncYear();
-      renderHomeLibrary();
-    }, { signal });
   }
 
   initHomePage();

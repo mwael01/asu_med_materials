@@ -64,12 +64,12 @@ test('fallback and messages without links never fabricate metadata', () => {
   assert.equal(fallback.title,''); assert.equal(fallback.year,undefined); assert.equal(fallback.author,undefined);
   assert.ok(fallback.issues.length);
 });
-test('publication requires translations and year, permits general material, validates videos', () => {
+test('publication requires title and year, permits general material, validates videos', () => {
   const draft = createDraft(parse([item])[0],draftCredit(admin));
   draft.moduleId = ''; assert.deepEqual(validateDraft(draft,modules),[]);
-  draft.titleEn = ''; assert.throws(() => serializeDraft(draft,modules));
-  draft.titleEn = item.titleEn; draft.descriptionEn = ''; assert.ok(validateDraft(draft,modules).some(i => i.field === 'description'));
-  draft.description = ''; draft.videos = [{id:'x',title:'',url:'javascript:alert(1)'}]; assert.ok(validateDraft(draft,modules).some(i => i.field === 'videos'));
+  draft.title = ''; draft.titleEn = ''; assert.throws(() => serializeDraft(draft,modules));
+  draft.title = item.title; draft.titleEn = ''; assert.equal(serializeDraft(draft,modules).title, item.title);
+  draft.videos = [{id:'x',title:'',url:'javascript:alert(1)'}]; assert.ok(validateDraft(draft,modules).some(i => i.field === 'videos'));
 });
 test('playlist retains only evidenced videos, with stable grouping', () => {
   const playlist = 'https://www.youtube.com/playlist?list=PLtest';

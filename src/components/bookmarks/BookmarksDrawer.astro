@@ -22,7 +22,7 @@
           </svg>
         </div>
         <div>
-          <h2 id="bookmarks-drawer-title" data-i18n="bookmarks.title" class="font-bold text-zinc-900 dark:text-zinc-100 text-sm sm:text-base">
+          <h2 id="bookmarks-drawer-title" class="font-bold text-zinc-900 dark:text-zinc-100 text-sm sm:text-base">
             Saved Resources
           </h2>
         </div>
@@ -32,7 +32,6 @@
         type="button"
         id="close-bookmarks-drawer"
         class="p-1.5 text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors cursor-pointer"
-        data-i18n-attr="aria-label:bookmarks.closeLabel"
         aria-label="Close bookmarks drawer"
       >
         <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -48,14 +47,14 @@
         id="drawer-filter-all"
         class="drawer-filter-btn text-xs font-semibold px-3 py-1.5 rounded-lg border transition-all cursor-pointer bg-zinc-900 text-white border-zinc-900 dark:bg-zinc-100 dark:text-zinc-900 dark:border-zinc-100 shadow-2xs"
       >
-        <span data-i18n="bookmarks.filterAll">All</span>
+        <span>All</span>
       </button>
       <button
         type="button"
         id="drawer-filter-unstudied"
         class="drawer-filter-btn text-xs font-semibold px-3 py-1.5 rounded-lg border transition-all cursor-pointer bg-white dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400 border-zinc-200 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700"
       >
-        <span data-i18n="bookmarks.filterUnstudied">To Study</span>
+        <span>To Study</span>
       </button>
     </div>
   </div>
@@ -69,10 +68,10 @@
           <path stroke-linecap="round" stroke-linejoin="round" d="M17.593 3.322c1.1.128 1.907 1.077 1.907 2.185V21L12 17.25 4.5 21V5.507c0-1.108.806-2.057 1.907-2.185a48.507 48.507 0 0111.186 0z" />
         </svg>
       </div>
-      <p class="text-sm font-bold text-zinc-700 dark:text-zinc-300" data-i18n="bookmarks.emptyTitle">
+      <p class="text-sm font-bold text-zinc-700 dark:text-zinc-300">
         No saved resources yet
       </p>
-      <p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1.5 max-w-xs mx-auto leading-relaxed" data-i18n="bookmarks.emptyDesc">
+      <p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1.5 max-w-xs mx-auto leading-relaxed">
         Click the Bookmark icon on any card to save it here for fast offline access.
       </p>
     </div>
@@ -85,7 +84,7 @@
 
   <!-- Drawer Footer -->
   <div class="p-3.5 pb-[calc(1rem+env(safe-area-inset-bottom,0px))] border-t border-zinc-200 dark:border-zinc-800 text-center space-y-1 bg-zinc-50/50 dark:bg-zinc-900/50">
-    <p class="text-[11px] text-zinc-400 dark:text-zinc-500" data-i18n="bookmarks.footerNote">
+    <p class="text-[11px] text-zinc-400 dark:text-zinc-500">
       Saved locally on your device • Available offline
     </p>
     <a
@@ -93,8 +92,8 @@
       id="drawer-view-home-link"
       class="inline-flex items-center gap-1 text-xs font-bold text-emerald-600 dark:text-emerald-400 hover:underline"
     >
-      <span data-i18n="bookmarks.viewInHome">View in Home</span>
-      <span class="rtl:rotate-180">&rarr;</span>
+      <span>View in Home</span>
+      <span>&rarr;</span>
     </a>
   </div>
 </aside>
@@ -110,7 +109,7 @@
   import { getMaterialEnglishTitle } from '../../i18n/materialsTranslations';
   import { getStoredBookmarkIds, getStoredStudiedIds } from '../../utils/storage';
   import { setMaterialBookmarked, renderBookmarkButtons, initBookmarkButtons, stopBookmarkButtons } from '../../utils/bookmarks';
-  import { getCurrentLanguage, t } from '../../utils/i18n';
+  import { t } from '../../utils/i18n';
   import { escapeHtml } from '../../utils/sanitize';
   import { getClientMaterials } from '../../utils/catalogueClient';
   import type { MaterialItem, ModuleInfo } from '../../types/materials';
@@ -216,12 +215,11 @@
 
         const showFn = (window as any).showToast;
         if (typeof showFn === 'function') {
-          const isAr = getCurrentLanguage() === 'ar';
           showFn({
             type: index >= 0 ? 'info' : 'success',
             message: index >= 0
-              ? (isAr ? 'تمت إزالة المصدر من المحفوظات' : 'Removed from saved library')
-              : (isAr ? 'تم حفظ المصدر في مكتبتك' : 'Saved to your study library'),
+              ? 'Removed from saved library'
+              : 'Saved to your study library',
             duration: 2000
           });
         }
@@ -233,9 +231,6 @@
       void renderSmartBookmarks();
     }, { signal });
     window.addEventListener('studied-updated', () => {
-      void renderSmartBookmarks();
-    }, { signal });
-    window.addEventListener('asumed-language-changed', () => {
       void renderSmartBookmarks();
     }, { signal });
 
@@ -278,7 +273,6 @@
     async function renderSmartBookmarks(): Promise<void> {
       const ids = getStoredBookmarkIds();
       const studiedIds = getStoredStudiedIds();
-      const isAr = getCurrentLanguage() === 'ar';
 
       renderBookmarkButtons();
 
@@ -326,10 +320,10 @@
           <div class="py-10 text-center border border-dashed border-zinc-200 dark:border-zinc-800 rounded-xl p-5 bg-zinc-50/60 dark:bg-zinc-800/30">
             <span class="text-2xl mb-1.5 block">🎉</span>
             <p class="text-xs font-bold text-zinc-700 dark:text-zinc-300">
-              ${isAr ? 'أحسنت! كل المحفوظات تمت مذاكرتها' : 'All saved resources are studied!'}
+              All saved resources are studied!
             </p>
             <p class="text-[11px] text-zinc-400 mt-1">
-              ${isAr ? 'اضغط على "الكل" لعرض جميع مصادرك المحفوظة.' : 'Switch to "All" to view all your saved resources.'}
+              Switch to "All" to view all your saved resources.
             </p>
           </div>
         `;
@@ -342,9 +336,7 @@
       displayMaterials.forEach((item) => {
         const mod = item.moduleId ? allModules.find((m) => m.id === item.moduleId) : null;
         const modKey = item.moduleId || 'general';
-        const modTitle = mod
-          ? (isAr ? mod.titleAr || mod.title : mod.title)
-          : (isAr ? 'مصادر عامة' : 'General Resources');
+        const modTitle = mod ? mod.title : 'General Resources';
 
         if (!modulesMap.has(modKey)) {
           modulesMap.set(modKey, { moduleTitle: modTitle, subjectsMap: new Map() });
@@ -352,7 +344,7 @@
 
         const subjectsMap = modulesMap.get(modKey)!.subjectsMap;
         const subKey = item.category === 'central' || !item.subject
-          ? (isAr ? 'المصادر المركزية والمشتركة' : 'Central & Batch Resources')
+          ? 'Central & Batch Resources'
           : item.subject;
 
         if (!subjectsMap.has(subKey)) {
@@ -391,8 +383,8 @@
 
           items.forEach((item) => {
             const isStudied = studiedIds.includes(item.id);
-            const titleText = isAr ? item.title : (item.titleEn || getMaterialEnglishTitle(item.id, item.title));
-            const typeLabel = t(`types.${item.type}`, isAr ? 'ar' : 'en');
+            const titleText = item.titleEn || getMaterialEnglishTitle(item.id, item.title);
+            const typeLabel = t(`types.${item.type}`);
             const targetUrl = item.type === 'playlist' || item.playlistId ? `/playlist/${item.id}` : item.url;
             const targetAttr = item.type === 'playlist' || item.playlistId ? '_self' : '_blank';
 
@@ -407,7 +399,7 @@
                       : 'border-zinc-300 dark:border-zinc-600 bg-white dark:bg-zinc-800 hover:border-emerald-500'
                   }"
                   data-drawer-studied-id="${escapeHtml(item.id)}"
-                  title="${isStudied ? (isAr ? 'تمت المذاكرة' : 'Marked as studied') : (isAr ? 'تحديد كمذاكر' : 'Mark as studied')}"
+                  title="${isStudied ? 'Marked as studied' : 'Mark as studied'}"
                   aria-label="Toggle studied status"
                 >
                   <svg class="w-3.5 h-3.5 ${isStudied ? '' : 'hidden'}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
@@ -429,7 +421,7 @@
                   <div class="flex items-center gap-1.5 text-[10px] text-zinc-400 dark:text-zinc-500 mt-0.5">
                     <span>${escapeHtml(typeLabel)}</span>
                     <span>&bull;</span>
-                    <span>${isAr ? `السنة ${escapeHtml(String(item.year))}` : `Year ${escapeHtml(String(item.year))}`}</span>
+                    <span>Year ${escapeHtml(String(item.year))}</span>
                   </div>
                 </div>
 
@@ -440,7 +432,7 @@
                     target="${targetAttr}"
                     rel="${targetAttr === '_blank' ? 'noopener noreferrer' : ''}"
                     class="p-1.5 text-zinc-400 hover:text-emerald-600 dark:hover:text-emerald-400 rounded-lg hover:bg-zinc-200/80 dark:hover:bg-zinc-700 transition-colors"
-                    title="${isAr ? 'فتح الرابط' : 'Open resource'}"
+                    title="Open resource"
                   >
                     <svg class="w-3.5 h-3.5 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                       <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
@@ -450,7 +442,7 @@
                     type="button"
                     class="drawer-remove-btn p-1.5 text-zinc-400 hover:text-rose-500 rounded-lg hover:bg-zinc-200/80 dark:hover:bg-zinc-700 transition-colors cursor-pointer"
                     data-drawer-remove-id="${escapeHtml(item.id)}"
-                    title="${isAr ? 'حذف من المحفوظات' : 'Remove from saved'}"
+                    title="Remove from saved"
                   >
                     <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                       <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
@@ -490,7 +482,7 @@
           if (typeof showFn === 'function') {
             showFn({
               type: 'info',
-              message: isAr ? 'تمت إزالة المصدر من المحفوظات' : 'Removed from saved library',
+              message: 'Removed from saved library',
               duration: 2000
             });
           }

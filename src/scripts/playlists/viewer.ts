@@ -19,7 +19,6 @@ export function initPlaylistViewer(): void {
   } catch { /* Storage unavailable; progress still works in memory. */ }
   let current = 0;
   const lifecycle = new AbortController();
-  const en = () => document.documentElement.lang === 'en';
   function importStudied() {
     const studied = new Set(getStoredStudiedIds());
     for (const item of items) {
@@ -32,10 +31,10 @@ export function initPlaylistViewer(): void {
     const percent = items.length ? Math.round(count / items.length * 100) : 0;
     const bar = get('progress-bar-fill'); if (bar) bar.style.width = `${percent}%`;
     const percentage = get('progress-percent-label'); if (percentage) percentage.textContent = `${percent}%`;
-    const label = get('progress-count-label'); if (label) label.textContent = en() ? `${count} of ${items.length} completed` : `${count} من ${items.length} مكتمل`;
+    const label = get('progress-count-label'); if (label) label.textContent = `${count} of ${items.length} completed`;
     for (const [index, item] of items.entries()) {
       const title = item.querySelector<HTMLElement>('.video-title');
-      if (title) title.textContent = (en() ? item.dataset.titleEn : item.dataset.titleAr) || item.dataset.title || '';
+      if (title) title.textContent = item.dataset.titleEn || item.dataset.title || '';
       const done = Boolean(watched[itemId(item)]);
       const active = videos.length > 0 && index === current;
       const box = item.querySelector<HTMLElement>('[role="checkbox"], .checkpoint-done-checkbox');
@@ -47,10 +46,10 @@ export function initPlaylistViewer(): void {
       const playing = item.querySelector('.now-playing-badge'); playing?.classList.toggle('hidden', !active); playing?.classList.toggle('flex', active);
     }
     const currentTitle = get('current-video-title');
-    if (currentTitle && videos.length) currentTitle.textContent = (en() ? videos[current].dataset.titleEn : videos[current].dataset.titleAr) || videos[current].dataset.title || '';
+    if (currentTitle && videos.length) currentTitle.textContent = videos[current].dataset.titleEn || videos[current].dataset.title || '';
     const done = videos.length ? Boolean(watched[itemId(videos[current])]) : count === items.length;
-    const toggle = get('toggle-done-text'); if (toggle) toggle.textContent = done ? (en() ? 'Completed' : 'مكتمل') : (en() ? 'Mark completed' : 'تحديد كمكتمل');
-    const stepper = get('video-stepper-label'); if (stepper) stepper.textContent = en() ? `${current + 1} of ${videos.length}` : `${current + 1} من ${videos.length}`;
+    const toggle = get('toggle-done-text'); if (toggle) toggle.textContent = done ? 'Completed' : 'Mark completed';
+    const stepper = get('video-stepper-label'); if (stepper) stepper.textContent = `${current + 1} of ${videos.length}`;
     const prev = get<HTMLButtonElement>('prev-video-btn'); if (prev) prev.disabled = current === 0;
     const next = get<HTMLButtonElement>('next-video-btn'); if (next) next.disabled = current === videos.length - 1;
   }
@@ -102,7 +101,7 @@ export function initPlaylistViewer(): void {
   }, {signal: lifecycle.signal});
   get('mark-all-done-btn')?.addEventListener('click', () => { for (const item of items) watched[itemId(item)] = true; save(); }, {signal: lifecycle.signal});
   get('reset-progress-btn')?.addEventListener('click', () => {
-    if (confirm(en() ? 'Reset watch progress?' : 'إعادة ضبط سجل المشاهدة؟')) { watched = {}; save(); }
+    if (confirm('Reset watch progress?')) { watched = {}; save(); }
   }, {signal: lifecycle.signal});
   get('prev-video-btn')?.addEventListener('click', () => switchVideo(current - 1, true), {signal: lifecycle.signal});
   get('next-video-btn')?.addEventListener('click', () => switchVideo(current + 1, true), {signal: lifecycle.signal});
@@ -110,7 +109,6 @@ export function initPlaylistViewer(): void {
     const detail = (event as CustomEvent<{id: string; watched: WatchedVideos}>).detail;
     if (detail.id === playlistId) { watched = detail.watched; render(); }
   }, {signal: lifecycle.signal});
-  window.addEventListener('asumed-language-changed', render, {signal: lifecycle.signal});
   window.addEventListener('studied-updated', event => {
     if ((event as CustomEvent<{sourceId?: string}>).detail?.sourceId === playlistId) return;
     importStudied(); render();

@@ -57,10 +57,10 @@ const searchHref = `/search?q=${encodeURIComponent(displayName)}`;
         </span>
       </span>
       <span class="mt-0.5 block text-[11px] text-zinc-500 dark:text-zinc-400">
-        <span data-i18n="contributors.totalCount" data-i18n-params={JSON.stringify({ n: contributor.total })}>{contributor.total} مصدر</span> • <span data-i18n="contributors.clickDetails">اضغط للتفاصيل</span>
+        <span>{contributor.total} resource{contributor.total === 1 ? '' : 's'}</span> • <span>Click for details</span>
       </span>
     </span>
-    <svg class="contributor-chevron w-4 h-4 text-zinc-400 shrink-0 rtl:rotate-180 transition-transform duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
+    <svg class="contributor-chevron w-4 h-4 text-zinc-400 shrink-0 transition-transform duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
       <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
     </svg>
   </button>
@@ -71,7 +71,7 @@ const searchHref = `/search?q=${encodeURIComponent(displayName)}`;
     data-contributor-popup={dialogId}
     role="dialog"
     aria-label={`Details for ${contributor.name}`}
-    class="contributor-popup hidden absolute top-full right-0 rtl:right-0 ltr:left-0 z-40 mt-2.5 w-full bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700/90 rounded-2xl p-4 sm:p-5 shadow-xl shadow-zinc-900/10 dark:shadow-black/50 text-start before:content-[''] before:absolute before:-top-2 before:right-7 rtl:before:right-7 ltr:before:left-7 before:w-3.5 before:h-3.5 before:bg-white dark:before:bg-zinc-900 before:border-t before:border-r before:border-zinc-200 dark:before:border-zinc-700/90 before:rotate-[-45deg] before:z-10"
+    class="contributor-popup hidden absolute top-full left-0 z-40 mt-2.5 w-full bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700/90 rounded-2xl p-4 sm:p-5 shadow-xl shadow-zinc-900/10 dark:shadow-black/50 text-start before:content-[''] before:absolute before:-top-2 before:left-7 before:w-3.5 before:h-3.5 before:bg-white dark:before:bg-zinc-900 before:border-t before:border-r before:border-zinc-200 dark:before:border-zinc-700/90 before:rotate-[-45deg] before:z-10"
   >
     <!-- Header with Initials + Name + Rank + Close Button -->
     <div class="flex items-start justify-between gap-3 mb-3.5">
@@ -100,10 +100,8 @@ const searchHref = `/search?q=${encodeURIComponent(displayName)}`;
           <h3 class="font-bold text-sm text-zinc-900 dark:text-zinc-100 truncate" title={displayName}>{displayName}</h3>
           <span
             class="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-600 dark:text-emerald-400 mt-0.5"
-            data-i18n={roleType === 'resource' ? 'contributors.resourceRank' : 'contributors.rank'}
-            data-i18n-params={JSON.stringify({ r: rank })}
           >
-            {roleType === 'resource' ? `المرتبة #${rank} بين مساهمي المصادر` : `المرتبة #${rank} بين صناع المحتوى`}
+            {roleType === 'resource' ? `Rank #${rank} among resource contributors` : `Rank #${rank} among content creators`}
           </span>
         </div>
       </div>
@@ -111,8 +109,7 @@ const searchHref = `/search?q=${encodeURIComponent(displayName)}`;
         type="button"
         data-contributor-close
         class="p-1.5 rounded-lg text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors cursor-pointer shrink-0"
-        aria-label="إغلاق"
-        data-i18n-attr="aria-label:common.close"
+        aria-label="Close"
       >
         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
           <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
@@ -124,22 +121,22 @@ const searchHref = `/search?q=${encodeURIComponent(displayName)}`;
     <div class="grid grid-cols-2 gap-2 mb-3.5 text-center">
       <div class="rounded-xl bg-zinc-50 dark:bg-zinc-800/60 border border-zinc-200/70 dark:border-zinc-700/60 px-2 py-2">
         <div class="text-base font-extrabold text-emerald-600 dark:text-emerald-400">{contributor.total}</div>
-        <div class="text-[10px] font-medium text-zinc-500 dark:text-zinc-400" data-i18n="contributors.totalResources">إجمالي المصادر</div>
+        <div class="text-[10px] font-medium text-zinc-500 dark:text-zinc-400">Total Resources</div>
       </div>
       <div class="rounded-xl bg-zinc-50 dark:bg-zinc-800/60 border border-zinc-200/70 dark:border-zinc-700/60 px-2 py-2">
         <div class="text-base font-extrabold text-zinc-900 dark:text-zinc-100">{contributor.subjects}</div>
-        <div class="text-[10px] font-medium text-zinc-500 dark:text-zinc-400" data-i18n="contributors.subjectsCount">مواد دراسية</div>
+        <div class="text-[10px] font-medium text-zinc-500 dark:text-zinc-400">Study Subjects</div>
       </div>
     </div>
 
     <!-- By Type Pills -->
     {typeEntries.length > 0 && (
       <div class="mb-3">
-        <h4 class="text-[10px] font-bold uppercase tracking-wider text-zinc-400 dark:text-zinc-500 mb-1.5" data-i18n="contributors.byType">حسب نوع المصدر</h4>
+        <h4 class="text-[10px] font-bold uppercase tracking-wider text-zinc-400 dark:text-zinc-500 mb-1.5">By Resource Type</h4>
         <div class="flex flex-wrap gap-1.5">
           {typeEntries.map(([type, count]) => (
             <span class="text-[11px] font-medium px-2 py-0.5 rounded-md bg-zinc-100 dark:bg-zinc-800/80 text-zinc-700 dark:text-zinc-300 border border-zinc-200/60 dark:border-zinc-700/50">
-              <span data-i18n={`types.${type}`}>{type}</span>: <strong class="font-bold text-zinc-900 dark:text-zinc-100">{count}</strong>
+              <span>{type}</span>: <strong class="font-bold text-zinc-900 dark:text-zinc-100">{count}</strong>
             </span>
           ))}
         </div>
@@ -149,13 +146,13 @@ const searchHref = `/search?q=${encodeURIComponent(displayName)}`;
     <!-- By Year Pills -->
     {yearEntries.length > 0 && (
       <div class="mb-3.5">
-        <h4 class="text-[10px] font-bold uppercase tracking-wider text-zinc-400 dark:text-zinc-500 mb-1.5" data-i18n="contributors.academicYears">السنوات الدراسية</h4>
+        <h4 class="text-[10px] font-bold uppercase tracking-wider text-zinc-400 dark:text-zinc-500 mb-1.5">Academic Years</h4>
         <div class="flex flex-wrap gap-1.5">
           {yearEntries.map(([year, count]) => {
             const isReferenceBucket = year === 'references';
             return (
               <span class="text-[11px] font-medium px-2 py-0.5 rounded-md bg-zinc-100 dark:bg-zinc-800/80 text-zinc-700 dark:text-zinc-300 border border-zinc-200/60 dark:border-zinc-700/50">
-                <span data-i18n={isReferenceBucket ? 'categories.references' : 'nav.year'} data-i18n-params={isReferenceBucket ? undefined : JSON.stringify({ y: year })}>
+                <span>
                   {isReferenceBucket ? 'References' : `Year ${year}`}
                 </span>
                 : <strong class="font-bold text-zinc-900 dark:text-zinc-100">{count}</strong>
@@ -171,13 +168,10 @@ const searchHref = `/search?q=${encodeURIComponent(displayName)}`;
       href={searchHref}
       class="w-full text-center text-xs font-bold py-2.5 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white shadow-xs transition-colors flex items-center justify-center gap-1.5"
     >
-      <span
-        data-i18n={roleType === 'resource' ? 'contributors.viewAllAdded' : 'contributors.viewAll'}
-        data-i18n-params={JSON.stringify({ n: contributor.total })}
-      >
-        {roleType === 'resource' ? `عرض كل المواد المضافة (${contributor.total})` : `عرض كل مصادره (${contributor.total})`}
+      <span>
+        {roleType === 'resource' ? `View all added materials (${contributor.total})` : `View all resources (${contributor.total})`}
       </span>
-      <svg class="w-3.5 h-3.5 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+      <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
         <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
       </svg>
     </a>

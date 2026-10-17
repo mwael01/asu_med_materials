@@ -55,18 +55,14 @@ const CREATORS_INITIAL_LIMIT = 12;
 >
   <div class="mb-6 text-start">
     <div class="flex items-center gap-2 text-xs text-zinc-500 dark:text-zinc-400 mb-2">
-      <a href="/?redirect=false" data-i18n="nav.home" class="hover:text-emerald-600 dark:hover:text-emerald-400">Home</a>
+      <a href="/?redirect=false" class="hover:text-emerald-600 dark:hover:text-emerald-400">Home</a>
       <span>/</span>
-      <span class="text-zinc-900 dark:text-zinc-100 font-bold" data-i18n="contributors.breadcrumbCurrent">Team & Contributors</span>
+      <span class="text-zinc-900 dark:text-zinc-100 font-bold">Team & Contributors</span>
     </div>
-    <h1 class="text-2xl font-extrabold text-zinc-900 dark:text-zinc-100 mb-1" data-i18n="contributors.title">
+    <h1 class="text-2xl font-extrabold text-zinc-900 dark:text-zinc-100 mb-1">
       Team & Contributors
     </h1>
-    <p
-      class="text-xs text-zinc-500 dark:text-zinc-400"
-      data-i18n="contributors.subtitle"
-      data-i18n-params={JSON.stringify({ a: coreTeam.length, r: resourceContributors.length, c: contributors.length })}
-    >
+    <p class="text-xs text-zinc-500 dark:text-zinc-400">
       Platform team ({coreTeam.length}), resource contributors ({resourceContributors.length}), and content creators from doctors and educational channels ({contributors.length}).
     </p>
   </div>
@@ -75,7 +71,7 @@ const CREATORS_INITIAL_LIMIT = 12;
   {coreTeam.length > 0 && (
     <section class="mb-10" aria-labelledby="authors-heading">
       <div class="flex items-center justify-between mb-3">
-        <h2 id="authors-heading" class="text-base font-bold text-zinc-900 dark:text-zinc-100" data-i18n="contributors.teamTitle">
+        <h2 id="authors-heading" class="text-base font-bold text-zinc-900 dark:text-zinc-100">
           Core Team
         </h2>
       </div>
@@ -91,10 +87,10 @@ const CREATORS_INITIAL_LIMIT = 12;
   <!-- Resource contributors: students & community members who added materials -->
   <section class="mb-10" aria-labelledby="resources-heading">
     <div class="flex items-center justify-between mb-3">
-      <h2 id="resources-heading" class="text-base font-bold text-zinc-900 dark:text-zinc-100" data-i18n="contributors.resourceTitle">
+      <h2 id="resources-heading" class="text-base font-bold text-zinc-900 dark:text-zinc-100">
         Resource Contributors
       </h2>
-      <span class="text-[11px] text-zinc-500 dark:text-zinc-400" data-i18n="contributors.resourceRankNote">
+      <span class="text-[11px] text-zinc-500 dark:text-zinc-400">
         Ranked by uploaded materials • Click any card for details
       </span>
     </div>
@@ -112,7 +108,7 @@ const CREATORS_INITIAL_LIMIT = 12;
         ))}
       </div>
     ) : (
-      <p class="text-xs text-zinc-500 dark:text-zinc-400 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl p-4" data-i18n="contributors.noContributors">
+      <p class="text-xs text-zinc-500 dark:text-zinc-400 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl p-4">
         No contributors registered yet.
       </p>
     )}
@@ -121,10 +117,10 @@ const CREATORS_INITIAL_LIMIT = 12;
   <!-- Content creators, ordered by contribution amount with preview limit -->
   <section aria-labelledby="contributors-heading">
     <div class="flex items-center justify-between mb-3">
-      <h2 id="contributors-heading" class="text-base font-bold text-zinc-900 dark:text-zinc-100" data-i18n="contributors.creatorsTitle">
+      <h2 id="contributors-heading" class="text-base font-bold text-zinc-900 dark:text-zinc-100">
         Content Creators
       </h2>
-      <span class="text-[11px] text-zinc-500 dark:text-zinc-400" data-i18n="contributors.creatorsRankNote">
+      <span class="text-[11px] text-zinc-500 dark:text-zinc-400">
         Ranked by resource count • Click any card for details
       </span>
     </div>
@@ -156,12 +152,8 @@ const CREATORS_INITIAL_LIMIT = 12;
               aria-expanded="false"
               aria-controls="creators-grid"
             >
-              <span
-                id="toggle-creators-text"
-                data-i18n="contributors.showAllCreators"
-                data-i18n-params={JSON.stringify({ n: contributors.length })}
-              >
-                عرض كل صناع المحتوى ({contributors.length})
+              <span id="toggle-creators-text">
+                Show all content creators ({contributors.length})
               </span>
               <svg
                 id="toggle-creators-icon"
@@ -179,7 +171,7 @@ const CREATORS_INITIAL_LIMIT = 12;
         )}
       </>
     ) : (
-      <p class="text-xs text-zinc-500 dark:text-zinc-400 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl p-4" data-i18n="contributors.noContributors">
+      <p class="text-xs text-zinc-500 dark:text-zinc-400 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl p-4">
         No contributors registered yet.
       </p>
     )}
@@ -187,8 +179,6 @@ const CREATORS_INITIAL_LIMIT = 12;
 </Layout>
 
 <script>
-  import { t, getCurrentLanguage } from '../utils/i18n';
-
   function initContributorPopups(): void {
     const triggers = document.querySelectorAll<HTMLButtonElement>('[data-contributor-trigger]');
     const popups = document.querySelectorAll<HTMLElement>('[data-contributor-popup]');
@@ -201,8 +191,7 @@ const CREATORS_INITIAL_LIMIT = 12;
         t.classList.remove('border-emerald-500', 'ring-2', 'ring-emerald-500/30', 'dark:border-emerald-500');
         const chevron = t.querySelector('.contributor-chevron');
         if (chevron) {
-          chevron.classList.remove('-rotate-90');
-          chevron.classList.add('rotate-180');
+          chevron.classList.remove('rotate-90');
         }
       });
       containers.forEach((c) => c.classList.remove('z-40'));
@@ -225,8 +214,7 @@ const CREATORS_INITIAL_LIMIT = 12;
 
         const chevron = trigger.querySelector('.contributor-chevron');
         if (chevron) {
-          chevron.classList.remove('rotate-180');
-          chevron.classList.add('-rotate-90');
+          chevron.classList.add('rotate-90');
         }
 
         const container = trigger.closest<HTMLElement>('.contributor-card-container');
@@ -292,16 +280,9 @@ const CREATORS_INITIAL_LIMIT = 12;
       const totalCount = btnEl.getAttribute('data-total') || '0';
 
       function updateToggleText(isExpanded: boolean): void {
-        const lang = getCurrentLanguage();
-        if (isExpanded) {
-          textEl.textContent = t('contributors.showLess', lang);
-          textEl.setAttribute('data-i18n', 'contributors.showLess');
-          textEl.removeAttribute('data-i18n-params');
-        } else {
-          textEl.textContent = t('contributors.showAllCreators', lang, { n: totalCount });
-          textEl.setAttribute('data-i18n', 'contributors.showAllCreators');
-          textEl.setAttribute('data-i18n-params', JSON.stringify({ n: totalCount }));
-        }
+        textEl.textContent = isExpanded
+          ? 'Show less'
+          : `Show all content creators (${totalCount})`;
       }
 
       btnEl.addEventListener('click', () => {
@@ -326,12 +307,6 @@ const CREATORS_INITIAL_LIMIT = 12;
             heading.scrollIntoView({ behavior: 'smooth', block: 'start' });
           }
         }
-      });
-
-      // Keep button text in sync when language changes
-      window.addEventListener('asumed-language-changed', () => {
-        const isExpanded = btnEl.getAttribute('data-state') === 'expanded';
-        updateToggleText(isExpanded);
       });
     }
   }

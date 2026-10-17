@@ -172,7 +172,7 @@ test('one-card Again clears answer and hint presentation and cannot rate twice w
   assert.equal(h.element('player-progress-percent').textContent, '100%');
 });
 
-test('resume, pause and language changes retain truthful progress and dynamic translation parameters', async () => {
+test('resume and pause retain truthful progress and lock inputs while paused', async () => {
   const h = playerHarness();
   await tick();
   await h.click('btn-reveal-answer');
@@ -184,10 +184,7 @@ test('resume, pause and language changes retain truthful progress and dynamic tr
   assert.equal(reopened.element('card-question-body').innerHTML, 'Question 2');
   assert.equal(reopened.element('player-progress-percent').textContent, '33%');
   await reopened.click('btn-pause-session');
-  reopened.language = 'ar';
-  reopened.window.dispatch('asumed-language-changed');
-  assert.equal(reopened.element('player-progress-counter').textContent, 'اكتملت 1 من 3 بطاقة');
-  assert.deepEqual(JSON.parse(reopened.element('player-progress-counter').getAttribute('data-i18n-params')), { known: 1, total: 3 });
+  assert.equal(reopened.element('player-progress-counter').textContent, '1 of 3 completed');
   assert.equal(reopened.element('session-paused-screen').classList.contains('hidden'), false);
   await reopened.key('Space');
   await reopened.key('ArrowRight');
@@ -195,6 +192,7 @@ test('resume, pause and language changes retain truthful progress and dynamic tr
   await reopened.click('btn-resume-session');
   assert.equal(reopened.element('card-question-body').innerHTML, 'Question 2');
 });
+
 
 test('Review again and Reset save a fresh pass before allowing further ratings', async () => {
   let release;

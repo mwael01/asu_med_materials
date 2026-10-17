@@ -7,13 +7,13 @@ interface Props {
 
 const { currentYear } = Astro.props;
 
-const years: { label: string; year: AcademicYear | 'all'; href: string; i18nKey: string; params?: any }[] = [
-  { label: 'All Resources', year: 'all', href: '/search?year=all', i18nKey: 'home.browseAll' },
-  { label: 'Year 1', year: 1, href: '/year/1', i18nKey: 'nav.year', params: { y: 1 } },
-  { label: 'Year 2', year: 2, href: '/year/2', i18nKey: 'nav.year', params: { y: 2 } },
-  { label: 'Year 3', year: 3, href: '/year/3', i18nKey: 'nav.year', params: { y: 3 } },
-  { label: 'Year 4', year: 4, href: '/year/4', i18nKey: 'nav.year', params: { y: 4 } },
-  { label: 'Year 5', year: 5, href: '/year/5', i18nKey: 'nav.year', params: { y: 5 } },
+const years: { label: string; year: AcademicYear | 'all'; href: string }[] = [
+  { label: 'All Resources', year: 'all', href: '/search?year=all' },
+  { label: 'Year 1', year: 1, href: '/year/1' },
+  { label: 'Year 2', year: 2, href: '/year/2' },
+  { label: 'Year 3', year: 3, href: '/year/3' },
+  { label: 'Year 4', year: 4, href: '/year/4' },
+  { label: 'Year 5', year: 5, href: '/year/5' },
 ];
 ---
 
@@ -30,7 +30,7 @@ const years: { label: string; year: AcademicYear | 'all'; href: string; i18nKey:
             : 'bg-white dark:bg-zinc-900 text-zinc-700 dark:text-zinc-300 border-zinc-200 dark:border-zinc-800 hover:border-emerald-500/50 hover:bg-zinc-50 dark:hover:bg-zinc-800/60'
         ]}
       >
-        <span data-i18n={item.i18nKey} data-i18n-params={item.params ? JSON.stringify(item.params) : undefined}>
+        <span>
           {item.label}
         </span>
       </a>

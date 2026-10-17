@@ -38,18 +38,6 @@ const {
     <title>{title}</title>
     <meta name="description" content={description} />
 
-    <!-- Zero-flash Early Language & Direction Setter -->
-    <script is:inline>
-      (function () {
-        try {
-          var lang = localStorage.getItem('asumed_lang') || 'en';
-          document.documentElement.lang = lang;
-          document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
-        } catch (e) {}
-      })();
-    </script>
-
-
     <!-- Default to White/Light Theme (Only activate dark if explicitly set to 'dark') -->
     <script is:inline>
       (function () {
@@ -84,22 +72,19 @@ const {
     <PwaInstallToast />
     <Footer />
 
-    <!-- Service Worker registration, studied materials, App Check, & i18n client synchronization -->
+    <!-- Service Worker registration, studied materials, App Check, & user library synchronization -->
     <script>
       import { registerServiceWorker } from '../utils/pwa';
-      import { initLanguageClient } from '../utils/i18n';
       import { initStudiedMaterials } from '../utils/studied';
       import { initAppCheck } from '../firebase/app-check';
       import { initUserLibrarySync } from '../utils/userSync';
 
-      initLanguageClient();
       initStudiedMaterials();
       registerServiceWorker();
       initAppCheck();
       initUserLibrarySync();
 
       document.addEventListener('astro:after-swap', () => {
-        initLanguageClient();
         initStudiedMaterials();
         initAppCheck();
         initUserLibrarySync();

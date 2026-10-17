@@ -97,15 +97,13 @@ const initialTitle = hasDiscreteVideos ? videos[0].title : (titleEn || playlist.
 >
   <!-- Breadcrumb -->
   <nav class="flex items-center gap-2 text-xs text-zinc-500 dark:text-zinc-400 mb-4" aria-label="Breadcrumb navigation">
-    <a href="/?redirect=false" data-i18n="nav.home" class="hover:text-emerald-600 dark:hover:text-emerald-400">Home</a>
+    <a href="/?redirect=false" class="hover:text-emerald-600 dark:hover:text-emerald-400">Home</a>
     <span>/</span>
     {playlist.moduleId && (
       <>
         <a
           href={`/module/${playlist.moduleId}`}
           class="hover:text-emerald-600 dark:hover:text-emerald-400"
-          data-i18n-mod-title-en={moduleInfo?.title || 'Module'}
-          data-i18n-mod-title-ar={moduleInfo?.titleAr || moduleInfo?.title || 'موديول'}
         >
           {moduleInfo?.title || 'Module'}
         </a>
@@ -125,9 +123,6 @@ const initialTitle = hasDiscreteVideos ? videos[0].title : (titleEn || playlist.
     )}
     <span
       class="text-zinc-900 dark:text-zinc-100 font-bold truncate max-w-[200px] sm:max-w-xs"
-      data-i18n-material-title
-      data-title-en={titleEn}
-      data-title-ar={playlist.title}
     >{titleEn || playlist.title}</span>
   </nav>
 
@@ -142,7 +137,7 @@ const initialTitle = hasDiscreteVideos ? videos[0].title : (titleEn || playlist.
               {playlist.subject}
             </span>
           )}
-          <span class="text-xs font-semibold px-2 py-0.5 rounded bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800/40" data-i18n="nav.year" data-i18n-params={JSON.stringify({ y: playlist.year })}>
+          <span class="text-xs font-semibold px-2 py-0.5 rounded bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800/40">
             Year {playlist.year}
           </span>
           <!-- Done Checkbox Button -->
@@ -152,7 +147,6 @@ const initialTitle = hasDiscreteVideos ? videos[0].title : (titleEn || playlist.
             data-id={playlist.id}
             role="checkbox"
             aria-checked="false"
-            data-i18n-attr="title:card.markStudied,aria-label:card.markStudied"
             title="Mark as studied"
             aria-label="Mark as studied"
           >
@@ -177,7 +171,6 @@ const initialTitle = hasDiscreteVideos ? videos[0].title : (titleEn || playlist.
             type="button"
             class="bookmark-btn relative z-30 pointer-events-auto inline-flex items-center justify-center p-2 -m-1 text-zinc-400 hover:text-amber-500 dark:hover:text-amber-400 rounded-lg hover:bg-amber-50/60 dark:hover:bg-amber-950/40 active:scale-95 transition-all cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-500"
             data-id={playlist.id}
-            data-i18n-attr="title:card.save,aria-label:card.save"
             title="Save to bookmarks"
             aria-label="Save to bookmarks"
           >
@@ -192,19 +185,13 @@ const initialTitle = hasDiscreteVideos ? videos[0].title : (titleEn || playlist.
 
         <h1
           class="text-xl sm:text-2xl font-extrabold text-zinc-900 dark:text-zinc-100 mb-1"
-          data-i18n-material-title
-          data-title-en={titleEn}
-          data-title-ar={playlist.title}
         >
           {titleEn || playlist.title}
         </h1>
 
-        {playlist.description && (
+        {(descEn || playlist.description) && (
           <p
             class="text-xs sm:text-sm text-zinc-600 dark:text-zinc-400 max-w-2xl mb-2"
-            data-i18n-material-desc
-            data-desc-en={descEn}
-            data-desc-ar={playlist.description}
           >
             {descEn || playlist.description}
           </p>
@@ -213,12 +200,12 @@ const initialTitle = hasDiscreteVideos ? videos[0].title : (titleEn || playlist.
         <div class="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-zinc-500 dark:text-zinc-400 font-medium">
           {authorText && (
             <p>
-              <span data-i18n="card.by">By:</span> <span class="text-zinc-800 dark:text-zinc-200 font-semibold">{authorText}</span>
+              <span>By:</span> <span class="text-zinc-800 dark:text-zinc-200 font-semibold">{authorText}</span>
             </p>
           )}
           {addedByText && (
             <p title={fullAddedByTooltip}>
-              <span data-i18n="card.addedBy">Added by:</span> {contributorProfileUrl ? (
+              <span>Added by:</span> {contributorProfileUrl ? (
                 <a href={contributorProfileUrl} class="text-zinc-800 dark:text-zinc-200 font-semibold hover:text-emerald-600 dark:hover:text-emerald-400 hover:underline">{addedByText}</a>
               ) : (
                 <span class="text-zinc-800 dark:text-zinc-200 font-semibold">{addedByText}</span>
@@ -231,7 +218,7 @@ const initialTitle = hasDiscreteVideos ? videos[0].title : (titleEn || playlist.
       <!-- Watch Progress Card -->
       <div class="w-full lg:w-72 bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700/60 rounded-xl p-3.5 shrink-0">
         <div class="flex items-center justify-between text-xs font-bold mb-1.5">
-          <span class="text-zinc-700 dark:text-zinc-300" id="progress-heading" data-i18n="playlists.progress">Progress</span>
+          <span class="text-zinc-700 dark:text-zinc-300" id="progress-heading">Progress</span>
           <span id="progress-percent-label" class="text-emerald-600 dark:text-emerald-400">0%</span>
         </div>
 
@@ -251,7 +238,7 @@ const initialTitle = hasDiscreteVideos ? videos[0].title : (titleEn || playlist.
             id="reset-progress-btn"
             class="hover:text-red-500 dark:hover:text-red-400 transition-colors cursor-pointer underline"
           >
-            <span id="reset-progress-text" data-i18n="playlists.reset">Reset</span>
+            <span id="reset-progress-text">Reset</span>
           </button>
         </div>
       </div>
@@ -303,7 +290,7 @@ const initialTitle = hasDiscreteVideos ? videos[0].title : (titleEn || playlist.
           </h3>
 
           <!-- Explanatory note -->
-          <p id="external-card-desc" class="text-xs sm:text-sm text-zinc-400 max-w-md mb-5 leading-relaxed" data-i18n="playlists.externalNotice">
+          <p id="external-card-desc" class="text-xs sm:text-sm text-zinc-400 max-w-md mb-5 leading-relaxed">
             This video is hosted externally. Click below to open and watch, then mark it completed to track your progress.
           </p>
 
@@ -319,7 +306,7 @@ const initialTitle = hasDiscreteVideos ? videos[0].title : (titleEn || playlist.
               <span id="external-card-btn-text">
                 {initialParsed.sourceType === 'telegram' ? 'Open in Telegram' : `Open in ${initialParsed.sourceLabelEn}`}
               </span>
-              <svg class="w-4 h-4 rtl:rotate-180 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+              <svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
               </svg>
             </a>
@@ -332,7 +319,7 @@ const initialTitle = hasDiscreteVideos ? videos[0].title : (titleEn || playlist.
               <svg class="w-4 h-4 text-emerald-400 checkmark-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
               </svg>
-              <span id="external-card-done-text" data-i18n="playlists.markCompleted">Mark Completed</span>
+              <span id="external-card-done-text">Mark Completed</span>
             </button>
           </div>
         </div>
@@ -357,7 +344,7 @@ const initialTitle = hasDiscreteVideos ? videos[0].title : (titleEn || playlist.
             <svg class="w-4 h-4 check-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
               <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
             </svg>
-            <span id="toggle-done-text" data-i18n="playlists.markCompleted">Mark as Completed</span>
+            <span id="toggle-done-text">Mark as Completed</span>
           </button>
 
           <!-- Dynamic External Link (Adapts to YouTube, Google Drive, Telegram, Direct, External) -->
@@ -383,7 +370,7 @@ const initialTitle = hasDiscreteVideos ? videos[0].title : (titleEn || playlist.
             id="prev-video-btn"
             class="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer transition-colors"
           >
-            <span class="rtl:rotate-180 inline-block">&larr;</span> <span data-i18n="playlists.prevVideo">Previous Video</span>
+            <span class="inline-block">&larr;</span> <span>Previous Video</span>
           </button>
           <span class="text-xs text-zinc-400" id="video-stepper-label">1 of {videos.length}</span>
           <button
@@ -391,7 +378,7 @@ const initialTitle = hasDiscreteVideos ? videos[0].title : (titleEn || playlist.
             id="next-video-btn"
             class="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer transition-colors"
           >
-            <span data-i18n="playlists.nextVideo">Next Video</span> <span class="rtl:rotate-180 inline-block">&rarr;</span>
+            <span>Next Video</span> <span class="inline-block">&rarr;</span>
           </button>
         </div>
       )}
@@ -400,7 +387,7 @@ const initialTitle = hasDiscreteVideos ? videos[0].title : (titleEn || playlist.
     <!-- Playlist / Checkpoints Sidebar -->
     <div class="lg:col-span-4 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl p-4 text-start shadow-2xs">
       <div class="flex items-center justify-between pb-3 mb-3 border-b border-zinc-100 dark:border-zinc-800">
-        <h3 class="text-sm font-bold text-zinc-900 dark:text-zinc-100" id="lectures-sidebar-heading" data-i18n="playlists.lectures">
+        <h3 class="text-sm font-bold text-zinc-900 dark:text-zinc-100" id="lectures-sidebar-heading">
           Lectures
         </h3>
         <button
@@ -408,7 +395,7 @@ const initialTitle = hasDiscreteVideos ? videos[0].title : (titleEn || playlist.
           id="mark-all-done-btn"
           class="text-xs font-semibold text-emerald-600 dark:text-emerald-400 hover:underline cursor-pointer"
         >
-          <span id="mark-all-done-text" data-i18n="playlists.markAllDone">Mark All ✓</span>
+          <span id="mark-all-done-text">Mark All ✓</span>
         </button>
       </div>
 
@@ -429,7 +416,6 @@ const initialTitle = hasDiscreteVideos ? videos[0].title : (titleEn || playlist.
                 data-embed-url={parsed.embedUrl || ''}
                 data-external-url={parsed.externalUrl}
                 data-source-label={parsed.sourceLabelEn}
-                data-source-label-ar={parsed.sourceLabelAr}
                 data-source-icon={parsed.icon}
                 data-title={vid.title}
               >
@@ -456,7 +442,7 @@ const initialTitle = hasDiscreteVideos ? videos[0].title : (titleEn || playlist.
                     </div>
                     <div class="now-playing-badge hidden items-center gap-1 text-[10px] font-bold text-emerald-600 dark:text-emerald-400 mt-1">
                       <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                      <span data-i18n="playlists.nowPlaying">Now Playing</span>
+                      <span>Now Playing</span>
                     </div>
                   </div>
                 </div>
@@ -469,7 +455,6 @@ const initialTitle = hasDiscreteVideos ? videos[0].title : (titleEn || playlist.
                   class="video-done-checkbox w-6 h-6 rounded-md border border-zinc-300 dark:border-zinc-600 hover:border-emerald-500 flex items-center justify-center text-white transition-all shrink-0 cursor-pointer mt-0.5 focus:outline-none focus:ring-2 focus:ring-emerald-500/30"
                   data-video-id={vid.id}
                   title="Mark as completed"
-                  data-i18n-attr="title:playlists.markCompleted"
                   aria-label={`Mark ${vid.title} as completed`}
                 >
                   <svg class="w-3.5 h-3.5 hidden checkmark-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
@@ -493,7 +478,7 @@ const initialTitle = hasDiscreteVideos ? videos[0].title : (titleEn || playlist.
                 </span>
                 <div>
                   <h4 class="text-xs font-bold text-zinc-900 dark:text-zinc-100">
-                    <span data-i18n="playlists.lecturePrefix">Lecture</span> {idx + 1}
+                    <span>Lecture</span> {idx + 1}
                   </h4>
                 </div>
               </div>
@@ -503,7 +488,6 @@ const initialTitle = hasDiscreteVideos ? videos[0].title : (titleEn || playlist.
                 class="checkpoint-done-checkbox w-6 h-6 rounded-md border border-zinc-300 dark:border-zinc-600 hover:border-emerald-500 flex items-center justify-center text-white transition-colors shrink-0 cursor-pointer"
                 data-checkpoint-id={`chk-${playlist.id}-${idx + 1}`}
                 title="Mark as completed"
-                data-i18n-attr="title:playlists.markCompleted"
                 aria-label="Mark as completed"
               >
                 <svg class="w-3.5 h-3.5 hidden checkmark-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
@@ -567,16 +551,13 @@ const initialTitle = hasDiscreteVideos ? videos[0].title : (titleEn || playlist.
     }
 
     function updateProgressUI() {
-      const isEn = document.documentElement.lang === 'en';
       const watchedCount = Object.values(watchedMap).filter(Boolean).length;
       const percent = Math.round((watchedCount / totalItemsCount) * 100);
 
       if (progressBarFill) progressBarFill.style.width = `${percent}%`;
       if (progressPercentLabel) progressPercentLabel.textContent = `${percent}%`;
       if (progressCountLabel) {
-        progressCountLabel.textContent = isEn
-          ? `${watchedCount} of ${totalItemsCount} completed`
-          : `${watchedCount} من ${totalItemsCount} مكتمل`;
+        progressCountLabel.textContent = `${watchedCount} of ${totalItemsCount} completed`;
       }
 
       // Update checkboxes UI and completion text styles
@@ -609,9 +590,7 @@ const initialTitle = hasDiscreteVideos ? videos[0].title : (titleEn || playlist.
       if (hasDiscreteVideos && videoItems.length > 0) {
         const currentId = videoItems[currentIndex]?.getAttribute('data-video-id');
         const isCurrentDone = Boolean(watchedMap[currentId]);
-        const doneString = isCurrentDone
-          ? (isEn ? 'Completed ✓' : 'مكتمل ✓')
-          : (isEn ? 'Mark Completed' : 'تحديد كمكتمل');
+        const doneString = isCurrentDone ? 'Completed ✓' : 'Mark Completed';
 
         if (toggleDoneText) toggleDoneText.textContent = doneString;
         if (extCardDoneText) extCardDoneText.textContent = doneString;
@@ -634,9 +613,7 @@ const initialTitle = hasDiscreteVideos ? videos[0].title : (titleEn || playlist.
         // Full playlist mode
         const allDone = watchedCount === totalItemsCount;
         if (toggleDoneText) {
-          toggleDoneText.textContent = allDone
-            ? (isEn ? 'Series Completed ✓' : 'السلسلة مكتملة ✓')
-            : (isEn ? 'Mark Completed' : 'تحديد كمكتمل');
+          toggleDoneText.textContent = allDone ? 'Series Completed ✓' : 'Mark Completed';
         }
       }
     }
@@ -705,8 +682,8 @@ const initialTitle = hasDiscreteVideos ? videos[0].title : (titleEn || playlist.
         if (extCardBtnText) {
           extCardBtnText.textContent =
             sourceType === 'telegram'
-              ? (isEn ? 'Open in Telegram' : 'افتح في تيليجرام')
-              : (isEn ? `Open on ${sourceLabel}` : `افتح في ${sourceLabel}`);
+              ? 'Open in Telegram'
+              : `Open on ${sourceLabel}`;
         }
       }
 
@@ -716,13 +693,11 @@ const initialTitle = hasDiscreteVideos ? videos[0].title : (titleEn || playlist.
       if (currentSourceName) currentSourceName.textContent = sourceLabel;
       if (currentExternalBtn) {
         currentExternalBtn.href = externalUrl;
-        currentExternalBtn.title = isEn ? `Open on ${sourceLabel}` : `فتح على ${sourceLabel}`;
+        currentExternalBtn.title = `Open on ${sourceLabel}`;
       }
 
       if (stepperLabel) {
-        stepperLabel.textContent = isEn
-          ? `${idx + 1} of ${videoItems.length}`
-          : `${idx + 1} من ${videoItems.length}`;
+        stepperLabel.textContent = `${idx + 1} of ${videoItems.length}`;
       }
 
       // 4. Update tracklist sidebar active states
@@ -846,11 +821,7 @@ const initialTitle = hasDiscreteVideos ? videos[0].title : (titleEn || playlist.
 
     // Reset progress
     resetProgressBtn?.addEventListener('click', () => {
-      const isEn = document.documentElement.lang === 'en';
-      const confirmMsg = isEn
-        ? 'Are you sure you want to reset watch progress for this playlist?'
-        : 'هل تريد بالتأكيد إعادة ضبط سجل المشاهدة لهذه القائمة؟';
-      if (confirm(confirmMsg)) {
+      if (confirm('Are you sure you want to reset watch progress for this playlist?')) {
         watchedMap = {};
         saveState();
       }
@@ -859,14 +830,6 @@ const initialTitle = hasDiscreteVideos ? videos[0].title : (titleEn || playlist.
     // Steppers
     prevBtn?.addEventListener('click', () => switchVideo(currentIndex - 1, true));
     nextBtn?.addEventListener('click', () => switchVideo(currentIndex + 1, true));
-
-    // React to language toggle
-    window.addEventListener('asumed-language-changed', () => {
-      updateProgressUI();
-      if (videoItems.length > 0) {
-        switchVideo(currentIndex, false);
-      }
-    });
 
     // Initialize first video highlight & progress
     if (hasDiscreteVideos && videoItems.length > 0) {

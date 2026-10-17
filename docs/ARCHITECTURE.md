@@ -13,7 +13,7 @@ ASU Med Materials is a lightweight, static-first web portal built with [Astro](h
 - **Dynamic On-Demand Server Core**: Server-side rendering (SSR) powered by Astro (`output: 'server'`) with `@astrojs/vercel`, rendering content directly from Firestore with bounded runtime and CDN caching.
 - **Cloud Firestore Single Source of Truth**: All study materials, curriculum modules, and contributors live in Cloud Firestore. No local catalogue files are used; public content refreshes through bounded caches.
 - **In-Memory Server Request Deduplication**: Public materials and modules use Vercel Runtime Cache for 24 hours, shared across page routes and server instances within a region. A 60-second in-process cache shares pending requests and reduces cache-outage reads. Anonymous public HTML uses Vercel CDN caching (60 seconds fresh, followed by 60 seconds of stale-while-revalidate). Private pages, API responses, and requests with cookies or authorization bypass shared caching.
-- **Arabic-First with Technical English**: Arabic RTL interface for clear local usability, paired with standard English terminology for subjects (Anatomy, Histology, etc.), channel names, and drive labels.
+- **Streamlined English-First with Arabic Search Tolerance**: English-first interface tailored to the 100% English medical curriculum at Ain Shams University Faculty of Medicine, eliminating bilingual translation runtime overhead while maintaining 100% search tolerance for Arabic queries and Egyptian doctor names.
 - **Multistage Year & Module Selection**: Students are guided on first visit through a two-stage prompt (Year & Module) saved locally in `localStorage` for personalized, instant access.
 - **Structured Grouped Categorization**: Materials are grouped by functional learning category (Central Drives, Lectures, Practical Labs & OSPE, Summaries, and Past Exams).
 - **Default White Theme**: Clean high-contrast white theme by default, with an optional dark mode toggle saved in `localStorage`.
@@ -37,7 +37,7 @@ asu_med_materials/
 │   ├── assets/                  # Bundled SVGs and images
 │   ├── components/              # Modular UI components
 │   │   ├── bookmarks/           # Offline bookmark drawer (BookmarksDrawer.astro)
-│   │   ├── common/              # Theme & Language toggles (ThemeToggle.astro, LanguageToggle.astro)
+│   │   ├── common/              # Theme toggle (ThemeToggle.astro), Toast, PWA components
 │   │   ├── materials/           # ResourceCard, GroupedResourceList, ModuleCard, SubjectBar, YearSelector
 │   │   ├── contributors/        # AuthorCard, ContributorCard, ContactButtons
 │   │   ├── navigation/          # Navbar.astro, Footer.astro
@@ -52,10 +52,11 @@ asu_med_materials/
 │   │   ├── client.ts            # Firebase app, auth, firestore (IndexedDB cache), storage
 │   │   ├── firestore.ts         # Firestore data access & converters
 │   │   └── schema.ts            # Strongly typed schema interfaces
-│   ├── i18n/                    # Centralized bilingual dictionaries
-│   │   └── translations.ts      # Canonical Arabic & English key-value dictionaries
+│   ├── i18n/                    # Centralized English dictionaries & legacy material translations
+│   │   ├── materialsTranslations.ts # Legacy English title/description fallbacks
+│   │   └── translations.ts      # Core English UI strings dictionary
 │   ├── layouts/                 # Base page layouts
-│   │   └── Layout.astro         # Shell with RTL/LTR, SEO, PWA, i18n, and Theme setup
+│   │   └── Layout.astro         # Shell with SEO, PWA, accessibility, and Theme setup
 │   ├── pages/                   # File-based routing
 │   │   ├── index.astro          # Personalized student dashboard: active modules & organized library folders
 │   │   ├── year/[year].astro    # Year-specific overview & grouped materials
@@ -187,17 +188,11 @@ export interface MaterialItem {
    - Each subject has a dedicated static URL route (`/module/[id]/[subject]`, e.g. `/module/year1-foundation/medical-biochemistry`) with dedicated title, SEO, custom breadcrumbs, and empty states.
    - Material cards link directly to their corresponding subject page via clickable subject badges.
 
-8. **Multi-Language Support (Client-Side In-Place Toggle)**:
-   - **Language Toggle**: Topbar button with a globe icon and language indicator badge (`AR` / `EN`) switching instantly between English (default for new visitors) and Arabic (100% preserved verbatim without alteration).
-   - **Zero URL Deviation**: Retains all static URLs identical across languages without redirects or duplicate route generation.
-   - **Zero Flash of Unstyled Text / Direction**: Synchronous inline `<script is:inline>` in `<head>` sets `lang` and `dir="ltr"` / `dir="rtl"` immediately from `localStorage.getItem('asumed_lang')` before layout rendering.
-   - **Declarative HTML Binding**: Static markup uses `data-i18n="key"`, `data-i18n-attr="attr:key"`, `data-i18n-mod-title-en`/`ar`, `data-i18n-subject-en`/`ar`, `data-i18n-material-title`, and `data-i18n-material-desc` attributes. The helper `applyLanguage()` in [`src/utils/i18n.ts`](file:///workspaces/asu_med_materials/src/utils/i18n.ts) translates elements instantly in-place.
-   - **Material Titles & Descriptions**: Centralized translations dictionary in [`src/i18n/materialsTranslations.ts`](file:///workspaces/asu_med_materials/src/i18n/materialsTranslations.ts) maps central drives, question banks, day-by-day folders, and lecture series into natural English titles and descriptions, with pattern-matching fallbacks for batches and subjects.
-   - **Bilingual Search Matching**: The client-side catalog search in [`src/pages/search.astro`](file:///workspaces/asu_med_materials/src/pages/search.astro) indexes both Arabic and English titles and descriptions simultaneously, matching queries seamlessly in either language.
-   - **Full Core Component Coverage**: All forms (Detailed submit, Quick Dump bulk linker), toast notifications, contributor popup cards, and playlist video players dynamically respond to language switching while maintaining strict logical CSS (`rtl:`, `text-start`).
-   - **Reactive Custom Event**: Dispatches `asumed-language-changed` on `window` whenever the language is switched, allowing client scripts (dynamic search counter, bookmarks drawer, multistage modal, video playlist stepper) to update text immediately.
-   - **Event Listener Lifecycle Safeguards**: All client scripts in persistent components and pages (`index.astro`, `BookmarksDrawer.astro`, `MultistageSelector.astro`, `MobileMenu.astro`) utilize global listener guards or `AbortController` cleanup to completely prevent listener duplication across ViewTransitions (`astro:after-swap`).
-   - **Dictionary Architecture**: Centralized dictionary in [`src/i18n/translations.ts`](file:///workspaces/asu_med_materials/src/i18n/translations.ts) typed with [`src/types/i18n.ts`](file:///workspaces/asu_med_materials/src/types/i18n.ts), covering all site navigation, academic years, modules, subjects, categories, badges, toasts, forms, and controls.
+8. **Streamlined English-First Platform with Arabic Search Tolerance**:
+   - **Unified English Interface**: All navigation, modules, subjects, cards, player controls, toasts, and modals are rendered cleanly in English without bilingual toggle overhead or RTL/LTR layout flipping.
+   - **Zero Translation Runtime Overhead**: Completely removed client-side DOM-sweeping translation passes (`applyLanguage`), bilingual event dispatchers (`asumed-language-changed`), and duplicate localized attributes.
+   - **Arabic Query Search Tolerance**: The search and suggestion engine ([`src/utils/searchAliases.ts`](file:///workspaces/asu_med_materials/src/utils/searchAliases.ts), [`src/utils/searchSuggestions.ts`](file:///workspaces/asu_med_materials/src/utils/searchSuggestions.ts)) maintains comprehensive Arabic aliases for Egyptian doctor names, module codes, and colloquial terms, ensuring students searching in Arabic instantly find the exact resources.
+   - **Legacy Data Compatibility**: Fallback helpers [`getMaterialEnglishTitle`](file:///workspaces/asu_med_materials/src/i18n/materialsTranslations.ts) and [`getMaterialEnglishDesc`](file:///workspaces/asu_med_materials/src/i18n/materialsTranslations.ts) seamlessly normalize legacy Firestore documents containing Arabic titles.
 
 9. **Student Feedback & Google Sheets Webhook Integration**:
    - Dedicated route at `/feedback` ([`src/pages/feedback.astro`](file:///workspaces/asu_med_materials/src/pages/feedback.astro)) powered by [`FeedbackForm.astro`](file:///workspaces/asu_med_materials/src/components/feedback/FeedbackForm.astro).

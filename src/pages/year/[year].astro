@@ -25,20 +25,20 @@ const materials = await getMaterialsByYear(yearNum);
   <!-- Breadcrumb & Year Tabs -->
   <div class="mb-6">
     <div class="flex items-center gap-2 text-xs text-zinc-500 dark:text-zinc-400 mb-2">
-      <a href="/?redirect=false" data-i18n="nav.home" class="hover:text-emerald-600 dark:hover:text-emerald-400">Home</a>
+      <a href="/?redirect=false" class="hover:text-emerald-600 dark:hover:text-emerald-400">Home</a>
       <span>/</span>
-      <span class="text-zinc-900 dark:text-zinc-100 font-bold" data-i18n="nav.year" data-i18n-params={JSON.stringify({ y: yearNum })}>Year {yearNum}</span>
+      <span class="text-zinc-900 dark:text-zinc-100 font-bold">Year {yearNum}</span>
     </div>
 
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-zinc-200 dark:border-zinc-800 pb-4">
       <div>
-        <h1 class="text-2xl font-extrabold text-zinc-900 dark:text-zinc-100" data-i18n="nav.year" data-i18n-params={JSON.stringify({ y: yearNum })}>
+        <h1 class="text-2xl font-extrabold text-zinc-900 dark:text-zinc-100">
           Year {yearNum}
         </h1>
         <p class="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5">
-          <span data-i18n="year.modulesCount" data-i18n-params={JSON.stringify({ n: modules.length })}>{modules.length} Study Modules</span>
+          <span>{modules.length} Study Modules</span>
           {' • '}
-          <span data-i18n="year.materialsCount" data-i18n-params={JSON.stringify({ n: materials.length })}>{materials.length} Verified Resources</span>
+          <span>{materials.length} Verified Resources</span>
         </p>
       </div>
 
@@ -49,14 +49,14 @@ const materials = await getMaterialsByYear(yearNum);
   <!-- Modules Grid -->
   <section class="mb-10">
     <div class="flex items-center justify-between mb-3">
-      <h2 class="text-base font-bold text-zinc-900 dark:text-zinc-100" data-i18n="year.modulesTitle">
+      <h2 class="text-base font-bold text-zinc-900 dark:text-zinc-100">
         Year Modules
       </h2>
     </div>
 
     {modules.length === 0 ? (
       <div class="py-8 text-center border border-dashed border-zinc-200 dark:border-zinc-800 rounded-xl p-6 bg-white dark:bg-zinc-900/60">
-        <p class="text-xs text-zinc-500 dark:text-zinc-400" data-i18n="home.noModulesFound">
+        <p class="text-xs text-zinc-500 dark:text-zinc-400">
           No modules added yet for this year. Blood Module (Year 2) is currently available.
         </p>
       </div>
@@ -73,7 +73,7 @@ const materials = await getMaterialsByYear(yearNum);
   <!-- Grouped Materials List for This Year -->
   <section>
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-6">
-      <h2 class="text-base font-bold text-zinc-900 dark:text-zinc-100" data-i18n="year.centralDrivesTitle">
+      <h2 class="text-base font-bold text-zinc-900 dark:text-zinc-100">
         Central Batch Resources
       </h2>
       <FilterToolbar />

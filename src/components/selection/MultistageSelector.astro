@@ -1,10 +1,10 @@
 ---
 const years = [
-  { year: 1, titleAr: 'السنة الأولى', titleEn: 'Year 1', desc: 'NOW AVAILABLE.. Introduction & ICT modules' },
-  { year: 2, titleAr: 'السنة الثانية', titleEn: 'Year 2', desc: 'Blood & Lymphatic System' },
-  { year: 3, titleAr: 'السنة الثالثة', titleEn: 'Year 3', desc: 'Soon' },
-  { year: 4, titleAr: 'السنة الرابعة', titleEn: 'Year 4', desc: 'Soon' },
-  { year: 5, titleAr: 'السنة الخامسة', titleEn: 'Year 5', desc: 'Soon' },
+  { year: 1, title: 'Year 1', desc: 'NOW AVAILABLE.. Introduction & ICT modules' },
+  { year: 2, title: 'Year 2', desc: 'Blood & Lymphatic System' },
+  { year: 3, title: 'Year 3', desc: 'Soon' },
+  { year: 4, title: 'Year 4', desc: 'Soon' },
+  { year: 5, title: 'Year 5', desc: 'Soon' },
 ];
 ---
 
@@ -22,7 +22,6 @@ const years = [
       <h2
         id="year-selector-title"
         class="text-xl font-bold text-zinc-900 dark:text-zinc-100"
-        data-i18n="selector.title"
       >
         Choose Academic Year
       </h2>
@@ -32,7 +31,6 @@ const years = [
         type="button"
         id="close-multistage-btn"
         class="p-2 text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors cursor-pointer"
-        data-i18n-attr="aria-label:selector.closeLabel"
         aria-label="Close"
       >
         <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -47,7 +45,8 @@ const years = [
         <button
           type="button"
           data-stage-year={y.year}
-          class="stage-year-btn group flex items-center justify-between p-3.5 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-800/40 hover:bg-emerald-50 dark:hover:bg-emerald-950/30 hover:border-emerald-500 transition-all text-start cursor-pointer"        >
+          class="stage-year-btn group flex items-center justify-between p-3.5 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-800/40 hover:bg-emerald-50 dark:hover:bg-emerald-950/30 hover:border-emerald-500 transition-all text-start cursor-pointer"
+        >
           <div class="flex items-center gap-3">
             <div class="w-9 h-9 rounded-lg bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 flex items-center justify-center font-bold text-sm">
               Y{y.year}
@@ -55,10 +54,8 @@ const years = [
             <div>
               <h3
                 class="font-bold text-sm text-zinc-900 dark:text-zinc-100 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors"
-                data-i18n="nav.year"
-                data-i18n-params={JSON.stringify({ y: y.year })}
               >
-                {y.titleEn}
+                {y.title}
               </h3>
               <p
                 class="text-[11px] text-zinc-500 dark:text-zinc-400 mt-0.5"
@@ -67,7 +64,7 @@ const years = [
               </p>
             </div>
           </div>
-          <svg class="w-4 h-4 text-zinc-400 group-hover:text-emerald-600 rtl:-rotate-180 rtl:group-hover:-translate-x-1 ltr:group-hover:translate-x-1 transition-all" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <svg class="w-4 h-4 text-zinc-400 group-hover:text-emerald-600 group-hover:translate-x-1 transition-all" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
             <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
           </svg>
         </button>

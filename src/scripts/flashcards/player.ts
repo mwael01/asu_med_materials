@@ -23,7 +23,6 @@ import {
 import { rateProgress, resetProgress } from '../../utils/flashcards/progress';
 import { getCachedUserProfile } from '../../firebase/auth';
 import { cacheDeckImagesOnOpen } from '../../utils/flashcards/caching';
-import { getCurrentLanguage, t } from '../../utils/i18n';
 import { prepareCardHtml } from './cardHtml';
 import { bindCardGestures } from './gestures';
 import { createCardAnimations } from './animations';
@@ -250,11 +249,8 @@ function initStudyPlayer() {
       !progressCounter
     )
       return;
-    const lang = getCurrentLanguage();
-
     const { known, total, percent } = reviewProgress(reviewState);
-    progressCounter.setAttribute('data-i18n-params', JSON.stringify({ known, total }));
-    progressCounter.textContent = t('flashcards.progress', lang, { known, total });
+    progressCounter.textContent = `${known} of ${total} completed`;
     if (progressPercent) progressPercent.textContent = `${percent}%`;
     if (progressBar) progressBar.style.width = `${percent}%`;
     emptyScreen?.classList.toggle('hidden', total > 0);
@@ -277,13 +273,13 @@ function initStudyPlayer() {
     if (reviewState.paused) {
       viewport.classList.add('hidden');
       pausedScreen?.classList.remove('hidden');
-      if (pauseBtnText) pauseBtnText.textContent = t('flashcards.resume', lang);
+      if (pauseBtnText) pauseBtnText.textContent = 'Resume';
       return;
     }
 
     viewport.classList.remove('hidden');
     pausedScreen?.classList.add('hidden');
-    if (pauseBtnText) pauseBtnText.textContent = t('flashcards.pause', lang);
+    if (pauseBtnText) pauseBtnText.textContent = 'Pause';
 
     const card = currentCard(reviewState);
     if (!card) return;
@@ -307,14 +303,10 @@ function initStudyPlayer() {
           overlay.style.display = '';
         }
       }
-      const currentLang = getCurrentLanguage();
       if (reviewState.revealed) {
         cardOcclusionContainer?.classList.remove('hidden');
         if (btnToggleOcclusionText) {
-          btnToggleOcclusionText.textContent = t(
-            shouldHide ? 'flashcards.showMask' : 'flashcards.hideMask',
-            currentLang,
-          );
+          btnToggleOcclusionText.textContent = shouldHide ? 'Show Mask' : 'Hide Mask';
         }
       } else {
         cardOcclusionContainer?.classList.add('hidden');
@@ -348,7 +340,7 @@ function initStudyPlayer() {
         cardHintPanel.classList.add('hidden');
         if (btnToggleHint) {
           const btnSpan = btnToggleHint.querySelector('span');
-          if (btnSpan) btnSpan.textContent = t('flashcards.showHint', lang);
+          if (btnSpan) btnSpan.textContent = '💡 Show Hint';
         }
       } else if (cardHintContainer) {
         cardHintContainer.classList.add('hidden');
@@ -374,7 +366,7 @@ function initStudyPlayer() {
           /<img\b/i.test(cleanA);
         answerBody.innerHTML = hasContent
           ? cleanA
-          : `<p class="text-xs sm:text-sm text-zinc-400 dark:text-zinc-500 italic">${t('flashcards.occlusionRevealed', lang)}</p>`;
+          : `<p class="text-xs sm:text-sm text-zinc-400 dark:text-zinc-500 italic">Mask revealed</p>`;
         answerRendered = true;
       }
       answerContainer?.classList.remove('hidden');
@@ -427,10 +419,7 @@ function initStudyPlayer() {
       const isCurrentlyHidden = cardHintPanel.classList.toggle('hidden');
       const btnSpan = btnToggleHint.querySelector('span');
       if (btnSpan) {
-        btnSpan.textContent = t(
-          isCurrentlyHidden ? 'flashcards.showHint' : 'flashcards.hideHint',
-          getCurrentLanguage(),
-        );
+        btnSpan.textContent = isCurrentlyHidden ? '💡 Show Hint' : '💡 Hide Hint';
       }
     },
     listenerOptions,
@@ -457,10 +446,7 @@ function initStudyPlayer() {
         }
       }
       if (btnToggleOcclusionText) {
-        btnToggleOcclusionText.textContent = t(
-          isOcclusionMaskHidden ? 'flashcards.showMask' : 'flashcards.hideMask',
-          getCurrentLanguage(),
-        );
+        btnToggleOcclusionText.textContent = isOcclusionMaskHidden ? 'Show Mask' : 'Hide Mask';
       }
     },
     listenerOptions,
@@ -492,10 +478,7 @@ function initStudyPlayer() {
             }
           }
           if (btnToggleOcclusionText) {
-            btnToggleOcclusionText.textContent = t(
-              isOcclusionMaskHidden ? 'flashcards.showMask' : 'flashcards.hideMask',
-              getCurrentLanguage(),
-            );
+            btnToggleOcclusionText.textContent = isOcclusionMaskHidden ? 'Show Mask' : 'Hide Mask';
           }
         }
       }
@@ -619,22 +602,7 @@ function initStudyPlayer() {
     listenerOptions,
   );
 
-  window.addEventListener(
-    'asumed-language-changed',
-    () => {
-      interruptVisuals();
-      render();
-      const label = btnToggleHint?.querySelector('span');
-      if (label)
-        label.textContent = t(
-          cardHintPanel?.classList.contains('hidden')
-            ? 'flashcards.showHint'
-            : 'flashcards.hideHint',
-          getCurrentLanguage(),
-        );
-    },
-    listenerOptions,
-  );
+
   window.addEventListener('keydown', handleKeydown, listenerOptions);
   document.addEventListener(
     'astro:before-swap',
