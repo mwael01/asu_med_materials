@@ -28,7 +28,7 @@ A native dialog with five year choices and a Close action. The browser controlle
 
 #### `Navbar.astro` and `MobileMenu.astro`
 
-Primary navigation offers Home, Videos, PDFs, Flashcards, and Search, with profile and saved-material actions. (Theme toggle removed in favor of permanent dark mode). Mobile includes Team and Contribute as secondary destinations. Year links and the navbar year badge are removed; year changes live on Home and profile.
+Primary navigation offers Home, Videos, PDFs, Flashcards, Team, and a prominent Contribute button, with Search, profile, and saved-material actions. (Theme toggle removed in favor of permanent dark mode). Mobile menu includes all destinations. Year links and the navbar year badge are removed; year changes live on Home and profile.
 
 #### [`Footer.astro`](file:///workspaces/asu_med_materials/src/components/navigation/Footer.astro)
 - **Location**: `src/components/navigation/Footer.astro`

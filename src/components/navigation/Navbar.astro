@@ -2,7 +2,13 @@
 import MobileMenu from './MobileMenu.astro';
 
 const currentPath = Astro.url.pathname;
-const links = [['/', 'Home'], ['/videos', 'Videos'], ['/pdfs', 'PDFs'], ['/flashcards', 'Flashcards']];
+const links = [
+  ['/', 'Home'],
+  ['/videos', 'Videos'],
+  ['/pdfs', 'PDFs'],
+  ['/flashcards', 'Flashcards'],
+  ['/team', 'Team'],
+];
 ---
 
 <header class="sticky top-0 z-30 w-full border-b border-zinc-200 dark:border-zinc-800 bg-white/95 dark:bg-zinc-950/90 backdrop-blur-md pt-[env(safe-area-inset-top,0px)]">
@@ -14,6 +20,15 @@ const links = [['/', 'Home'], ['/videos', 'Videos'], ['/pdfs', 'PDFs'], ['/flash
 
     <nav class="hidden lg:flex items-center gap-1 text-xs font-medium" aria-label="Main navigation">
       {links.map(([href, title]) => <a href={href} aria-current={currentPath === href ? 'page' : undefined} class:list={['px-3 py-2 rounded-md hover:text-emerald-600', currentPath === href && 'text-emerald-600 font-bold']}>{title}</a>)}
+      <a
+        href="/contribute"
+        class="inline-flex items-center gap-1.5 px-3 py-1.5 ml-1 rounded-lg text-xs font-semibold bg-emerald-600 hover:bg-emerald-700 active:scale-[0.98] text-white transition-all shadow-2xs"
+      >
+        <svg class="w-3.5 h-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+        </svg>
+        <span>Contribute</span>
+      </a>
     </nav>
 
     <!-- Action Tools -->
