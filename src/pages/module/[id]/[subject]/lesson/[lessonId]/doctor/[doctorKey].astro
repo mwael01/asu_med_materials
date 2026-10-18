@@ -35,7 +35,7 @@ const crumbs = [
   { title: lesson.title, href: `${lessonPath(lesson)}${type ? `?type=${type}` : ''}` }
 ];
 ---
-<Layout title={`${doctor.name} - ${lesson.title} - ASU Med Materials`}>
+<Layout title={`${doctor.name} - ${lesson.title} - mediX`}>
   <PageHeading title={doctor.name} crumbs={crumbs} />
   <DoctorPlayer entries={entries} materials={doctor.items} />
 </Layout>

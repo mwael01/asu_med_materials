@@ -6,7 +6,7 @@ const allMaterials = await getAllMaterials();
 ---
 
 <Layout
-  title="Student Profile - ASU Med Materials"
+  title="Student Profile - mediX"
   description="Manage your medical student profile, customize your avatar and bio, and share your contributions at ASU Faculty of Medicine."
 >
   <div class="max-w-4xl mx-auto py-4 text-start">
@@ -651,7 +651,7 @@ const allMaterials = await getAllMaterials();
             uid: 'guest_' + identifier,
             username: identifier.toLowerCase().replace(/\s+/g, '_'),
             displayName: identifier,
-            bio: 'Contributor to ASU Med Materials community',
+            bio: 'Contributor to mediX community',
             createdAt: new Date().toISOString()
           };
         }
@@ -815,8 +815,8 @@ const allMaterials = await getAllMaterials();
           if (navigator.share) {
             try {
               await navigator.share({
-                title: `${profile.displayName} (@${profile.username}) - ASU Med Materials`,
-                text: `Check out ${profile.displayName}'s contributions on ASU Med Materials.`,
+                title: `${profile.displayName} (@${profile.username}) - mediX`,
+                text: `Check out ${profile.displayName}'s contributions on mediX.`,
                 url: shareUrl
               });
               return;
@@ -1109,7 +1109,7 @@ const allMaterials = await getAllMaterials();
       if (navigator.share) {
         try {
           await navigator.share({
-            title: `${currentProfile.displayName} (@${currentProfile.username}) - ASU Med Materials`,
+            title: `${currentProfile.displayName} (@${currentProfile.username}) - mediX`,
             url: shareUrl
           });
           return;

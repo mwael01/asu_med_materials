@@ -37,7 +37,7 @@ const crumbs = [
   { title: lesson.subject, href: `/module/${module.id}/${subjectToSlug(lesson.subject)}${type ? `?type=${type}` : ''}` }
 ];
 ---
-<Layout title={`${lesson.title} - ASU Med Materials`}>
+<Layout title={`${lesson.title} - mediX`}>
   <PageHeading title={lesson.title} crumbs={crumbs} />
   {doctors.length > 0 && (
     <section>

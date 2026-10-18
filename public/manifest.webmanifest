@@ -1,6 +1,6 @@
 {
-  "name": "ASU Med Materials",
-  "short_name": "ASU Med",
+  "name": "mediX",
+  "short_name": "mediX",
   "description": "All-in-one study materials directory for Ain Shams University Faculty of Medicine",
   "start_url": "/",
   "display": "standalone",

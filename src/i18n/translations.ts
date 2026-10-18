@@ -321,7 +321,7 @@ export const enTranslations: TranslationsSchema = {
       breadcrumbHome: 'Home',
       breadcrumbFeedback: 'Feedback & Suggestions',
       title: 'Feedback & Suggestions',
-      subtitle: 'Help us improve ASU Med Materials by sharing ideas, reporting broken links, or reporting technical issues.',
+      subtitle: 'Help us improve mediX by sharing ideas, reporting broken links, or reporting technical issues.',
       categoryLabel: 'Category',
       categorySuggestion: '💡 Feature Suggestion or Idea',
       categoryContentIssue: '🔗 Broken Link or Missing Material',
