@@ -6,7 +6,12 @@ import {
   AVAILABLE_MODULE_ICONS
 } from '../src/utils/subjectAppearance.ts';
 import { moduleConverter } from '../src/firebase/schema.ts';
-import { getClientModules, getClientModuleById } from '../src/utils/catalogueClient.ts';
+import {
+  getClientModules,
+  getClientModuleById,
+  getClientLessons,
+  warmupCatalogueCache
+} from '../src/utils/catalogueClient.ts';
 
 test('getModuleAppearance resolves explicit icons and dark mode colors', () => {
   const blood = getModuleAppearance({
@@ -160,3 +165,65 @@ test('getClientModules and getClientModuleById resolve from memory and localStor
   const nonExistent = await getClientModuleById('unknown-mod');
   assert.equal(nonExistent, null);
 });
+
+test('getClientLessons resolves from localStorage snapshot', async () => {
+  const mockLessons = [
+    { id: 'les-1', title: 'Staphylococcus', moduleId: 'year1-infection', subject: 'Microbiology', order: 1, active: true },
+    { id: 'les-2', title: 'Streptococcus', moduleId: 'year1-infection', subject: 'Microbiology', order: 2, active: true }
+  ];
+
+  const storageMap = new Map();
+  global.window = {
+    __CACHED_LESSONS: undefined,
+    localStorage: {
+      getItem: (key) => storageMap.get(key) || null,
+      setItem: (key, val) => storageMap.set(key, String(val))
+    }
+  };
+
+  storageMap.set('asumed_lessons_snapshot', JSON.stringify({
+    timestamp: Date.now(),
+    lessons: mockLessons
+  }));
+
+  const lessons = await getClientLessons();
+  assert.equal(lessons.length, 2);
+  assert.equal(lessons[0].title, 'Staphylococcus');
+  assert.equal(global.window.__CACHED_LESSONS?.length, 2);
+});
+
+test('warmupCatalogueCache immediately restores materials, modules, and lessons to in-memory window cache', () => {
+  const storageMap = new Map();
+  storageMap.set('asumed_catalogue_snapshot', JSON.stringify({
+    timestamp: Date.now(),
+    materials: [{ id: 'mat-1', title: 'Hematology Lecture', url: 'https://youtube.com', year: 2, type: 'youtube' }]
+  }));
+  storageMap.set('asumed_modules_snapshot', JSON.stringify({
+    timestamp: Date.now(),
+    modules: [{ id: 'year2-blood', title: 'Blood & Lymph', year: 2, subjects: ['Pathology'], icon: 'droplet', color: 'red' }]
+  }));
+  storageMap.set('asumed_lessons_snapshot', JSON.stringify({
+    timestamp: Date.now(),
+    lessons: [{ id: 'les-1', title: 'Red Blood Cells', moduleId: 'year2-blood', subject: 'Physiology', order: 1, active: true }]
+  }));
+
+  global.window = {
+    __CACHED_MATERIALS: undefined,
+    __CACHED_MODULES: undefined,
+    __CACHED_LESSONS: undefined,
+    localStorage: {
+      getItem: (key) => storageMap.get(key) || null,
+      setItem: (key, val) => storageMap.set(key, String(val))
+    }
+  };
+
+  warmupCatalogueCache();
+
+  assert.equal(global.window.__CACHED_MATERIALS?.length, 1);
+  assert.equal(global.window.__CACHED_MATERIALS[0].id, 'mat-1');
+  assert.equal(global.window.__CACHED_MODULES?.length, 1);
+  assert.equal(global.window.__CACHED_MODULES[0].id, 'year2-blood');
+  assert.equal(global.window.__CACHED_LESSONS?.length, 1);
+  assert.equal(global.window.__CACHED_LESSONS[0].id, 'les-1');
+});
+

@@ -111,7 +111,7 @@
   import { setMaterialBookmarked, renderBookmarkButtons, initBookmarkButtons, stopBookmarkButtons } from '../../utils/bookmarks';
   import { t } from '../../utils/i18n';
   import { escapeHtml } from '../../utils/sanitize';
-  import { getClientMaterials } from '../../utils/catalogueClient';
+  import { getClientMaterials, getClientModules } from '../../utils/catalogueClient';
   import { isEmbeddableDocument, getDocumentViewerPath } from '../../utils/documentViewer';
   import type { MaterialItem, ModuleInfo } from '../../types/materials';
 
@@ -296,7 +296,7 @@
         (window as unknown as { __ALL_MATERIALS?: MaterialItem[] }).__ALL_MATERIALS = allMaterials;
       }
 
-      const allModules: ModuleInfo[] = (window as unknown as { __ALL_MODULES?: ModuleInfo[] }).__ALL_MODULES || [];
+      const allModules: ModuleInfo[] = await getClientModules();
 
       const bookmarked = allMaterials.filter((m) => ids.includes(m.id));
       const unstudiedBookmarked = bookmarked.filter((m) => !studiedIds.includes(m.id));

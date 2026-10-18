@@ -1,10 +1,16 @@
 // Service Worker for ASU Med Materials PWA
 // Cache visited pages for offline access without fetching the entire catalogue.
 
-const CACHE_NAME = 'asumed-cache-v6';
+const CACHE_NAME = 'asumed-cache-v7';
 
-// 1. Static brand assets & icons
+// 1. Static brand assets, icons, core navigation routes, and catalogue APIs
 const PRECACHE_ASSETS = [
+  '/',
+  '/videos',
+  '/pdfs',
+  '/flashcards',
+  '/search',
+  '/contributors',
   '/manifest.webmanifest',
   '/favicon.svg',
   '/favicon.ico',
@@ -22,7 +28,9 @@ const PRECACHE_ASSETS = [
   '/icons/youtube.svg',
   '/offline.html',
   '/api/materials',
-  '/api/modules'
+  '/api/modules',
+  '/api/lessons',
+  '/api/collections'
 ];
 
 // Helper: fetch with network timeout
@@ -145,8 +153,13 @@ self.addEventListener('fetch', (event) => {
   // Ignore other external origins (YouTube iframe embeds, drives, etc.)
   if (url.origin !== self.location.origin) return;
 
-  // Stale-While-Revalidate strategy for catalogue materials and modules endpoints
-  if (url.pathname === '/api/materials' || url.pathname === '/api/modules') {
+  // Stale-While-Revalidate strategy for catalogue materials, modules, lessons, and collections endpoints
+  if (
+    url.pathname === '/api/materials' ||
+    url.pathname === '/api/modules' ||
+    url.pathname === '/api/lessons' ||
+    url.pathname === '/api/collections'
+  ) {
     event.respondWith(
       (async () => {
         const cache = await caches.open(CACHE_NAME);
@@ -205,63 +218,60 @@ self.addEventListener('fetch', (event) => {
   }
 
   // 2. Navigation / HTML pages
-  // Strategy: Network-First (with timeout) and Cache fallback
+  // Strategy: Stale-While-Revalidate for instant page transitions & offline access
   event.respondWith(
     (async () => {
-      try {
-        const networkResponse = await fetchWithTimeout(request, 2500);
-        if (networkResponse && networkResponse.status === 200) {
-          const cache = await caches.open(CACHE_NAME);
-          const copy = networkResponse.clone();
-          cache.put(request, copy);
+      const cache = await caches.open(CACHE_NAME);
+      const path = url.pathname;
+      const withSlash = path.endsWith('/') ? path : path + '/';
+      const noSlash = path.endsWith('/') && path !== '/' ? path.slice(0, -1) : path;
 
-          // Also store under canonical pathname variations
-          const path = url.pathname;
-          const withSlash = path.endsWith('/') ? path : path + '/';
-          const noSlash = path.endsWith('/') && path !== '/' ? path.slice(0, -1) : path;
-          cache.put(path, networkResponse.clone());
-          if (withSlash !== path) cache.put(withSlash, networkResponse.clone());
-          if (noSlash !== path) cache.put(noSlash, networkResponse.clone());
+      // 1. Check if cached version exists (exact, path, or slash variants)
+      const cached =
+        (await cache.match(request, { ignoreSearch: true })) ||
+        (await cache.match(path, { ignoreSearch: true })) ||
+        (await cache.match(withSlash, { ignoreSearch: true })) ||
+        (await cache.match(noSlash, { ignoreSearch: true }));
+
+      // 2. Network fetch promise that updates the cache in background
+      const fetchPromise = (async () => {
+        try {
+          const networkResponse = await fetchWithTimeout(request, 3500);
+          if (networkResponse && networkResponse.status === 200) {
+            const copy = networkResponse.clone();
+            await cache.put(request, copy);
+            await cache.put(path, networkResponse.clone());
+            if (withSlash !== path) await cache.put(withSlash, networkResponse.clone());
+            if (noSlash !== path) await cache.put(noSlash, networkResponse.clone());
+          }
+          return networkResponse;
+        } catch {
+          return null;
         }
-        return networkResponse;
-      } catch (err) {
-        // Offline or network timed out — look up in cache
-        const cache = await caches.open(CACHE_NAME);
+      })();
 
-        // 1. Try exact request (with or without query parameters)
-        let matched = await cache.match(request, { ignoreSearch: true });
-        if (matched) return matched;
-
-        // 2. Try pathname
-        const path = url.pathname;
-        matched = await cache.match(path, { ignoreSearch: true });
-        if (matched) return matched;
-
-        // 3. Try pathname with trailing slash
-        matched = await cache.match(path.endsWith('/') ? path : path + '/', { ignoreSearch: true });
-        if (matched) return matched;
-
-        // 4. Try pathname without trailing slash
-        if (path.endsWith('/') && path !== '/') {
-          matched = await cache.match(path.slice(0, -1), { ignoreSearch: true });
-          if (matched) return matched;
-        }
-
-
-
-        // 6. Fall back to cached home page or offline.html
-        const fallback =
-          (await cache.match('/', { ignoreSearch: true })) ||
-          (await cache.match('/index.html', { ignoreSearch: true })) ||
-          (await cache.match('/offline.html', { ignoreSearch: true }));
-        if (fallback) return fallback;
-
-        return new Response('الموقع غير متصل بالإنترنت حالياً.', {
-          status: 503,
-          statusText: 'Offline',
-          headers: { 'Content-Type': 'text/plain; charset=utf-8' }
-        });
+      // 3. If cached, serve immediately (0ms) and update cache in background
+      if (cached) {
+        event.waitUntil(fetchPromise);
+        return cached;
       }
+
+      // 4. Not in cache yet: await network fetch
+      const networkResponse = await fetchPromise;
+      if (networkResponse) return networkResponse;
+
+      // 5. Offline or network failed: fall back to cached home page or offline.html
+      const fallback =
+        (await cache.match('/', { ignoreSearch: true })) ||
+        (await cache.match('/index.html', { ignoreSearch: true })) ||
+        (await cache.match('/offline.html', { ignoreSearch: true }));
+      if (fallback) return fallback;
+
+      return new Response('الموقع غير متصل بالإنترنت حالياً.', {
+        status: 503,
+        statusText: 'Offline',
+        headers: { 'Content-Type': 'text/plain; charset=utf-8' }
+      });
     })()
   );
 });

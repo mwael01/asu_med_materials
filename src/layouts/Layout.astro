@@ -8,6 +8,7 @@ import Toast from '../components/common/Toast.astro';
 import PwaInstallToast from '../components/pwa/PwaInstallToast.astro';
 import Analytics from '@vercel/analytics/astro';
 import { RECAPTCHA_ENTERPRISE_SITE_KEY } from '../firebase/app-check';
+import { ClientRouter } from 'astro:transitions';
 
 interface Props {
   title?: string;
@@ -37,6 +38,7 @@ const {
     <meta name="generator" content={Astro.generator} />
     <title>{title}</title>
     <meta name="description" content={description} />
+    <ClientRouter />
 
     <!-- Permanent Dark Mode -->
     <script is:inline>
@@ -63,22 +65,25 @@ const {
     <PwaInstallToast />
     <Footer />
 
-    <!-- Service Worker registration, studied materials, App Check, & user library synchronization -->
+    <!-- Service Worker registration, studied materials, App Check, catalogue cache & user library synchronization -->
     <script>
       import { registerServiceWorker } from '../utils/pwa';
       import { initStudiedMaterials } from '../utils/studied';
       import { initAppCheck } from '../firebase/app-check';
       import { initUserLibrarySync } from '../utils/userSync';
+      import { warmupCatalogueCache } from '../utils/catalogueClient';
 
       initStudiedMaterials();
       registerServiceWorker();
       initAppCheck();
       initUserLibrarySync();
+      warmupCatalogueCache();
 
       document.addEventListener('astro:after-swap', () => {
         initStudiedMaterials();
         initAppCheck();
         initUserLibrarySync();
+        warmupCatalogueCache();
       });
     </script>
 

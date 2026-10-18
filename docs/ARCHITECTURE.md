@@ -26,9 +26,11 @@ See [Study flow and lesson curation](STUDY_FLOW.md) for route contracts, Firesto
 
 Public modules, materials, and lessons share versioned Vercel Runtime Cache snapshots and single-flight in-process loaders. `materials_version/current` selects the current snapshot; the version reader caches for 60 seconds. Administrative mutations increment the version. Cache keys include the project and schema namespace; large snapshots use generation-specific chunks and a final manifest. Origin failures propagate instead of being cached as empty results.
 
-Anonymous public HTML uses Vercel CDN caching (300 seconds fresh, with stale-while-revalidate). API, private, authenticated, and cookie-bearing requests bypass shared HTML caching. New type pages share these rules. Cached pages need a refresh to display catalogue changes.
+Anonymous public HTML uses Vercel CDN caching (300 seconds fresh, with stale-while-revalidate). Client-side navigation uses Astro's `<ClientRouter />` with `prefetchAll: true` (hover/tap strategy), eliminating full-page document reloads and providing seamless view transitions with 0ms perceived latency.
 
-Firebase's multi-tab IndexedDB persistence caches direct browser reads. The service worker caches visited public pages and static assets, rather than crawling the catalogue. An unavailable page uses the offline fallback. Profile/admin responses bypass service-worker caching.
+Firebase's multi-tab IndexedDB persistence caches direct browser reads. The service worker (`public/sw.js`) precaches core application routes (`/`, `/videos`, `/pdfs`, `/flashcards`, `/search`, `/contributors`) and catalogue APIs (`/api/materials`, `/api/modules`, `/api/lessons`, `/api/collections`). Navigation requests use a Stale-While-Revalidate strategy, serving cached HTML immediately in 0ms while silently revalidating in the background. Profile and admin routes strictly bypass service-worker caching.
+
+Client-side data access uses `warmupCatalogueCache()` to eagerly hydrate `localStorage` snapshots (`asumed_catalogue_snapshot`, `asumed_modules_snapshot`, `asumed_lessons_snapshot`) into in-memory window stores upon startup and view transitions, providing instant zero-wait access to materials, search documents, and bookmarks.
 
 Existing semester-two hiding and inactive-module filtering remain in the data layer. Reference modules keep their existing visibility behavior; saved-year discovery strictly isolates by material year.
 
