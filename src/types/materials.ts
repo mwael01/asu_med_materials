@@ -67,6 +67,7 @@ export interface MaterialItem {
   moduleId?: string;
   semester?: 1 | 2;
   subject?: string;
+  lessonId?: string;
   author?: string | string[]; // Creator / Doctor / Teacher who prepared the materials
   contributorUid?: string; // Firebase Auth UID of the contributing user
   contributorUsername?: string; // Username handle of the contributing user

@@ -10,6 +10,7 @@ export interface QuickDumpSubmission {
   contributorUsername?: string; // Username of user if logged in
   year?: AcademicYear | 'general';
   moduleId?: string;
+  lessonId?: string;
   notes?: string;
 }
 
@@ -20,6 +21,7 @@ export interface DetailedSubmission {
   type?: ResourceType;
   year?: AcademicYear | 'general';
   moduleId?: string;
+  lessonId?: string;
   subject?: string;
   author?: string; // Content creator / Doctor / Lecturer
   contributor?: string; // Student contributor name (optional)

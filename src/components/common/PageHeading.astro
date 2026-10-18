@@ -1,0 +1,16 @@
+---
+interface Props {
+  title: string;
+  crumbs?: { title: string; href: string }[];
+}
+const { title, crumbs = [] } = Astro.props;
+---
+{crumbs.length > 0 && (
+  <nav aria-label="Breadcrumb" class="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-zinc-500 mb-3">
+    {crumbs.map(crumb => <><a href={crumb.href} class="hover:text-emerald-600">{crumb.title}</a><span aria-hidden="true">/</span></>)}
+  </nav>
+)}
+<div class="flex items-center justify-between gap-4 mb-6">
+  <h1 class="text-xl font-bold">{title}</h1>
+  <slot />
+</div>

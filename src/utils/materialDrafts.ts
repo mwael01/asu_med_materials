@@ -50,6 +50,7 @@ export function serializeDraft(draft: MaterialDraft, modules: ModuleInfo[]): Mat
     year: draft.year!,
     moduleId: draft.moduleId || undefined,
     subject: draft.subject?.trim() || undefined,
+    lessonId: draft.lessonId?.trim() || undefined,
     author: authors.length ? authors : undefined,
     tags: [...new Set(draft.tags.map(t => t.trim()).filter(Boolean))],
     contributorUid: draft.contributorUid,

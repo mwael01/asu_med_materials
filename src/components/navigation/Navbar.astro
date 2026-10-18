@@ -3,7 +3,7 @@ import ThemeToggle from '../common/ThemeToggle.astro';
 import MobileMenu from './MobileMenu.astro';
 
 const currentPath = Astro.url.pathname;
-const isYear = (y: number) => currentPath.startsWith(`/year/${y}`);
+const links = [['/', 'Home'], ['/videos', 'Videos'], ['/pdfs', 'PDFs'], ['/flashcards', 'Flashcards']];
 ---
 
 <header class="sticky top-0 z-30 w-full border-b border-zinc-200 dark:border-zinc-800 bg-white/95 dark:bg-zinc-950/90 backdrop-blur-md pt-[env(safe-area-inset-top,0px)]">
@@ -13,64 +13,12 @@ const isYear = (y: number) => currentPath.startsWith(`/year/${y}`);
       <span class="font-bold text-xs sm:text-sm tracking-tight truncate max-w-[125px] sm:max-w-none shrink-0">ASU Med Materials</span>
     </a>
 
-    <!-- Navigation Links (Desktop) -->
-    <nav class="hidden lg:flex items-center gap-0.5 text-xs font-medium">
-      <a
-        href="/"
-        class:list={[
-          'px-2.5 py-1 rounded-md transition-colors',
-          currentPath === '/' ? 'text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/50 font-bold' : 'text-zinc-600 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800'
-        ]}
-      >
-        Home
-      </a>
-      {[1, 2, 3, 4, 5].map((y) => (
-        <a
-          href={`/year/${y}`}
-          class:list={[
-            'px-2 py-1 rounded-md transition-colors',
-            isYear(y) ? 'text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/50 font-bold' : 'text-zinc-600 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800'
-          ]}
-        >
-          Year {y}
-        </a>
-      ))}
-
-      <a
-        href="/team"
-        class:list={[
-          'px-2.5 py-1 rounded-md transition-colors',
-          currentPath === '/team' ? 'text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/50 font-bold' : 'text-zinc-600 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800'
-        ]}
-      >
-        Team
-      </a>
-      <a
-        href="/contribute"
-        class="inline-flex items-center gap-1.5 px-3 py-1 ml-1 rounded-lg text-xs font-semibold bg-emerald-600 hover:bg-emerald-700 active:scale-[0.98] text-white transition-all shadow-2xs"
-      >
-        <svg class="w-3.5 h-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-        </svg>
-        <span>Contribute</span>
-      </a>
+    <nav class="hidden lg:flex items-center gap-1 text-xs font-medium" aria-label="Main navigation">
+      {links.map(([href, title]) => <a href={href} aria-current={currentPath === href ? 'page' : undefined} class:list={['px-3 py-2 rounded-md hover:text-emerald-600', currentPath === href && 'text-emerald-600 font-bold']}>{title}</a>)}
     </nav>
 
     <!-- Action Tools -->
     <div class="flex items-center gap-1 sm:gap-1.5">
-      <!-- Quick Change Year Button (triggers MultistageSelector for guests) -->
-      <button
-        type="button"
-        id="nav-change-year-btn"
-        class="trigger-multistage-selector hidden sm:inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium text-zinc-600 dark:text-zinc-300 hover:text-emerald-600 dark:hover:text-emerald-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 cursor-pointer"
-        title="Change Year & Module"
-      >
-        <svg class="w-3.5 h-3.5 text-zinc-400 dark:text-zinc-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" />
-        </svg>
-        <span id="nav-user-year-badge" class="text-xs font-semibold hidden sm:inline">Change Year</span>
-      </button>
-
       <!-- Search Link -->
       <a
         href="/search"
@@ -155,23 +103,9 @@ const isYear = (y: number) => currentPath.startsWith(`/year/${y}`);
 
   let unsubscribeAuth: (() => void) | undefined;
 
-  function syncNavYearBadge(): void {
-    const badge = document.getElementById('nav-user-year-badge');
-    if (!badge) return;
-    try {
-      const year = localStorage.getItem('asumed_user_year');
-      if (year) {
-        badge.textContent = `Year ${year}`;
-      } else {
-        badge.textContent = 'Change Year';
-      }
-    } catch {}
-  }
-
   function syncNavAuthState(): void {
     const avatar = document.getElementById('nav-profile-avatar') as HTMLImageElement | null;
     const defaultIcon = document.getElementById('nav-profile-default-icon');
-    const changeYearBtn = document.getElementById('nav-change-year-btn');
     const cached = getCachedUserProfile();
 
     if (cached) {
@@ -183,34 +117,18 @@ const isYear = (y: number) => currentPath.startsWith(`/year/${y}`);
         avatar?.classList.add('hidden');
         defaultIcon?.classList.remove('hidden');
       }
-
-      // Hide year reset button for logged in users
-      if (changeYearBtn) {
-        changeYearBtn.classList.add('hidden');
-        changeYearBtn.classList.remove('inline-flex', 'sm:inline-flex');
-      }
     } else {
       avatar?.classList.add('hidden');
       defaultIcon?.classList.remove('hidden');
-
-      // Show year selection button for guests
-      if (changeYearBtn) {
-        changeYearBtn.classList.remove('hidden');
-        changeYearBtn.classList.add('inline-flex', 'sm:inline-flex');
-      }
     }
   }
 
-  syncNavYearBadge();
   syncNavAuthState();
   if (unsubscribeAuth) unsubscribeAuth();
   unsubscribeAuth = onAuthChange((_user) => {
     syncNavAuthState();
-    syncNavYearBadge();
   });
-  window.addEventListener('user-preferences-updated', syncNavYearBadge);
   document.addEventListener('astro:after-swap', () => {
-    syncNavYearBadge();
     syncNavAuthState();
   });
 </script>

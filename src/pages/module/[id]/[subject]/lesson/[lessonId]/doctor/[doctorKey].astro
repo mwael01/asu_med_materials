@@ -1,0 +1,19 @@
+---
+import Layout from '../../../../../../../layouts/Layout.astro';
+import PageHeading from '../../../../../../../components/common/PageHeading.astro';
+import DoctorPlayer from '../../../../../../../components/study/DoctorPlayer.astro';
+import { loadLessonPage } from '../../../../../../../data/lessons';
+import { lessonDoctors, lessonPath } from '../../../../../../../utils/lessons';
+import { studyEntries, isFlashcards } from '../../../../../../../utils/studyContent';
+import { subjectToSlug } from '../../../../../../../utils/slug';
+const context = await loadLessonPage(Astro.params.id || '', Astro.params.subject || '', Astro.params.lessonId || '');
+if (!context) return Astro.redirect('/404');
+const { module, lesson, materials } = context;
+const doctor = lessonDoctors(materials.filter(item => !isFlashcards(item))).find(item => item.key === Astro.params.doctorKey);
+if (!doctor) return Astro.redirect('/404');
+const entries = studyEntries(doctor.items);
+---
+<Layout title={`${doctor.name} - ${lesson.title} - ASU Med Materials`}>
+  <PageHeading title={doctor.name} crumbs={[{ title: 'Home', href: '/' }, { title: module.title, href: `/module/${module.id}` }, { title: lesson.subject, href: `/module/${module.id}/${subjectToSlug(lesson.subject)}` }, { title: lesson.title, href: lessonPath(lesson) }]} />
+  <DoctorPlayer entries={entries} materials={doctor.items} />
+</Layout>

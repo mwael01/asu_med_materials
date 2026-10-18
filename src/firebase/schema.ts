@@ -4,7 +4,7 @@ import type {
   SnapshotOptions,
   DocumentData
 } from 'firebase/firestore';
-import type { MaterialItem, ModuleInfo, AcademicYear, ResourceType, MaterialCategory, PlaylistItem } from '../types/materials';
+import type { MaterialItem, ModuleInfo, AcademicYear, ResourceType, MaterialCategory, PlaylistItem, DocumentItem } from '../types/materials';
 import type { FlashcardCard, FlashcardDeck, FlashcardRevision } from '../types/flashcards';
 import type { UserProfile, UserRole } from '../types/profile';
 
@@ -14,6 +14,7 @@ import type { UserProfile, UserRole } from '../types/profile';
 export const COLLECTIONS = {
   MATERIALS: 'materials',
   MODULES: 'modules',
+  LESSONS: 'lessons',
   USERS: 'users',
   SUBMISSIONS: 'submissions',
   FEEDBACK: 'feedback',
@@ -48,6 +49,7 @@ export interface MaterialDocument {
   year: AcademicYear;
   moduleId?: string;
   subject?: string;
+  lessonId?: string;
   author?: string | string[];
   contributorUid?: string;
   contributorUsername?: string;
@@ -56,6 +58,8 @@ export interface MaterialDocument {
   createdAt?: string;
   playlistId?: string;
   videos?: PlaylistItem[];
+  documents?: DocumentItem[];
+  semester?: 1 | 2;
   bookmarksCount?: number;
   flashcardDeckId?: string;
 }
@@ -116,6 +120,7 @@ export interface SubmissionDocument {
   year: AcademicYear | 'general';
   moduleId?: string;
   subject?: string;
+  lessonId?: string;
   type?: ResourceType;
   notes?: string;
   status: 'pending' | 'approved' | 'rejected';
@@ -189,6 +194,7 @@ export const materialConverter: FirestoreDataConverter<MaterialItem> = {
       year: material.year,
       moduleId: material.moduleId || null,
       subject: material.subject || null,
+      lessonId: material.lessonId || null,
       author: material.author || null,
       contributorUid: material.contributorUid || null,
       contributorUsername: material.contributorUsername || null,
@@ -197,6 +203,8 @@ export const materialConverter: FirestoreDataConverter<MaterialItem> = {
       createdAt: material.createdAt || new Date().toISOString(),
       playlistId: material.playlistId || null,
       videos: Array.isArray(material.videos) ? material.videos : null,
+      documents: Array.isArray(material.documents) ? material.documents : null,
+      semester: material.semester || null,
       bookmarksCount: typeof material.bookmarksCount === 'number' ? material.bookmarksCount : 0,
       flashcardDeckId: material.flashcardDeckId || null,
     };
@@ -218,6 +226,7 @@ export const materialConverter: FirestoreDataConverter<MaterialItem> = {
       year: (data.year || 2) as AcademicYear,
       moduleId: data.moduleId || undefined,
       subject: data.subject || undefined,
+      lessonId: data.lessonId || undefined,
       author: data.author || undefined,
       contributorUid: data.contributorUid || undefined,
       contributorUsername: data.contributorUsername || undefined,
@@ -226,6 +235,8 @@ export const materialConverter: FirestoreDataConverter<MaterialItem> = {
       createdAt: data.createdAt || undefined,
       playlistId: data.playlistId || undefined,
       videos: Array.isArray(data.videos) ? data.videos : undefined,
+      documents: Array.isArray(data.documents) ? data.documents : undefined,
+      semester: data.semester || undefined,
       bookmarksCount: typeof data.bookmarksCount === 'number' ? data.bookmarksCount : 0,
       flashcardDeckId: data.flashcardDeckId || undefined,
     };
@@ -340,6 +351,7 @@ export const submissionConverter: FirestoreDataConverter<SubmissionDocument> = {
       year: data.year || 'general',
       moduleId: data.moduleId,
       subject: data.subject,
+      lessonId: data.lessonId,
       type: data.type,
       notes: data.notes,
       status: data.status || 'pending',

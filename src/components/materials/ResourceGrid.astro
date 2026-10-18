@@ -6,11 +6,13 @@ interface Props {
   materials: MaterialItem[];
   emptyMessage?: string;
   showYear?: boolean;
+  hrefs?: Record<string, string>;
 }
 
 const {
   materials,
   emptyMessage = 'No study resources available yet.',
+  hrefs = {},
   showYear = false
 } = Astro.props;
 ---
@@ -36,7 +38,7 @@ const {
 ) : (
   <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 materials-grid">
     {materials.map((item) => (
-      <ResourceCard material={item} showYear={showYear} />
+      <ResourceCard material={item} showYear={showYear} href={hrefs[item.id]} />
     ))}
   </div>
 )}

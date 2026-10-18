@@ -80,7 +80,7 @@ export function initDirectMaterialForm(): void {
   const quickStatusIcon = get('admin-quick-status-icon');
   const quickStatusText = get('admin-quick-status-text');
 
-  let source: Partial<DraftCredit> | undefined;
+  let source: (Partial<DraftCredit> & { lessonId?: string }) | undefined;
   let single = createDraft({}, draftCredit(getCachedUserProfile()));
   let staged: MaterialDraft[] = [];
   let revision = 0;
@@ -414,7 +414,7 @@ export function initDirectMaterialForm(): void {
       if (current !== revision || !root?.isConnected) return;
 
       const drafts = result.items.map((item) => {
-        const draft = createDraft(item, credit);
+        const draft = createDraft({ ...item, lessonId: item.lessonId || source?.lessonId }, credit);
         applyPresets(draft);
         return draft;
       });
@@ -787,6 +787,7 @@ export function initDirectMaterialForm(): void {
           year: presets.locked && presets.year ? presets.year : first.year,
           moduleId: presets.locked && presets.moduleId ? presets.moduleId : first.moduleId,
           subject: subjectStr,
+          lessonId: selected.every(item => item.lessonId === first.lessonId) ? first.lessonId : undefined,
           author: authorStr
             ? authorStr
                 .split(/[,،]/)
@@ -904,6 +905,7 @@ export function initDirectMaterialForm(): void {
           year: presets.locked && presets.year ? presets.year : first.year,
           moduleId: presets.locked && presets.moduleId ? presets.moduleId : first.moduleId,
           subject: subjectStr,
+          lessonId: selected.every(item => item.lessonId === first.lessonId) ? first.lessonId : undefined,
           author: authorStr
             ? authorStr
                 .split(/[,،]/)
@@ -1010,12 +1012,14 @@ export function initDirectMaterialForm(): void {
           contributorUid?: string;
           contributorUsername?: string;
           content?: string;
+          lessonId?: string;
         }>
       ).detail;
       if (!detail) return;
       invalidate();
       source = {
         sourceSubmissionId: detail.submissionId,
+        lessonId: detail.lessonId,
         contributor: detail.contributor,
         contributorUid: detail.contributorUid,
         contributorUsername: detail.contributorUsername,

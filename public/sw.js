@@ -1,7 +1,7 @@
 // Service Worker for ASU Med Materials PWA
 // Cache visited pages for offline access without fetching the entire catalogue.
 
-const CACHE_NAME = 'asumed-cache-v4';
+const CACHE_NAME = 'asumed-cache-v5';
 
 // 1. Static brand assets & icons
 const PRECACHE_ASSETS = [

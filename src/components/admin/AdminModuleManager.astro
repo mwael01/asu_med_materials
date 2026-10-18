@@ -46,14 +46,6 @@
           <label class="block text-xs font-medium text-zinc-500 mb-1">المواد (Subjects) - مفصولة بفاصلة</label>
           <input type="text" id="amm-input-subjects" class="w-full px-3 py-2 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 text-start" placeholder="anatomy, physiology" />
         </div>
-        <div class="md:col-span-2">
-          <label class="block text-xs font-medium text-zinc-500 mb-1">الوصف (Description)</label>
-          <textarea id="amm-input-desc" rows="2" class="w-full px-3 py-2 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 text-start"></textarea>
-        </div>
-        <div class="md:col-span-2">
-          <label class="block text-xs font-medium text-zinc-500 mb-1">الوصف بالعربية (Description Ar)</label>
-          <textarea id="amm-input-desc-ar" rows="2" class="w-full px-3 py-2 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 text-start"></textarea>
-        </div>
       </div>
       <div class="flex justify-end gap-2 mt-4">
         <button type="button" id="amm-cancel-add-btn" class="px-4 py-2 bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-700 rounded-xl text-sm font-medium transition-colors cursor-pointer">
@@ -302,10 +294,6 @@
               <label class="block text-xs font-medium text-zinc-500 mb-1">المواد</label>
               <input type="text" name="subjects" value="${escapeHtml(subjStr)}" class="w-full px-2 py-1.5 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-lg text-sm text-start" />
             </div>
-            <div class="md:col-span-3">
-              <label class="block text-xs font-medium text-zinc-500 mb-1">الوصف</label>
-              <textarea name="description" rows="1" class="w-full px-2 py-1.5 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-lg text-sm text-start">${escapeHtml(mod.description || '')}</textarea>
-            </div>
           </div>
           <div class="flex justify-end gap-2 mt-4">
             <button type="button" class="cancel-edit-btn px-3 py-1.5 bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 rounded-lg text-sm font-medium cursor-pointer">إلغاء</button>
@@ -339,7 +327,6 @@
           year: year as any,
           semester: semesterVal ? parseInt(semesterVal) as 1 | 2 : undefined,
           subjects: subjVal.split(',').map(s => s.trim()).filter(s => s),
-          description: formData.get('description') as string,
         };
 
         try {
@@ -394,8 +381,6 @@
         year: year as any,
         semester: semesterVal ? parseInt(semesterVal) as 1 | 2 : undefined,
         subjects: subjStr.split(',').map(s => s.trim()).filter(s => s),
-        description: (document.getElementById('amm-input-desc') as HTMLTextAreaElement).value,
-        descriptionAr: (document.getElementById('amm-input-desc-ar') as HTMLTextAreaElement).value,
         active: true
       };
 

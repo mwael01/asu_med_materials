@@ -23,6 +23,7 @@ export interface ParsedAIMaterial {
   year?: AcademicYear;
   moduleId: string;
   subject?: string;
+  lessonId?: string;
   author?: string | string[];
   tags: string[];
   playlistId?: string;

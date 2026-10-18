@@ -32,6 +32,8 @@ import type {
   FeedbackDocument,
   AdminLogDocument
 } from './schema';
+import { materialMatchesLesson } from '../utils/lessons';
+import type { Lesson } from '../types/lessons';
 import { normalizeResourceUrl } from '../utils/url';
 import { materialUrlKey } from '../utils/materialLinks';
 
@@ -225,6 +227,12 @@ export async function saveMaterialToFirestore(material: MaterialItem): Promise<b
   if (!db) return false;
 
   try {
+    if (material.lessonId) {
+      const lesson = await getDoc(doc(db, 'lessons', material.lessonId));
+      if (!lesson.exists() || !materialMatchesLesson(material, lesson.data() as Lesson)) {
+        throw new Error('Lesson must match the material module and subject.');
+      }
+    }
     const docRef = doc(db, MATERIALS_COLLECTION, material.id);
     await setDoc(docRef, sanitizeFirestorePayload(material), { merge: true });
     addUrlToVerificationCache(material);

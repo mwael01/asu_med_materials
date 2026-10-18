@@ -5,11 +5,13 @@ import {
   fetchModulesFromFirestore,
   getMaterialsVersionFromFirestore
 } from '../firebase/firestore';
+import { fetchLessonsFromFirestore } from '../firebase/lessons';
+import type { Lesson } from '../types/lessons';
 import type { MaterialItem, ModuleInfo } from '../types/materials';
 import { loadCachedCatalogue, createMemoryCacheStore } from '../utils/catalogueCache';
 import { createTimedLoader } from '../utils/timedLoader';
 
-const namespace = `asumed:${process.env.VERCEL_PROJECT_ID || process.env.VERCEL_PROJECT_NAME || 'website'}:${firebaseConfig.projectId}:catalogue-v1`;
+const namespace = `asumed:${process.env.VERCEL_PROJECT_ID || process.env.VERCEL_PROJECT_NAME || 'website'}:${firebaseConfig.projectId}:catalogue-v2`;
 
 const isMaterial = (value: unknown): value is MaterialItem =>
   Boolean(
@@ -64,3 +66,11 @@ export const getPublicModules = async (): Promise<ModuleInfo[]> => {
   const currentVersion = await getMaterialsVersionFromFirestore();
   return internalModulesLoader(currentVersion);
 };
+
+const isLesson = (value: unknown): value is Lesson => Boolean(value && typeof value === 'object' &&
+  typeof (value as Lesson).id === 'string' && typeof (value as Lesson).moduleId === 'string' &&
+  typeof (value as Lesson).subject === 'string');
+const internalLessonsLoader = createTimedLoader((version?: number) =>
+  loadCachedCatalogue(getActiveCacheStore(), 'lessons', () => fetchLessonsFromFirestore(true), isLesson, version || 1));
+export const getPublicLessons = async (): Promise<Lesson[]> =>
+  internalLessonsLoader(await getMaterialsVersionFromFirestore());

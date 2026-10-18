@@ -1,0 +1,7 @@
+---
+import type { ModuleInfo } from '../../types/materials';
+import NavigationCards from '../common/NavigationCards.astro';
+interface Props { modules: ModuleInfo[] }
+const { modules } = Astro.props;
+---
+<NavigationCards items={modules.filter(module => !module.id.includes('reference-books')).map(module => ({ title: module.title, href: `/module/${module.id}` }))} emptyMessage="No modules available for this year yet." />

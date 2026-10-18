@@ -5,6 +5,7 @@ const STUDIED_STORAGE_KEY = 'asumed_studied_materials';
 const USER_YEAR_KEY = 'asumed_user_year';
 const USER_MODULE_KEY = 'asumed_user_module';
 const HAS_VISITED_KEY = 'asumed_has_visited';
+let memoryYear: AcademicYear | null = null;
 
 // Bookmarks management
 export function getStoredBookmarkIds(): string[] {
@@ -103,22 +104,19 @@ export function getUserStoredYear(): AcademicYear | null {
   if (typeof window === 'undefined') return null;
   try {
     const val = localStorage.getItem(USER_YEAR_KEY);
-    if (!val) return null;
-    const num = parseInt(val, 10);
-    return num >= 1 && num <= 5 ? (num as AcademicYear) : null;
+    if (!val) return memoryYear;
+    const num = Number(val);
+    return Number.isInteger(num) && num >= 1 && num <= 5 ? (num as AcademicYear) : null;
   } catch {
-    return null;
+    return memoryYear;
   }
 }
 
 export function setUserStoredYear(year: AcademicYear): void {
-  if (typeof window === 'undefined') return;
-  try {
-    localStorage.setItem(USER_YEAR_KEY, String(year));
-    window.dispatchEvent(new CustomEvent('user-preferences-updated', { detail: { year } }));
-  } catch (err) {
-    console.error('Failed to save user year to localStorage', err);
-  }
+  if (typeof window === 'undefined' || !Number.isInteger(year) || year < 1 || year > 5) return;
+  memoryYear = year;
+  try { localStorage.setItem(USER_YEAR_KEY, String(year)); } catch { /* Keep this tab usable without persistent storage. */ }
+  window.dispatchEvent(new CustomEvent('user-preferences-updated', { detail: { year } }));
 }
 
 export function getUserStoredModule(): string | null {

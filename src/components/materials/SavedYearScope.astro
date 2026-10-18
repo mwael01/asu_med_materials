@@ -1,0 +1,7 @@
+---
+---
+<script>
+  import { initYearScope } from '../../scripts/navigation/yearScope';
+  initYearScope();
+  document.addEventListener('astro:after-swap', initYearScope);
+</script>

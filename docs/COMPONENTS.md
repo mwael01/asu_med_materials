@@ -18,33 +18,17 @@ This document details all UI components, their props, intended reuse guidelines,
 
 ### Selection & Onboarding
 
-#### [`MultistageSelector.astro`](file:///workspaces/asu_med_materials/src/components/selection/MultistageSelector.astro)
-- **Location**: `src/components/selection/MultistageSelector.astro`
-- **Purpose**: Single-step modal for quick academic year selection (Years 1 to 5) with module description preview.
-- **Style**: Based on legacy multistage design (commit a207a03) - grid layout with year badge, title, and description.
-- **Persistence**: Saves choices to `localStorage` (`asumed_user_year`) and emits `user-preferences-updated`. Tracks first visit with `asumed_has_visited` flag.
-- **First-Visit Onboarding**: Automatically opens on first page load if no year is stored, prompting the student to select their academic year immediately.
-- **Module Preview**: Each year shows a description (e.g., "Blood & Lymphatic System" for Year 2, "Coming Soon" for others).
-- **Props**: None (global client script).
+#### `MultistageSelector.astro`
+
+A native dialog with five year choices and a Close action. The browser controller in `src/scripts/navigation/yearSelector.ts` opens it whenever a public visitor has no valid stored year. Selection saves the preference and updates the current page without redirecting shared URLs. Home's Change year button reopens it. There are no module previews, descriptions, welcome quotes, or active-module selection.
 
 ---
 
 ### Navigation & Shell
 
-#### [`Navbar.astro`](file:///workspaces/asu_med_materials/src/components/navigation/Navbar.astro)
-- **Location**: `src/components/navigation/Navbar.astro`
-- **Purpose**: Compact top navigation bar (`h-12`) with clean text brand title (`ASU Med Materials`), desktop nav links, featured Contribute CTA with special emerald-teal gradient and glowing animations (`.contribute-glow-btn`), year indicator badge (`#nav-user-year-badge`), search shortcut, bookmark drawer trigger, theme switcher (`ThemeToggle.astro`), and mobile burger menu trigger (`#mobile-menu-trigger`).
-- **Props**: None.
+#### `Navbar.astro` and `MobileMenu.astro`
 
-#### [`MobileMenu.astro`](file:///workspaces/asu_med_materials/src/components/navigation/MobileMenu.astro)
-- **Location**: `src/components/navigation/MobileMenu.astro`
-- **Purpose**: Responsive slide-down navigation menu for small devices (< md), ensuring all pages and elements remain directly accessible. Features a prominent glowing Contribute button, 5-column Academic Years quick switcher grid (Years 1 to 5), core page links (Home, Playlists, Search, Contributors), and quick action shortcuts (Change Year, Saved Bookmarks).
-- **Props**:
-  ```typescript
-  interface Props {
-    currentPath: string;
-  }
-  ```
+Primary navigation offers Home, Videos, PDFs, Flashcards, and Search, with profile, saved-material, and theme actions. Mobile includes Team and Contribute as secondary destinations. Year links and the navbar year badge are removed; year changes live on Home and profile.
 
 #### [`Footer.astro`](file:///workspaces/asu_med_materials/src/components/navigation/Footer.astro)
 - **Location**: `src/components/navigation/Footer.astro`
@@ -69,6 +53,7 @@ This document details all UI components, their props, intended reuse guidelines,
   interface Props {
     materials: MaterialItem[];
     showYear?: boolean;
+    href?: string; // ResourceCard destination override
   }
   ```
 
@@ -102,6 +87,7 @@ This document details all UI components, their props, intended reuse guidelines,
     materials: MaterialItem[];
     emptyMessage?: string;
     showYear?: boolean;
+    hrefs?: Record<string, string>;
   }
   ```
 
@@ -384,3 +370,16 @@ Flashcard decks are integrated directly into module pages ([`src/pages/module/[i
 - **Location**: `src/components/materials/CollectionCard.astro`
 - **Purpose**: Unified card component representing a curated pack. Displays situation category badges (`practical`, `finals`, `midterm`, `revision`, `general`), year badge, bookmark button with live optimistic counter, and item/subgroup counts.
 
+
+
+## Lesson-flow components
+
+- **PageHeading**: Compact page title, optional breadcrumb links, and an action slot. Props: `title`, optional `crumbs: { title, href }[]`.
+- **NavigationCards**: Plain responsive text cards for module, subject, lesson, or doctor destinations. Props: `items: { title, href }[]`, optional `emptyMessage`.
+- **ModuleDirectory**: Active curriculum module destinations for the supplied year-scoped module list. No descriptions or counts.
+- **SavedYearScope**: Binds the year-scope controller to sections marked `data-scope-year`. Updates on preference changes and cross-tab storage events; shows one empty state when nothing matches.
+- **TypeDiscovery**: Shared Videos/PDFs/Flashcards discovery renderer, with `type` selecting the content class. Groups by module and subject and resolves assigned resources into their doctor workspace.
+- **DoctorPlayer**: Responsive viewer plus a tabbed sidebar; props `entries: StudyEntry[]`, `materials: MaterialItem[]`. Only populated Videos/PDFs/Links tabs render. The typed controller handles item selection, media disposal, shared URLs, progress, and bookmarks.
+- **AdminLessonManager**: Lazy-loaded lesson editor and per-material assignment controls. Lists inactive lessons for management; validates module/subject relationships before saving.
+
+Public module/subject routes use these components instead of SubjectBar and FilterToolbar. Legacy grouping components remain available to existing consumers. See [Study flow](STUDY_FLOW.md) for data and route details.

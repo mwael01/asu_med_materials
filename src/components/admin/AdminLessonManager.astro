@@ -1,0 +1,29 @@
+---
+---
+<section data-lesson-manager class="space-y-6">
+  <div class="flex items-center justify-between gap-4"><h2 class="text-base font-bold">Lessons</h2><button type="button" data-lessons-refresh class="text-sm text-emerald-600">Refresh</button></div>
+  <p data-lessons-status role="status" class="text-sm text-zinc-500">Open this tab to load lessons.</p>
+  <div class="grid sm:grid-cols-2 gap-3">
+    <label class="text-sm">Module<select data-lessons-module class="study-input mt-1"></select></label>
+    <label class="text-sm">Subject<select data-lessons-subject class="study-input mt-1"></select></label>
+  </div>
+  <form data-lesson-form class="space-y-3 border border-zinc-200 dark:border-zinc-700 rounded-xl p-4">
+    <label class="block text-sm">Edit lesson<select data-lesson-edit class="study-input mt-1"><option value="">New lesson</option></select></label>
+    <div class="grid sm:grid-cols-[1fr_6rem] gap-3">
+      <label class="text-sm">Title<input name="title" required maxlength="200" class="study-input mt-1" /></label>
+      <label class="text-sm">Order<input name="order" type="number" value="0" step="1" required class="study-input mt-1" /></label>
+    </div>
+    <label class="flex items-center gap-2 text-sm"><input name="active" type="checkbox" checked class="accent-emerald-600" />Active</label>
+    <button type="submit" class="rounded-lg px-4 py-2 bg-emerald-600 text-white text-sm disabled:opacity-50">Save lesson</button>
+  </form>
+  <section>
+    <h3 class="text-sm font-semibold mb-3">Assign subject materials</h3>
+    <p class="text-xs text-zinc-500 mb-3">Each row saves separately. Choose “Subject resources” to remove an assignment.</p>
+    <div data-lesson-assignments class="space-y-2"></div>
+  </section>
+</section>
+<script>
+  import { initAdminLessons } from '../../scripts/admin/lessons';
+  initAdminLessons();
+  document.addEventListener('astro:after-swap', initAdminLessons);
+</script>

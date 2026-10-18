@@ -215,6 +215,11 @@
               "title"
             ]
           }
+        },
+        "lessonId": {
+          "type": "string",
+          "required": false,
+          "description": "Optional reference to a lesson in the same module and subject"
         }
       }
     },
@@ -529,6 +534,37 @@
     },
     "admin_logs": {
       "totalDocuments": 0
+    },
+    "lessons": {
+      "collectionName": "lessons",
+      "idField": "id",
+      "description": "Ordered subject lessons; materials reference these documents by lessonId.",
+      "fields": {
+        "id": {
+          "type": "string",
+          "required": true
+        },
+        "title": {
+          "type": "string",
+          "required": true
+        },
+        "moduleId": {
+          "type": "string",
+          "required": true
+        },
+        "subject": {
+          "type": "string",
+          "required": true
+        },
+        "order": {
+          "type": "number",
+          "required": true
+        },
+        "active": {
+          "type": "boolean",
+          "required": true
+        }
+      }
     }
   }
 }

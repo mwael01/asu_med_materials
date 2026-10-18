@@ -1,0 +1,24 @@
+---
+import Layout from '../../../../../layouts/Layout.astro';
+import PageHeading from '../../../../../components/common/PageHeading.astro';
+import NavigationCards from '../../../../../components/common/NavigationCards.astro';
+import ResourceGrid from '../../../../../components/materials/ResourceGrid.astro';
+import { loadLessonPage } from '../../../../../data/lessons';
+import { lessonDoctors, lessonPath } from '../../../../../utils/lessons';
+import { isFlashcards } from '../../../../../utils/studyContent';
+import { subjectToSlug } from '../../../../../utils/slug';
+const context = await loadLessonPage(Astro.params.id || '', Astro.params.subject || '', Astro.params.lessonId || '');
+if (!context) return Astro.redirect('/404');
+const { module, lesson, materials } = context;
+const flashcards = materials.filter(isFlashcards);
+const doctors = lessonDoctors(materials.filter(item => !isFlashcards(item)));
+const doctorMaterials = new Set(doctors.flatMap(doctor => doctor.items.map(item => item.id)));
+const general = materials.filter(item => !isFlashcards(item) && !doctorMaterials.has(item.id));
+---
+<Layout title={`${lesson.title} - ASU Med Materials`}>
+  <PageHeading title={lesson.title} crumbs={[{ title: 'Home', href: '/' }, { title: module.title, href: `/module/${module.id}` }, { title: lesson.subject, href: `/module/${module.id}/${subjectToSlug(lesson.subject)}` }]} />
+  {doctors.length > 0 && <section><h2 class="text-base font-semibold mb-4">Doctors</h2><NavigationCards items={doctors.map(doctor => ({ title: doctor.name, href: `${lessonPath(lesson)}/doctor/${doctor.key}` }))} /></section>}
+  {flashcards.length > 0 && <section class="mt-8"><h2 class="text-base font-semibold mb-4">Flashcards</h2><ResourceGrid materials={flashcards} /></section>}
+  {general.length > 0 && <section class="mt-8"><h2 class="text-base font-semibold mb-4">Lesson resources</h2><ResourceGrid materials={general} /></section>}
+  {!materials.length && <p class="text-sm text-zinc-500">No materials assigned to this lesson yet.</p>}
+</Layout>

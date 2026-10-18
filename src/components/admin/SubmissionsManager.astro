@@ -304,7 +304,8 @@
                 contributorUsername,
                 content,
                 year,
-                moduleId
+                moduleId,
+                lessonId: allSubmissions.find(item => item.id === submissionId)?.lessonId
               }
             })
           );
@@ -341,6 +342,7 @@
             year: yrNum,
             moduleId: sub.moduleId || 'year2-blood',
             subject: sub.subject || 'General',
+            lessonId: sub.lessonId || undefined,
             type: sub.type || 'drive',
             category: 'summaries',
             contributorUid: sub.contributorUid || undefined,
@@ -350,7 +352,11 @@
             createdAt: new Date().toISOString()
           };
 
-          await saveMaterialToFirestore(newMat);
+          if (!await saveMaterialToFirestore(newMat)) {
+            showToast('Unable to publish. Check the material and lesson assignment.', 'error');
+            btn.disabled = false;
+            return;
+          }
           if (sub.contributorUid) {
             await incrementUserContributionsCount(sub.contributorUid, 1);
           }

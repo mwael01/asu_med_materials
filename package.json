@@ -9,7 +9,7 @@
     "dev": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
-    "test": "pnpm test:flashcards && pnpm test:admin-ai && pnpm test:admin-quota && pnpm test:recent-materials && pnpm test:auth && pnpm test:search && pnpm test:search-suggestions && pnpm test:perf && pnpm test:cache && pnpm test:collections && pnpm test:video-sources && pnpm test:document-viewer && pnpm test:grouping && pnpm test:teacher-grouping",
+    "test": "pnpm test:flashcards && pnpm test:admin-ai && pnpm test:admin-quota && pnpm test:recent-materials && pnpm test:auth && pnpm test:search && pnpm test:search-suggestions && pnpm test:perf && pnpm test:cache && pnpm test:collections && pnpm test:video-sources && pnpm test:document-viewer && pnpm test:grouping && pnpm test:teacher-grouping && pnpm test:lessons",
     "test:flashcards": "node --import ./scripts/register-typescript.mjs tests/flashcards.test.mjs",
     "test:admin-ai": "node --import ./scripts/register-typescript.mjs tests/admin-ai.test.mjs",
     "test:admin-quota": "node --import ./scripts/register-typescript.mjs tests/admin-interactive-quota.test.mjs",
@@ -30,7 +30,8 @@
     "migrate:contributions": "node scripts/migrate-contributions.mjs",
     "deploy:indexes": "firebase deploy --only firestore:indexes",
     "deploy:rules": "firebase deploy --only firestore:rules",
-    "deploy:all": "firebase deploy --only firestore"
+    "deploy:all": "firebase deploy --only firestore",
+    "test:lessons": "node --import ./scripts/register-typescript.mjs tests/lessons.test.mjs && node --import ./scripts/register-typescript.mjs tests/study-flow.test.mjs"
   },
   "dependencies": {
     "@astrojs/check": "^0.9.10",

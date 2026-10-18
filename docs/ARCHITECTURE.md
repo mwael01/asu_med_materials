@@ -1,265 +1,46 @@
-# ASU Med Materials Architecture
+# ASU Med Materials architecture
 
-This document describes the architectural layout, directory structure, data model, and engineering standards for the **ASU Med Materials** platform.
+ASU Med Materials uses Astro SSR, TypeScript, Tailwind CSS, Firebase, and Vercel. Cloud Firestore is the sole source for materials, curriculum modules, lessons, collections, contributor profiles, and student data. There are no local catalogue snapshots.
 
----
+## Student navigation
 
-## 1. System Overview
+The primary flow is saved year → modules → subjects → lessons → doctors → a tabbed study workspace. Home contains module cards and a year-change action. Videos, PDFs, and Flashcards have dedicated discovery pages; search lives only at `/search`. Public pages use compact titles and breadcrumbs without module descriptions or filter strips.
 
-ASU Med Materials is a lightweight, static-first web portal built with [Astro](https://astro.build/) for students at Ain Shams University Faculty of Medicine. It aggregates study resources (Google Drives, Telegram channels, YouTube playlists, summary notes, past exams, and community links) in an organized, searchable, and offline-capable interface.
+Year selection uses `asumed_user_year` in localStorage and the `user-preferences-updated` event. Existing `asumed_user_module` values no longer drive public navigation. Shared destinations survive onboarding. Year scoping runs client-side on anonymous shared HTML; it never changes Firestore curriculum visibility.
 
-### Key Technical Pillars
+See [Study flow and lesson curation](STUDY_FLOW.md) for route contracts, Firestore fields, admin assignment, player persistence, and deployment order.
 
-- **Dynamic On-Demand Server Core**: Server-side rendering (SSR) powered by Astro (`output: 'server'`) with `@astrojs/vercel`, rendering content directly from Firestore with bounded runtime and CDN caching.
-- **Cloud Firestore Single Source of Truth**: All study materials, curriculum modules, and contributors live in Cloud Firestore. No local catalogue files are used; public content refreshes through bounded caches.
-- **In-Memory Server Request Deduplication**: Public materials and modules use Vercel Runtime Cache for 24 hours, shared across page routes and server instances within a region. A 60-second in-process cache shares pending requests and reduces cache-outage reads. Anonymous public HTML uses Vercel CDN caching (60 seconds fresh, followed by 60 seconds of stale-while-revalidate). Private pages, API responses, and requests with cookies or authorization bypass shared caching.
-- **Streamlined English-First with Arabic Search Tolerance**: English-first interface tailored to the 100% English medical curriculum at Ain Shams University Faculty of Medicine, eliminating bilingual translation runtime overhead while maintaining 100% search tolerance for Arabic queries and Egyptian doctor names.
-- **Multistage Year & Module Selection**: Students are guided on first visit through a two-stage prompt (Year & Module) saved locally in `localStorage` for personalized, instant access.
-- **Structured Grouped Categorization**: Materials are grouped by functional learning category (Central Drives, Lectures, Practical Labs & OSPE, Summaries, and Past Exams).
-- **Default White Theme**: Clean high-contrast white theme by default, with an optional dark mode toggle saved in `localStorage`.
-- **Offline Bookmarks & PWA**: Saved client-side in `localStorage` (`asumed_bookmarks`) with web app manifest and multi-tab IndexedDB cache support.
+## Code organization
 
----
+- `src/pages/`: Astro routes, including public discovery and nested lesson/doctor pages.
+- `src/components/`: Reusable navigation, headings, directories, resource grids, player shells, forms, and admin UI.
+- `src/scripts/`: Typed browser controllers grouped by navigation, search, study, playlists, flashcards, and admin responsibilities.
+- `src/types/`: Domain interfaces; `materials.ts` defines resources and curriculum, `lessons.ts` defines lessons and study entries.
+- `src/data/`: Public catalogue loaders, visibility rules, and route-context resolution.
+- `src/firebase/`: Firebase initialization, converters, authenticated operations, and Firestore access.
+- `src/utils/`: Pure content resolution, search, grouping, local preferences, bookmark/progress, and shared client services.
+- `firebase/`: Security rules, index definitions, and schema metadata, without material content snapshots.
+- `scripts/`: Reusable administrative and data-processing tools; see [Scripts](SCRIPTS.md).
 
-## 2. Directory Structure
+## Data and caching
 
-```
-asu_med_materials/
-├── docs/                        # Architecture and developer documentation
-│   ├── ARCHITECTURE.md          # System architecture and data flow
-│   ├── COMPONENTS.md            # Component catalog and design guidelines
-│   └── CURRICULUM_STRUCTURE.md  # ASU Medicine curriculum mapping
-├── public/                      # Static assets, PWA manifest, and icons
-│   ├── favicon.svg
-│   ├── icons/                   # PWA & resource brand icons
-│   └── manifest.webmanifest
-├── src/
-│   ├── assets/                  # Bundled SVGs and images
-│   ├── components/              # Modular UI components
-│   │   ├── bookmarks/           # Offline bookmark drawer (BookmarksDrawer.astro)
-│   │   ├── common/              # Theme toggle (ThemeToggle.astro), Toast, PWA components
-│   │   ├── materials/           # ResourceCard, GroupedResourceList, ModuleCard, SubjectBar, YearSelector
-│   │   ├── contributors/        # AuthorCard, ContributorCard, ContactButtons
-│   │   ├── navigation/          # Navbar.astro, Footer.astro
-│   │   ├── search/              # SearchBar.astro, FilterToolbar.astro
-│   │   └── selection/           # MultistageSelector.astro (Two-stage Year/Module modal)
-│   ├── data/                    # Dynamic data query functions & caching
-│   │   ├── modules.ts           # Firestore module queries (getAllModules, getModuleById)
-│   │   ├── materials.ts         # Facade re-exporting from ./materials/index
-│   │   └── materials/           # Modular study materials loaders
-│   │       └── index.ts         # Firestore materials queries with shared 24-hour caching
-│   ├── firebase/                # Firebase client, converters & schema types
-│   │   ├── client.ts            # Firebase app, auth, firestore (IndexedDB cache), storage
-│   │   ├── firestore.ts         # Firestore data access & converters
-│   │   └── schema.ts            # Strongly typed schema interfaces
-│   ├── i18n/                    # Centralized English dictionaries & legacy material translations
-│   │   ├── materialsTranslations.ts # Legacy English title/description fallbacks
-│   │   └── translations.ts      # Core English UI strings dictionary
-│   ├── layouts/                 # Base page layouts
-│   │   └── Layout.astro         # Shell with SEO, PWA, accessibility, and Theme setup
-│   ├── pages/                   # File-based routing
-│   │   ├── index.astro          # Personalized student dashboard: active modules & organized library folders
-│   │   ├── year/[year].astro    # Year-specific overview & grouped materials
-│   │   ├── module/[id].astro    # Dedicated module resources page
-│   │   ├── module/[id]/[subject].astro # Dedicated module subject page
-│   │   ├── playlists.astro      # Video playlists index & tracker
-│   │   ├── playlist/[id].astro  # Integrated video playlist player & curriculum checkpoint viewer
-│   │   ├── viewer/[id].astro    # In-app embedded Google Drive PDF & document reader
-│   │   ├── search.astro         # Global search & multi-filter explorer
-│   │   ├── contribute.astro     # Contribution guide & automatic submission form
-│   │   ├── feedback.astro       # Student feedback, issue reporting & suggestions
-│   │   └── contributors.astro   # Site team on top + content makers (author field only, ranked)
-│   ├── styles/                  # Global styles & Tailwind configuration
-│   │   └── global.css
-│   ├── types/                   # TypeScript interfaces & types
-│   │   ├── i18n.ts              # SupportedLanguage, TranslationsDictionary types
-│   │   ├── materials.ts         # Material, module, and curriculum types
-│   │   ├── submission.ts        # Material submission payload and response types
-│   │   ├── feedback.ts          # Feedback category and submission types
-│   │   └── contributors.ts      # Author, contributor profile, contact, and stats types
-│   └── utils/                   # Shared pure TypeScript helper functions
-│       ├── contributors.ts      # Contributor stats aggregation + initials fallback
-│       ├── documentViewer.ts    # Drive file detection, preview URL generator, and embed routing
-│       ├── feedback.ts          # Feedback submission API client
-│       ├── filter.ts            # Search and filter matching logic
-│       ├── i18n.ts              # Language manager, DOM translation binding & reactivity
-│       ├── slug.ts              # URL slugification for subjects and routes
-│       └── storage.ts           # Bookmarks, user folders, and academic preferences in localStorage
-├── astro.config.mjs             # Astro build configuration
-├── package.json
-├── tsconfig.json
-└── README.md
-```
+Public modules, materials, and lessons share versioned Vercel Runtime Cache snapshots and single-flight in-process loaders. `materials_version/current` selects the current snapshot; the version reader caches for 60 seconds. Administrative mutations increment the version. Cache keys include the project and schema namespace; large snapshots use generation-specific chunks and a final manifest. Origin failures propagate instead of being cached as empty results.
 
----
+Anonymous public HTML uses Vercel CDN caching (300 seconds fresh, with stale-while-revalidate). API, private, authenticated, and cookie-bearing requests bypass shared HTML caching. New type pages share these rules. Cached pages need a refresh to display catalogue changes.
 
-## 3. Data Model & Types
+Firebase's multi-tab IndexedDB persistence caches direct browser reads. The service worker caches visited public pages and static assets, rather than crawling the catalogue. An unavailable page uses the offline fallback. Profile/admin responses bypass service-worker caching.
 
-All entities are strictly typed in [`src/types/materials.ts`](file:///workspaces/asu_med_materials/src/types/materials.ts).
+Existing semester-two hiding and inactive-module filtering remain in the data layer. Reference modules keep their existing visibility behavior; saved-year discovery strictly isolates by material year.
 
-### Core Entities
+## Existing study features
 
-```typescript
-export type AcademicYear = 1 | 2 | 3 | 4 | 5;
+- Material bookmarks and studied IDs persist locally and synchronize with authenticated profiles. The shared bookmark drawer remains accessible from navigation.
+- Video playlists and document bundles preserve source item order and original IDs. Doctor players combine sources within one lesson; legacy playlist/viewer URLs still work.
+- Flashcard decks retain their dedicated offline study player, revision lifecycle, and progress model. See [Flashcards](FLASHCARDS.md).
+- English UI uses existing legacy title fallbacks. Search retains Arabic normalization and doctor/subject aliases.
+- Google and email authentication, avatar uploads, profiles, contributions, feedback, collections, and admin management remain available.
+- Admin AI extraction produces reviewable typed drafts and publishes directly to Firestore. See [Admin AI](ADMIN_AI.md).
 
-export type ResourceType =
-  | 'drive'
-  | 'telegram'
-  | 'youtube'
-  | 'whatsapp'
-  | 'book'
-  | 'summary'
-  | 'exam'
-  | 'website'
-  | 'other';
+## Validation
 
-export type MaterialCategory =
-  | 'central'      // درايفات وقنوات الدفعة
-  | 'lectures'     // محاضرات وشروحات الفيديو
-  | 'practical'    // سكاشن وعملي ومعامل
-  | 'summaries'    // ورق ومذكرات وملخصات
-  | 'exams'        // امتحانات سابقة وريكولات
-  | 'references';  // كتب ومراجع
-
-export interface ModuleInfo {
-  id: string;             // e.g. "year1-foundation"
-  code: string;           // e.g. "MED101"
-  title: string;          // e.g. "Foundation Module"
-  titleAr?: string;       // e.g. "موديول التأسيس"
-  year: AcademicYear;     // 1 to 5
-  semester?: 1 | 2;
-  subjects: string[];     // e.g. ["Anatomy", "Physiology", "Biochemistry"]
-  description?: string;
-  descriptionAr?: string;
-}
-
-export interface MaterialItem {
-  id: string;             // Unique identifier
-  title: string;          // Resource name
-  description?: string;   // Context description
-  url: string;            // Destination URL
-  type: ResourceType;     // Resource format
-  category?: MaterialCategory; // Group category
-  year: AcademicYear;     // Academic year
-  moduleId?: string;      // Related module ID
-  subject?: string;       // Medical discipline
-  author?: string | string[]; // Creator, doctor, or contributors (up to 5 names)
-  tags: string[];         // Search tags
-  createdAt?: string;     // ISO date
-}
-```
-
----
-
-## 4. Client-Side Features & State Management
-
-1. **Student Personal Hub & Year Preferences**:
-   - Stored in `localStorage` under `asumed_user_year` and `asumed_user_module`.
-   - The home page serves as the student's personal study space: presenting active modules for their year and an automatically organized **Personal Study Library** (`Module > Subject > Materials`).
-   - Students can change their active year anytime via the "تغيير السنة" multistage modal.
-   - Emits `user-preferences-updated` when modified, dynamically synchronizing modules grid and navbar indicators.
-
-2. **Personal Study Library & Smart Hierarchy**:
-   - Stored in `localStorage` under `asumed_bookmarks` alongside studied items in `asumed_studied_materials`.
-   - Materials are automatically structured by **Module > Subject > Materials** without tedious manual folder creation.
-   - Features real-time completion progress tracking (`X/Y studied`), dynamic module filter chips, and an "Unstudied Only" quick toggle to streamline exam prep.
-   - Dispatches `bookmarks-updated` and `studied-updated` custom events for instantaneous reactive rendering across the page and the Smart Drawer.
-
-3. **Default Light Theme & Tailwind v4 Custom Dark Variant**:
-   - In Tailwind CSS v4, manual class-based dark mode requires `@custom-variant dark (&:where(.dark, .dark *));` in [`src/styles/global.css`](file:///workspaces/asu_med_materials/src/styles/global.css) to override the default system `@media (prefers-color-scheme: dark)`.
-   - Zero flash of unstyled theme (FOUC) handled via an inline `<script>` in [`Layout.astro`](file:///workspaces/asu_med_materials/src/layouts/Layout.astro).
-   - Defaults to white/light mode. Dark mode is only activated if `localStorage.getItem('theme') === 'dark'`.
-
-4. **Bookmarks System**:
-   - Users can bookmark frequently accessed drives, channels, and playlists.
-   - Saved in client `localStorage` under `asumed_bookmarks`.
-   - Accessible from the top navbar drawer even when offline.
-
-5. **Instant Search & Filtering**:
-   - Client-side in-memory search using normalized text scoring over title, subject, tags, and author.
-   - Live URL query parameters (`?q=...&type=...&year=...`) for shareable search states.
-
-6. **Direct GitHub Issues API Integration (Vercel Serverless Function)**:
-   - Implemented via [`api/submit-material.js`](file:///workspaces/asu_med_materials/api/submit-material.js) as a native Vercel Serverless Function at `POST /api/submit-material`.
-   - In development, serviced via Vite connect middleware in [`astro.config.mjs`](file:///workspaces/asu_med_materials/astro.config.mjs).
-   - In production on Vercel, executes securely using the `GITHUB_TOKEN` environment variable to create issues on `mwael01/asu_med_materials` directly via GitHub REST API.
-   - The contribute page ([`src/pages/contribute.astro`](file:///workspaces/asu_med_materials/src/pages/contribute.astro)) provides a clean, single-purpose form without manual PR cards or external GitHub issues links, giving students instant on-page confirmation and status feedback.
-
-7. **Per-Subject Filtration & Dedicated Subject Pages**:
-   - Every module features a [`SubjectBar.astro`](file:///workspaces/asu_med_materials/src/components/materials/SubjectBar.astro) navigation bar showing all academic subjects for that module.
-   - Each subject has a dedicated static URL route (`/module/[id]/[subject]`, e.g. `/module/year1-foundation/medical-biochemistry`) with dedicated title, SEO, custom breadcrumbs, and empty states.
-   - Material cards link directly to their corresponding subject page via clickable subject badges.
-
-8. **Streamlined English-First Platform with Arabic Search Tolerance**:
-   - **Unified English Interface**: All navigation, modules, subjects, cards, player controls, toasts, and modals are rendered cleanly in English without bilingual toggle overhead or RTL/LTR layout flipping.
-   - **Zero Translation Runtime Overhead**: Completely removed client-side DOM-sweeping translation passes (`applyLanguage`), bilingual event dispatchers (`asumed-language-changed`), and duplicate localized attributes.
-   - **Arabic Query Search Tolerance**: The search and suggestion engine ([`src/utils/searchAliases.ts`](file:///workspaces/asu_med_materials/src/utils/searchAliases.ts), [`src/utils/searchSuggestions.ts`](file:///workspaces/asu_med_materials/src/utils/searchSuggestions.ts)) maintains comprehensive Arabic aliases for Egyptian doctor names, module codes, and colloquial terms, ensuring students searching in Arabic instantly find the exact resources.
-   - **Legacy Data Compatibility**: Fallback helpers [`getMaterialEnglishTitle`](file:///workspaces/asu_med_materials/src/i18n/materialsTranslations.ts) and [`getMaterialEnglishDesc`](file:///workspaces/asu_med_materials/src/i18n/materialsTranslations.ts) seamlessly normalize legacy Firestore documents containing Arabic titles.
-
-9. **Student Feedback & Google Sheets Webhook Integration**:
-   - Dedicated route at `/feedback` ([`src/pages/feedback.astro`](file:///workspaces/asu_med_materials/src/pages/feedback.astro)) powered by [`FeedbackForm.astro`](file:///workspaces/asu_med_materials/src/components/feedback/FeedbackForm.astro).
-   - Reciprocal cross-linking between `/contribute` and `/feedback` ensures students can seamlessly navigate between sharing study drives and submitting feedback or bug reports.
-   - Handled via [`api/submit-feedback.ts`](file:///workspaces/asu_med_materials/api/submit-feedback.ts) (Vercel Serverless Function & local Vite middleware) which forwards JSON payloads directly to Google Sheets via Google Apps Script webhooks (`GOOGLE_SHEETS_FEEDBACK_WEBHOOK_URL` or `GOOGLE_SHEETS_WEBHOOK_URL`).
-   - Automatically pre-selects the student's academic year from `localStorage.getItem('asumed_user_year')` and filters related modules for instant submission.
-   - Provides local development fallback mocking successful responses when no webhook is configured.
-
-10. **Firebase Integration, Offline-First Persistence & Student Profiles**:
-   - **Cloud Firestore**: Configured with modular SDK v12 `persistentLocalCache` and `persistentMultipleTabManager` for multi-tab IndexedDB offline persistence. Materials, curriculum modules, contributor data, and student profiles queried online are cached directly in IndexedDB for immediate offline access.
-   - **Offline-First Persistence Architecture**:
-     1. *Dynamic SSR on Vercel*: On-demand server rendering queries Firestore directly with 60s in-memory request deduplication, without static snapshot rebuilds. Public catalogue data can remain cached for 24 hours plus the short HTML cache interval; open pages do not automatically reload.
-     2. *Client IndexedDB Firestore Cache*: Modular Firebase SDK v12 with `persistentLocalCache` and `persistentMultipleTabManager` caches queries across tabs for instant offline retrieval without network roundtrips.
-     3. *Service Worker*: Fetches the homepage once to discover bundles and pre-caches static assets. Other public pages are cached after visiting, rather than fetching all routes on installation. Profile/admin pages bypass the response cache. Unvisited pages use the offline fallback.
-   - **Dynamic Collections & Local Schema Architecture**:
-     - `materials`: 163+ medical study drives, playlists, exam papers, and textbooks across academic years, queried on-demand.
-     - `modules`: Curriculum modules stored dynamically in Firestore with bilingual descriptions and subjects, fetched via `getAllModules()`.
-     - `contributors`: Platform team authors and community contributors dynamically managed with roles and badges.
-     - `users`: Medical student profiles with custom handles and contribution counts.
-     - `submissions`: Pending and approved peer material submissions.
-   - **Schema Specification & Synchronization**:
-     - [`firebase/schema.json`](file:///home/mwael/work/asu_med_materials/firebase/schema.json): Canonical JSON schema defining document types, constraints, and live document counts (local contract for syntax validation).
-     - [`firebase/firestore.indexes.json`](file:///home/mwael/work/asu_med_materials/firebase/firestore.indexes.json): Declarative Cloud Firestore composite index configuration and single-field overrides (deployed via `pnpm run deploy:indexes`).
-     - [`src/firebase/schema.ts`](file:///home/mwael/work/asu_med_materials/src/firebase/schema.ts): Strongly typed TypeScript interfaces and `FirestoreDataConverter` implementations (`materialConverter`, `moduleConverter`, `contributorConverter`, `userConverter`, `submissionConverter`).
-     - [`scripts/sync-firebase-schema.mjs`](file:///home/mwael/work/asu_med_materials/scripts/sync-firebase-schema.mjs) (`pnpm run schema:sync`): Synchronizes live Firestore collection states and document counts with `firebase/schema.json`.
-     - [`scripts/seed-firestore.mjs`](file:///home/mwael/work/asu_med_materials/scripts/seed-firestore.mjs): Uploads initial/seed materials, modules, and contributors to Cloud Firestore.
-   - **Zero-Friction Guest Mode**: Visitors can browse, search, use bookmarks, track completed materials, and submit resources completely offline without creating an account.
-   - **Firebase Authentication**: Supports one-click Google Sign-In and Email/Password registration. Profiles are cached locally in `localStorage` for zero-delay UI rendering on page load.
-   - **Firebase Storage**: Securely handles avatar image uploads (`avatars/{userId}_{timestamp}.ext`) with strict MIME type and 2.5 MB size validation.
-   - **Unified Shareable Profile Route (`/profile`)**:
-     - `/profile` (Logged-in): Student dashboard to edit display name, unique `@username` handle, academic year, bio, and upload avatar pictures.
-     - `/profile?u=username`: Shareable public profile card showcasing student bio, academic year badge, and list of study materials contributed.
-     - `/profile` (Guest): Welcoming guest card explaining offline capabilities with fast sign-in options.
-   - **Security & Environment Architecture**:
-     - Client-exposed variables strictly prefixed with `PUBLIC_FIREBASE_*` in `.env.local` and documented in `.env.example`.
-     - Security rules version-controlled under `firebase/firestore.rules` and `firebase/storage.rules`.
-
-11. **In-App Embedded Google Drive & Document Viewer (`/viewer/[id]`)**:
-    - **In-App PDF Reading**: Eliminates external tab bouncing for Google Drive summaries, revision notes, textbooks, and past exams by rendering an embedded preview (`https://drive.google.com/file/d/{id}/preview` and Google Docs Viewer).
-    - **Folder Separation**: Preserves external Google Drive routing (`_blank`) for central batch drives and drive folders (`/drive/folders/...`), while routing discrete document files to the in-app viewer.
-    - **Study Workflow Integration**: Includes integrated Done/Studied toggle, Bookmark button, Share/Copy Link, and an always-accessible "Open in Google Drive" button for downloading or copying.
-    - **Cross-Platform Fullscreen**: Implements fixed viewport overlay expansion supporting distraction-free reading across iOS Safari, Android, iPad, and desktop browsers.
-
----
-
-## 5. Coding & Quality Standards
-
-- **Static Validation**: Run `pnpm astro check` and `pnpm build` after all modifications.
-- **Component Separation**: Keep components focused on a single responsibility.
-- **Documentation**: Keep docs synchronized with major architectural decisions without bloating `README.md`.
-
-## 6. Firestore Read Optimizations
-
-- Public material/module queries use the official `@vercel/functions` Runtime Cache with a 86,400-second TTL. The first cache miss reads Firestore; later pages and students reuse that catalogue, including individual playlist/module lookups and profile contribution matching. Local development uses short in-process caching.
-- Cache keys include the Firebase project, Vercel project, and schema version. Oversized catalogues are stored in generation-specific chunks below 1 MB; a manifest is published after all chunks succeed. Failed Firestore reads are never cached as empty results. Cache failures fall back to Firestore with short in-process reuse; origin failures return uncached errors.
-- Admin reads/writes, duplicate checks, authentication, submissions, bookmark/progress writes, and profile listeners remain direct Firebase operations. Publishing does not invalidate the daily public catalogue.
-- Runtime Cache is regional and may evict entries; simultaneous misses across instances can repeat reads. It persists across deployments, and usage may be billed by Vercel. Bump the key version when the cached schema changes.
-- Admin logs order and limit in Firestore; admin lists limit in Firestore; team queries filter roles before downloading documents.
-- Missing material/module lookups do not fall back to full-collection scans. Document IDs must match the stored `id`, as in current write functions.
-- The homepage renders six recently added materials from its existing catalogue query, with no additional reads.
-- The shared bookmarks drawer receives the complete catalogue from the shared cache. Moving the drawer and homepage library to lazy queries of saved document IDs would enable scoped year/module reads in a future coordinated change.
-- IndexedDB supports offline access; ordinary online `getDocs` calls can still incur server reads. Measure actual reductions in the Firebase Usage dashboard after deployment and verify public CDN hits with `x-vercel-cache`.
-
-Cache verification: test cache reuse across different routes and cold instances, daily expiry, empty collections, read/write failures, incomplete chunks, and oversized catalogues. Confirm live account syncing and direct admin changes; compare Firebase reads and Vercel Runtime Cache activity after deployment. Runtime cache hits are distinct from HTML CDN `x-vercel-cache` hits. See [Vercel Runtime Cache documentation](https://vercel.com/docs/functions/functions-api-reference/vercel-functions-package#getcache).
-
-### Admin AI preparation
-
-Admin extraction combines Firebase AI Logic structured output with authenticated server-side public HTML previews. Typed drafts retain per-item attribution and unresolved review fields until explicit publication to Firestore. Single and bulk paths share validation and serialization. See [Admin AI preparation](ADMIN_AI.md) for the request contract, network protections, runtime limits, and tests.
+Run `pnpm astro check`, `pnpm test`, and `pnpm build` after major changes. Keep UI responsive and components reusable. Document architectural changes here or in focused documents instead of expanding the README. Deploy rules before application features that require a new Firestore collection.

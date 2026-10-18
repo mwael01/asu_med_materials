@@ -1,0 +1,9 @@
+---
+interface Props { items: { title: string; href: string }[]; emptyMessage?: string }
+const { items, emptyMessage = 'Nothing available yet.' } = Astro.props;
+---
+{items.length ? (
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+    {items.map(item => <a href={item.href} class="block rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-5 text-sm font-semibold hover:border-emerald-500 hover:text-emerald-600 focus-visible:outline-2 focus-visible:outline-emerald-500">{item.title}</a>)}
+  </div>
+) : <p class="text-sm text-zinc-500 py-6">{emptyMessage}</p>}

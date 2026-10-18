@@ -74,6 +74,7 @@ export async function submitMaterial(payload: MaterialSubmission): Promise<Submi
       contributorUsername: payload.contributorUsername || cachedProfile?.username || undefined,
       year: payload.year || 'general',
       moduleId: payload.moduleId,
+      lessonId: payload.lessonId,
       subject: payload.mode === 'single' ? payload.subject : undefined,
       type: payload.mode === 'single' ? payload.type : undefined,
       notes: payload.mode === 'dump' ? payload.notes : payload.description,

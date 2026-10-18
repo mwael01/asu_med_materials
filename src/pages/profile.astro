@@ -572,6 +572,7 @@ const allMaterials = await getAllMaterials();
 </script>
 
 <script>
+  import { setUserStoredYear } from '../utils/storage';
   import {
     onAuthChange,
     signInWithGoogle,
@@ -1278,12 +1279,7 @@ const allMaterials = await getAllMaterials();
 
         // Conserve user's updated academic year in localStorage and notify site components
         if (currentProfile.academicYear) {
-          localStorage.setItem('asumed_user_year', String(currentProfile.academicYear));
-          window.dispatchEvent(
-            new CustomEvent('user-preferences-updated', {
-              detail: { year: currentProfile.academicYear }
-            })
-          );
+          setUserStoredYear(currentProfile.academicYear);
         }
 
         notify('Profile updated successfully!', 'success');

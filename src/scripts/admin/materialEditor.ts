@@ -43,7 +43,7 @@ export function mountMaterialEditor(host: HTMLElement, draft: MaterialDraft, mod
         case 'author': draft.author = value.split(',').map(s => s.trim()).filter(Boolean); break;
         case 'tags': draft.tags = value.split(',').map(s => s.trim()).filter(Boolean); break;
         case 'title': draft.title = value; draft.titleEn = value; break;
-        case 'moduleId': case 'subject': case 'description': case 'playlistId': case 'contributor': draft[key] = value; break;
+        case 'lessonId': case 'moduleId': case 'subject': case 'description': case 'playlistId': case 'contributor': draft[key] = value; break;
       }
       draft.issues = draft.issues?.filter(i => i.field !== key);
       showIssues(); changed(key);

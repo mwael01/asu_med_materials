@@ -31,12 +31,31 @@ service cloud.firestore {
     // =========================================================================
     // 1. Study Materials
     // =========================================================================
+    function validLessonAssignment() {
+      let lessonId = request.resource.data.get('lessonId', null);
+      return lessonId == null || lessonId == '' || (
+        exists(/databases/$(database)/documents/lessons/$(lessonId)) &&
+        get(/databases/$(database)/documents/lessons/$(lessonId)).data.moduleId == request.resource.data.get('moduleId', '') &&
+        get(/databases/$(database)/documents/lessons/$(lessonId)).data.subject == request.resource.data.get('subject', '')
+      );
+    }
+
+    match /lessons/{lessonId} {
+      allow read: if true;
+      allow create, update: if isAdmin() && request.resource.data.id == lessonId &&
+        request.resource.data.title is string && request.resource.data.title.size() > 0 &&
+        request.resource.data.order is number && request.resource.data.active is bool &&
+        exists(/databases/$(database)/documents/modules/$(request.resource.data.moduleId)) &&
+        request.resource.data.subject in get(/databases/$(database)/documents/modules/$(request.resource.data.moduleId)).data.subjects;
+    }
+
     match /materials/{materialId} {
       allow read: if true;
-      allow update: if isAdmin() || (
+      allow update: if (isAdmin() && validLessonAssignment()) || (
         request.resource.data.diff(resource.data).affectedKeys().hasOnly(['bookmarksCount'])
       );
-      allow create, delete: if isAdmin();
+      allow create: if isAdmin() && validLessonAssignment();
+      allow delete: if isAdmin();
     }
 
     // =========================================================================

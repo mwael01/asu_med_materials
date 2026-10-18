@@ -101,3 +101,8 @@ html {
   content-visibility: auto;
   contain-intrinsic-size: auto 160px;
 }
+/* Shared plain controls for lesson curation. */
+.study-input {
+  @apply w-full min-w-0 rounded-lg border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-3 py-2 text-sm;
+}
+[hidden] { display: none !important; }

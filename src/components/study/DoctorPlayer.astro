@@ -1,0 +1,51 @@
+---
+import type { StudyEntry, StudyTab } from '../../types/lessons';
+import type { MaterialItem } from '../../types/materials';
+interface Props { entries: StudyEntry[]; materials: MaterialItem[] }
+const { entries, materials } = Astro.props;
+const labels: Record<StudyTab, string> = { videos: 'Videos', pdfs: 'PDFs', links: 'Links' };
+const tabs = (['videos', 'pdfs', 'links'] as const).filter(tab => entries.some(entry => entry.tab === tab));
+---
+<div data-doctor-player>
+  <script type="application/json" data-study-entries set:html={JSON.stringify(entries).replace(/</g, '\\u003c')} />
+  {entries.length ? (
+    <div class="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_20rem] gap-5 items-start">
+      <section aria-label="Study viewer" class="min-w-0">
+        <div data-study-viewport class="rounded-xl overflow-hidden border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900">
+          <iframe data-study-frame title="Study material" class="w-full aspect-video" hidden allow="autoplay; fullscreen; picture-in-picture" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe>
+          <video data-study-video class="w-full aspect-video" controls playsinline hidden></video>
+          <div data-study-external class="p-8 text-sm text-zinc-500" hidden>Open this resource using the link below.</div>
+        </div>
+        <h2 data-study-title class="font-semibold text-base mt-4 break-words"></h2>
+        <div class="flex flex-wrap items-center gap-x-5 gap-y-3 mt-3 text-sm">
+          <a data-study-open target="_blank" rel="noopener noreferrer" class="text-emerald-600 hover:underline">Open original</a>
+          <button type="button" data-study-done aria-pressed="false" class="hover:text-emerald-600">Mark completed</button>
+          <button type="button" data-study-save aria-pressed="false" class="hover:text-emerald-600">Save</button>
+          <button type="button" data-study-share class="hover:text-emerald-600">Copy link</button>
+        </div>
+        <p data-study-status role="status" class="text-xs text-zinc-500 mt-3"></p>
+      </section>
+      <aside aria-label="Lesson materials" class="min-w-0 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 overflow-hidden">
+        <div role="tablist" aria-label="Material type" class="flex border-b border-zinc-200 dark:border-zinc-800">
+          {tabs.map((tab, index) => <button id={`study-tab-${tab}`} type="button" role="tab" data-study-tab={tab} aria-controls={`study-panel-${tab}`} aria-selected={index === 0 ? 'true' : 'false'} tabindex={index === 0 ? 0 : -1} class="flex-1 p-3 text-sm aria-selected:text-emerald-600 aria-selected:font-bold">{labels[tab]}</button>)}
+        </div>
+        {tabs.map((tab, index) => (
+          <div id={`study-panel-${tab}`} role="tabpanel" aria-labelledby={`study-tab-${tab}`} data-study-panel={tab} hidden={index !== 0} class="p-3 max-h-[65vh] overflow-y-auto">
+            {materials.map(material => {
+              const items = entries.filter(entry => entry.materialId === material.id && entry.tab === tab);
+              return items.length > 0 && <section class="mb-4 last:mb-0">
+                {items.length > 1 && <h3 class="text-xs font-semibold text-zinc-500 mb-2 px-2">{material.titleEn || material.title}</h3>}
+                <div class="space-y-1">{items.map(entry => <button type="button" data-study-item={entry.key} class="w-full text-left text-sm rounded-lg p-2.5 hover:bg-zinc-100 dark:hover:bg-zinc-800 aria-[current=true]:bg-emerald-50 dark:aria-[current=true]:bg-emerald-950/50 aria-[current=true]:text-emerald-700 dark:aria-[current=true]:text-emerald-400 break-words">{entry.title}</button>)}</div>
+              </section>;
+            })}
+          </div>
+        ))}
+      </aside>
+    </div>
+  ) : <p class="text-sm text-zinc-500">No materials available for this doctor yet.</p>}
+</div>
+<script>
+  import { initDoctorPlayer } from '../../scripts/study/doctorPlayer';
+  initDoctorPlayer();
+  document.addEventListener('astro:after-swap', initDoctorPlayer);
+</script>
