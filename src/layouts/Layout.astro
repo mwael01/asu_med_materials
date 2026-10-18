@@ -21,7 +21,7 @@ const {
 ---
 
 <!doctype html>
-<html lang="en" dir="ltr">
+<html lang="en" dir="ltr" class="dark">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
@@ -30,36 +30,27 @@ const {
     <link rel="apple-touch-icon" href="/icons/icon-192.png" />
     <link rel="apple-touch-icon" sizes="512x512" href="/icons/icon-512.png" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="ASU Med" />
     <meta name="format-detection" content="telephone=no" />
-    <meta name="theme-color" content="#059669" />
+    <meta name="theme-color" content="#09090b" />
     <meta name="generator" content={Astro.generator} />
     <title>{title}</title>
     <meta name="description" content={description} />
 
-    <!-- Default to White/Light Theme (Only activate dark if explicitly set to 'dark') -->
+    <!-- Permanent Dark Mode -->
     <script is:inline>
-      (function () {
-        try {
-          const stored = localStorage.getItem('theme');
-          if (stored === 'dark') {
-            document.documentElement.classList.add('dark');
-          } else {
-            document.documentElement.classList.remove('dark');
-            if (!stored) {
-              localStorage.setItem('theme', 'light');
-            }
-          }
-        } catch (e) {}
-      })();
+      document.documentElement.classList.add('dark');
+      try {
+        localStorage.setItem('theme', 'dark');
+      } catch (e) {}
     </script>
     <!-- Google reCAPTCHA Enterprise for Firebase App Check -->
     {RECAPTCHA_ENTERPRISE_SITE_KEY && (
       <script src={`https://www.google.com/recaptcha/enterprise.js?render=${RECAPTCHA_ENTERPRISE_SITE_KEY}`} async defer></script>
     )}
   </head>
-  <body class="min-h-dvh flex flex-col bg-zinc-50/60 dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100 antialiased selection:bg-emerald-500 selection:text-white">
+  <body class="min-h-dvh flex flex-col bg-zinc-950 text-zinc-100 antialiased selection:bg-emerald-500 selection:text-white">
     <Navbar />
 
     <main class="page-content flex-1 w-full max-w-6xl mx-auto px-4 sm:px-6 py-6 pb-[calc(1.5rem+env(safe-area-inset-bottom,0px))]">

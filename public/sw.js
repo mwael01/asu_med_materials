@@ -1,7 +1,7 @@
 // Service Worker for ASU Med Materials PWA
 // Cache visited pages for offline access without fetching the entire catalogue.
 
-const CACHE_NAME = 'asumed-cache-v5';
+const CACHE_NAME = 'asumed-cache-v6';
 
 // 1. Static brand assets & icons
 const PRECACHE_ASSETS = [
@@ -21,7 +21,8 @@ const PRECACHE_ASSETS = [
   '/icons/whatsapp.svg',
   '/icons/youtube.svg',
   '/offline.html',
-  '/api/materials'
+  '/api/materials',
+  '/api/modules'
 ];
 
 // Helper: fetch with network timeout
@@ -144,8 +145,8 @@ self.addEventListener('fetch', (event) => {
   // Ignore other external origins (YouTube iframe embeds, drives, etc.)
   if (url.origin !== self.location.origin) return;
 
-  // Stale-While-Revalidate strategy for catalogue materials endpoint
-  if (url.pathname === '/api/materials') {
+  // Stale-While-Revalidate strategy for catalogue materials and modules endpoints
+  if (url.pathname === '/api/materials' || url.pathname === '/api/modules') {
     event.respondWith(
       (async () => {
         const cache = await caches.open(CACHE_NAME);

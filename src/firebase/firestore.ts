@@ -775,6 +775,7 @@ export async function saveModuleToFirestore(mod: ModuleInfo): Promise<boolean> {
   try {
     const docRef = doc(db, MODULES_COLLECTION, mod.id);
     await setDoc(docRef, sanitizeFirestorePayload(mod), { merge: true });
+    await incrementMaterialsVersionInFirestore();
     return true;
   } catch (err) {
     console.error(`[Firestore] Failed to save module ${mod.id}:`, err);
@@ -798,6 +799,7 @@ export async function deleteModuleFromFirestore(
     const moduleData = snap.exists() ? (snap.data() as ModuleInfo) : null;
 
     await deleteDoc(docRef);
+    await incrementMaterialsVersionInFirestore();
 
     if (actingAdmin) {
       await logAdminAction({
@@ -834,6 +836,7 @@ export async function toggleModuleActive(
     const moduleData = snap.exists() ? (snap.data() as ModuleInfo) : null;
 
     await setDoc(docRef, { active, updatedAt: new Date().toISOString() }, { merge: true });
+    await incrementMaterialsVersionInFirestore();
 
     if (actingAdmin) {
       await logAdminAction({

@@ -2,12 +2,19 @@
 import Layout from '../../layouts/Layout.astro';
 import PageHeading from '../../components/common/PageHeading.astro';
 import NavigationCards from '../../components/common/NavigationCards.astro';
+import SubjectIcon from '../../components/materials/SubjectIcon.astro';
 import { getModuleById } from '../../data/modules';
+import { getModuleAppearance } from '../../utils/subjectAppearance';
 import { subjectToSlug } from '../../utils/slug';
 const module = await getModuleById(Astro.params.id || '');
 if (!module) return Astro.redirect('/404');
+const appearance = getModuleAppearance(module);
 ---
 <Layout title={`${module.title} - ASU Med Materials`}>
-  <PageHeading title={module.title} crumbs={[{ title: 'Home', href: '/' }]} />
+  <PageHeading title={module.title} crumbs={[{ title: 'Home', href: '/' }]}>
+    <span class:list={['w-10 h-10 rounded-xl flex items-center justify-center shrink-0 shadow-2xs', appearance.colors]} title={module.title}>
+      <SubjectIcon name={appearance.icon} />
+    </span>
+  </PageHeading>
   <NavigationCards items={module.subjects.map(subject => ({ title: subject, href: `/module/${module.id}/${subjectToSlug(subject)}`, subject }))} emptyMessage="No subjects available yet." />
 </Layout>

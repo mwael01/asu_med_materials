@@ -8,7 +8,7 @@ This document details all UI components, their props, intended reuse guidelines,
 
 - **Minimalist & Convenient**: Omit fluff, boilerplate slogans, and filler copy. Prioritize getting students to the resource link in as few clicks as possible.
 - **English-First Platform with Arabic Search Tolerance**: Clean English interface tailored to the 100% English medical curriculum at Ain Shams University Faculty of Medicine, with full Arabic alias tolerance in search for Egyptian doctor names.
-- **Default White Theme**: Optimized for clean contrast on white backgrounds with subtle borders and emerald accents.
+- **Permanent Dark Theme**: Deep zinc background (`#09090b`) with translucent borders and luminous pastel accents tailored for low-light studying and distraction-free readability.
 - **Component Reuse**: Reuse shared components across Year views, Module views, and the Search page.
 - **Small Button Icons**: Use SVG icons for compact buttons and type badges; do not replace substantive visual elements with misleading standalone icons.
 
@@ -28,7 +28,7 @@ A native dialog with five year choices and a Close action. The browser controlle
 
 #### `Navbar.astro` and `MobileMenu.astro`
 
-Primary navigation offers Home, Videos, PDFs, Flashcards, and Search, with profile, saved-material, and theme actions. Mobile includes Team and Contribute as secondary destinations. Year links and the navbar year badge are removed; year changes live on Home and profile.
+Primary navigation offers Home, Videos, PDFs, Flashcards, and Search, with profile and saved-material actions. (Theme toggle removed in favor of permanent dark mode). Mobile includes Team and Contribute as secondary destinations. Year links and the navbar year badge are removed; year changes live on Home and profile.
 
 #### [`Footer.astro`](file:///workspaces/asu_med_materials/src/components/navigation/Footer.astro)
 - **Location**: `src/components/navigation/Footer.astro`
@@ -201,10 +201,8 @@ Primary navigation offers Home, Videos, PDFs, Flashcards, and Search, with profi
   - **Home Page Shortcut**: Quick jump link to the student's Home Page Library.
 - **Props**: None.
 
-#### [`ThemeToggle.astro`](file:///workspaces/asu_med_materials/src/components/common/ThemeToggle.astro)
-- **Location**: `src/components/common/ThemeToggle.astro`
-- **Purpose**: Accessible button to toggle between Light (default) and Dark theme.
-- **Props**: None.
+#### `ThemeToggle.astro` (Removed)
+- **Status**: Removed. The website permanently enforces dark mode with a dark HTML class (`<html class="dark">`), deep zinc theme (`#09090b`), and luminous pastel accents for unified contrast.
 
 #### [`Toast.astro`](file:///workspaces/asu_med_materials/src/components/common/Toast.astro)
 - **Location**: `src/components/common/Toast.astro`
@@ -375,9 +373,9 @@ Flashcard decks are integrated directly into module pages ([`src/pages/module/[i
 ## Lesson-flow components
 
 - **PageHeading**: Compact page title, optional breadcrumb links, and an action slot. Props: `title`, optional `crumbs: { title, href }[]`.
-- **NavigationCards**: Responsive navigation cards with a 112px minimum height (128px from the small breakpoint). Props: `items: NavigationCardItem[]`, optional `emptyMessage`. Optional `subject` adds a full-height, softly tinted left icon panel, reused for subject and lesson cards. Long titles wrap without fixing card height.
-- **SubjectIcon**: Decorative medical SVGs selected by `getSubjectAppearance`; named subjects have distinct colors in light and dark themes, with a book fallback for other subjects.
-- **ModuleDirectory**: Active curriculum module destinations for the supplied year-scoped module list. No descriptions or counts.
+- **NavigationCards**: Responsive navigation cards with a 112px minimum height (128px from the small breakpoint). Props: `items: NavigationCardItem[]`, optional `emptyMessage`. Supports optional `appearance` (icon + pastel color token) or legacy `subject` prop for softly tinted full-height icon badges. Long titles wrap without fixing card height.
+- **SubjectIcon**: Decorative medical SVGs selected by `getSubjectAppearance` or `getModuleAppearance` (supporting `droplet`, `compass`, `brain`, `activity`, `pill`, `microscope`, `bacteria`, `bone`, `monitor`, `book`, etc.) with dark-mode pastel badge styling.
+- **ModuleDirectory**: Active curriculum module destinations for the supplied year-scoped module list, rendering module icon and color badges via `getModuleAppearance`. No descriptions or counts.
 - **SavedYearScope**: Binds the year-scope controller to sections marked `data-scope-year`. Updates on preference changes and cross-tab storage events; shows one empty state when nothing matches.
 - **TypeDiscovery**: Shared Videos/PDFs/Flashcards discovery renderer, with `type` selecting the content class. Groups by module and subject and resolves assigned resources into their doctor workspace.
 - **DoctorPlayer**: Responsive viewer plus a tabbed sidebar; props `entries: StudyEntry[]`, `materials: MaterialItem[]`. Only populated Videos/PDFs/Links tabs render. The typed controller handles item selection, media disposal, shared URLs, progress, and bookmarks.

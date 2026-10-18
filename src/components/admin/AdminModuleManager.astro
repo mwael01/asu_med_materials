@@ -46,6 +46,50 @@
           <label class="block text-xs font-medium text-zinc-500 mb-1">المواد (Subjects) - مفصولة بفاصلة</label>
           <input type="text" id="amm-input-subjects" class="w-full px-3 py-2 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 text-start" placeholder="anatomy, physiology" />
         </div>
+        <div>
+          <label class="block text-xs font-medium text-zinc-500 mb-1">الأيقونة (Icon)</label>
+          <select id="amm-input-icon" class="w-full px-3 py-2 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
+            <option value="compass">Compass (بوصلة - تمهيدي)</option>
+            <option value="droplet">Droplet (قطرة دم)</option>
+            <option value="bone">Bone (عظام / حركي)</option>
+            <option value="heart">Heart (قلب)</option>
+            <option value="cells">Cells (خلايا)</option>
+            <option value="flask">Flask (كيمياء)</option>
+            <option value="pill">Pill (دواء / فارما)</option>
+            <option value="microscope">Microscope (ميكروسكوب / باثولوجي)</option>
+            <option value="bacteria">Bacteria (بكتيريا / عدوى)</option>
+            <option value="parasite">Parasite (طفيليات)</option>
+            <option value="shield">Shield (مناعة)</option>
+            <option value="dna">DNA (جينات)</option>
+            <option value="embryo">Embryo (أجنة)</option>
+            <option value="monitor">Monitor (حاسب / تكنولوجيا)</option>
+            <option value="presentation">Presentation (عرض تقديمي)</option>
+            <option value="stethoscope">Stethoscope (سماعة طبية)</option>
+            <option value="book">Book (كتاب مرجعي)</option>
+            <option value="brain">Brain (مخ وأعصاب)</option>
+            <option value="activity">Activity (نبض / نشاط)</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-xs font-medium text-zinc-500 mb-1">اللون المميز (Color Theme)</label>
+          <select id="amm-input-color" class="w-full px-3 py-2 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
+            <option value="indigo">Indigo (نيلي)</option>
+            <option value="sky">Sky Blue (سماوي)</option>
+            <option value="emerald">Emerald (زمردي)</option>
+            <option value="amber">Amber (كهرماني)</option>
+            <option value="teal">Teal (تركواز)</option>
+            <option value="rose">Rose (وردي)</option>
+            <option value="red">Red (أحمر)</option>
+            <option value="purple">Purple (بنفسجي)</option>
+            <option value="blue">Blue (أزرق)</option>
+            <option value="cyan">Cyan (مائي)</option>
+            <option value="violet">Violet (بنفسجي فاتح)</option>
+            <option value="pink">Pink (زهري)</option>
+            <option value="orange">Orange (برتقالي)</option>
+            <option value="lime">Lime (ليموني)</option>
+            <option value="slate">Slate (رمادي هادئ)</option>
+          </select>
+        </div>
       </div>
       <div class="flex justify-end gap-2 mt-4">
         <button type="button" id="amm-cancel-add-btn" class="px-4 py-2 bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-700 rounded-xl text-sm font-medium transition-colors cursor-pointer">
@@ -86,6 +130,7 @@
   import { fetchModulesFromFirestore, saveModuleToFirestore, deleteModuleFromFirestore, toggleModuleActive, logAdminAction } from '../../firebase/firestore';
   import { getCachedUserProfile } from '../../firebase/auth';
   import { showToast } from '../../utils/toast';
+  import { getModuleAppearance, AVAILABLE_MODULE_ICONS, MODULE_COLOR_PALETTE } from '../../utils/subjectAppearance';
   import type { ModuleInfo } from '../../types/materials';
 
   function initModuleManager() {
@@ -161,6 +206,7 @@
     function createViewCard(mod: ModuleInfo): HTMLElement {
       const el = document.createElement('div');
       el.className = `p-4 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl shadow-2xs flex flex-col ${!mod.active ? 'opacity-70' : ''}`;
+      const appearance = getModuleAppearance(mod);
       
       const subjTags = (mod.subjects || []).map(s => 
         `<span class="px-2 py-0.5 bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300 rounded-md text-[10px]">${escapeHtml(s.trim())}</span>`
@@ -170,9 +216,14 @@
         <div class="flex justify-between items-start mb-2">
           <div class="flex-1">
             <div class="flex items-center gap-2 flex-wrap mb-1">
+              <span class="w-6 h-6 rounded-md flex items-center justify-center shrink-0 ${appearance.colors} text-[10px] font-bold" title="${escapeHtml(appearance.icon)}">
+                ${escapeHtml(appearance.icon.slice(0, 2).toUpperCase())}
+              </span>
               <h3 class="font-bold text-sm">${escapeHtml(mod.title)}</h3>
               <span class="px-1.5 py-0.5 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 rounded text-[10px] font-medium tracking-wide uppercase">${escapeHtml(mod.code)}</span>
               ${mod.semester ? `<span class="px-1.5 py-0.5 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 rounded text-[10px] font-medium">ترم ${mod.semester}</span>` : ''}
+              ${mod.icon ? `<span class="px-1.5 py-0.5 bg-zinc-100 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400 rounded text-[10px]">${escapeHtml(mod.icon)}</span>` : ''}
+              ${mod.color ? `<span class="px-1.5 py-0.5 bg-zinc-100 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400 rounded text-[10px]">${escapeHtml(mod.color)}</span>` : ''}
             </div>
             ${mod.titleAr ? `<p class="text-xs text-zinc-500 dark:text-zinc-400 mb-2">${escapeHtml(mod.titleAr)}</p>` : ''}
           </div>
@@ -256,6 +307,17 @@
       el.className = `p-4 bg-white dark:bg-zinc-900 border-2 border-emerald-500 rounded-2xl shadow-sm flex flex-col col-span-1 md:col-span-2`;
       
       const subjStr = (mod.subjects || []).join(', ');
+      const appearance = getModuleAppearance(mod);
+      const currentIcon = mod.icon || appearance.icon;
+      const currentColor = mod.color || 'slate';
+
+      const iconOptions = AVAILABLE_MODULE_ICONS.map(
+        i => `<option value="${i}" ${i === currentIcon ? 'selected' : ''}>${i}</option>`
+      ).join('');
+
+      const colorOptions = Object.keys(MODULE_COLOR_PALETTE).map(
+        c => `<option value="${c}" ${c === currentColor ? 'selected' : ''}>${c}</option>`
+      ).join('');
 
       el.innerHTML = `
         <form id="edit-form-${mod.id}" class="space-y-4">
@@ -294,6 +356,18 @@
               <label class="block text-xs font-medium text-zinc-500 mb-1">المواد</label>
               <input type="text" name="subjects" value="${escapeHtml(subjStr)}" class="w-full px-2 py-1.5 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-lg text-sm text-start" />
             </div>
+            <div>
+              <label class="block text-xs font-medium text-zinc-500 mb-1">الأيقونة (Icon)</label>
+              <select name="icon" class="w-full px-2 py-1.5 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-lg text-sm">
+                ${iconOptions}
+              </select>
+            </div>
+            <div>
+              <label class="block text-xs font-medium text-zinc-500 mb-1">اللون المميز (Color)</label>
+              <select name="color" class="w-full px-2 py-1.5 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-lg text-sm">
+                ${colorOptions}
+              </select>
+            </div>
           </div>
           <div class="flex justify-end gap-2 mt-4">
             <button type="button" class="cancel-edit-btn px-3 py-1.5 bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 rounded-lg text-sm font-medium cursor-pointer">إلغاء</button>
@@ -327,6 +401,8 @@
           year: year as any,
           semester: semesterVal ? parseInt(semesterVal) as 1 | 2 : undefined,
           subjects: subjVal.split(',').map(s => s.trim()).filter(s => s),
+          icon: (formData.get('icon') as string) || undefined,
+          color: (formData.get('color') as string) || undefined,
         };
 
         try {
@@ -372,6 +448,8 @@
       const year = parseInt((document.getElementById('amm-input-year') as HTMLSelectElement).value);
       const semesterVal = (document.getElementById('amm-input-semester') as HTMLSelectElement).value;
       const subjStr = (document.getElementById('amm-input-subjects') as HTMLInputElement).value;
+      const iconVal = (document.getElementById('amm-input-icon') as HTMLSelectElement)?.value;
+      const colorVal = (document.getElementById('amm-input-color') as HTMLSelectElement)?.value;
       
       const newMod: ModuleInfo = {
         id: generateId(year, title),
@@ -381,6 +459,8 @@
         year: year as any,
         semester: semesterVal ? parseInt(semesterVal) as 1 | 2 : undefined,
         subjects: subjStr.split(',').map(s => s.trim()).filter(s => s),
+        icon: iconVal || undefined,
+        color: colorVal || undefined,
         active: true
       };
 

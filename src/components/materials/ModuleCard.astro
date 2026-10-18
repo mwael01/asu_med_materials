@@ -1,5 +1,7 @@
 ---
 import type { ModuleInfo } from '../../types/materials';
+import SubjectIcon from './SubjectIcon.astro';
+import { getModuleAppearance } from '../../utils/subjectAppearance';
 
 interface Props {
   module: ModuleInfo;
@@ -7,17 +9,28 @@ interface Props {
 }
 
 const { module } = Astro.props;
+const appearance = getModuleAppearance(module);
 ---
 
 <a
   href={`/module/${module.id}`}
   class="group block bg-white dark:bg-zinc-900 border border-zinc-200/80 dark:border-zinc-800 rounded-xl p-5 transition-all hover:border-emerald-500/70 shadow-2xs hover:shadow-sm dark:hover:shadow-emerald-950/20 active:scale-[0.99] text-start"
 >
-  <h3
-    class="text-sm font-bold text-zinc-900 dark:text-zinc-100 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 group-hover:underline group-active:underline group-focus-visible:underline underline-offset-4 decoration-emerald-500 dark:decoration-emerald-400 transition-colors mb-2"
-  >
-    {module.title}
-  </h3>
+  <div class="flex items-center gap-3 mb-3">
+    <span class:list={['w-10 h-10 rounded-xl flex items-center justify-center shrink-0', appearance.colors]}>
+      <SubjectIcon name={appearance.icon} />
+    </span>
+    <div class="min-w-0 flex-1">
+      <h3
+        class="text-sm font-bold text-zinc-900 dark:text-zinc-100 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 group-hover:underline group-active:underline group-focus-visible:underline underline-offset-4 decoration-emerald-500 dark:decoration-emerald-400 transition-colors truncate"
+      >
+        {module.title}
+      </h3>
+      {module.code && (
+        <span class="text-[10px] font-mono text-zinc-400 dark:text-zinc-500">{module.code}</span>
+      )}
+    </div>
+  </div>
 
 
 

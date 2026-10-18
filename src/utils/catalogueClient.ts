@@ -1,4 +1,4 @@
-import type { MaterialItem } from '../types/materials';
+import type { MaterialItem, ModuleInfo } from '../types/materials';
 import type { MaterialCollection } from '../types/collections';
 
 declare global {
@@ -6,6 +6,7 @@ declare global {
     __CACHED_MATERIALS?: MaterialItem[];
     __ALL_SEARCH_MATERIALS?: MaterialItem[];
     __CACHED_COLLECTIONS?: MaterialCollection[];
+    __CACHED_MODULES?: ModuleInfo[];
   }
 }
 
@@ -211,4 +212,93 @@ export async function getClientCollectionById(id: string): Promise<MaterialColle
   const collections = await getClientCollections();
   return collections.find((c) => c.id === id) || null;
 }
+
+const MODULES_STORAGE_KEY = 'asumed_modules_snapshot';
+
+interface ModulesStoragePayload {
+  timestamp: number;
+  modules: ModuleInfo[];
+}
+
+/**
+ * Loads curriculum modules from in-memory cache, local snapshot, or /api/modules endpoint.
+ */
+export async function getClientModules(): Promise<ModuleInfo[]> {
+  // 1. In-memory check
+  if (typeof window !== 'undefined') {
+    if (window.__CACHED_MODULES && window.__CACHED_MODULES.length > 0) {
+      return window.__CACHED_MODULES;
+    }
+  }
+
+  // 2. Local storage snapshot check
+  let cachedPayload: ModulesStoragePayload | null = null;
+  if (typeof window !== 'undefined' && window.localStorage) {
+    try {
+      const raw = window.localStorage.getItem(MODULES_STORAGE_KEY);
+      if (raw) {
+        cachedPayload = JSON.parse(raw);
+        if (cachedPayload && Array.isArray(cachedPayload.modules) && cachedPayload.modules.length > 0) {
+          window.__CACHED_MODULES = cachedPayload.modules;
+          const isFresh = Date.now() - cachedPayload.timestamp < SNAPSHOT_EXPIRY_MS;
+          if (isFresh) {
+            void revalidateModulesInBackground();
+            return cachedPayload.modules;
+          }
+        }
+      }
+    } catch {}
+  }
+
+  // 3. Fetch from /api/modules (intercepted by Service Worker offline cache)
+  try {
+    const res = await fetch('/api/modules');
+    if (res.ok) {
+      const data: ModuleInfo[] = await res.json();
+      if (Array.isArray(data) && data.length > 0) {
+        if (typeof window !== 'undefined') {
+          window.__CACHED_MODULES = data;
+          try {
+            const payload: ModulesStoragePayload = { timestamp: Date.now(), modules: data };
+            window.localStorage?.setItem(MODULES_STORAGE_KEY, JSON.stringify(payload));
+          } catch {}
+        }
+        return data;
+      }
+    }
+  } catch {}
+
+  // Fallback to stale snapshot if fetch failed (e.g. offline)
+  if (cachedPayload && Array.isArray(cachedPayload.modules)) {
+    return cachedPayload.modules;
+  }
+
+  return [];
+}
+
+async function revalidateModulesInBackground(): Promise<void> {
+  try {
+    const res = await fetch('/api/modules');
+    if (res.ok) {
+      const data: ModuleInfo[] = await res.json();
+      if (Array.isArray(data) && typeof window !== 'undefined') {
+        window.__CACHED_MODULES = data;
+        const payload: ModulesStoragePayload = { timestamp: Date.now(), modules: data };
+        try {
+          window.localStorage?.setItem(MODULES_STORAGE_KEY, JSON.stringify(payload));
+        } catch {}
+      }
+    }
+  } catch {}
+}
+
+/**
+ * Resolves a single module ID to a ModuleInfo object using client cache.
+ */
+export async function getClientModuleById(id: string): Promise<ModuleInfo | null> {
+  if (!id) return null;
+  const modules = await getClientModules();
+  return modules.find((m) => m.id === id) || null;
+}
+
 

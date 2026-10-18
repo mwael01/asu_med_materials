@@ -84,6 +84,8 @@ export interface ModuleDocument {
   active?: boolean;
   createdAt?: string;
   updatedAt?: string;
+  icon?: string;
+  color?: string;
 }
 
 /**
@@ -259,6 +261,8 @@ export const moduleConverter: FirestoreDataConverter<ModuleInfo> = {
       description: mod.description || null,
       descriptionAr: mod.descriptionAr || null,
       active: mod.active !== false, // defaults to true
+      icon: mod.icon || null,
+      color: mod.color || null,
     };
   },
   fromFirestore(
@@ -277,6 +281,8 @@ export const moduleConverter: FirestoreDataConverter<ModuleInfo> = {
       description: data.description || undefined,
       descriptionAr: data.descriptionAr || undefined,
       active: data.active !== false, // defaults to true
+      icon: data.icon || undefined,
+      color: data.color || undefined,
     };
   }
 };

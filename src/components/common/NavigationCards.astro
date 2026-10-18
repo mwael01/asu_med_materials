@@ -8,7 +8,7 @@ const { items, emptyMessage = 'Nothing available yet.' } = Astro.props;
 {items.length ? (
   <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
     {items.map(item => {
-      const appearance = item.subject ? getSubjectAppearance(item.subject) : undefined;
+      const appearance = item.appearance || (item.subject ? getSubjectAppearance(item.subject) : undefined);
       return (
         <a href={item.href} class="group flex min-h-28 sm:min-h-32 items-stretch overflow-hidden rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-sm font-semibold transition-colors duration-150 hover:border-emerald-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-500">
           {appearance && <span class:list={['flex w-20 sm:w-24 shrink-0 items-center justify-center', appearance.colors]}><SubjectIcon name={appearance.icon} /></span>}

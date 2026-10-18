@@ -1,5 +1,4 @@
 ---
-import ThemeToggle from '../common/ThemeToggle.astro';
 import MobileMenu from './MobileMenu.astro';
 
 const currentPath = Astro.url.pathname;
@@ -70,9 +69,6 @@ const links = [['/', 'Home'], ['/videos', 'Videos'], ['/pdfs', 'PDFs'], ['/flash
           </svg>
         </span>
       </a>
-
-      <!-- Theme Switcher -->
-      <ThemeToggle />
 
       <!-- Mobile Burger Menu Trigger -->
       <button

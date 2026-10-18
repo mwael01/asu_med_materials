@@ -52,6 +52,8 @@ export interface ModuleInfo {
   description?: string;
   descriptionAr?: string;
   active?: boolean; // defaults to true when undefined
+  icon?: string;
+  color?: string;
 }
 
 export interface MaterialItem {
