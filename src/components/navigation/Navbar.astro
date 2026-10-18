@@ -4,11 +4,13 @@ import MobileMenu from './MobileMenu.astro';
 const currentPath = Astro.url.pathname;
 const links = [
   ['/', 'Home'],
+  ['/modules', 'Modules'],
   ['/videos', 'Videos'],
   ['/pdfs', 'PDFs'],
   ['/flashcards', 'Flashcards'],
   ['/team', 'Team'],
 ];
+
 ---
 
 <header class="sticky top-0 z-30 w-full border-b border-zinc-200 dark:border-zinc-800 bg-white/95 dark:bg-zinc-950/90 backdrop-blur-md pt-[env(safe-area-inset-top,0px)]">

@@ -42,15 +42,25 @@ const typeLabels: Record<DiscoveryType, string> = {
 
 const crumbs = [
   { title: 'Home', href: '/' },
+  { title: 'Modules', href: '/modules' },
   ...(type ? [{ title: typeLabels[type], href: `/${type}` }] : [])
 ];
 ---
 <Layout title={`${module.title} - mediX`}>
   <PageHeading title={module.title} crumbs={crumbs}>
-    <span class:list={['w-10 h-10 rounded-xl flex items-center justify-center shrink-0 shadow-2xs', appearance.colors]} title={module.title}>
-      <SubjectIcon name={appearance.icon} />
-    </span>
+    <div class="flex items-center gap-2">
+      <a
+        href="/modules"
+        class="hidden sm:inline-flex items-center px-2.5 py-1.5 rounded-lg text-xs font-medium text-zinc-600 dark:text-zinc-300 hover:text-emerald-500 border border-zinc-200 dark:border-zinc-800 transition-colors"
+      >
+        All Modules
+      </a>
+      <span class:list={['w-10 h-10 rounded-xl flex items-center justify-center shrink-0 shadow-2xs', appearance.colors]} title={module.title}>
+        <SubjectIcon name={appearance.icon} />
+      </span>
+    </div>
   </PageHeading>
+
   <NavigationCards
     items={activeSubjects.map(subject => ({
       title: subject,

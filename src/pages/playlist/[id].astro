@@ -4,7 +4,6 @@ import TypeBadge from '../../components/materials/TypeBadge.astro';
 import { getPlaylistById } from '../../data/materials';
 import { getModuleById } from '../../data/modules';
 import { subjectToSlug } from '../../utils/slug';
-import { getMaterialEnglishTitle, getMaterialEnglishDesc } from '../../i18n/materialsTranslations';
 import {
   parseVideoSource,
   determinePrimaryPlaylistSource,
@@ -23,8 +22,8 @@ if (!playlist) {
 
 const moduleInfo = playlist.moduleId ? await getModuleById(playlist.moduleId) : undefined;
 
-const titleEn = getMaterialEnglishTitle(playlist.id, playlist.title);
-const descEn = playlist.description ? getMaterialEnglishDesc(playlist.id, playlist.description) : undefined;
+const titleEn = playlist.titleEn || playlist.title;
+const descEn = playlist.descriptionEn || playlist.description;
 
 // Authors list normalization (who prepared the material)
 const rawAuthors = Array.isArray(playlist.author)

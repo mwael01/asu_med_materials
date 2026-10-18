@@ -10,11 +10,15 @@ export function initYearSelector(): void {
   dialog.querySelector('[data-close-year]')?.addEventListener('click', () => dialog.close());
   dialog.querySelectorAll<HTMLButtonElement>('[data-select-year]').forEach(button => {
     button.addEventListener('click', () => {
-      setUserStoredYear(Number(button.dataset.selectYear) as AcademicYear);
+      const selectedYear = Number(button.dataset.selectYear) as AcademicYear;
+      setUserStoredYear(selectedYear);
       dialog.close();
-      // Updating the home hub is immediate; shared URLs keep their destination.
+      if (location.pathname === '/') {
+        window.location.reload();
+      }
     });
   });
+
   // A dismissed prompt must not permanently suppress onboarding on the next visit.
   if (!getUserStoredYear() && !['/admin', '/profile'].includes(location.pathname)) open();
 }

@@ -1,6 +1,7 @@
 import { getPublicModules } from './catalogue.server';
 import type { ModuleInfo } from '../types/materials';
 import { fetchModulesFromFirestore } from '../firebase/firestore';
+import { resolveActiveModule } from '../utils/moduleHelpers';
 
 export const REFERENCE_BOOK_SUBJECTS: string[] = [
   'Anatomy',
@@ -16,13 +17,23 @@ export const REFERENCE_BOOK_SUBJECTS: string[] = [
 
 const loadModules = getPublicModules;
 
-/** Fetch active modules; reuse the same pending read across SSR components. Hides second semester modules for now. */
+/** Fetch all modules; reuse the same pending read across SSR components. */
 export async function getAllModules(): Promise<ModuleInfo[]> {
-  const list = (await loadModules()).filter(
-    (module) => module.active !== false && module.semester !== 2
-  );
+  const list = await loadModules();
   return list.sort((a, b) => (a.order ?? 99) - (b.order ?? 99));
 }
+
+
+/**
+ * Resolves the currently studied active module for an academic year.
+ * If a module explicitly has active: true, it is selected; otherwise falls back to the first module in order.
+ */
+export async function getActiveModuleForYear(year: number): Promise<ModuleInfo | null> {
+  const modules = await getAllModules();
+  return resolveActiveModule(modules, year);
+}
+
+
 
 /**
  * Fetches ALL modules including inactive ones (for admin management).

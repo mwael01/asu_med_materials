@@ -106,10 +106,8 @@
 ></div>
 
 <script>
-  import { getMaterialEnglishTitle } from '../../i18n/materialsTranslations';
   import { getStoredBookmarkIds, getStoredStudiedIds } from '../../utils/storage';
   import { setMaterialBookmarked, renderBookmarkButtons, initBookmarkButtons, stopBookmarkButtons } from '../../utils/bookmarks';
-  import { t } from '../../utils/i18n';
   import { escapeHtml } from '../../utils/sanitize';
   import { getClientMaterials, getClientModules } from '../../utils/catalogueClient';
   import { isEmbeddableDocument, getDocumentViewerPath } from '../../utils/documentViewer';
@@ -384,8 +382,21 @@
 
           items.forEach((item) => {
             const isStudied = studiedIds.includes(item.id);
-            const titleText = item.titleEn || getMaterialEnglishTitle(item.id, item.title);
-            const typeLabel = t(`types.${item.type}`);
+            const titleText = item.titleEn || item.title;
+            const TYPE_LABELS: Record<string, string> = {
+              drive: 'Google Drive',
+              telegram: 'Telegram',
+              youtube: 'YouTube',
+              playlist: 'Playlist',
+              whatsapp: 'WhatsApp',
+              book: 'Reference Book',
+              summary: 'Notes / Summary',
+              exam: 'Past Exams',
+              flashcards: 'Flashcards',
+              website: 'Website',
+              pdf: 'PDF Document'
+            };
+            const typeLabel = TYPE_LABELS[item.type] || item.type;
             const isPl = item.type === 'playlist' || Boolean(item.playlistId);
             const isDoc = isEmbeddableDocument(item.url);
             const targetUrl = isPl ? `/playlist/${item.id}` : isDoc ? getDocumentViewerPath(item.id) : item.url;

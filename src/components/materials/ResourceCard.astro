@@ -2,7 +2,6 @@
 import type { MaterialItem } from '../../types/materials';
 import TypeBadge from './TypeBadge.astro';
 import { subjectToSlug } from '../../utils/slug';
-import { getMaterialEnglishTitle, getMaterialEnglishDesc } from '../../i18n/materialsTranslations';
 import { legacyMaterialPath } from '../../utils/studyContent';
 
 interface Props {
@@ -13,8 +12,8 @@ interface Props {
 
 const { material, showYear = false, href } = Astro.props;
 
-const titleEn = material.titleEn || getMaterialEnglishTitle(material.id, material.title);
-const descEn = material.descriptionEn || (material.description ? getMaterialEnglishDesc(material.id, material.description) : undefined);
+const titleEn = material.titleEn || material.title;
+const descEn = material.descriptionEn || material.description;
 
 // Normalize author (who made/prepared the material)
 const rawAuthors: string[] = Array.isArray(material.author)

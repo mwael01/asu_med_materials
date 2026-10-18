@@ -5,7 +5,6 @@ import ResourceCard from '../../components/materials/ResourceCard.astro';
 import { getMaterialById, getMaterialsByModule } from '../../data/materials';
 import { getModuleById } from '../../data/modules';
 import { subjectToSlug } from '../../utils/slug';
-import { getMaterialEnglishTitle, getMaterialEnglishDesc } from '../../i18n/materialsTranslations';
 import {
   getDocumentEmbedUrl,
   getDocumentExternalUrl,
@@ -61,8 +60,8 @@ if (!embedUrl && !isBundle) {
 const externalUrl = initialDoc.externalUrl || getDocumentExternalUrl(material.url);
 const moduleInfo = material.moduleId ? await getModuleById(material.moduleId) : undefined;
 
-const titleEn = material.titleEn || getMaterialEnglishTitle(material.id, material.title);
-const descEn = material.descriptionEn || (material.description ? getMaterialEnglishDesc(material.id, material.description) : undefined);
+const titleEn = material.titleEn || material.title;
+const descEn = material.descriptionEn || material.description;
 
 // Authors list normalization (who prepared the material)
 const rawAuthors = Array.isArray(material.author)

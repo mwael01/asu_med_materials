@@ -1,18 +1,55 @@
 ---
 import Layout from '../layouts/Layout.astro';
-import ModuleDirectory from '../components/materials/ModuleDirectory.astro';
-import SavedYearScope from '../components/materials/SavedYearScope.astro';
 import { getAllModules } from '../data/modules';
+import { resolveActiveModule } from '../utils/moduleHelpers';
+
 const modules = await getAllModules();
+
+// Build map of academic year -> active module ID
+const activeModuleMap: Record<number, string> = {};
+for (let y = 1; y <= 5; y++) {
+  const active = resolveActiveModule(modules, y);
+  if (active) activeModuleMap[y] = active.id;
+}
+
+// Default fallback is Year 2 active module (Respiratory)
+const defaultActiveModuleId = activeModuleMap[2] || 'year2-respiratory';
+
 ---
-<Layout title="My modules - mediX">
-  <section data-saved-year-scope>
-    <div class="flex items-center justify-between gap-4 mb-6">
-      <h1 class="text-xl font-bold">My modules <span data-year-label class="text-sm font-normal text-zinc-500 ml-2"></span></h1>
-      <button type="button" class="trigger-multistage-selector text-sm text-emerald-600 hover:underline">Change year</button>
-    </div>
-    {[1,2,3,4,5].map(year => <div data-scope-year={year} hidden><ModuleDirectory modules={modules.filter(module => module.year === year)} /></div>)}
-    <p data-year-empty class="text-sm text-zinc-500">Choose your year to continue.</p>
-  </section>
-  <SavedYearScope />
+
+<Layout title="mediX - All-in-one Medical Study Hub">
+  <noscript>
+    <meta http-equiv="refresh" content={`0;url=/module/${defaultActiveModuleId}`} />
+  </noscript>
+
+  <div class="py-16 text-center text-sm text-zinc-500">
+    <p>Opening your active module...</p>
+    <p class="mt-3">
+      <a href={`/module/${defaultActiveModuleId}`} id="direct-active-link" class="text-emerald-500 hover:underline font-medium">
+        Click here if you are not redirected automatically &rarr;
+      </a>
+    </p>
+  </div>
+
+  <script is:inline define:vars={{ activeModuleMap, defaultActiveModuleId }}>
+    function resolveAndOpenActiveModule() {
+      try {
+        var raw = localStorage.getItem('asumed_user_year');
+        var year = (raw && !isNaN(raw)) ? parseInt(raw, 10) : 2;
+        var target = activeModuleMap[year] || defaultActiveModuleId;
+        var destination = '/module/' + target;
+        var directLink = document.getElementById('direct-active-link');
+        if (directLink) directLink.setAttribute('href', destination);
+        window.location.replace(destination);
+      } catch (e) {
+        window.location.replace('/module/' + defaultActiveModuleId);
+      }
+    }
+    resolveAndOpenActiveModule();
+    document.addEventListener('astro:page-load', function() {
+      if (window.location.pathname === '/') {
+        resolveAndOpenActiveModule();
+      }
+    });
+  </script>
 </Layout>

@@ -7,9 +7,8 @@ import { getAllMaterials } from '../data/materials';
 import { getAllModules } from '../data/modules';
 import { getPublicLessons } from '../data/catalogue.server';
 import { materialStudyPath } from '../utils/studyContent';
-import { getMaterialEnglishTitle } from '../i18n/materialsTranslations';
 const [rawMaterials, modules, lessons] = await Promise.all([getAllMaterials(), getAllModules(), getPublicLessons()]);
-const materials = rawMaterials.map(item => ({ ...item, titleEn: item.titleEn || getMaterialEnglishTitle(item.id, item.title),
+const materials = rawMaterials.map(item => ({ ...item, titleEn: item.titleEn || item.title,
   tags: [...item.tags, ...lessons.filter(lesson => lesson.id === item.lessonId && lesson.active !== false && lesson.moduleId === item.moduleId).map(lesson => lesson.title)] }));
 const hrefs = Object.fromEntries(materials.map(item => [item.id, materialStudyPath(item, lessons)]));
 ---

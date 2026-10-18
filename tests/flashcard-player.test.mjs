@@ -5,7 +5,6 @@ import { runInNewContext } from 'node:vm';
 import ts from 'typescript';
 import * as review from '../src/utils/flashcards/review.ts';
 import * as progress from '../src/utils/flashcards/progress.ts';
-import { t } from '../src/utils/i18n.ts';
 import { createRatingFlow } from '../src/scripts/flashcards/ratingFlow.ts';
 
 const playerSource = await readFile(new URL('../src/scripts/flashcards/player.ts', import.meta.url), 'utf8');
@@ -93,7 +92,6 @@ function playerHarness(cards = sampleCards(), saved = null, storage = {}) {
     },
     '../../firebase/auth': { getCachedUserProfile: () => null },
     '../../utils/flashcards/caching': { cacheDeckImagesOnOpen: async () => {} },
-    '../../utils/i18n': { t, getCurrentLanguage: () => h.language },
     './cardHtml': { prepareCardHtml: (html) => ({ html, hintText: 'Test hint' }) },
     './gestures': { bindCardGestures: (_element, _shades, callbacks) => {
       h.gestures = callbacks;
