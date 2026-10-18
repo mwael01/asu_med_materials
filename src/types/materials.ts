@@ -54,6 +54,7 @@ export interface ModuleInfo {
   active?: boolean; // defaults to true when undefined
   icon?: string;
   color?: string;
+  order?: number;
 }
 
 export interface MaterialItem {

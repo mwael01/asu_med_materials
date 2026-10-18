@@ -31,8 +31,13 @@ The medical program spans 5 years divided into two primary phases:
 - **Infection Module (MED105)**: `year1-infection` (`semester: 2`)
 - **Locomotor Module (MED106)**: `year1-locomotor` (`semester: 2`)
 
+### Year 2 — Respiratory Module (MED202 — Default Active Module)
+- **Module ID**: `year2-respiratory` (`semester: 1`, `order: 1`, `icon: 'lungs'`, `color: 'cyan'`)
+- **Subjects**: Anatomy, Histology, Physiology, Biochemistry, Pathology, Pharmacology, Microbiology, Parasitology.
+- **Curriculum Structure**: 52 lessons across Weeks 5–9 mapped from the faculty timetable, featuring shared multi-department lecture slots (e.g. Nose & Paranasal sinuses in Anatomy and Histology) with isolated subject material assignments.
+
 ### Year 2 — Blood & Lymphatic System (MED201)
-- **Module ID**: `year2-blood` (`semester: 1`)
+- **Module ID**: `year2-blood` (`semester: 1`, `order: 2`, `icon: 'droplet'`, `color: 'red'`)
 - **Subjects**: Anatomy, Physiology, Histology, Biochemistry, Pharmacology, Pathology, Parasitology, Microbiology, Clinical Lectures.
 - **Resources**: Central Drives, Video Playlists & Embedded Players, Telegram Lecture Recordings, Audio Revisions, MCQs & Essay Banks, Formatives, and Past Finals.
 

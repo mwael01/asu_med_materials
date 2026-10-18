@@ -2,7 +2,7 @@ export type SubjectIconName =
   | 'bone' | 'heart' | 'cells' | 'flask' | 'pill' | 'microscope'
   | 'bacteria' | 'parasite' | 'shield' | 'dna' | 'embryo'
   | 'monitor' | 'presentation' | 'stethoscope' | 'book'
-  | 'droplet' | 'compass' | 'brain' | 'activity';
+  | 'droplet' | 'compass' | 'brain' | 'activity' | 'lungs';
 
 export interface SubjectAppearance {
   icon: SubjectIconName;

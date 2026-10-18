@@ -145,3 +145,66 @@ test('unlessoned subjects and type-scoped subject filtering logic', () => {
   assert.deepEqual(pdfSubjects, ['Pathology']);
 });
 
+test('shared lesson names across multiple subjects maintain isolated material assignments', () => {
+  const respModule = {
+    id: 'year2-respiratory',
+    title: 'Respiratory Module',
+    code: 'MED202',
+    year: 2,
+    subjects: ['Anatomy', 'Histology']
+  };
+
+  const anatNoseLesson = {
+    id: 'year2-resp-anat-nose-paranasal-sinuses',
+    title: 'Nose and Paranasal sinuses',
+    moduleId: 'year2-respiratory',
+    subject: 'Anatomy',
+    order: 1,
+    active: true
+  };
+
+  const histoNoseLesson = {
+    id: 'year2-resp-histo-nose-paranasal-sinuses',
+    title: 'Nose and Paranasal sinuses',
+    moduleId: 'year2-respiratory',
+    subject: 'Histology',
+    order: 1,
+    active: true
+  };
+
+  const allLessons = [anatNoseLesson, histoNoseLesson];
+
+  // Each subject query resolves its own lesson
+  const anatLessons = lessonsForSubject(allLessons, 'year2-respiratory', 'Anatomy');
+  const histoLessons = lessonsForSubject(allLessons, 'year2-respiratory', 'Histology');
+  assert.equal(anatLessons.length, 1);
+  assert.equal(anatLessons[0].id, anatNoseLesson.id);
+  assert.equal(anatLessons[0].title, 'Nose and Paranasal sinuses');
+
+  assert.equal(histoLessons.length, 1);
+  assert.equal(histoLessons[0].id, histoNoseLesson.id);
+  assert.equal(histoLessons[0].title, 'Nose and Paranasal sinuses');
+
+  // Materials assigned to Anatomy cannot bleed into Histology
+  const anatMaterial = {
+    id: 'anat-mat-1',
+    moduleId: 'year2-respiratory',
+    subject: 'Anatomy',
+    lessonId: anatNoseLesson.id
+  };
+
+  assert.equal(materialMatchesLesson(anatMaterial, anatNoseLesson), true);
+  assert.equal(materialMatchesLesson(anatMaterial, histoNoseLesson), false);
+
+  const histoMaterial = {
+    id: 'histo-mat-1',
+    moduleId: 'year2-respiratory',
+    subject: 'Histology',
+    lessonId: histoNoseLesson.id
+  };
+
+  assert.equal(materialMatchesLesson(histoMaterial, histoNoseLesson), true);
+  assert.equal(materialMatchesLesson(histoMaterial, anatNoseLesson), false);
+});
+
+

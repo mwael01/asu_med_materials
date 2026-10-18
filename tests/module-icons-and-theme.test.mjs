@@ -80,9 +80,28 @@ test('AVAILABLE_MODULE_ICONS includes newly added icons', () => {
   assert.ok(AVAILABLE_MODULE_ICONS.includes('compass'));
   assert.ok(AVAILABLE_MODULE_ICONS.includes('brain'));
   assert.ok(AVAILABLE_MODULE_ICONS.includes('activity'));
+  assert.ok(AVAILABLE_MODULE_ICONS.includes('lungs'));
 });
 
-test('moduleConverter preserves icon and color across Firestore serialization', () => {
+test('getModuleAppearance resolves respiratory module with lungs icon and cyan color', () => {
+  const resp = getModuleAppearance({
+    id: 'year2-respiratory',
+    title: 'Respiratory Module',
+    icon: 'lungs',
+    color: 'cyan'
+  });
+  assert.equal(resp.icon, 'lungs');
+  assert.equal(resp.colors, MODULE_COLOR_PALETTE.cyan);
+
+  const inferred = getModuleAppearance({
+    id: 'year2-respiratory',
+    title: 'Respiratory System'
+  });
+  assert.equal(inferred.icon, 'lungs');
+  assert.equal(inferred.colors, MODULE_COLOR_PALETTE.cyan);
+});
+
+test('moduleConverter preserves icon, color, and order across Firestore serialization', () => {
   const sampleModule = {
     id: 'year2-blood',
     code: 'MED201',
@@ -94,12 +113,14 @@ test('moduleConverter preserves icon and color across Firestore serialization', 
     description: 'Blood module',
     active: true,
     icon: 'droplet',
-    color: 'red'
+    color: 'red',
+    order: 2
   };
 
   const firestoreData = moduleConverter.toFirestore(sampleModule);
   assert.equal(firestoreData.icon, 'droplet');
   assert.equal(firestoreData.color, 'red');
+  assert.equal(firestoreData.order, 2);
 
   const mockSnapshot = {
     id: sampleModule.id,
@@ -109,6 +130,7 @@ test('moduleConverter preserves icon and color across Firestore serialization', 
   const parsedModule = moduleConverter.fromFirestore(mockSnapshot);
   assert.equal(parsedModule.icon, 'droplet');
   assert.equal(parsedModule.color, 'red');
+  assert.equal(parsedModule.order, 2);
   assert.equal(parsedModule.id, sampleModule.id);
 });
 

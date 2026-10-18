@@ -18,9 +18,10 @@ const loadModules = getPublicModules;
 
 /** Fetch active modules; reuse the same pending read across SSR components. Hides second semester modules for now. */
 export async function getAllModules(): Promise<ModuleInfo[]> {
-  return (await loadModules()).filter(
+  const list = (await loadModules()).filter(
     (module) => module.active !== false && module.semester !== 2
   );
+  return list.sort((a, b) => (a.order ?? 99) - (b.order ?? 99));
 }
 
 /**

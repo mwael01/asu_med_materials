@@ -39,7 +39,8 @@ export const AVAILABLE_MODULE_ICONS: readonly SubjectIconName[] = [
   'stethoscope',
   'book',
   'brain',
-  'activity'
+  'activity',
+  'lungs'
 ] as const;
 
 const validIconsSet = new Set<string>(AVAILABLE_MODULE_ICONS);
@@ -87,6 +88,7 @@ export function getModuleAppearance(mod?: { icon?: string; color?: string; id?: 
     else if (text.includes('locomotor') || text.includes('musculo') || text.includes('bone')) icon = 'bone';
     else if (text.includes('heart') || text.includes('cardio') || text.includes('cvs')) icon = 'heart';
     else if (text.includes('neuro') || text.includes('cns') || text.includes('brain')) icon = 'brain';
+    else if (text.includes('resp') || text.includes('lung')) icon = 'lungs';
     else icon = 'book';
   }
 
@@ -105,6 +107,7 @@ export function getModuleAppearance(mod?: { icon?: string; color?: string; id?: 
     else if (text.includes('patho')) colors = MODULE_COLOR_PALETTE.amber;
     else if (text.includes('infect')) colors = MODULE_COLOR_PALETTE.teal;
     else if (text.includes('locomotor')) colors = MODULE_COLOR_PALETTE.rose;
+    else if (text.includes('resp') || text.includes('lung')) colors = MODULE_COLOR_PALETTE.cyan;
     else if (text.includes('reference')) colors = MODULE_COLOR_PALETTE.purple;
     else colors = MODULE_COLOR_PALETTE.slate;
   }

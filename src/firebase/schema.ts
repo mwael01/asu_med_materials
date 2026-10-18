@@ -263,6 +263,7 @@ export const moduleConverter: FirestoreDataConverter<ModuleInfo> = {
       active: mod.active !== false, // defaults to true
       icon: mod.icon || null,
       color: mod.color || null,
+      order: typeof mod.order === 'number' ? mod.order : null,
     };
   },
   fromFirestore(
@@ -283,6 +284,7 @@ export const moduleConverter: FirestoreDataConverter<ModuleInfo> = {
       active: data.active !== false, // defaults to true
       icon: data.icon || undefined,
       color: data.color || undefined,
+      order: typeof data.order === 'number' ? data.order : undefined,
     };
   }
 };
