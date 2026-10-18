@@ -106,3 +106,49 @@ html {
   @apply w-full min-w-0 rounded-lg border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-3 py-2 text-sm;
 }
 [hidden] { display: none !important; }
+
+/* Native document navigation keeps the existing page/player lifecycles intact. */
+@view-transition {
+  navigation: auto;
+}
+
+@keyframes page-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes page-fade-out {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+
+.page-content {
+  view-transition-name: page-content;
+}
+
+/* Fade content only; retain the shell and avoid geometry/slide animations. */
+::view-transition-group(root),
+::view-transition-group(page-content),
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+}
+
+::view-transition-old(page-content) {
+  animation: page-fade-out 160ms ease-out both;
+}
+
+::view-transition-new(page-content) {
+  animation: page-fade-in 160ms ease-out both;
+}
+
+@supports not (view-transition-name: page-content) {
+  .page-content { animation: page-fade-in 160ms ease-out; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  @view-transition { navigation: none; }
+  .page-content { animation: none; }
+  ::view-transition-old(page-content),
+  ::view-transition-new(page-content) { animation: none; }
+}

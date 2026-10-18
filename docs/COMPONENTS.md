@@ -375,7 +375,8 @@ Flashcard decks are integrated directly into module pages ([`src/pages/module/[i
 ## Lesson-flow components
 
 - **PageHeading**: Compact page title, optional breadcrumb links, and an action slot. Props: `title`, optional `crumbs: { title, href }[]`.
-- **NavigationCards**: Plain responsive text cards for module, subject, lesson, or doctor destinations. Props: `items: { title, href }[]`, optional `emptyMessage`.
+- **NavigationCards**: Responsive navigation cards with a 112px minimum height (128px from the small breakpoint). Props: `items: NavigationCardItem[]`, optional `emptyMessage`. Optional `subject` adds a full-height, softly tinted left icon panel, reused for subject and lesson cards. Long titles wrap without fixing card height.
+- **SubjectIcon**: Decorative medical SVGs selected by `getSubjectAppearance`; named subjects have distinct colors in light and dark themes, with a book fallback for other subjects.
 - **ModuleDirectory**: Active curriculum module destinations for the supplied year-scoped module list. No descriptions or counts.
 - **SavedYearScope**: Binds the year-scope controller to sections marked `data-scope-year`. Updates on preference changes and cross-tab storage events; shows one empty state when nothing matches.
 - **TypeDiscovery**: Shared Videos/PDFs/Flashcards discovery renderer, with `type` selecting the content class. Groups by module and subject and resolves assigned resources into their doctor workspace.

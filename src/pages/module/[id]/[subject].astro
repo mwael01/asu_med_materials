@@ -26,7 +26,7 @@ const resources = unassigned.filter(item => !isGeneralLink(item));
 ---
 <Layout title={`${subject} - ${module.title} - ASU Med Materials`}>
   <PageHeading title={subject} crumbs={[{ title: 'Home', href: '/' }, { title: module.title, href: `/module/${module.id}` }]} />
-  {lessons.length > 0 && <section><h2 class="text-base font-semibold mb-4">Lessons</h2><NavigationCards items={lessons.map(lesson => ({ title: lesson.title, href: lessonPath(lesson) }))} /></section>}
+  {lessons.length > 0 && <section><h2 class="text-base font-semibold mb-4">Lessons</h2><NavigationCards items={lessons.map(lesson => ({ title: lesson.title, href: lessonPath(lesson), subject }))} /></section>}
   {resources.length > 0 && <section class="mt-8"><h2 class="text-base font-semibold mb-4">Subject resources</h2><ResourceGrid materials={resources} /></section>}
   {links.length > 0 && <section class="mt-8"><h2 class="text-base font-semibold mb-4">Links</h2><ResourceGrid materials={links} /></section>}
   {!lessons.length && !materials.length && <p class="text-sm text-zinc-500">No lessons or resources available yet.</p>}

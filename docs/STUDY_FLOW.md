@@ -4,6 +4,8 @@
 
 Students choose their academic year once, stored as `asumed_user_year` in localStorage. Home lists that year's active curriculum modules. Each module opens its subject directory; each subject opens an ordered lesson list; each lesson opens doctor cards; each doctor opens a shared video/document/link workspace.
 
+Subject cards have taller rows with subject-specific medical icons in soft-colored left panels; lesson cards carry the same subject treatment. Module pages contain only subject navigation. Materials without a matching subject remain available through discovery and search.
+
 The topbar links to Home, Videos, PDFs, and Flashcards, with a Search shortcut. Mobile navigation offers the same destinations. Team and Contribute remain in secondary navigation. Home and profile allow year changes, including for signed-in users. No welcome quote or stored active-module selection interrupts this flow. First-visit selection preserves shared destinations. If storage is unavailable, the year survives in memory for the current page; a fresh page load may prompt again.
 
 Routes:
@@ -11,7 +13,7 @@ Routes:
 | Route | Purpose |
 | --- | --- |
 | `/` | Saved year's modules |
-| `/module/[id]` | Subject cards and resources with no matching subject |
+| `/module/[id]` | Subject cards |
 | `/module/[id]/[subject]` | Lessons, unassigned subject resources, and general links |
 | `/module/[id]/[subject]/lesson/[lessonId]` | Doctors, flashcards, and resources without a doctor |
 | `/module/[id]/[subject]/lesson/[lessonId]/doctor/[doctorKey]` | Doctor workspace; `?item=` selects an original source item |
@@ -20,6 +22,8 @@ Routes:
 | `/year/[year]` | Compatibility module directory |
 
 Standalone playlist, document viewer, collection, and flashcard URLs remain available. Standalone YouTube videos retain their external links. Resources linked to inactive, missing, or mismatched lessons remain reachable through their legacy destinations and subject resources.
+
+Page content crossfades over 160ms using [native cross-document view transitions](https://developer.mozilla.org/en-US/docs/Web/CSS/@view-transition). The navigation shell stays steady, and document navigation retains existing player/form initialization. Browsers without the view-transition CSS property receive a simple content fade-in; reduced-motion preferences disable both effects. No routing or animation dependency is added.
 
 ## Firestore contract
 

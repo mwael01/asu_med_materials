@@ -2,16 +2,12 @@
 import Layout from '../../layouts/Layout.astro';
 import PageHeading from '../../components/common/PageHeading.astro';
 import NavigationCards from '../../components/common/NavigationCards.astro';
-import ResourceGrid from '../../components/materials/ResourceGrid.astro';
 import { getModuleById } from '../../data/modules';
-import { getMaterialsByModule } from '../../data/materials';
 import { subjectToSlug } from '../../utils/slug';
 const module = await getModuleById(Astro.params.id || '');
 if (!module) return Astro.redirect('/404');
-const general = (await getMaterialsByModule(module.id)).filter(item => !item.subject || !module.subjects.some(subject => subjectToSlug(subject) === subjectToSlug(item.subject!)));
 ---
 <Layout title={`${module.title} - ASU Med Materials`}>
   <PageHeading title={module.title} crumbs={[{ title: 'Home', href: '/' }]} />
-  <NavigationCards items={module.subjects.map(subject => ({ title: subject, href: `/module/${module.id}/${subjectToSlug(subject)}` }))} emptyMessage="No subjects available yet." />
-  {general.length > 0 && <section class="mt-8"><h2 class="text-base font-semibold mb-4">Module resources</h2><ResourceGrid materials={general} /></section>}
+  <NavigationCards items={module.subjects.map(subject => ({ title: subject, href: `/module/${module.id}/${subjectToSlug(subject)}`, subject }))} emptyMessage="No subjects available yet." />
 </Layout>
