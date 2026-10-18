@@ -47,6 +47,33 @@ const {
         localStorage.setItem('theme', 'dark');
       } catch (e) {}
     </script>
+
+    <!-- Eager Cache & User Year Warmup for instant 0ms access -->
+    <script is:inline>
+      (function() {
+        try {
+          var y = localStorage.getItem('asumed_user_year');
+          if (y && !isNaN(y)) window.__USER_STORED_YEAR = parseInt(y, 10);
+
+          var m = localStorage.getItem('asumed_modules_snapshot');
+          if (m) {
+            var pm = JSON.parse(m);
+            if (pm && pm.modules) window.__CACHED_MODULES = pm.modules;
+          }
+          var c = localStorage.getItem('asumed_catalogue_snapshot');
+          if (c) {
+            var pc = JSON.parse(c);
+            if (pc && pc.materials) window.__CACHED_MATERIALS = pc.materials;
+          }
+          var l = localStorage.getItem('asumed_lessons_snapshot');
+          if (l) {
+            var pl = JSON.parse(l);
+            if (pl && pl.lessons) window.__CACHED_LESSONS = pl.lessons;
+          }
+        } catch(e) {}
+      })();
+    </script>
+
     <!-- Google reCAPTCHA Enterprise for Firebase App Check -->
     {RECAPTCHA_ENTERPRISE_SITE_KEY && (
       <script src={`https://www.google.com/recaptcha/enterprise.js?render=${RECAPTCHA_ENTERPRISE_SITE_KEY}`} async defer></script>

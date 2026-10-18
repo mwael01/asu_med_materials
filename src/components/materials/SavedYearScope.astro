@@ -1,7 +1,25 @@
----
----
+<!-- Immediate synchronous unhide before paint on initial page load -->
+<script is:inline>
+  (function() {
+    try {
+      var raw = localStorage.getItem('asumed_user_year');
+      var y = (raw && !isNaN(raw)) ? parseInt(raw, 10) : 2;
+      var roots = document.querySelectorAll('[data-saved-year-scope]');
+      roots.forEach(function(root) {
+        var sec = root.querySelector('[data-scope-year="' + y + '"]');
+        if (sec) sec.removeAttribute('hidden');
+        var empty = root.querySelector('[data-year-empty]');
+        if (empty) empty.setAttribute('hidden', '');
+        var lbl = root.querySelector('[data-year-label]');
+        if (lbl) lbl.textContent = 'Year ' + y;
+      });
+    } catch(e) {}
+  })();
+</script>
+
 <script>
   import { initYearScope } from '../../scripts/navigation/yearScope';
   initYearScope();
   document.addEventListener('astro:after-swap', initYearScope);
 </script>
+
