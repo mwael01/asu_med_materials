@@ -3,32 +3,45 @@ import type { DiscoveryType } from '../../types/lessons';
 import { getAllMaterials } from '../../data/materials';
 import { getAllModules } from '../../data/modules';
 import { getPublicLessons } from '../../data/catalogue.server';
-import { matchesDiscoveryType, materialStudyPath } from '../../utils/studyContent';
-import ResourceGrid from './ResourceGrid.astro';
+import { matchesDiscoveryType } from '../../utils/studyContent';
+import ModuleDirectory from './ModuleDirectory.astro';
 import SavedYearScope from './SavedYearScope.astro';
-import { subjectToSlug } from '../../utils/slug';
+
 interface Props { type: DiscoveryType }
 const { type } = Astro.props;
-const [materials, modules, lessons] = await Promise.all([getAllMaterials(), getAllModules(), getPublicLessons()]);
-const matching = materials.filter(item => matchesDiscoveryType(item, type));
-const hrefs = Object.fromEntries(matching.map(item => [item.id, materialStudyPath(item, lessons, type)]));
-const groups = [...new Set(matching.map(item => JSON.stringify([item.year, item.moduleId || '', item.subject || ''])))].map(key => {
-  const [year, moduleId, subject] = JSON.parse(key) as [number, string, string];
-  const module = modules.find(item => item.id === moduleId);
-  const canonicalSubject = module?.subjects.find(item => subjectToSlug(item) === subjectToSlug(subject));
-  return { year, title: [module?.title || (moduleId ? 'References' : 'General'), subject].filter(Boolean).join(' / '),
-    href: module ? (canonicalSubject ? `/module/${module.id}/${subjectToSlug(canonicalSubject)}` : `/module/${module.id}`) : undefined,
-    items: matching.filter(item => item.year === year && (item.moduleId || '') === moduleId && (item.subject || '') === subject) };
-}).sort((a,b) => a.title.localeCompare(b.title));
+
+const [materials, modules, lessons] = await Promise.all([
+  getAllMaterials(),
+  getAllModules(),
+  getPublicLessons()
+]);
+
+// Filter modules for each year: only modules that contain active lessons with materials matching `type`
+const modulesWithContent = modules.filter(module => {
+  const activeLessons = lessons.filter(l => l.active !== false && l.moduleId === module.id);
+  const lessonIds = new Set(activeLessons.map(l => l.id));
+  return materials.some(m => m.moduleId === module.id && m.lessonId && lessonIds.has(m.lessonId) && matchesDiscoveryType(m, type));
+});
+
+const typeTitles: Record<DiscoveryType, string> = {
+  videos: 'Videos',
+  pdfs: 'PDFs',
+  flashcards: 'Flashcards'
+};
 ---
 <section data-saved-year-scope>
-  <div class="flex justify-between items-center mb-5 text-sm">
-    <span data-year-label class="text-zinc-500"></span>
-    <a href="/" class="text-emerald-600 hover:underline">My modules</a>
+  <div class="flex items-center justify-between gap-4 mb-6">
+    <h1 class="text-xl font-bold">{typeTitles[type]} <span data-year-label class="text-sm font-normal text-zinc-500 ml-2"></span></h1>
+    <button type="button" class="trigger-multistage-selector text-sm text-emerald-600 hover:underline">Change year</button>
   </div>
-  <div class="space-y-8">
-    {groups.map(group => <section data-scope-year={group.year} hidden><h2 class="text-sm font-semibold mb-3">{group.href ? <a href={group.href} class="hover:text-emerald-600">{group.title}</a> : group.title}</h2><ResourceGrid materials={group.items} hrefs={hrefs} /></section>)}
-  </div>
+  {[1, 2, 3, 4, 5].map(year => (
+    <div data-scope-year={year} hidden>
+      <ModuleDirectory
+        modules={modulesWithContent.filter(module => module.year === year)}
+        type={type}
+      />
+    </div>
+  ))}
   <p data-year-empty class="text-sm text-zinc-500">Choose your year to continue.</p>
 </section>
 <SavedYearScope />

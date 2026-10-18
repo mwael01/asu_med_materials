@@ -1,16 +1,22 @@
 ---
 import type { ModuleInfo } from '../../types/materials';
+import type { DiscoveryType } from '../../types/lessons';
 import NavigationCards from '../common/NavigationCards.astro';
 import { getModuleAppearance } from '../../utils/subjectAppearance';
-interface Props { modules: ModuleInfo[] }
-const { modules } = Astro.props;
+
+interface Props {
+  modules: ModuleInfo[];
+  type?: DiscoveryType;
+}
+
+const { modules, type } = Astro.props;
 ---
 <NavigationCards
   items={modules
     .filter(module => !module.id.includes('reference-books'))
     .map(module => ({
       title: module.title,
-      href: `/module/${module.id}`,
+      href: type ? `/module/${module.id}?type=${type}` : `/module/${module.id}`,
       appearance: getModuleAppearance(module),
     }))}
   emptyMessage="No modules available for this year yet."

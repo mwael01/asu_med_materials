@@ -98,3 +98,50 @@ test('lesson assignment and document bundles survive converters, drafts, and sub
   const submission = submissionConverter.fromFirestore({ id: 'sub', data: () => ({ lessonId: lesson.id }) });
   assert.equal(submission.lessonId, lesson.id);
 });
+
+test('unlessoned subjects and type-scoped subject filtering logic', () => {
+  const multiSubjectModule = {
+    id: 'blood-module',
+    title: 'Blood Module',
+    year: 2,
+    subjects: ['Pathology', 'Physiology', 'Histology', 'Biochemistry']
+  };
+
+  const lessons = [
+    { id: 'l1', title: 'RBCs', moduleId: 'blood-module', subject: 'Physiology', order: 1, active: true },
+    { id: 'l2', title: 'Anemia', moduleId: 'blood-module', subject: 'Pathology', order: 1, active: true },
+    { id: 'l3', title: 'Inactive Lesson', moduleId: 'blood-module', subject: 'Histology', order: 1, active: false }
+  ];
+
+  const materials = [
+    { id: 'm1', title: 'RBC Video', type: 'youtube', url: 'https://youtu.be/test', moduleId: 'blood-module', subject: 'Physiology', lessonId: 'l1' },
+    { id: 'm2', title: 'Anemia Notes', type: 'summary', url: 'https://example.org/anemia.pdf', moduleId: 'blood-module', subject: 'Pathology', lessonId: 'l2' }
+  ];
+
+  // 1. Unlessoned subjects filtering: only Pathology and Physiology have active lessons
+  const activeSubjects = multiSubjectModule.subjects.filter(subject => {
+    return lessonsForSubject(lessons, multiSubjectModule.id, subject).length > 0;
+  });
+  assert.deepEqual(activeSubjects, ['Pathology', 'Physiology']);
+  assert.equal(activeSubjects.includes('Histology'), false); // inactive lesson only
+  assert.equal(activeSubjects.includes('Biochemistry'), false); // zero lessons
+
+  // 2. Type filtering: 'videos' matches only Physiology (has m1 which is a video)
+  const videoSubjects = multiSubjectModule.subjects.filter(subject => {
+    const sLessons = lessonsForSubject(lessons, multiSubjectModule.id, subject);
+    if (sLessons.length === 0) return false;
+    const lessonIds = new Set(sLessons.map(l => l.id));
+    return materials.some(m => m.lessonId && lessonIds.has(m.lessonId) && matchesDiscoveryType(m, 'videos'));
+  });
+  assert.deepEqual(videoSubjects, ['Physiology']);
+
+  // 3. Type filtering: 'pdfs' matches only Pathology (has m2 which is a pdf)
+  const pdfSubjects = multiSubjectModule.subjects.filter(subject => {
+    const sLessons = lessonsForSubject(lessons, multiSubjectModule.id, subject);
+    if (sLessons.length === 0) return false;
+    const lessonIds = new Set(sLessons.map(l => l.id));
+    return materials.some(m => m.lessonId && lessonIds.has(m.lessonId) && matchesDiscoveryType(m, 'pdfs'));
+  });
+  assert.deepEqual(pdfSubjects, ['Pathology']);
+});
+

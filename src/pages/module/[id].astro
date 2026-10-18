@@ -4,17 +4,59 @@ import PageHeading from '../../components/common/PageHeading.astro';
 import NavigationCards from '../../components/common/NavigationCards.astro';
 import SubjectIcon from '../../components/materials/SubjectIcon.astro';
 import { getModuleById } from '../../data/modules';
+import { getMaterialsByModule } from '../../data/materials';
+import { getPublicLessons } from '../../data/catalogue.server';
 import { getModuleAppearance } from '../../utils/subjectAppearance';
 import { subjectToSlug } from '../../utils/slug';
+import { lessonsForSubject } from '../../utils/lessons';
+import { matchesDiscoveryType } from '../../utils/studyContent';
+import type { DiscoveryType } from '../../types/lessons';
+
 const module = await getModuleById(Astro.params.id || '');
 if (!module) return Astro.redirect('/404');
+
+const typeParam = Astro.url.searchParams.get('type');
+const type: DiscoveryType | null = (typeParam === 'videos' || typeParam === 'pdfs' || typeParam === 'flashcards') ? typeParam : null;
+
+const [allLessons, materials] = await Promise.all([
+  getPublicLessons(),
+  getMaterialsByModule(module.id)
+]);
+
+// Filter out unlessoned subjects; if type is active, require matching materials
+const activeSubjects = module.subjects.filter(subject => {
+  const subjectLessons = lessonsForSubject(allLessons, module.id, subject);
+  if (subjectLessons.length === 0) return false;
+  if (!type) return true;
+  const lessonIds = new Set(subjectLessons.map(l => l.id));
+  return materials.some(m => m.lessonId && lessonIds.has(m.lessonId) && matchesDiscoveryType(m, type));
+});
+
 const appearance = getModuleAppearance(module);
+
+const typeLabels: Record<DiscoveryType, string> = {
+  videos: 'Videos',
+  pdfs: 'PDFs',
+  flashcards: 'Flashcards'
+};
+
+const crumbs = [
+  { title: 'Home', href: '/' },
+  ...(type ? [{ title: typeLabels[type], href: `/${type}` }] : [])
+];
 ---
 <Layout title={`${module.title} - ASU Med Materials`}>
-  <PageHeading title={module.title} crumbs={[{ title: 'Home', href: '/' }]}>
+  <PageHeading title={module.title} crumbs={crumbs}>
     <span class:list={['w-10 h-10 rounded-xl flex items-center justify-center shrink-0 shadow-2xs', appearance.colors]} title={module.title}>
       <SubjectIcon name={appearance.icon} />
     </span>
   </PageHeading>
-  <NavigationCards items={module.subjects.map(subject => ({ title: subject, href: `/module/${module.id}/${subjectToSlug(subject)}`, subject }))} emptyMessage="No subjects available yet." />
+  <NavigationCards
+    items={activeSubjects.map(subject => ({
+      title: subject,
+      href: `/module/${module.id}/${subjectToSlug(subject)}${type ? `?type=${type}` : ''}`,
+      subject
+    }))}
+    emptyMessage="No subjects with lessons available yet."
+  />
 </Layout>

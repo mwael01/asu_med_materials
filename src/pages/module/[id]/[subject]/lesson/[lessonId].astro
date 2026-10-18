@@ -5,20 +5,62 @@ import NavigationCards from '../../../../../components/common/NavigationCards.as
 import ResourceGrid from '../../../../../components/materials/ResourceGrid.astro';
 import { loadLessonPage } from '../../../../../data/lessons';
 import { lessonDoctors, lessonPath } from '../../../../../utils/lessons';
-import { isFlashcards } from '../../../../../utils/studyContent';
+import { isFlashcards, matchesDiscoveryType } from '../../../../../utils/studyContent';
 import { subjectToSlug } from '../../../../../utils/slug';
+import type { DiscoveryType } from '../../../../../types/lessons';
+
 const context = await loadLessonPage(Astro.params.id || '', Astro.params.subject || '', Astro.params.lessonId || '');
 if (!context) return Astro.redirect('/404');
 const { module, lesson, materials } = context;
-const flashcards = materials.filter(isFlashcards);
-const doctors = lessonDoctors(materials.filter(item => !isFlashcards(item)));
+
+const typeParam = Astro.url.searchParams.get('type');
+const type: DiscoveryType | null = (typeParam === 'videos' || typeParam === 'pdfs' || typeParam === 'flashcards') ? typeParam : null;
+
+// Filter materials if type is specified
+const activeMaterials = type ? materials.filter(item => matchesDiscoveryType(item, type)) : materials;
+
+const flashcards = activeMaterials.filter(isFlashcards);
+const doctors = lessonDoctors(activeMaterials.filter(item => !isFlashcards(item)));
 const doctorMaterials = new Set(doctors.flatMap(doctor => doctor.items.map(item => item.id)));
-const general = materials.filter(item => !isFlashcards(item) && !doctorMaterials.has(item.id));
+const general = activeMaterials.filter(item => !isFlashcards(item) && !doctorMaterials.has(item.id));
+
+const typeLabels: Record<DiscoveryType, string> = {
+  videos: 'Videos',
+  pdfs: 'PDFs',
+  flashcards: 'Flashcards'
+};
+
+const crumbs = [
+  { title: 'Home', href: '/' },
+  ...(type ? [{ title: typeLabels[type], href: `/${type}` }] : []),
+  { title: module.title, href: `/module/${module.id}${type ? `?type=${type}` : ''}` },
+  { title: lesson.subject, href: `/module/${module.id}/${subjectToSlug(lesson.subject)}${type ? `?type=${type}` : ''}` }
+];
 ---
 <Layout title={`${lesson.title} - ASU Med Materials`}>
-  <PageHeading title={lesson.title} crumbs={[{ title: 'Home', href: '/' }, { title: module.title, href: `/module/${module.id}` }, { title: lesson.subject, href: `/module/${module.id}/${subjectToSlug(lesson.subject)}` }]} />
-  {doctors.length > 0 && <section><h2 class="text-base font-semibold mb-4">Doctors</h2><NavigationCards items={doctors.map(doctor => ({ title: doctor.name, href: `${lessonPath(lesson)}/doctor/${doctor.key}` }))} /></section>}
-  {flashcards.length > 0 && <section class="mt-8"><h2 class="text-base font-semibold mb-4">Flashcards</h2><ResourceGrid materials={flashcards} /></section>}
-  {general.length > 0 && <section class="mt-8"><h2 class="text-base font-semibold mb-4">Lesson resources</h2><ResourceGrid materials={general} /></section>}
-  {!materials.length && <p class="text-sm text-zinc-500">No materials assigned to this lesson yet.</p>}
+  <PageHeading title={lesson.title} crumbs={crumbs} />
+  {doctors.length > 0 && (
+    <section>
+      <h2 class="text-base font-semibold mb-4">Doctors</h2>
+      <NavigationCards
+        items={doctors.map(doctor => ({
+          title: doctor.name,
+          href: `${lessonPath(lesson)}/doctor/${doctor.key}${type ? `?type=${type}` : ''}`
+        }))}
+      />
+    </section>
+  )}
+  {flashcards.length > 0 && (
+    <section class="mt-8">
+      <h2 class="text-base font-semibold mb-4">Flashcards</h2>
+      <ResourceGrid materials={flashcards} />
+    </section>
+  )}
+  {general.length > 0 && (
+    <section class="mt-8">
+      <h2 class="text-base font-semibold mb-4">Lesson resources</h2>
+      <ResourceGrid materials={general} />
+    </section>
+  )}
+  {!activeMaterials.length && <p class="text-sm text-zinc-500">No materials available for this lesson.</p>}
 </Layout>
