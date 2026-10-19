@@ -9,6 +9,7 @@ import PwaInstallToast from '../components/pwa/PwaInstallToast.astro';
 import Analytics from '@vercel/analytics/astro';
 import { RECAPTCHA_ENTERPRISE_SITE_KEY } from '../firebase/app-check';
 import { getMaterialsVersionFromFirestore } from '../firebase/firestore';
+import { getAllModules } from '../data/modules';
 import { ClientRouter } from 'astro:transitions';
 
 import type { NavCrumb } from '../types/navigation';
@@ -28,6 +29,7 @@ const {
 } = Astro.props;
 
 const catalogueVersion = await getMaterialsVersionFromFirestore();
+const allModules = await getAllModules(catalogueVersion);
 ---
 
 <!doctype html>
@@ -90,7 +92,7 @@ const catalogueVersion = await getMaterialsVersionFromFirestore();
     )}
   </head>
   <body class="min-h-dvh flex flex-col bg-zinc-950 text-zinc-100 antialiased selection:bg-emerald-500 selection:text-white">
-    <Navbar crumbs={crumbs} backHref={backHref} />
+    <Navbar crumbs={crumbs} backHref={backHref} allModules={allModules} />
 
     <main class="page-content flex-1 w-full max-w-6xl mx-auto px-4 sm:px-6 py-6 pb-[calc(1.5rem+env(safe-area-inset-bottom,0px))]">
       <slot />

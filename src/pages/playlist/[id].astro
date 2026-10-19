@@ -82,18 +82,36 @@ const initialTitle = hasDiscreteVideos ? videos[0].title : (titleEn || playlist.
 const crumbs: NavCrumb[] = [];
 let backHref = '/';
 
+if (playlist.year) {
+  crumbs.push({
+    title: `Year ${playlist.year}`,
+    href: `/year/${playlist.year}`,
+    isYear: true,
+    year: playlist.year
+  });
+  backHref = `/year/${playlist.year}`;
+}
+
 if (playlist.moduleId && moduleInfo) {
   crumbs.push({
     title: moduleInfo.title,
-    href: `/module/${playlist.moduleId}`
+    href: `/module/${playlist.moduleId}`,
+    isModule: true,
+    year: moduleInfo.year
   });
   backHref = `/module/${playlist.moduleId}`;
 }
 
-if (playlist.subject && playlist.moduleId) {
+if (playlist.subject && playlist.moduleId && moduleInfo) {
+  const subjectMenu = moduleInfo.subjects.map((s) => ({
+    title: s,
+    href: `/module/${playlist.moduleId}/${subjectToSlug(s)}`,
+    active: s === playlist.subject
+  }));
   crumbs.push({
     title: playlist.subject,
-    href: `/module/${playlist.moduleId}/${subjectToSlug(playlist.subject)}`
+    href: `/module/${playlist.moduleId}/${subjectToSlug(playlist.subject)}`,
+    menu: subjectMenu
   });
   backHref = `/module/${playlist.moduleId}/${subjectToSlug(playlist.subject)}`;
 }

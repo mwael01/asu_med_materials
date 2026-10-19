@@ -18,7 +18,14 @@ const yearMenu = ([1, 2, 3, 4, 5] as const).map(y => ({
 const crumbs: NavCrumb[] = [
   {
     title: `Year ${year}`,
+    isYear: true,
+    year: year,
     menu: yearMenu
+  },
+  {
+    title: 'Modules',
+    isModule: true,
+    year: year
   }
 ];
 ---

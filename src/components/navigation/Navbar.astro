@@ -1,10 +1,14 @@
 ---
-import type { NavCrumb } from '../../types/navigation';
+import type { NavCrumb, NavCrumbOption } from '../../types/navigation';
+import type { ModuleInfo } from '../../types/materials';
 import MobileMenu from './MobileMenu.astro';
+import { getAllModules } from '../../data/modules';
+import { getMaterialsVersionFromFirestore } from '../../firebase/firestore';
 
 interface Props {
   crumbs?: NavCrumb[];
   backHref?: string;
+  allModules?: ModuleInfo[];
 }
 
 const { crumbs = [], backHref } = Astro.props;
@@ -13,12 +17,31 @@ const isHome = currentPath === '/' || currentPath === '';
 const showBack = !isHome && (crumbs.length > 0 || Boolean(backHref));
 const parentCrumb = crumbs.length > 1 ? crumbs[crumbs.length - 2] : null;
 const effectiveBackFallback = backHref || parentCrumb?.href || '/';
+
+let allModules: ModuleInfo[] = Astro.props.allModules || [];
+if (allModules.length === 0) {
+  try {
+    const version = await getMaterialsVersionFromFirestore();
+    allModules = await getAllModules(version);
+  } catch {
+    allModules = [];
+  }
+}
+
+const years = [1, 2, 3, 4, 5] as const;
+const modulesByYear: Record<number, ModuleInfo[]> = {
+  1: allModules.filter((m) => m.year === 1 && m.active !== false),
+  2: allModules.filter((m) => m.year === 2 && m.active !== false),
+  3: allModules.filter((m) => m.year === 3 && m.active !== false),
+  4: allModules.filter((m) => m.year === 4 && m.active !== false),
+  5: allModules.filter((m) => m.year === 5 && m.active !== false)
+};
 ---
 
-<header class="sticky top-0 z-30 w-full border-b border-zinc-200 dark:border-zinc-800 bg-white/95 dark:bg-zinc-950/90 backdrop-blur-md pt-[env(safe-area-inset-top,0px)]">
-  <div class="max-w-6xl mx-auto px-3 sm:px-6 h-12 flex items-center justify-between gap-2 sm:gap-4">
+<header class="sticky top-0 z-30 w-full border-b border-zinc-200 dark:border-zinc-800 bg-white/95 dark:bg-zinc-950/90 backdrop-blur-md pt-[env(safe-area-inset-top,0px)] overflow-visible">
+  <div class="max-w-6xl mx-auto px-3 sm:px-6 h-12 flex items-center justify-between gap-2 sm:gap-4 overflow-visible">
     <!-- Left Navigation: Back button + Unified Directory Breadcrumbs -->
-    <div class="flex items-center gap-1.5 min-w-0 flex-1">
+    <div class="flex items-center gap-1.5 min-w-0 flex-1 overflow-visible">
       {showBack && (
         <button
           type="button"
@@ -34,7 +57,7 @@ const effectiveBackFallback = backHref || parentCrumb?.href || '/';
         </button>
       )}
 
-      <nav aria-label="Directory navigation" class="flex items-center gap-1 min-w-0 overflow-x-auto no-scrollbar py-1">
+      <nav aria-label="Directory navigation" class="flex items-center gap-1 min-w-0 overflow-x-auto sm:overflow-visible no-scrollbar py-1">
         <!-- Root Brand Link -->
         <a
           href="/"
@@ -51,19 +74,40 @@ const effectiveBackFallback = backHref || parentCrumb?.href || '/';
         <!-- Breadcrumb segments with interactive dropdowns -->
         {crumbs.map((crumb, index) => {
           const isLast = index === crumbs.length - 1;
-          const hasMenu = Boolean(crumb.menu && crumb.menu.length > 0);
+
+          // Detect Year Crumb
+          const isYearCrumb = Boolean(crumb.isYear || /^Year\s*([1-5])$/i.test(crumb.title));
+          const yearMatch = crumb.title.match(/^Year\s*([1-5])$/i);
+          const currentYear = crumb.year || (yearMatch ? parseInt(yearMatch[1], 10) : 1);
+          const yearMenu: NavCrumbOption[] = years.map((y) => ({
+            title: `Year ${y}`,
+            href: `/year/${y}`,
+            active: y === currentYear
+          }));
+
+          // Detect Module Crumb (can see all modules for all years 1 to 5)
+          const isModuleCrumb = Boolean(
+            crumb.isModule ||
+            crumb.title === 'Modules' ||
+            (index > 0 && (crumbs[index - 1]?.isYear || /^Year\s*([1-5])$/i.test(crumbs[index - 1]?.title))) ||
+            allModules.some((m) => m.title.toLowerCase() === crumb.title.toLowerCase() || m.id === crumb.title)
+          );
+          const parentYearMatch = crumbs[0]?.title.match(/^Year\s*([1-5])$/i);
+          const activeYearForModule = crumb.year || crumbs[0]?.year || (parentYearMatch ? parseInt(parentYearMatch[1], 10) : 1);
+
+          const hasMenu = isYearCrumb || isModuleCrumb || Boolean(crumb.menu && crumb.menu.length > 0);
 
           return (
-            <div class="flex items-center gap-1 shrink-0">
+            <div class="flex items-center gap-1 shrink-0 overflow-visible">
               <span class="text-zinc-300 dark:text-zinc-700 select-none text-xs shrink-0" aria-hidden="true">/</span>
 
               {hasMenu ? (
-                <div class="relative flex items-center shrink-0">
-                  <div class="inline-flex items-center rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800/80 transition-colors">
+                <div class="nav-crumb-item relative flex items-center shrink-0" data-crumb-index={index}>
+                  <div class="nav-crumb-trigger-group inline-flex items-center rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800/80 transition-colors">
                     {crumb.href && !isLast ? (
                       <a
                         href={crumb.href}
-                        class="text-xs text-zinc-600 dark:text-zinc-300 hover:text-emerald-600 dark:hover:text-emerald-400 font-medium pl-1.5 pr-0.5 py-1 transition-colors max-w-[110px] sm:max-w-[160px] truncate"
+                        class="nav-crumb-link text-xs text-zinc-600 dark:text-zinc-300 hover:text-emerald-600 dark:hover:text-emerald-400 font-medium pl-1.5 pr-0.5 py-1 transition-colors max-w-[80px] xs:max-w-[110px] sm:max-w-[150px] truncate"
                         title={crumb.title}
                       >
                         {crumb.title}
@@ -71,7 +115,7 @@ const effectiveBackFallback = backHref || parentCrumb?.href || '/';
                     ) : (
                       <button
                         type="button"
-                        class="nav-crumb-menu-trigger text-xs font-bold text-zinc-900 dark:text-zinc-100 pl-1.5 pr-0.5 py-1 text-left max-w-[120px] sm:max-w-[180px] truncate cursor-pointer"
+                        class="nav-crumb-title-btn text-xs font-bold text-zinc-900 dark:text-zinc-100 pl-1.5 pr-0.5 py-1 text-left max-w-[90px] xs:max-w-[120px] sm:max-w-[180px] truncate cursor-pointer"
                         title={crumb.title}
                         aria-haspopup="true"
                         aria-expanded="false"
@@ -82,52 +126,160 @@ const effectiveBackFallback = backHref || parentCrumb?.href || '/';
 
                     <button
                       type="button"
-                      class="nav-crumb-menu-trigger p-1 text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 transition-colors cursor-pointer rounded"
+                      class="nav-crumb-arrow-btn p-1 text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 transition-colors cursor-pointer rounded"
                       aria-label={`Options for ${crumb.title}`}
                       aria-haspopup="true"
                       aria-expanded="false"
                     >
-                      <svg class="w-3 h-3 transition-transform duration-150" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                      <svg class="nav-crumb-arrow-icon w-3 h-3 transition-transform duration-150" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
                       </svg>
                     </button>
                   </div>
 
                   <!-- Dropdown Popover Menu -->
-                  <div
-                    class="nav-crumb-dropdown hidden absolute top-full left-0 mt-1 min-w-[200px] max-w-[280px] max-h-[60vh] overflow-y-auto overscroll-contain bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl shadow-xl z-50 p-1 text-xs text-start"
-                  >
-                    {crumb.menu!.map((item) => (
-                      <a
-                        href={item.href}
-                        class:list={[
-                          'flex items-center justify-between px-2.5 py-2 rounded-lg transition-colors',
-                          item.active
-                            ? 'bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400 font-bold'
-                            : 'text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800'
-                        ]}
-                      >
-                        <span class="truncate">{item.title}</span>
-                        {item.active && (
-                          <svg class="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 shrink-0 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
-                          </svg>
-                        )}
-                      </a>
-                    ))}
-                  </div>
+                  {isYearCrumb ? (
+                    <div
+                      class="nav-crumb-dropdown hidden fixed z-50 p-1.5 min-w-[200px] max-w-[280px] bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl shadow-2xl text-xs"
+                    >
+                      <div class="px-2 py-1 text-[10px] font-bold uppercase tracking-wider text-zinc-400 dark:text-zinc-500 border-b border-zinc-100 dark:border-zinc-800/80 mb-1">
+                        Select Academic Year
+                      </div>
+                      <div class="space-y-0.5">
+                        {yearMenu.map((item) => (
+                          <a
+                            href={item.href}
+                            class:list={[
+                              'flex items-center justify-between px-2.5 py-2 rounded-lg transition-colors font-medium',
+                              item.active
+                                ? 'bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 font-bold'
+                                : 'text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800'
+                            ]}
+                          >
+                            <span>{item.title}</span>
+                            {item.active && (
+                              <svg class="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 shrink-0 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                              </svg>
+                            )}
+                          </a>
+                        ))}
+                      </div>
+                    </div>
+                  ) : isModuleCrumb ? (
+                    <div
+                      class="nav-crumb-dropdown hidden fixed z-50 p-2 min-w-[260px] sm:min-w-[300px] max-w-[340px] max-h-[70vh] overflow-y-auto overscroll-contain bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl shadow-2xl text-xs text-start"
+                    >
+                      <!-- Year Switcher Tabs -->
+                      <div class="nav-module-year-tabs flex items-center justify-between gap-1 pb-2 mb-2 border-b border-zinc-100 dark:border-zinc-800">
+                        <span class="text-[10px] font-bold uppercase tracking-wider text-zinc-400 dark:text-zinc-500 px-0.5">Year:</span>
+                        <div class="flex items-center gap-1">
+                          {years.map((y) => (
+                            <button
+                              type="button"
+                              class:list={[
+                                'nav-module-year-tab px-2 py-0.5 rounded-md text-[11px] font-bold transition-all cursor-pointer',
+                                y === activeYearForModule
+                                  ? 'bg-emerald-600 text-white shadow-2xs'
+                                  : 'text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800'
+                              ]}
+                              data-target-year={String(y)}
+                              title={`View Year ${y} modules`}
+                            >
+                              {y}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+
+                      <!-- Module Panels for Each Year -->
+                      {years.map((y) => {
+                        const yearModules = modulesByYear[y] || [];
+                        const isPanelActive = y === activeYearForModule;
+
+                        return (
+                          <div
+                            class="nav-module-year-panel space-y-0.5"
+                            data-panel-year={String(y)}
+                            hidden={!isPanelActive}
+                          >
+                            {yearModules.length > 0 ? (
+                              yearModules.map((m) => {
+                                const isModActive = m.title.toLowerCase() === crumb.title.toLowerCase() || m.id === crumb.title;
+                                return (
+                                  <a
+                                    href={`/module/${m.id}`}
+                                    class:list={[
+                                      'flex items-center justify-between px-2.5 py-1.5 rounded-lg transition-colors',
+                                      isModActive
+                                        ? 'bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 font-bold'
+                                        : 'text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800'
+                                    ]}
+                                  >
+                                    <span class="truncate">{m.title}</span>
+                                    {isModActive && (
+                                      <svg class="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 shrink-0 ml-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                                      </svg>
+                                    )}
+                                  </a>
+                                );
+                              })
+                            ) : (
+                              <div class="py-4 text-center text-zinc-400 dark:text-zinc-500 text-[11px]">
+                                No modules registered
+                              </div>
+                            )}
+
+                            <a
+                              href={`/year/${y}`}
+                              class="mt-1 pt-1.5 border-t border-zinc-100 dark:border-zinc-800/80 text-[11px] font-semibold text-emerald-600 dark:text-emerald-400 hover:underline flex items-center justify-between px-2.5"
+                            >
+                              <span>View Year {y} Overview</span>
+                              <span>→</span>
+                            </a>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  ) : (
+                    <div
+                      class="nav-crumb-dropdown hidden fixed z-50 p-1 min-w-[200px] max-w-[280px] max-h-[60vh] overflow-y-auto overscroll-contain bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl shadow-2xl text-xs text-start"
+                    >
+                      <div class="space-y-0.5">
+                        {crumb.menu!.map((item) => (
+                          <a
+                            href={item.href}
+                            class:list={[
+                              'flex items-center justify-between px-2.5 py-1.5 rounded-lg transition-colors',
+                              item.active
+                                ? 'bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 font-bold'
+                                : 'text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800'
+                            ]}
+                          >
+                            <span class="truncate">{item.title}</span>
+                            {item.active && (
+                              <svg class="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 shrink-0 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                              </svg>
+                            )}
+                          </a>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
               ) : crumb.href && !isLast ? (
                 <a
                   href={crumb.href}
-                  class="text-xs text-zinc-600 dark:text-zinc-300 hover:text-emerald-600 dark:hover:text-emerald-400 font-medium px-1 py-0.5 transition-colors max-w-[110px] sm:max-w-[160px] truncate shrink-0"
+                  class="text-xs text-zinc-600 dark:text-zinc-300 hover:text-emerald-600 dark:hover:text-emerald-400 font-medium px-1 py-0.5 transition-colors max-w-[80px] xs:max-w-[110px] sm:max-w-[150px] truncate shrink-0"
                   title={crumb.title}
                 >
                   {crumb.title}
                 </a>
               ) : (
                 <span
-                  class="text-xs font-bold text-zinc-900 dark:text-zinc-100 px-1 py-0.5 max-w-[120px] sm:max-w-[180px] truncate shrink-0"
+                  class="text-xs font-bold text-zinc-900 dark:text-zinc-100 px-1 py-0.5 max-w-[90px] xs:max-w-[120px] sm:max-w-[180px] truncate shrink-0"
                   title={crumb.title}
                 >
                   {crumb.title}
@@ -258,36 +410,162 @@ const effectiveBackFallback = backHref || parentCrumb?.href || '/';
   }
 
   function initNavCrumbDropdowns(): void {
-    const closeAll = () => {
-      document.querySelectorAll<HTMLElement>('.nav-crumb-dropdown').forEach((d) => d.classList.add('hidden'));
-      document.querySelectorAll<HTMLElement>('.nav-crumb-menu-trigger').forEach((t) => t.setAttribute('aria-expanded', 'false'));
-    };
+    const isTouchDevice = () => window.matchMedia('(hover: none) and (pointer: coarse)').matches;
+    let hoverTimeout: any = null;
+    let activeItem: HTMLElement | null = null;
 
-    document.querySelectorAll<HTMLElement>('.nav-crumb-menu-trigger').forEach((trigger) => {
-      trigger.onclick = (e) => {
-        e.stopPropagation();
-        const parent = trigger.closest('.relative');
-        const dropdown = parent?.querySelector<HTMLElement>('.nav-crumb-dropdown');
-        if (!dropdown) return;
-        const isOpen = !dropdown.classList.contains('hidden');
-        closeAll();
-        if (!isOpen) {
-          dropdown.classList.remove('hidden');
-          trigger.setAttribute('aria-expanded', 'true');
+    function positionDropdown(triggerGroup: HTMLElement, dropdown: HTMLElement): void {
+      const rect = triggerGroup.getBoundingClientRect();
+      const dropdownWidth = Math.min(320, window.innerWidth - 16);
+      dropdown.style.width = `${dropdownWidth}px`;
+      dropdown.style.position = 'fixed';
+      dropdown.style.top = `${rect.bottom + 4}px`;
+
+      let left = rect.left;
+      if (left + dropdownWidth > window.innerWidth - 8) {
+        left = window.innerWidth - dropdownWidth - 8;
+      }
+      if (left < 8) left = 8;
+      dropdown.style.left = `${left}px`;
+    }
+
+    function openItem(item: HTMLElement): void {
+      if (hoverTimeout) {
+        clearTimeout(hoverTimeout);
+        hoverTimeout = null;
+      }
+      if (activeItem && activeItem !== item) {
+        closeItem(activeItem);
+      }
+      activeItem = item;
+      const dropdown = item.querySelector<HTMLElement>('.nav-crumb-dropdown');
+      const arrow = item.querySelector<HTMLElement>('.nav-crumb-arrow-icon');
+      const triggerGroup = item.querySelector<HTMLElement>('.nav-crumb-trigger-group');
+      const triggerBtn = item.querySelector<HTMLElement>('[aria-haspopup="true"]');
+
+      if (!dropdown || !triggerGroup) return;
+
+      positionDropdown(triggerGroup, dropdown);
+      dropdown.classList.remove('hidden');
+      arrow?.classList.add('rotate-180');
+      triggerGroup.classList.add('bg-zinc-100', 'dark:bg-zinc-800');
+      triggerBtn?.setAttribute('aria-expanded', 'true');
+    }
+
+    function closeItem(item: HTMLElement): void {
+      const dropdown = item.querySelector<HTMLElement>('.nav-crumb-dropdown');
+      const arrow = item.querySelector<HTMLElement>('.nav-crumb-arrow-icon');
+      const triggerGroup = item.querySelector<HTMLElement>('.nav-crumb-trigger-group');
+      const triggerBtn = item.querySelector<HTMLElement>('[aria-haspopup="true"]');
+
+      dropdown?.classList.add('hidden');
+      arrow?.classList.remove('rotate-180');
+      triggerGroup?.classList.remove('bg-zinc-100', 'dark:bg-zinc-800');
+      triggerBtn?.setAttribute('aria-expanded', 'false');
+      if (activeItem === item) activeItem = null;
+    }
+
+    function closeAll(): void {
+      if (hoverTimeout) {
+        clearTimeout(hoverTimeout);
+        hoverTimeout = null;
+      }
+      document.querySelectorAll<HTMLElement>('.nav-crumb-item').forEach(closeItem);
+      activeItem = null;
+    }
+
+    const items = document.querySelectorAll<HTMLElement>('.nav-crumb-item');
+
+    items.forEach((item) => {
+      const arrowBtn = item.querySelector<HTMLElement>('.nav-crumb-arrow-btn');
+      const titleBtn = item.querySelector<HTMLElement>('.nav-crumb-title-btn');
+      const dropdown = item.querySelector<HTMLElement>('.nav-crumb-dropdown');
+
+      // 1. Desktop Hover: 0ms open on mouseenter, graceful 140ms close on mouseleave
+      item.addEventListener('mouseenter', () => {
+        if (!isTouchDevice()) {
+          openItem(item);
         }
-      };
-    });
+      });
 
-    document.querySelectorAll<HTMLElement>('.nav-crumb-dropdown a').forEach((link) => {
-      link.addEventListener('click', () => {
-        closeAll();
+      item.addEventListener('mouseleave', () => {
+        if (!isTouchDevice()) {
+          hoverTimeout = setTimeout(() => {
+            closeItem(item);
+          }, 140);
+        }
+      });
+
+      // 2. Click / Touch on Down Arrow: toggles the dropdown
+      arrowBtn?.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        const isOpen = dropdown && !dropdown.classList.contains('hidden');
+        if (isOpen) {
+          closeItem(item);
+        } else {
+          openItem(item);
+        }
+      });
+
+      // 3. Click / Touch on Title Button (when crumb has no href, i.e. current active route): toggles dropdown
+      titleBtn?.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        const isOpen = dropdown && !dropdown.classList.contains('hidden');
+        if (isOpen) {
+          closeItem(item);
+        } else {
+          openItem(item);
+        }
+      });
+
+      // 4. Inside the dropdown: Year Switcher Tabs for Modules
+      const yearTabs = item.querySelectorAll<HTMLButtonElement>('.nav-module-year-tab');
+      const yearPanels = item.querySelectorAll<HTMLElement>('.nav-module-year-panel');
+
+      function switchYear(targetYear: string): void {
+        yearTabs.forEach((tab) => {
+          const isSelected = tab.getAttribute('data-target-year') === targetYear;
+          tab.classList.toggle('bg-emerald-600', isSelected);
+          tab.classList.toggle('text-white', isSelected);
+          tab.classList.toggle('shadow-2xs', isSelected);
+          tab.classList.toggle('text-zinc-600', !isSelected);
+          tab.classList.toggle('dark:text-zinc-400', !isSelected);
+        });
+        yearPanels.forEach((panel) => {
+          panel.hidden = panel.getAttribute('data-panel-year') !== targetYear;
+        });
+      }
+
+      yearTabs.forEach((tab) => {
+        tab.addEventListener('click', (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          const y = tab.getAttribute('data-target-year');
+          if (y) switchYear(y);
+        });
+        tab.addEventListener('mouseenter', () => {
+          if (!isTouchDevice()) {
+            const y = tab.getAttribute('data-target-year');
+            if (y) switchYear(y);
+          }
+        });
+      });
+
+      // 5. Close when any link inside dropdown is clicked
+      item.querySelectorAll<HTMLElement>('.nav-crumb-dropdown a').forEach((link) => {
+        link.addEventListener('click', () => {
+          closeAll();
+        });
       });
     });
 
-    if (!(window as unknown as { _navCrumbDocBound?: boolean })._navCrumbDocBound) {
-      (window as unknown as { _navCrumbDocBound?: boolean })._navCrumbDocBound = true;
+    // Global dismiss handlers
+    if (!(window as any)._navCrumbBound) {
+      (window as any)._navCrumbBound = true;
       document.addEventListener('click', (e) => {
-        if (!(e.target as HTMLElement).closest('.nav-crumb-dropdown, .nav-crumb-menu-trigger')) {
+        if (!(e.target as HTMLElement).closest('.nav-crumb-item')) {
           closeAll();
         }
       });
@@ -295,6 +573,9 @@ const effectiveBackFallback = backHref || parentCrumb?.href || '/';
         if (e.key === 'Escape') {
           closeAll();
         }
+      });
+      window.addEventListener('resize', () => {
+        closeAll();
       });
     }
   }

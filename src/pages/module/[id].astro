@@ -43,10 +43,14 @@ const crumbs: NavCrumb[] = [
   {
     title: `Year ${module.year}`,
     href: `/year/${module.year}`,
+    isYear: true,
+    year: module.year,
     menu: yearMenu
   },
   {
     title: module.title,
+    isModule: true,
+    year: module.year,
     menu: moduleMenu
   }
 ];

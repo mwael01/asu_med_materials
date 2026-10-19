@@ -20,10 +20,14 @@ export interface NavCrumbOption {
   title: string;
   href: string;
   active?: boolean;
+  year?: number;
 }
 
 export interface NavCrumb {
   title: string;
   href?: string;
   menu?: NavCrumbOption[];
+  isYear?: boolean;
+  isModule?: boolean;
+  year?: number;
 }

@@ -37,14 +37,18 @@ let backHref = '/';
 if (collection.year) {
   crumbs.push({
     title: `Year ${collection.year}`,
-    href: `/year/${collection.year}`
+    href: `/year/${collection.year}`,
+    isYear: true,
+    year: collection.year
   });
   backHref = `/year/${collection.year}`;
 }
 if (moduleInfo) {
   crumbs.push({
     title: moduleInfo.title,
-    href: `/module/${moduleInfo.id}`
+    href: `/module/${moduleInfo.id}`,
+    isModule: true,
+    year: moduleInfo.year
   });
   backHref = `/module/${moduleInfo.id}`;
 }

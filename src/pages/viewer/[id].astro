@@ -104,19 +104,29 @@ const crumbs: NavCrumb[] = [];
 if (material.year) {
   crumbs.push({
     title: `Year ${material.year}`,
-    href: `/year/${material.year}`
+    href: `/year/${material.year}`,
+    isYear: true,
+    year: material.year
   });
 }
 if (moduleInfo) {
   crumbs.push({
     title: moduleInfo.title,
-    href: `/module/${moduleInfo.id}`
+    href: `/module/${moduleInfo.id}`,
+    isModule: true,
+    year: moduleInfo.year
   });
 }
 if (material.subject && moduleInfo) {
+  const subjectMenu = moduleInfo.subjects.map((s) => ({
+    title: s,
+    href: `/module/${moduleInfo.id}/${subjectToSlug(s)}`,
+    active: s === material.subject
+  }));
   crumbs.push({
     title: material.subject,
-    href: `/module/${moduleInfo.id}/${subjectToSlug(material.subject)}`
+    href: `/module/${moduleInfo.id}/${subjectToSlug(material.subject)}`,
+    menu: subjectMenu
   });
 }
 crumbs.push({

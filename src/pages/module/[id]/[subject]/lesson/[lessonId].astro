@@ -41,10 +41,25 @@ const lessonMenu = siblingLessons.map(l => ({
   active: l.id === lesson.id
 }));
 
+const yearMenu = ([1, 2, 3, 4, 5] as const).map(y => ({
+  title: `Year ${y}`,
+  href: `/year/${y}`,
+  active: y === module.year
+}));
+
 const crumbs: NavCrumb[] = [
+  {
+    title: `Year ${module.year}`,
+    href: `/year/${module.year}`,
+    isYear: true,
+    year: module.year,
+    menu: yearMenu
+  },
   {
     title: module.title,
     href: `/module/${module.id}`,
+    isModule: true,
+    year: module.year,
     menu: moduleMenu
   },
   {
