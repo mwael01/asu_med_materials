@@ -14,6 +14,13 @@ import {
 import { isHostedDocumentUrl, getDocumentDownloadPath } from '../src/utils/documentViewer.ts';
 import { downloadHostedDocument } from '../src/utils/documentDownload.server.ts';
 
+test('hosted recordings have downloads without being treated as document iframes', () => {
+  const url = `https://asumed.eduvour.com/materials/sha256/${'b'.repeat(64)}.m4a`;
+  assert.equal(getDocumentViewerType(url), 'none');
+  assert.equal(getDocumentEmbedUrl(url), null);
+  assert.match(getDocumentDownloadUrl(url), /^\/api\/material-download/);
+});
+
 test('downloads stream catalogue files with attachment filenames and do not follow redirects', async () => {
   const document = { id: 'doc', title: 'ملخص\r\nlung', url: `https://asumed.eduvour.com/materials/sha256/${'a'.repeat(64)}.pdf` };
   const response = await downloadHostedDocument(document, async (url, options) => {

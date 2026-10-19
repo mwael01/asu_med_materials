@@ -49,6 +49,7 @@ __pycache__/
 
 # Temporary material imports and Telegram authentication
 tmp/telegram-materials/
+tmp/telegram-inbox/
 .telegram-materials/
 *.session
 *.session-journal

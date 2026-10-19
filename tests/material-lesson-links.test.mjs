@@ -13,6 +13,24 @@ const lesson = (id, subject, rest = {}) => ({ id, subject, moduleId: 'resp', tit
 const anatomy = lesson('anatomy', 'Anatomy'), histology = lesson('histology', 'Histology');
 const link = (lessonId, rest = {}) => ({ id: lessonId, materialId: material.id, moduleId: 'resp', lessonId, ...rest });
 
+test('audio playlists preserve track identity and large Telegram documents stay in PDFs', () => {
+  const audioUrl = `https://asumed.eduvour.com/materials/sha256/${'a'.repeat(64)}.ogg?v=${'a'.repeat(64)}`;
+  const recording = { ...material, type: 'playlist', videos: [
+    { id: 'voice', title: 'Voice note', url: audioUrl, sourceType: 'direct', mediaKind: 'audio' },
+    { id: 'large-voice', title: 'Long recording', url: 'https://t.me/asumedmaterials/30', sourceType: 'telegram', mediaKind: 'audio' },
+  ] };
+  const stored = materialConverter.toFirestore(recording);
+  const restored = materialConverter.fromFirestore({ id: recording.id, data: () => stored });
+  assert.equal(restored.videos[0].mediaKind, 'audio');
+  const entries = studyEntries([restored]);
+  assert.deepEqual(entries.map(item => item.tab), ['audio', 'audio']);
+  assert.deepEqual(entries.map(item => item.embedType), ['audio', 'none']);
+  assert.equal(entries[0].itemId, 'voice');
+  assert.equal(entries[0].playlistProgress, true);
+  const [large] = studyEntries([{ ...material, documents: [{ id: 'large', title: 'Large book', url: 'https://t.me/asumedmaterials/31', mimeType: 'application/pdf' }] }]);
+  assert.equal(large.tab, 'pdfs'); assert.equal(large.embedType, 'none');
+});
+
 test('one original material serves multiple subjects and merges its legacy assignment once', () => {
   const [shared] = attachLessonLinks([material], [link('anatomy'), link('histology'), link('histology'), link('wrong', { moduleId: 'renal' })]);
   assert.equal(shared.id, material.id);

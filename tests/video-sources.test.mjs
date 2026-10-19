@@ -11,6 +11,15 @@ import {
   getVideoDownloadUrl
 } from '../src/utils/videoSources.ts';
 
+test('audio tracks use native playback or Telegram fallback with hosted downloads', () => {
+  const url = `https://asumed.eduvour.com/materials/sha256/${'b'.repeat(64)}.m4a?v=${'b'.repeat(64)}`;
+  assert.equal(parseVideoSource(url, undefined, 'direct', 'audio').embedType, 'audio');
+  assert.equal(parseVideoSource('https://t.me/asumedmaterials/4', undefined, 'telegram', 'audio').embedType, 'none');
+  assert.match(getVideoDownloadUrl(url), /^\/api\/material-download\?url=/);
+  assert.equal(parseVideoSource('https://example.org/lecture.mp4').embedType, 'video');
+  assert.equal(parseVideoSource('https://drive.google.com/file/d/audioFile123/view', undefined, 'drive', 'audio').embedType, 'iframe');
+});
+
 test('extractDriveFileId correctly extracts Google Drive file IDs', () => {
   assert.equal(
     extractDriveFileId('https://drive.google.com/file/d/1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs/view'),

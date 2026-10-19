@@ -11,7 +11,7 @@ export interface Lesson {
   revisionType?: 'practical' | 'assessment' | 'final';
 }
 
-export type StudyTab = 'videos' | 'pdfs' | 'links';
+export type StudyTab = 'videos' | 'audio' | 'pdfs' | 'links';
 export type DiscoveryType = 'videos' | 'pdfs' | 'flashcards';
 
 export interface StudyEntry {
@@ -23,7 +23,7 @@ export interface StudyEntry {
   tab: StudyTab;
   url: string;
   embedUrl: string | null;
-  embedType: 'iframe' | 'video' | 'image' | 'none';
+  embedType: 'iframe' | 'video' | 'audio' | 'image' | 'none';
   /** Existing playlist progress uses the original video ID. */
   playlistProgress: boolean;
 }

@@ -100,24 +100,30 @@ def upload(stage: Stage, entry: dict) -> str:
     if blocker := publication_blocker(entry, stage):
         raise ValueError(blocker)
     verify_entry(stage, entry)
-    extension = Path(entry["file"]).suffix
+    url = put_r2(stage.directory / entry['file'], entry)
+    entry['uploadedUrl'] = url
+    stage.save(entry)
+    return url
+
+
+def put_r2(path: Path, entry: dict) -> str:
+    """Shared immutable uploader; callers enforce their workflow's size policy."""
+    if path.stat().st_size != entry['bytes'] or hashlib.sha256(path.read_bytes()).hexdigest() != entry['sha256']:
+        raise ValueError('Upload source failed checksum verification')
+    extension = path.suffix
     key = f"materials/sha256/{entry['sha256']}{extension}"
     domain = os.environ.get("R2_PUBLIC_DOMAIN", "https://asumed.eduvour.com").rstrip("/")
     bucket = os.environ.get("R2_BUCKET_NAME", "asumed")
     url = f"{domain}/{key}?v={entry['sha256']}"
     if verify_r2(url, entry):
-        entry["uploadedUrl"] = url
-        stage.save(entry)
         return url
     command = [str(ROOT / "node_modules/.bin/wrangler"), "r2", "object", "put", f"{bucket}/{key}",
-               "--file", str(stage.directory / entry["file"]), "--content-type", entry["mime"],
+               "--file", str(path), "--content-type", entry["mime"],
                "--cache-control", "public, max-age=31536000, immutable", "--content-disposition", "inline", "--remote"]
     environment = {**os.environ, "CI": "1", "WRANGLER_SEND_METRICS": "false", "NO_UPDATE_NOTIFIER": "1"}
     for attempt in range(3):
         result = subprocess.run(command, cwd=ROOT, env=environment, capture_output=True, text=True, timeout=600)
         if result.returncode == 0 and verify_r2(url, entry):
-            entry["uploadedUrl"] = url
-            stage.save(entry)
             return url
         if attempt < 2:
             time.sleep(2 ** attempt)

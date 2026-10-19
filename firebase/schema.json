@@ -190,7 +190,7 @@
         "videos": {
           "type": "array",
           "required": false,
-          "description": "Discrete chapter videos in playlist",
+          "description": "Ordered video or audio tracks, using the existing playlist player",
           "items": {
             "type": "object",
             "properties": {
@@ -208,6 +208,14 @@
               },
               "duration": {
                 "type": "string"
+              },
+              "mediaKind": {
+                "type": "string",
+                "enum": [
+                  "audio",
+                  "video"
+                ],
+                "description": "Optional; older tracks default to video"
               }
             },
             "required": [
@@ -228,7 +236,9 @@
         },
         "importSources": {
           "type": "array",
-          "items": { "type": "string" },
+          "items": {
+            "type": "string"
+          },
           "required": false
         },
         "importRunId": {
@@ -239,6 +249,33 @@
           "type": "string",
           "required": false,
           "description": "pending or reviewed; import audit marker without student-facing badges"
+        },
+        "documents": {
+          "type": "array",
+          "required": false,
+          "description": "Ordered PDF, image or external resource items; optional mimeType supports Telegram-hosted file classification",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "title": {
+                "type": "string"
+              },
+              "url": {
+                "type": "string"
+              },
+              "mimeType": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "id",
+              "title",
+              "url"
+            ]
+          }
         }
       }
     },
@@ -589,19 +626,244 @@
       "collectionName": "material_lesson_links",
       "description": "Independent material/lesson pairs; both records must belong to the same module. Publicly readable and admin writable. Never duplicate material content for an assignment.",
       "fields": {
-        "materialId": { "type": "string", "required": true },
-        "lessonId": { "type": "string", "required": true },
-        "moduleId": { "type": "string", "required": true }
+        "materialId": {
+          "type": "string",
+          "required": true
+        },
+        "lessonId": {
+          "type": "string",
+          "required": true
+        },
+        "moduleId": {
+          "type": "string",
+          "required": true
+        }
       }
     },
     "material_imports": {
       "collectionName": "material_imports",
       "description": "Admin-only publication runs, with entries/{entryId} transactional checkpoints. Temporary scrape data stays outside Firestore until publication.",
       "fields": {
-        "moduleId": { "type": "string", "required": true },
-        "status": { "type": "string", "required": true },
-        "publishedCount": { "type": "integer", "required": false },
-        "updatedAt": { "type": "timestamp", "required": true }
+        "moduleId": {
+          "type": "string",
+          "required": true
+        },
+        "status": {
+          "type": "string",
+          "required": true
+        },
+        "publishedCount": {
+          "type": "integer",
+          "required": false
+        },
+        "updatedAt": {
+          "type": "timestamp",
+          "required": true
+        }
+      }
+    },
+    "material_inbox_sources": {
+      "collectionName": "material_inbox_sources",
+      "idField": "id",
+      "description": "Admin-only Telegram channel checkpoints, snapshot/full-scan cursors, cooldown and renewable processing lease.",
+      "fields": {
+        "channel": {
+          "type": "string",
+          "required": false
+        },
+        "peerId": {
+          "type": "integer",
+          "required": false
+        },
+        "lastMessageId": {
+          "type": "integer",
+          "required": false
+        },
+        "lease": {
+          "type": "object",
+          "required": false
+        },
+        "cooldownUntil": {
+          "type": "string",
+          "required": false
+        },
+        "fullReconciliationCursor": {
+          "type": "integer",
+          "required": false
+        },
+        "fullReconciliationInProgress": {
+          "type": "boolean",
+          "required": false
+        }
+      }
+    },
+    "material_inbox": {
+      "collectionName": "material_inbox",
+      "idField": "id",
+      "description": "Admin-only current source messages; revisions/{fingerprint} retains immutable historical snapshots. Published website materials are never deleted when a source disappears.",
+      "fields": {
+        "sourceId": {
+          "type": "string",
+          "required": false
+        },
+        "messageId": {
+          "type": "integer",
+          "required": false
+        },
+        "fingerprint": {
+          "type": "string",
+          "required": false
+        },
+        "caption": {
+          "type": "string",
+          "required": false
+        },
+        "parts": {
+          "type": "array",
+          "required": false
+        },
+        "status": {
+          "type": "string",
+          "required": false
+        },
+        "sourceMissing": {
+          "type": "boolean",
+          "required": false
+        },
+        "sourceStatus": {
+          "type": "string",
+          "required": false,
+          "description": "Source ID plus current status for single-field count aggregation. Backfilled when sync visits legacy messages."
+        }
+      }
+    },
+    "material_inbox_items": {
+      "collectionName": "material_inbox_items",
+      "idField": "id",
+      "description": "Admin-only revision-specific resources and extracted archive members. Includes disposable cache hints, bounded evidence, identity matches, review reason and per-destination publication progress.",
+      "fields": {
+        "sourceId": {
+          "type": "string",
+          "required": false
+        },
+        "messageId": {
+          "type": "integer",
+          "required": false
+        },
+        "revision": {
+          "type": "string",
+          "required": false
+        },
+        "kind": {
+          "type": "string",
+          "required": false
+        },
+        "storage": {
+          "type": "string",
+          "required": false
+        },
+        "bytes": {
+          "type": "integer",
+          "required": false
+        },
+        "sha256": {
+          "type": "string",
+          "required": false
+        },
+        "evidence": {
+          "type": "object",
+          "required": false
+        },
+        "status": {
+          "type": "string",
+          "required": false
+        },
+        "reason": {
+          "type": "string",
+          "required": false
+        },
+        "batchId": {
+          "type": "string",
+          "required": false
+        },
+        "targetPlans": {
+          "type": "object",
+          "required": false
+        },
+        "publishedTargets": {
+          "type": "object",
+          "required": false
+        }
+      }
+    },
+    "material_inbox_batches": {
+      "collectionName": "material_inbox_batches",
+      "idField": "id",
+      "description": "Admin-only review batches. plans/{planId} stores ordered itemIds, exact revisions, create/reuse/hold/ignore/duplicate action, moduleId, lessonIds and reason. Explicit approval binds the actionable plans digest; publication commits each plan with its material, lesson links, identities and catalogue version.",
+      "fields": {
+        "sourceId": {
+          "type": "string",
+          "required": false
+        },
+        "itemIds": {
+          "type": "array",
+          "required": false
+        },
+        "status": {
+          "type": "string",
+          "required": false
+        },
+        "approvedDigest": {
+          "type": "string",
+          "required": false
+        },
+        "approvedAt": {
+          "type": "string",
+          "required": false
+        }
+      }
+    },
+    "material_asset_index": {
+      "collectionName": "material_asset_index",
+      "idField": "id",
+      "description": "Admin-only hashed identity lookup: content SHA-256 takes priority, Telegram media identity for oversized attachments, or canonical URL for links. materials maps material IDs to module IDs; uploadedUrl is an immutable verified R2 object. Provenance post URLs do not identify distinct file editions. __catalogue__ is the resumable version/generation/cursor checkpoint; identity associations from stale generations are ignored. Inbox publication advances index and catalogue versions atomically.",
+      "fields": {
+        "key": {
+          "type": "string",
+          "required": false
+        },
+        "materials": {
+          "type": "object",
+          "required": false
+        },
+        "uploadedUrl": {
+          "type": "string",
+          "required": false
+        },
+        "updatedAt": {
+          "type": "string",
+          "required": false
+        },
+        "generation": {
+          "type": "string",
+          "required": false
+        },
+        "version": {
+          "type": "integer",
+          "required": false
+        },
+        "cursor": {
+          "type": "string",
+          "required": false
+        },
+        "complete": {
+          "type": "boolean",
+          "required": false
+        },
+        "indexedMaterials": {
+          "type": "integer",
+          "required": false
+        }
       }
     }
   }

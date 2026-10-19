@@ -138,8 +138,10 @@ async def collect(args, stage: Stage):
 
 
 def parser():
-    root = argparse.ArgumentParser(description="Respiratory-only Telegram import: collect, review, then publish separately")
+    root = argparse.ArgumentParser(description="Telegram materials: ongoing channel inbox and respiratory bot imports; review before publication")
     commands = root.add_subparsers(dest="command", required=True)
+    from .inbox_cli import add_parser
+    add_parser(commands)
     login = commands.add_parser("login", help="Authenticate interactively; no bot messages are sent")
     login.add_argument("--request-code", action="store_true", help="Request a code, save the private challenge, and exit; run login again to enter the code")
     inspect = commands.add_parser("inspect", help="Show bot responses/buttons to establish a respiratory route")
@@ -187,6 +189,10 @@ def main():
     args = parser().parse_args()
     operation_lock = None
     try:
+        if args.command == 'inbox':
+            from .inbox_cli import run
+            run(args)
+            return
         if args.command in {"login", "inspect", "collect"}:
             operation_lock = acquire_telegram_lock()
         if args.command == "login":

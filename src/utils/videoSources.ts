@@ -3,6 +3,7 @@ import type {
   VideoSourceType,
   VideoEmbedType
 } from '../types/materials';
+import { getDocumentDownloadUrl, isHostedDocumentUrl } from './documentViewer';
 
 export interface ParsedVideoSource {
   sourceType: VideoSourceType;
@@ -85,9 +86,15 @@ export function isTelegramUrl(url?: string): boolean {
 export function parseVideoSource(
   url?: string,
   youtubeId?: string,
-  explicitType?: VideoSourceType
+  explicitType?: VideoSourceType,
+  mediaKind?: 'audio' | 'video'
 ): ParsedVideoSource {
   const cleanUrl = (url || '').trim();
+  if (mediaKind === 'audio' && /^https?:\/\//i.test(cleanUrl) && !isTelegramUrl(cleanUrl)
+    && (explicitType === 'direct' || /\.(mp3|ogg|m4a|wav|flac|webm)(?:[?#]|$)/i.test(cleanUrl))) {
+    return { sourceType: 'direct', embedType: 'audio', embedUrl: cleanUrl, externalUrl: cleanUrl,
+      sourceLabelEn: 'Audio', sourceLabelAr: 'صوت', icon: '/icons/playlist.svg' };
+  }
 
   // 1. YouTube
   const cleanYtId = extractYouTubeId(youtubeId) || extractYouTubeId(cleanUrl);
@@ -224,6 +231,7 @@ export function determinePrimaryPlaylistSource(playlist: MaterialItem): VideoSou
 export function getVideoDownloadUrl(url?: string): string | null {
   if (!url) return null;
   const clean = url.trim();
+  if (isHostedDocumentUrl(clean)) return getDocumentDownloadUrl(clean);
 
   const driveId = extractDriveFileId(clean);
   if (driveId) {

@@ -43,7 +43,7 @@ const videos = playlist.videos || [];
 
 // Parse all video items with multi-source video resolver
 const parsedVideos: ParsedVideoSource[] = videos.map((v) =>
-  parseVideoSource(v.url, v.youtubeId, v.sourceType)
+  parseVideoSource(v.url, v.youtubeId, v.sourceType, v.mediaKind)
 );
 
 // Determine initial video playback state
@@ -263,6 +263,7 @@ crumbs.push({
           class:list={['w-full h-full object-contain bg-black', initialParsed.embedType !== 'video' && 'hidden']}
           src={initialParsed.embedType === 'video' && initialParsed.embedUrl ? initialParsed.embedUrl : undefined}
         ></video>
+        <audio id="embed-audio-player" controls preload="metadata" class:list={['w-full absolute inset-x-0 top-1/2 -translate-y-1/2', initialParsed.embedType !== 'audio' && 'hidden']} src={initialParsed.embedType === 'audio' ? initialParsed.embedUrl : undefined}></audio>
 
         <!-- 3. External Fallback Action Card (Telegram, External / Non-embeddable links) -->
         <div
@@ -360,12 +361,12 @@ crumbs.push({
             href={getVideoDownloadUrl(initialParsed.externalUrl) || '#'}
             target="_blank"
             rel="noopener noreferrer"
-            download={`${(initialTitle || 'Video').replace(/[/\\?%*:|"<>]/g, ' ').trim()}.mp4`}
+            download
             class:list={[
               'inline-flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-lg border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors',
               !getVideoDownloadUrl(initialParsed.externalUrl) && 'hidden'
             ]}
-            title="Download Video"
+            title="Download"
           >
             <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
               <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
@@ -428,6 +429,7 @@ crumbs.push({
                 data-embed-type={parsed.embedType}
                 data-embed-url={parsed.embedUrl || ''}
                 data-external-url={parsed.externalUrl}
+                data-download-url={getVideoDownloadUrl(parsed.externalUrl) || ''}
                 data-source-label={parsed.sourceLabelEn}
                 data-source-icon={parsed.icon}
                 data-title={vid.title}
@@ -527,6 +529,7 @@ crumbs.push({
 
     const playerIframe = document.getElementById('embed-iframe-player');
     const playerVideo = document.getElementById('embed-video-player');
+    const playerAudio = document.getElementById('embed-audio-player');
     const externalCard = document.getElementById('embed-external-card');
     const extCardTitle = document.getElementById('external-card-title');
     const extCardActionBtn = document.getElementById('external-card-action-btn');
@@ -647,6 +650,10 @@ crumbs.push({
       const sourceIcon = activeItem.getAttribute('data-source-icon') || '/icons/other.svg';
 
       // 1. Hide / stop players that are not active
+      if (playerAudio) {
+        playerAudio.pause(); playerAudio.removeAttribute('src'); playerAudio.load();
+        playerAudio.classList.toggle('hidden', embedType !== 'audio');
+      }
       if (embedType !== 'iframe') {
         if (playerIframe) {
           playerIframe.classList.add('hidden');
@@ -686,6 +693,9 @@ crumbs.push({
             playerVideo.play().catch(() => {});
           }
         }
+      } else if (embedType === 'audio' && playerAudio) {
+        playerAudio.src = embedUrl;
+        if (userInitiated) playerAudio.play().catch(() => {});
       } else if (embedType === 'none' && externalCard) {
         externalCard.classList.remove('hidden');
         if (extCardTitle) extCardTitle.textContent = title;
@@ -711,18 +721,11 @@ crumbs.push({
 
       const downloadBtn = document.getElementById('current-video-download-btn');
       if (downloadBtn) {
-        let dlUrl = null;
-        if (sourceType === 'drive') {
-          const driveMatch = externalUrl.match(/\/file\/d\/([a-zA-Z0-9_-]+)/) || externalUrl.match(/[?&]id=([a-zA-Z0-9_-]+)/);
-          if (driveMatch) dlUrl = `https://drive.google.com/uc?export=download&id=${driveMatch[1]}`;
-        } else if (embedType === 'video' && (embedUrl || externalUrl)) {
-          dlUrl = embedUrl || externalUrl;
-        }
+        const dlUrl = activeItem.getAttribute('data-download-url');
         if (dlUrl) {
           downloadBtn.classList.remove('hidden');
           downloadBtn.href = dlUrl;
-          const cleanTitle = (title || 'Video').replace(/[/\\?%*:|"<>]/g, ' ').trim();
-          downloadBtn.setAttribute('download', `${cleanTitle}.mp4`);
+          downloadBtn.setAttribute('download', '');
         } else {
           downloadBtn.classList.add('hidden');
         }
@@ -862,6 +865,13 @@ crumbs.push({
     // Steppers
     prevBtn?.addEventListener('click', () => switchVideo(currentIndex - 1, true));
     nextBtn?.addEventListener('click', () => switchVideo(currentIndex + 1, true));
+
+    document.addEventListener('astro:before-swap', () => {
+      for (const player of [playerAudio, playerVideo]) {
+        if (player) { player.pause(); player.removeAttribute('src'); player.load(); }
+      }
+      if (playerIframe) playerIframe.src = 'about:blank';
+    }, { once: true });
 
     // Initialize first video highlight & progress
     if (hasDiscreteVideos && videoItems.length > 0) {

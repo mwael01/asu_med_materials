@@ -43,15 +43,15 @@ export function studyEntries(materials: MaterialItem[]): StudyEntry[] {
   for (const material of materials) {
     if (isFlashcards(material)) continue;
     const base = { materialId: material.id, bundleTitle: material.titleEn || material.title };
-    const addVideo = (itemId: string, title: string, url: string, youtubeId?: string, sourceType?: VideoSourceType, origin = 'videos') => {
-      const source = parseVideoSource(url, youtubeId, sourceType);
+    const addVideo = (itemId: string, title: string, url: string, youtubeId?: string, sourceType?: VideoSourceType, origin = 'videos', mediaKind?: 'audio' | 'video') => {
+      const source = parseVideoSource(url, youtubeId, sourceType, mediaKind);
       if (!isHttpUrl(source.externalUrl)) return;
       result.push({ ...base, key: JSON.stringify([material.id, origin, itemId]), itemId, title,
-        tab: 'videos', url: source.externalUrl, embedUrl: source.embedUrl, embedType: source.embedType,
+        tab: mediaKind === 'audio' ? 'audio' : 'videos', url: source.externalUrl, embedUrl: source.embedUrl, embedType: source.embedType,
         playlistProgress: origin === 'videos' && Boolean(material.videos?.length) });
     };
     if (material.videos?.length) {
-      for (const video of material.videos) addVideo(video.id, video.title, video.url || '', video.youtubeId, video.sourceType);
+      for (const video of material.videos) addVideo(video.id, video.title, video.url || '', video.youtubeId, video.sourceType, 'videos', video.mediaKind);
     } else if (isVideoMaterial(material)) {
       if (material.playlistId) {
         result.push({ ...base, key: JSON.stringify([material.id, 'videos', material.id]), itemId: material.id,
@@ -70,7 +70,7 @@ export function studyEntries(materials: MaterialItem[]): StudyEntry[] {
         }
         const embed = getDocumentEmbedUrl(document.url);
         result.push({ ...base, key: JSON.stringify([material.id, 'documents', document.id]), itemId: document.id,
-          title: document.title, tab: embed ? 'pdfs' : 'links', url: document.url,
+          title: document.title, tab: embed || document.mimeType === 'application/pdf' || document.mimeType?.startsWith('image/') ? 'pdfs' : 'links', url: document.url,
           embedUrl: embed, embedType: isImageDocument(document.url) ? 'image' : embed ? 'iframe' : 'none', playlistProgress: false });
       }
     } else if (!isVideoMaterial(material) && isHttpUrl(material.url)) {

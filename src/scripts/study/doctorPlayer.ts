@@ -15,6 +15,7 @@ export function initDoctorPlayer(): void {
   const get = <T extends HTMLElement>(selector: string) => root.querySelector<T>(selector)!;
   const frame = get<HTMLIFrameElement>('[data-study-frame]');
   const video = get<HTMLVideoElement>('[data-study-video]');
+  const audio = root.querySelector<HTMLAudioElement>('[data-study-audio]');
   const image = root.querySelector<HTMLImageElement>('[data-study-image]');
   const pdfRoot = root.querySelector<HTMLElement>('[data-pdf-viewer]');
   const done = get<HTMLButtonElement>('[data-study-done]');
@@ -75,6 +76,11 @@ export function initDoctorPlayer(): void {
     // Removing inactive sources stops media and avoids retaining hidden embeds.
     frame.removeAttribute('src');
     video.pause(); video.removeAttribute('src'); video.load();
+    if (audio) {
+      audio.pause(); audio.removeAttribute('src'); audio.load();
+      audio.hidden = entry.embedType !== 'audio';
+      if (entry.embedType === 'audio' && entry.embedUrl) audio.src = entry.embedUrl;
+    }
     frame.hidden = !isIframe;
     video.hidden = !isVideo;
     if (image) {
@@ -213,6 +219,7 @@ export function initDoctorPlayer(): void {
   document.addEventListener('astro:before-swap', () => {
     lifecycle.abort();
     video.pause();
+    audio?.pause(); audio?.removeAttribute('src');
     frame.removeAttribute('src');
     pdfViewer?.destroy();
     if (document.body) document.body.style.overflow = '';

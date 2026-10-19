@@ -65,7 +65,7 @@ function playerEntry(materialId, itemId, tab = 'videos') {
 async function playerHarness(entries, requested, unavailableStorage = false) {
   const state = browser(`https://example.org/lesson/doctor${requested ? `?${new URLSearchParams({ item: requested })}` : ''}`);
   const root = new Element(); state.document.selectors.set('[data-doctor-player]', root);
-  const selectors = ['[data-study-entries]', '[data-study-frame]', '[data-study-video]', '[data-study-image]', '[data-study-done]', '[data-study-save]', '[data-study-external]', '[data-study-title]', '[data-study-open]', '[data-study-download]', '[data-study-status]', '[data-study-share]'];
+  const selectors = ['[data-study-entries]', '[data-study-frame]', '[data-study-video]', '[data-study-audio]', '[data-study-image]', '[data-study-done]', '[data-study-save]', '[data-study-external]', '[data-study-title]', '[data-study-open]', '[data-study-download]', '[data-study-status]', '[data-study-share]'];
   for (const selector of selectors) root.selectors.set(selector, new Element());
   root.querySelector('[data-study-entries]').textContent = JSON.stringify(entries);
   const tabs = [...new Set(entries.map(entry => entry.tab))].map(tab => { const element = new Element(); element.dataset.studyTab = tab; return element; });
@@ -88,6 +88,16 @@ async function playerHarness(entries, requested, unavailableStorage = false) {
   exports.initDoctorPlayer();
   return { state, root, tabs, panels, items, init: exports.initDoctorPlayer };
 }
+
+test('audio stops and releases its URL when switching to a document', async () => {
+  const entry = { ...playerEntry('recording', 'voice', 'audio'), embedType: 'audio' };
+  const { root, items } = await playerHarness([entry, playerEntry('notes', 'pdf', 'pdfs')]);
+  const audio = root.querySelector('[data-study-audio]');
+  assert.equal(audio.hidden, false); assert.equal(audio.src, entry.embedUrl);
+  const before = audio.pauseCount;
+  items[1].dispatch('click');
+  assert.equal(audio.hidden, true); assert.equal(audio.src, ''); assert.ok(audio.pauseCount > before);
+});
 
 test('download action follows the active hosted document and hides for external resources', async () => {
   const hosted = playerEntry('notes', 'page-1', 'pdfs');

@@ -1,7 +1,7 @@
 import type { DocumentItem, MaterialItem } from '../types/materials';
 
 export const isHostedDocumentUrl = (url: string): boolean =>
-  /^https:\/\/asumed\.eduvour\.com\/materials\/sha256\/[a-f0-9]{64}\.(pdf|jpg|jpeg|png)(?:\?v=[a-f0-9]{64})?$/.test(url);
+  /^https:\/\/asumed\.eduvour\.com\/materials\/sha256\/[a-f0-9]{64}\.(pdf|jpg|jpeg|png|gif|webp|avif|bmp|mp3|ogg|m4a|wav|flac|mp4|webm)(?:\?v=[a-f0-9]{64})?$/.test(url);
 
 /**
  * Checks if a URL or document represents a PDF file that should be rendered with PDF.js.
@@ -162,7 +162,7 @@ export function isEmbeddableDocument(urlOrMaterial?: string | MaterialItem | nul
  */
 export function getDocumentEmbedUrl(url?: string): string | null {
   if (!url) return null;
-  if (isImageDocument(url) || isHostedDocumentUrl(url)) return url;
+  if (isImageDocument(url) || (isHostedDocumentUrl(url) && /\.pdf(?:[?#]|$)/i.test(url))) return url;
   const driveId = extractDriveDocumentId(url);
   if (driveId) {
     if (url.includes('docs.google.com/document/')) {

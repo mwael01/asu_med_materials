@@ -29,7 +29,7 @@ export const GET: APIRoute = async ({ url }) => {
     return new Response('Document not found', { status: 404 });
   }
 
-  const items = resolveDocumentItems(material);
+  const items: DocumentItem[] = [...resolveDocumentItems(material), ...(material.videos || []).filter(item => item.url).map(item => ({ id: item.id, title: item.title, url: item.url! }))];
   if (items.length === 0) {
     return new Response('Document not found', { status: 404 });
   }

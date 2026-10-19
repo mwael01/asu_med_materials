@@ -1,5 +1,7 @@
 # Telegram respiratory import
 
+For ongoing channel submissions and all curriculum modules, use the [Telegram inbox queue](./TELEGRAM_INBOX.md). The commands below remain the separate respiratory bot workflow.
+
 The importer has two separate stages: local collection and reviewed publication. It is restricted to the existing Firestore module `year2-respiratory` and existing active lessons. It never creates lessons. Sources are `ASUMedZonebot`, `ASU_MedDataBot`, and `Medicine_way_bot`; explicit Year 2/respiratory bot delegations are followed with their original breadcrumbs.
 
 ## Setup and login

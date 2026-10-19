@@ -183,6 +183,76 @@
       "collectionGroup": "cards",
       "fieldPath": "answerHtml",
       "indexes": []
+    },
+    {
+      "collectionGroup": "material_inbox",
+      "fieldPath": "caption",
+      "indexes": []
+    },
+    {
+      "collectionGroup": "material_inbox",
+      "fieldPath": "parts",
+      "indexes": []
+    },
+    {
+      "collectionGroup": "revisions",
+      "fieldPath": "caption",
+      "indexes": []
+    },
+    {
+      "collectionGroup": "revisions",
+      "fieldPath": "parts",
+      "indexes": []
+    },
+    {
+      "collectionGroup": "material_inbox_items",
+      "fieldPath": "caption",
+      "indexes": []
+    },
+    {
+      "collectionGroup": "material_inbox_items",
+      "fieldPath": "evidence",
+      "indexes": []
+    },
+    {
+      "collectionGroup": "material_inbox_items",
+      "fieldPath": "lessonSuggestions",
+      "indexes": []
+    },
+    {
+      "collectionGroup": "material_inbox_items",
+      "fieldPath": "possibleDuplicates",
+      "indexes": []
+    },
+    {
+      "collectionGroup": "material_inbox_items",
+      "fieldPath": "existingMatches",
+      "indexes": []
+    },
+    {
+      "collectionGroup": "material_inbox_items",
+      "fieldPath": "targetPlans",
+      "indexes": []
+    },
+    {
+      "collectionGroup": "material_inbox_items",
+      "fieldPath": "publishedTargets",
+      "indexes": []
+    },
+    {
+      "collectionGroup": "material_inbox_items",
+      "fieldPath": "videos",
+      "indexes": []
+    },
+    {
+      "collectionGroup": "material_inbox_batches",
+      "fieldPath": "itemIds",
+      "indexes": []
+    },
+    {
+      "collectionGroup": "material_asset_index",
+      "fieldPath": "materials",
+      "indexes": []
     }
   ]
 }

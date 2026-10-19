@@ -16,7 +16,7 @@ export type ResourceType =
   | 'other';
 
 export type VideoSourceType = 'youtube' | 'drive' | 'direct' | 'vimeo' | 'telegram' | 'external';
-export type VideoEmbedType = 'iframe' | 'video' | 'none';
+export type VideoEmbedType = 'iframe' | 'video' | 'audio' | 'none';
 
 export interface PlaylistItem {
   id: string;
@@ -25,6 +25,7 @@ export interface PlaylistItem {
   url?: string;
   duration?: string;
   sourceType?: VideoSourceType;
+  mediaKind?: 'video' | 'audio';
 }
 
 export interface DocumentItem {
@@ -32,6 +33,7 @@ export interface DocumentItem {
   title: string;
   url: string;
   type?: ResourceType;
+  mimeType?: string;
 }
 
 export type MaterialCategory =

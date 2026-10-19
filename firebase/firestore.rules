@@ -61,6 +61,28 @@ service cloud.firestore {
       allow delete: if isAdmin();
     }
 
+    match /material_inbox_sources/{id} {
+      allow read, write: if isAdmin();
+    }
+    match /material_inbox/{id} {
+      allow read, write: if isAdmin();
+      match /revisions/{revision} {
+        allow read, write: if isAdmin();
+      }
+    }
+    match /material_inbox_items/{id} {
+      allow read, write: if isAdmin();
+    }
+    match /material_inbox_batches/{id} {
+      allow read, write: if isAdmin();
+      match /plans/{planId} {
+        allow read, write: if isAdmin();
+      }
+    }
+    match /material_asset_index/{id} {
+      allow read, write: if isAdmin();
+    }
+
     match /material_imports/{importId} {
       allow read, write: if isAdmin();
       match /entries/{entryId} {
