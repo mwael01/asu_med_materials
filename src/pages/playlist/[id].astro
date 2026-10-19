@@ -15,13 +15,13 @@ import {
 
 const { id } = Astro.params;
 if (!id) {
-  return Astro.redirect('/?redirect=false');
+  return Astro.redirect('/404');
 }
 
 const version = await getMaterialsVersionFromFirestore();
 const playlist = await getPlaylistById(id, version);
 if (!playlist) {
-  return Astro.redirect('/?redirect=false');
+  return Astro.redirect('/404');
 }
 
 const moduleInfo = playlist.moduleId ? await getModuleById(playlist.moduleId, version) : undefined;

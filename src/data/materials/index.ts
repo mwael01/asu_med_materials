@@ -110,9 +110,17 @@ export async function getAllPlaylists(version?: number): Promise<MaterialItem[]>
  * Retrieve a single video playlist by ID from Firestore.
  */
 export async function getPlaylistById(id: string, version?: number): Promise<MaterialItem | null> {
+  const isPlaylist = (item: MaterialItem) =>
+    item.type === 'playlist' || Boolean(item.playlistId) || Boolean(item.videos);
   const material = (await getAllMaterials(version)).find((item) => item.id === id);
-  if (material && (material.type === 'playlist' || Boolean(material.playlistId) || Boolean(material.videos))) {
+  if (material && isPlaylist(material)) {
     return material;
+  }
+  // Fallback: check getPublicMaterials directly so valid playlists in non-active modules or semester 2 are not dropped
+  const allRaw = await getPublicMaterials(version);
+  const found = allRaw.find((item) => item.id === id);
+  if (found && isPlaylist(found)) {
+    return found;
   }
   return null;
 }
@@ -123,5 +131,7 @@ export async function getPlaylistById(id: string, version?: number): Promise<Mat
 export async function getMaterialById(id: string, version?: number): Promise<MaterialItem | null> {
   const material = (await getAllMaterials(version)).find((item) => item.id === id);
   if (material) return material;
-  return null;
+  // Fallback: check getPublicMaterials directly so valid materials in non-active modules or semester 2 are not dropped
+  const allRaw = await getPublicMaterials(version);
+  return allRaw.find((item) => item.id === id) || null;
 }

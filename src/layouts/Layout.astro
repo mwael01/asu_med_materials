@@ -92,6 +92,18 @@ const allModules = await getAllModules(catalogueVersion);
     )}
   </head>
   <body class="min-h-dvh flex flex-col bg-zinc-950 text-zinc-100 antialiased selection:bg-emerald-500 selection:text-white">
+    <!-- Global Top Progress Bar for Instant Route Feedback -->
+    <div
+      id="global-nav-progress"
+      class="fixed top-0 left-0 right-0 h-[2px] z-[99999] pointer-events-none opacity-0 transition-opacity duration-200"
+      aria-hidden="true"
+    >
+      <div
+        id="global-nav-progress-bar"
+        class="h-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.7)] w-0 transition-[width] duration-300 ease-out"
+      ></div>
+    </div>
+
     <Navbar crumbs={crumbs} backHref={backHref} allModules={allModules} />
 
     <main class="page-content flex-1 w-full max-w-6xl mx-auto px-4 sm:px-6 py-6 pb-[calc(1.5rem+env(safe-area-inset-bottom,0px))]">
@@ -124,6 +136,52 @@ const allModules = await getAllModules(catalogueVersion);
         initUserLibrarySync();
         warmupCatalogueCache();
       });
+
+      // Global navigation loading bar for instant feedback during page transitions
+      (function() {
+        let progressTimer: ReturnType<typeof setTimeout> | null = null;
+        let finishTimer: ReturnType<typeof setTimeout> | null = null;
+
+        function startNavProgress() {
+          const container = document.getElementById('global-nav-progress');
+          const bar = document.getElementById('global-nav-progress-bar');
+          if (!container || !bar) return;
+
+          if (finishTimer) clearTimeout(finishTimer);
+          if (progressTimer) clearTimeout(progressTimer);
+
+          bar.style.transition = 'width 250ms ease-out';
+          bar.style.width = '35%';
+          container.style.opacity = '1';
+
+          progressTimer = setTimeout(() => {
+            bar.style.transition = 'width 1200ms cubic-bezier(0.1, 0.5, 0.1, 1)';
+            bar.style.width = '80%';
+          }, 200);
+        }
+
+        function finishNavProgress() {
+          const container = document.getElementById('global-nav-progress');
+          const bar = document.getElementById('global-nav-progress-bar');
+          if (!container || !bar) return;
+
+          if (progressTimer) clearTimeout(progressTimer);
+
+          bar.style.transition = 'width 150ms ease-out';
+          bar.style.width = '100%';
+
+          finishTimer = setTimeout(() => {
+            container.style.opacity = '0';
+            finishTimer = setTimeout(() => {
+              bar.style.transition = 'none';
+              bar.style.width = '0%';
+            }, 250);
+          }, 150);
+        }
+
+        document.addEventListener('astro:before-preparation', startNavProgress);
+        document.addEventListener('astro:page-load', finishNavProgress);
+      })();
     </script>
 
     <Analytics />

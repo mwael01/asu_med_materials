@@ -23,13 +23,13 @@ import {
 
 const { id } = Astro.params;
 if (!id) {
-  return Astro.redirect('/?redirect=false');
+  return Astro.redirect('/404');
 }
 
 const version = await getMaterialsVersionFromFirestore();
 const material = await getMaterialById(id, version);
 if (!material) {
-  return Astro.redirect('/?redirect=false');
+  return Astro.redirect('/404');
 }
 
 // Redirect playlists to the dedicated playlist player
@@ -83,7 +83,21 @@ if (!embedUrl && !isInitialPdf && !isBundle) {
 const externalUrl = initialDoc.externalUrl || getDocumentExternalUrl(material.url);
 const initialDownloadUrl = getDocumentDownloadUrl(initialDoc.url, material.id, initialDoc.id);
 const initialDownloadFilename = initialDoc.downloadName;
-const moduleInfo = material.moduleId ? await getModuleById(material.moduleId, version) : undefined;
+const [moduleInfo, relatedMaterials] = await Promise.all([
+  material.moduleId ? getModuleById(material.moduleId, version) : Promise.resolve(undefined),
+  material.moduleId
+    ? getMaterialsByModule(material.moduleId, version).then((moduleMaterials) =>
+        moduleMaterials
+          .filter((m) => m.id !== material.id)
+          .sort((a, b) => {
+            if (a.subject === material.subject && b.subject !== material.subject) return -1;
+            if (b.subject === material.subject && a.subject !== material.subject) return 1;
+            return 0;
+          })
+          .slice(0, 3)
+      )
+    : Promise.resolve([])
+]);
 
 const titleEn = material.titleEn || material.title;
 const descEn = material.descriptionEn || material.description;
@@ -95,21 +109,6 @@ const rawAuthors = Array.isArray(material.author)
     ? [material.author]
     : [];
 const authorText = rawAuthors.join(', ');
-
-// Related materials in the same module / subject
-let relatedMaterials: typeof material[] = [];
-if (material.moduleId) {
-  const moduleMaterials = await getMaterialsByModule(material.moduleId, version);
-  relatedMaterials = moduleMaterials
-    .filter((m) => m.id !== material.id)
-    .sort((a, b) => {
-      // Prioritize same subject
-      if (a.subject === material.subject && b.subject !== material.subject) return -1;
-      if (b.subject === material.subject && a.subject !== material.subject) return 1;
-      return 0;
-    })
-    .slice(0, 3);
-}
 
 const backFallbackUrl = material.moduleId
   ? material.subject

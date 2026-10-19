@@ -1,7 +1,7 @@
 // Service Worker for ASU Med Materials PWA
 // Cache visited pages for offline access without fetching the entire catalogue.
 
-const CACHE_NAME = 'asumed-cache-v11';
+const CACHE_NAME = 'asumed-cache-v12';
 
 // 1. Static brand assets, icons, core navigation routes, and catalogue APIs
 const PRECACHE_ASSETS = [
@@ -241,7 +241,7 @@ self.addEventListener('fetch', (event) => {
       // 2. Network fetch promise that updates the cache in background
       const fetchPromise = (async () => {
         try {
-          const networkResponse = await fetchWithTimeout(request, 3500);
+          const networkResponse = await fetchWithTimeout(request, 12000);
           if (networkResponse && networkResponse.status === 200) {
             const copy = networkResponse.clone();
             await cache.put(request, copy);
@@ -268,12 +268,19 @@ self.addEventListener('fetch', (event) => {
       const networkResponse = await fetchPromise;
       if (networkResponse) return networkResponse;
 
-      // 5. Offline or network failed: fall back to cached home page or offline.html
-      const fallback =
-        (await cache.match('/', { ignoreSearch: true })) ||
-        (await cache.match('/index.html', { ignoreSearch: true })) ||
-        (await cache.match('/offline.html', { ignoreSearch: true }));
-      if (fallback) return fallback;
+      // 5. Offline or network failed:
+      // If the user requested root '/', fall back to cached '/' or index.html.
+      // Sub-routes (viewer, playlist, module, etc.) MUST NEVER fall back to '/' because '/' contains
+      // an active module redirect script that hijacks navigation. They fall back strictly to offline.html!
+      if (path === '/' || path === '/index.html') {
+        const homeFallback =
+          (await cache.match('/', { ignoreSearch: true })) ||
+          (await cache.match('/index.html', { ignoreSearch: true }));
+        if (homeFallback) return homeFallback;
+      }
+
+      const offlineFallback = await cache.match('/offline.html', { ignoreSearch: true });
+      if (offlineFallback) return offlineFallback;
 
       return new Response('الموقع غير متصل بالإنترنت حالياً.', {
         status: 503,
