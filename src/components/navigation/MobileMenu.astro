@@ -35,13 +35,14 @@ const links = [
   <div class="max-w-6xl mx-auto px-4 py-4 space-y-4">
     <nav aria-label="Mobile navigation" class="grid gap-1">
       {links.map(([href, title]) => <a href={href} aria-current={currentPath === href ? 'page' : undefined} class:list={['px-3 py-3 text-sm rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800', currentPath === href && 'text-emerald-600 font-bold']}>{title}</a>)}
-      <button type="button" class="open-bookmarks-trigger mobile-menu-close-on-click text-left px-3 py-3 text-sm">Saved</button>
+      <button type="button" class="open-bookmarks-trigger mobile-menu-close-on-click w-full text-left px-3 py-3 text-sm rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors text-zinc-800 dark:text-zinc-200 cursor-pointer">Saved Resources</button>
     </nav>
   </div>
 </div>
 
 <script>
   function initMobileMenu(): void {
+    document.body.classList.remove('overflow-hidden');
     const trigger = document.getElementById('mobile-menu-trigger');
     const panel = document.getElementById('mobile-nav-panel');
     const backdrop = document.getElementById('mobile-nav-backdrop');

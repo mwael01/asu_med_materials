@@ -17,11 +17,11 @@ const tabs = (['videos', 'pdfs', 'links'] as const).filter(tab => entries.some(e
           <div data-study-external class="p-8 text-sm text-zinc-500" hidden>Open this resource using the link below.</div>
         </div>
         <h2 data-study-title class="font-semibold text-base mt-4 break-words"></h2>
-        <div class="flex flex-wrap items-center gap-x-5 gap-y-3 mt-3 text-sm">
-          <a data-study-open target="_blank" rel="noopener noreferrer" class="text-emerald-600 hover:underline">Open original</a>
-          <button type="button" data-study-done aria-pressed="false" class="hover:text-emerald-600">Mark completed</button>
-          <button type="button" data-study-save aria-pressed="false" class="hover:text-emerald-600">Save</button>
-          <button type="button" data-study-share class="hover:text-emerald-600">Copy link</button>
+        <div class="flex flex-wrap items-center gap-2 mt-4 text-xs font-semibold">
+          <a data-study-open target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-zinc-700 dark:text-zinc-300 hover:border-emerald-500 hover:text-emerald-600 transition-colors shadow-2xs">Open original &nearr;</a>
+          <button type="button" data-study-done aria-pressed="false" class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-zinc-700 dark:text-zinc-300 hover:border-emerald-500 hover:text-emerald-600 transition-colors cursor-pointer shadow-2xs aria-pressed:bg-emerald-50 dark:aria-pressed:bg-emerald-950/50 aria-pressed:text-emerald-700 dark:aria-pressed:text-emerald-400 aria-pressed:border-emerald-500">Mark completed</button>
+          <button type="button" data-study-save aria-pressed="false" class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-zinc-700 dark:text-zinc-300 hover:border-amber-500 hover:text-amber-600 transition-colors cursor-pointer shadow-2xs aria-pressed:bg-amber-50 dark:aria-pressed:bg-amber-950/50 aria-pressed:text-amber-700 dark:aria-pressed:text-amber-400 aria-pressed:border-amber-500">Save</button>
+          <button type="button" data-study-share class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-zinc-700 dark:text-zinc-300 hover:border-emerald-500 hover:text-emerald-600 transition-colors cursor-pointer shadow-2xs">Copy link</button>
         </div>
         <p data-study-status role="status" class="text-xs text-zinc-500 mt-3"></p>
       </section>
