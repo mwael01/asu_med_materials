@@ -7,7 +7,7 @@ import { getMaterialsByModuleAndSubject } from '../../../data/materials';
 import { getPublicLessons } from '../../../data/catalogue.server';
 import { getMaterialsVersionFromFirestore } from '../../../firebase/firestore';
 import { subjectToSlug } from '../../../utils/slug';
-import { lessonsForSubject, lessonPath } from '../../../utils/lessons';
+import { lessonsForSubject, lessonPath, isRevisionLesson } from '../../../utils/lessons';
 import { matchesDiscoveryType } from '../../../utils/studyContent';
 import type { DiscoveryType } from '../../../types/lessons';
 
@@ -34,9 +34,8 @@ const lessons = type
     )
   : subjectLessons;
 
-const isRevisionLesson = (l: (typeof lessons)[number]) => Boolean(l.isRevision || l.id.endsWith('-revisions'));
 const regularLessons = lessons.filter(l => !isRevisionLesson(l));
-const revisionLessons = lessons.filter(isRevisionLesson);
+const revisionLessons = lessons.filter(l => isRevisionLesson(l) && materials.some(m => m.lessonId === l.id));
 
 const typeLabels: Record<DiscoveryType, string> = {
   videos: 'Videos',

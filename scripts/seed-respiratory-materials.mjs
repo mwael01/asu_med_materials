@@ -143,80 +143,46 @@ async function incrementMaterialsVersion(accessToken, projectId) {
   }
 }
 
-// 8 Dedicated Subject Revision Lessons
+// 23 Dedicated Subject Revision Lessons (Practical, Assessments, Finals)
 const REVISION_LESSONS = [
-  {
-    id: 'year2-resp-anatomy-revisions',
-    title: 'Anatomy Revisions & Practical',
-    moduleId: 'year2-respiratory',
-    subject: 'Anatomy',
-    order: 99,
-    active: true,
-    isRevision: true
-  },
-  {
-    id: 'year2-resp-histo-revisions',
-    title: 'Histology Revisions & Practical',
-    moduleId: 'year2-respiratory',
-    subject: 'Histology',
-    order: 99,
-    active: true,
-    isRevision: true
-  },
-  {
-    id: 'year2-resp-physio-revisions',
-    title: 'Physiology Revisions & Practical',
-    moduleId: 'year2-respiratory',
-    subject: 'Physiology',
-    order: 99,
-    active: true,
-    isRevision: true
-  },
-  {
-    id: 'year2-resp-biochem-revisions',
-    title: 'Biochemistry Revisions & Practical',
-    moduleId: 'year2-respiratory',
-    subject: 'Biochemistry',
-    order: 99,
-    active: true,
-    isRevision: true
-  },
-  {
-    id: 'year2-resp-patho-revisions',
-    title: 'Pathology Revisions & Practical',
-    moduleId: 'year2-respiratory',
-    subject: 'Pathology',
-    order: 99,
-    active: true,
-    isRevision: true
-  },
-  {
-    id: 'year2-resp-pharma-revisions',
-    title: 'Pharmacology Revisions & Practical',
-    moduleId: 'year2-respiratory',
-    subject: 'Pharmacology',
-    order: 99,
-    active: true,
-    isRevision: true
-  },
-  {
-    id: 'year2-resp-micro-revisions',
-    title: 'Microbiology Revisions & Practical',
-    moduleId: 'year2-respiratory',
-    subject: 'Microbiology',
-    order: 99,
-    active: true,
-    isRevision: true
-  },
-  {
-    id: 'year2-resp-para-revisions',
-    title: 'Parasitology Revisions & Practical',
-    moduleId: 'year2-respiratory',
-    subject: 'Parasitology',
-    order: 99,
-    active: true,
-    isRevision: true
-  }
+  // Anatomy
+  { id: 'year2-resp-anatomy-practical', title: 'Practical Revisions', moduleId: 'year2-respiratory', subject: 'Anatomy', order: 97, active: true, isRevision: true, revisionType: 'practical' },
+  { id: 'year2-resp-anatomy-assessments', title: 'Assessments & Formatives', moduleId: 'year2-respiratory', subject: 'Anatomy', order: 98, active: true, isRevision: true, revisionType: 'assessment' },
+  { id: 'year2-resp-anatomy-finals', title: 'Final Revisions', moduleId: 'year2-respiratory', subject: 'Anatomy', order: 99, active: true, isRevision: true, revisionType: 'final' },
+
+  // Histology
+  { id: 'year2-resp-histo-practical', title: 'Practical Revisions', moduleId: 'year2-respiratory', subject: 'Histology', order: 97, active: true, isRevision: true, revisionType: 'practical' },
+  { id: 'year2-resp-histo-assessments', title: 'Assessments & Formatives', moduleId: 'year2-respiratory', subject: 'Histology', order: 98, active: true, isRevision: true, revisionType: 'assessment' },
+  { id: 'year2-resp-histo-finals', title: 'Final Revisions', moduleId: 'year2-respiratory', subject: 'Histology', order: 99, active: true, isRevision: true, revisionType: 'final' },
+
+  // Physiology
+  { id: 'year2-resp-physio-practical', title: 'Practical Revisions', moduleId: 'year2-respiratory', subject: 'Physiology', order: 97, active: true, isRevision: true, revisionType: 'practical' },
+  { id: 'year2-resp-physio-assessments', title: 'Assessments & Formatives', moduleId: 'year2-respiratory', subject: 'Physiology', order: 98, active: true, isRevision: true, revisionType: 'assessment' },
+  { id: 'year2-resp-physio-finals', title: 'Final Revisions', moduleId: 'year2-respiratory', subject: 'Physiology', order: 99, active: true, isRevision: true, revisionType: 'final' },
+
+  // Biochemistry
+  { id: 'year2-resp-biochem-practical', title: 'Practical Revisions', moduleId: 'year2-respiratory', subject: 'Biochemistry', order: 97, active: true, isRevision: true, revisionType: 'practical' },
+  { id: 'year2-resp-biochem-assessments', title: 'Assessments & Formatives', moduleId: 'year2-respiratory', subject: 'Biochemistry', order: 98, active: true, isRevision: true, revisionType: 'assessment' },
+  { id: 'year2-resp-biochem-finals', title: 'Final Revisions', moduleId: 'year2-respiratory', subject: 'Biochemistry', order: 99, active: true, isRevision: true, revisionType: 'final' },
+
+  // Pathology
+  { id: 'year2-resp-patho-practical', title: 'Practical Revisions', moduleId: 'year2-respiratory', subject: 'Pathology', order: 97, active: true, isRevision: true, revisionType: 'practical' },
+  { id: 'year2-resp-patho-assessments', title: 'Assessments & Formatives', moduleId: 'year2-respiratory', subject: 'Pathology', order: 98, active: true, isRevision: true, revisionType: 'assessment' },
+  { id: 'year2-resp-patho-finals', title: 'Final Revisions', moduleId: 'year2-respiratory', subject: 'Pathology', order: 99, active: true, isRevision: true, revisionType: 'final' },
+
+  // Pharmacology
+  { id: 'year2-resp-pharma-practical', title: 'Practical Revisions', moduleId: 'year2-respiratory', subject: 'Pharmacology', order: 97, active: true, isRevision: true, revisionType: 'practical' },
+  { id: 'year2-resp-pharma-assessments', title: 'Assessments & Formatives', moduleId: 'year2-respiratory', subject: 'Pharmacology', order: 98, active: true, isRevision: true, revisionType: 'assessment' },
+  { id: 'year2-resp-pharma-finals', title: 'Final Revisions', moduleId: 'year2-respiratory', subject: 'Pharmacology', order: 99, active: true, isRevision: true, revisionType: 'final' },
+
+  // Microbiology
+  { id: 'year2-resp-micro-practical', title: 'Practical Revisions', moduleId: 'year2-respiratory', subject: 'Microbiology', order: 97, active: true, isRevision: true, revisionType: 'practical' },
+  { id: 'year2-resp-micro-assessments', title: 'Assessments & Formatives', moduleId: 'year2-respiratory', subject: 'Microbiology', order: 98, active: true, isRevision: true, revisionType: 'assessment' },
+  { id: 'year2-resp-micro-finals', title: 'Final Revisions', moduleId: 'year2-respiratory', subject: 'Microbiology', order: 99, active: true, isRevision: true, revisionType: 'final' },
+
+  // Parasitology (no practical exam at ASU)
+  { id: 'year2-resp-para-assessments', title: 'Assessments & Formatives', moduleId: 'year2-respiratory', subject: 'Parasitology', order: 98, active: true, isRevision: true, revisionType: 'assessment' },
+  { id: 'year2-resp-para-finals', title: 'Final Revisions', moduleId: 'year2-respiratory', subject: 'Parasitology', order: 99, active: true, isRevision: true, revisionType: 'final' }
 ];
 
 // Curated Materials List
@@ -350,7 +316,7 @@ const MATERIALS = [
     year: 2,
     moduleId: 'year2-respiratory',
     subject: 'Anatomy',
-    lessonId: 'year2-resp-anatomy-revisions',
+    lessonId: 'year2-resp-anatomy-finals',
     author: 'Dr. Faten Mahmoud',
     tags: ['anatomy', 'college revision', 'sharepoint', 'faten mahmoud'],
     createdAt: new Date().toISOString()
@@ -364,7 +330,7 @@ const MATERIALS = [
     year: 2,
     moduleId: 'year2-respiratory',
     subject: 'Anatomy',
-    lessonId: 'year2-resp-anatomy-revisions',
+    lessonId: 'year2-resp-anatomy-practical',
     author: 'Dr. Abdullah',
     tags: ['anatomy', 'practical', 'ribs', 'vertebrae', 'bones', 'xray', 'soft tissue'],
     videos: [
@@ -391,7 +357,7 @@ const MATERIALS = [
     year: 2,
     moduleId: 'year2-respiratory',
     subject: 'Anatomy',
-    lessonId: 'year2-resp-anatomy-revisions',
+    lessonId: 'year2-resp-anatomy-practical',
     author: 'Dr. Kareem',
     tags: ['anatomy', 'practical', 'bones', 'soft tissue', 'lungs', 'diaphragm'],
     videos: [
@@ -415,7 +381,7 @@ const MATERIALS = [
     year: 2,
     moduleId: 'year2-respiratory',
     subject: 'Anatomy',
-    lessonId: 'year2-resp-anatomy-revisions',
+    lessonId: 'year2-resp-anatomy-finals',
     author: 'Dr. M Adel',
     tags: ['anatomy', 'revision', 'dr adel'],
     createdAt: new Date().toISOString()
@@ -475,7 +441,7 @@ const MATERIALS = [
     year: 2,
     moduleId: 'year2-respiratory',
     subject: 'Histology',
-    lessonId: 'year2-resp-histo-revisions',
+    lessonId: 'year2-resp-histo-finals',
     author: 'Dr. Faten Mahmoud',
     tags: ['histology', 'college revision', 'sharepoint', 'faten mahmoud'],
     createdAt: new Date().toISOString()
@@ -489,7 +455,7 @@ const MATERIALS = [
     year: 2,
     moduleId: 'year2-respiratory',
     subject: 'Histology',
-    lessonId: 'year2-resp-histo-revisions',
+    lessonId: 'year2-resp-histo-practical',
     tags: ['histology', 'practical', 'microscope', 'slides'],
     createdAt: new Date().toISOString()
   },
@@ -502,7 +468,7 @@ const MATERIALS = [
     year: 2,
     moduleId: 'year2-respiratory',
     subject: 'Histology',
-    lessonId: 'year2-resp-histo-revisions',
+    lessonId: 'year2-resp-histo-practical',
     tags: ['histology', 'practical guide', 'pdf'],
     createdAt: new Date().toISOString()
   },
@@ -593,7 +559,7 @@ const MATERIALS = [
     year: 2,
     moduleId: 'year2-respiratory',
     subject: 'Physiology',
-    lessonId: 'year2-resp-physio-revisions',
+    lessonId: 'year2-resp-physio-finals',
     author: 'Dr. Faten Mahmoud',
     tags: ['physiology', 'college revision', 'sharepoint', 'faten mahmoud'],
     createdAt: new Date().toISOString()
@@ -607,7 +573,7 @@ const MATERIALS = [
     year: 2,
     moduleId: 'year2-respiratory',
     subject: 'Physiology',
-    lessonId: 'year2-resp-physio-revisions',
+    lessonId: 'year2-resp-physio-finals',
     author: 'Dr. Faten Mahmoud',
     tags: ['physiology', 'college revision', 'sharepoint', 'faten mahmoud'],
     createdAt: new Date().toISOString()
@@ -621,7 +587,7 @@ const MATERIALS = [
     year: 2,
     moduleId: 'year2-respiratory',
     subject: 'Physiology',
-    lessonId: 'year2-resp-physio-revisions',
+    lessonId: 'year2-resp-physio-finals',
     author: 'Dr. Mohamed El-Nahhas',
     tags: ['physiology', 'crash course', 'revision', 'el-nahhas'],
     videos: [
@@ -639,7 +605,7 @@ const MATERIALS = [
     year: 2,
     moduleId: 'year2-respiratory',
     subject: 'Physiology',
-    lessonId: 'year2-resp-physio-revisions',
+    lessonId: 'year2-resp-physio-practical',
     tags: ['physiology', 'practical', 'lab'],
     createdAt: new Date().toISOString()
   },
@@ -652,7 +618,7 @@ const MATERIALS = [
     year: 2,
     moduleId: 'year2-respiratory',
     subject: 'Physiology',
-    lessonId: 'year2-resp-physio-revisions',
+    lessonId: 'year2-resp-physio-practical',
     tags: ['clinical', 'examination', 'practical'],
     videos: [
       { id: '6xfpfsWASus', title: 'Respiratory Clinical Examination Part 1', url: 'https://youtu.be/6xfpfsWASus', youtubeId: '6xfpfsWASus' },
@@ -669,7 +635,7 @@ const MATERIALS = [
     year: 2,
     moduleId: 'year2-respiratory',
     subject: 'Physiology',
-    lessonId: 'year2-resp-physio-revisions',
+    lessonId: 'year2-resp-physio-assessments',
     tags: ['physiology', 'sgd', 'small group discussion'],
     createdAt: new Date().toISOString()
   },
@@ -682,7 +648,7 @@ const MATERIALS = [
     year: 2,
     moduleId: 'year2-respiratory',
     subject: 'Physiology',
-    lessonId: 'year2-resp-physio-revisions',
+    lessonId: 'year2-resp-physio-assessments',
     tags: ['physiology', 'sgd', 'small group discussion'],
     createdAt: new Date().toISOString()
   },
@@ -768,7 +734,7 @@ const MATERIALS = [
     year: 2,
     moduleId: 'year2-respiratory',
     subject: 'Biochemistry',
-    lessonId: 'year2-resp-biochem-revisions',
+    lessonId: 'year2-resp-biochem-practical',
     author: 'Dr. Marwa Hamdy',
     tags: ['biochemistry', 'practical', 'buffer', 'pdh', 'marwa hamdy'],
     videos: [
@@ -890,7 +856,7 @@ const MATERIALS = [
     year: 2,
     moduleId: 'year2-respiratory',
     subject: 'Pathology',
-    lessonId: 'year2-resp-patho-revisions',
+    lessonId: 'year2-resp-patho-finals',
     author: 'Dr. Shimaa Elgohary',
     tags: ['pathology', 'college revision', 'sharepoint', 'shimaa elgohary'],
     createdAt: new Date().toISOString()
@@ -904,7 +870,7 @@ const MATERIALS = [
     year: 2,
     moduleId: 'year2-respiratory',
     subject: 'Pathology',
-    lessonId: 'year2-resp-patho-revisions',
+    lessonId: 'year2-resp-patho-finals',
     author: 'Dr. Eslam El-Radad',
     tags: ['pathology', 'revision', 'el-radad'],
     createdAt: new Date().toISOString()
@@ -918,7 +884,7 @@ const MATERIALS = [
     year: 2,
     moduleId: 'year2-respiratory',
     subject: 'Pathology',
-    lessonId: 'year2-resp-patho-revisions',
+    lessonId: 'year2-resp-patho-practical',
     tags: ['pathology', 'practical', 'jars', 'slides'],
     videos: [
       { id: 'quqiMPtO0VM', title: 'Practical Pathology Jars', url: 'https://youtu.be/quqiMPtO0VM', youtubeId: 'quqiMPtO0VM' },
@@ -935,7 +901,7 @@ const MATERIALS = [
     year: 2,
     moduleId: 'year2-respiratory',
     subject: 'Pathology',
-    lessonId: 'year2-resp-patho-revisions',
+    lessonId: 'year2-resp-patho-finals',
     tags: ['pathology', 'department book', 'reference'],
     createdAt: new Date().toISOString()
   },
@@ -1019,7 +985,7 @@ const MATERIALS = [
     year: 2,
     moduleId: 'year2-respiratory',
     subject: 'Pharmacology',
-    lessonId: 'year2-resp-pharma-revisions',
+    lessonId: 'year2-resp-pharma-finals',
     author: 'Dr. Faten Mahmoud',
     tags: ['pharmacology', 'college revision', 'sharepoint', 'faten mahmoud'],
     createdAt: new Date().toISOString()
@@ -1033,7 +999,7 @@ const MATERIALS = [
     year: 2,
     moduleId: 'year2-respiratory',
     subject: 'Pharmacology',
-    lessonId: 'year2-resp-pharma-revisions',
+    lessonId: 'year2-resp-pharma-finals',
     author: 'Dr. Amany Hasanin',
     tags: ['pharmacology', 'college revision', 'sharepoint', 'amany hasanin'],
     createdAt: new Date().toISOString()
@@ -1047,7 +1013,7 @@ const MATERIALS = [
     year: 2,
     moduleId: 'year2-respiratory',
     subject: 'Pharmacology',
-    lessonId: 'year2-resp-pharma-revisions',
+    lessonId: 'year2-resp-pharma-practical',
     author: 'Dr. Mohamed El-Shorbagy',
     tags: ['pharmacology', 'practical', 'shorbagy'],
     videos: [
@@ -1066,7 +1032,7 @@ const MATERIALS = [
     year: 2,
     moduleId: 'year2-respiratory',
     subject: 'Pharmacology',
-    lessonId: 'year2-resp-pharma-revisions',
+    lessonId: 'year2-resp-pharma-practical',
     tags: ['pharmacology', 'moodle', 'quiz'],
     createdAt: new Date().toISOString()
   },
@@ -1079,7 +1045,7 @@ const MATERIALS = [
     year: 2,
     moduleId: 'year2-respiratory',
     subject: 'Pharmacology',
-    lessonId: 'year2-resp-pharma-revisions',
+    lessonId: 'year2-resp-pharma-practical',
     tags: ['pharmacology', 'moodle', 'quiz'],
     createdAt: new Date().toISOString()
   },
@@ -1092,7 +1058,7 @@ const MATERIALS = [
     year: 2,
     moduleId: 'year2-respiratory',
     subject: 'Pharmacology',
-    lessonId: 'year2-resp-pharma-revisions',
+    lessonId: 'year2-resp-pharma-practical',
     tags: ['pharmacology', 'moodle', 'quiz'],
     createdAt: new Date().toISOString()
   },
@@ -1179,7 +1145,7 @@ const MATERIALS = [
     year: 2,
     moduleId: 'year2-respiratory',
     subject: 'Microbiology',
-    lessonId: 'year2-resp-micro-revisions',
+    lessonId: 'year2-resp-micro-finals',
     author: 'Dr. Faten Mahmoud',
     tags: ['microbiology', 'college revision', 'sharepoint', 'faten mahmoud'],
     createdAt: new Date().toISOString()
@@ -1193,7 +1159,7 @@ const MATERIALS = [
     year: 2,
     moduleId: 'year2-respiratory',
     subject: 'Microbiology',
-    lessonId: 'year2-resp-micro-revisions',
+    lessonId: 'year2-resp-micro-practical',
     author: 'Dr. Muhammad Ashraf',
     tags: ['microbiology', 'practical', 'lab', 'flashcards', 'muhammad ashraf'],
     videos: [
@@ -1255,7 +1221,7 @@ const MATERIALS = [
     year: 2,
     moduleId: 'year2-respiratory',
     subject: 'Parasitology',
-    lessonId: 'year2-resp-para-revisions',
+    lessonId: 'year2-resp-para-finals',
     tags: ['parasitology', 'telegram', 'simba', 'central hub'],
     createdAt: new Date().toISOString()
   },
@@ -1272,7 +1238,7 @@ const MATERIALS = [
     year: 2,
     moduleId: 'year2-respiratory',
     subject: 'Pathology',
-    lessonId: 'year2-resp-patho-revisions',
+    lessonId: 'year2-resp-patho-assessments',
     tags: ['formatives', 'essay questions', 'pathology'],
     createdAt: new Date().toISOString()
   },
@@ -1285,7 +1251,7 @@ const MATERIALS = [
     year: 2,
     moduleId: 'year2-respiratory',
     subject: 'Physiology',
-    lessonId: 'year2-resp-physio-revisions',
+    lessonId: 'year2-resp-physio-assessments',
     tags: ['formatives', 'integrated case', 'physiology'],
     createdAt: new Date().toISOString()
   },
@@ -1298,7 +1264,7 @@ const MATERIALS = [
     year: 2,
     moduleId: 'year2-respiratory',
     subject: 'Anatomy',
-    lessonId: 'year2-resp-anatomy-revisions',
+    lessonId: 'year2-resp-anatomy-practical',
     tags: ['practical', 'labs guide', 'all subjects'],
     createdAt: new Date().toISOString()
   },
@@ -1311,7 +1277,7 @@ const MATERIALS = [
     year: 2,
     moduleId: 'year2-respiratory',
     subject: 'Pathology',
-    lessonId: 'year2-resp-patho-revisions',
+    lessonId: 'year2-resp-patho-finals',
     tags: ['essay questions', 'compilation'],
     createdAt: new Date().toISOString()
   }

@@ -381,7 +381,7 @@ RESPIRATORY_DECK_MAPPINGS: dict[str, dict[str, str]] = {
     "Respiratory Module (Practical)::Anatomy": {
         "title": "Respiratory Module (Practical) - Anatomy",
         "subject": "Anatomy",
-        "lessonId": "year2-resp-anatomy-revisions",
+        "lessonId": "year2-resp-anatomy-practical",
         "unit": "Practical",
         "chapter": "Anatomy Practical",
         "deckId": "resp-practical-anatomy",
@@ -389,7 +389,7 @@ RESPIRATORY_DECK_MAPPINGS: dict[str, dict[str, str]] = {
     "Respiratory Module (Practical)::Microbiology": {
         "title": "Respiratory Module (Practical) - Microbiology",
         "subject": "Microbiology",
-        "lessonId": "year2-resp-micro-revisions",
+        "lessonId": "year2-resp-micro-practical",
         "unit": "Practical",
         "chapter": "Microbiology Practical",
         "deckId": "resp-practical-microbiology",

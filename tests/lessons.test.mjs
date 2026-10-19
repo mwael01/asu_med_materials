@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { lessonDoctors, doctorKey, lessonPath, lessonsForSubject, materialMatchesLesson, validateLesson } from '../src/utils/lessons.ts';
+import { lessonDoctors, doctorKey, lessonPath, lessonsForSubject, materialMatchesLesson, validateLesson, isRevisionLesson } from '../src/utils/lessons.ts';
 import { studyEntries, matchesDiscoveryType, materialStudyPath, legacyMaterialPath, isFlashcards, isMcqMaterial, isPdfMaterial, isVideoMaterial } from '../src/utils/studyContent.ts';
 import { entryProgressStorage, parseProgress } from '../src/utils/studyProgress.ts';
 import { materialConverter, submissionConverter } from '../src/firebase/schema.ts';
@@ -294,4 +294,113 @@ test('lesson material partitioning divides Doctors, PDFs, Flashcards, and MCQs i
   assert.equal(partialMcqs.length, 0, 'MCQs section must be empty (hidden)');
 });
 
+test('dedicated revision lessons (practical, assessments, finals) and empty-revision hiding logic', () => {
+  const regularLesson = {
+    id: 'year2-resp-anat-nose-paranasal-sinuses',
+    title: 'Nose and Paranasal sinuses',
+    moduleId: 'year2-respiratory',
+    subject: 'Anatomy',
+    order: 1,
+    active: true
+  };
 
+  const practicalLesson = {
+    id: 'year2-resp-anatomy-practical',
+    title: 'Practical Revisions',
+    moduleId: 'year2-respiratory',
+    subject: 'Anatomy',
+    order: 97,
+    active: true,
+    isRevision: true,
+    revisionType: 'practical'
+  };
+
+  const assessmentsLesson = {
+    id: 'year2-resp-anatomy-assessments',
+    title: 'Assessments & Formatives',
+    moduleId: 'year2-respiratory',
+    subject: 'Anatomy',
+    order: 98,
+    active: true,
+    isRevision: true,
+    revisionType: 'assessment'
+  };
+
+  const finalsLesson = {
+    id: 'year2-resp-anatomy-finals',
+    title: 'Final Revisions',
+    moduleId: 'year2-respiratory',
+    subject: 'Anatomy',
+    order: 99,
+    active: true,
+    isRevision: true,
+    revisionType: 'final'
+  };
+
+  const paraAssessmentsLesson = {
+    id: 'year2-resp-para-assessments',
+    title: 'Assessments & Formatives',
+    moduleId: 'year2-respiratory',
+    subject: 'Parasitology',
+    order: 98,
+    active: true,
+    isRevision: true,
+    revisionType: 'assessment'
+  };
+
+  const paraFinalsLesson = {
+    id: 'year2-resp-para-finals',
+    title: 'Final Revisions',
+    moduleId: 'year2-respiratory',
+    subject: 'Parasitology',
+    order: 99,
+    active: true,
+    isRevision: true,
+    revisionType: 'final'
+  };
+
+  const allLessons = [
+    regularLesson,
+    practicalLesson,
+    assessmentsLesson,
+    finalsLesson,
+    paraAssessmentsLesson,
+    paraFinalsLesson
+  ];
+
+  // Materials: Anatomy has practical & finals (no assessments); Parasitology has finals only
+  const materials = [
+    material({ id: 'm-prac', lessonId: practicalLesson.id, subject: 'Anatomy' }),
+    material({ id: 'm-fin', lessonId: finalsLesson.id, subject: 'Anatomy' }),
+    material({ id: 'm-para-fin', lessonId: paraFinalsLesson.id, subject: 'Parasitology' })
+  ];
+
+  // 1. Classification check
+  assert.equal(isRevisionLesson(regularLesson), false);
+  assert.equal(isRevisionLesson(practicalLesson), true);
+  assert.equal(isRevisionLesson(assessmentsLesson), true);
+  assert.equal(isRevisionLesson(finalsLesson), true);
+  assert.equal(isRevisionLesson(paraAssessmentsLesson), true);
+  assert.equal(isRevisionLesson(paraFinalsLesson), true);
+
+  // 2. Anatomy revision lessons filtering:
+  // Empty revision lessons (assessmentsLesson with 0 materials) must be excluded
+  const anatLessons = allLessons.filter(l => l.subject === 'Anatomy');
+  const visibleAnatRegular = anatLessons.filter(l => !isRevisionLesson(l));
+  const visibleAnatRevisions = anatLessons.filter(l => isRevisionLesson(l) && materials.some(m => m.lessonId === l.id));
+
+  assert.equal(visibleAnatRegular.length, 1);
+  assert.equal(visibleAnatRegular[0].id, regularLesson.id);
+
+  assert.equal(visibleAnatRevisions.length, 2);
+  assert.deepEqual(visibleAnatRevisions.map(l => l.id), [practicalLesson.id, finalsLesson.id]);
+  assert.equal(visibleAnatRevisions.some(l => l.id === assessmentsLesson.id), false, 'Empty assessment revision must be hidden');
+
+  // 3. Parasitology revision lessons filtering:
+  const paraLessons = allLessons.filter(l => l.subject === 'Parasitology');
+  const visibleParaRevisions = paraLessons.filter(l => isRevisionLesson(l) && materials.some(m => m.lessonId === l.id));
+
+  assert.equal(visibleParaRevisions.length, 1);
+  assert.equal(visibleParaRevisions[0].id, paraFinalsLesson.id);
+  assert.equal(visibleParaRevisions.some(l => l.id === paraAssessmentsLesson.id), false, 'Empty para assessment must be hidden');
+});

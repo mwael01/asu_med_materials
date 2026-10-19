@@ -9,8 +9,16 @@ export const lessonConverter: FirestoreDataConverter<Lesson> = {
   toFirestore: (lesson: Lesson) => ({ ...lesson }),
   fromFirestore(snapshot, options) {
     const data = snapshot.data(options);
-    return { id: snapshot.id, title: data.title || '', moduleId: data.moduleId || '',
-      subject: data.subject || '', order: typeof data.order === 'number' ? data.order : 0, active: data.active !== false };
+    return {
+      id: snapshot.id,
+      title: data.title || '',
+      moduleId: data.moduleId || '',
+      subject: data.subject || '',
+      order: typeof data.order === 'number' ? data.order : 0,
+      active: data.active !== false,
+      isRevision: Boolean(data.isRevision),
+      revisionType: data.revisionType || undefined
+    };
   },
 };
 

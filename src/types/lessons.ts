@@ -8,6 +8,7 @@ export interface Lesson {
   order: number;
   active: boolean;
   isRevision?: boolean;
+  revisionType?: 'practical' | 'assessment' | 'final';
 }
 
 export type StudyTab = 'videos' | 'pdfs' | 'links';

@@ -47,3 +47,16 @@ export function lessonsForSubject(lessons: Lesson[], moduleId: string, subject: 
     subjectToSlug(lesson.subject) === subjectToSlug(subject))
     .sort((a, b) => a.order - b.order || a.title.localeCompare(b.title) || a.id.localeCompare(b.id));
 }
+
+/** Determines if a lesson is a revision lesson (Practical, Assessments, Finals) */
+export function isRevisionLesson(lesson: Lesson): boolean {
+  return Boolean(
+    lesson.isRevision ||
+    lesson.revisionType ||
+    (typeof lesson.order === 'number' && lesson.order >= 90) ||
+    lesson.id.endsWith('-revisions') ||
+    lesson.id.endsWith('-practical') ||
+    lesson.id.endsWith('-assessments') ||
+    lesson.id.endsWith('-finals')
+  );
+}
