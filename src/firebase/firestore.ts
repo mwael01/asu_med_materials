@@ -104,15 +104,18 @@ const MATERIALS_VERSION_COLLECTION = 'materials_version';
 const MATERIALS_VERSION_DOC_ID = 'current';
 
 let cachedMaterialsVersion: { version: number; expiresAt: number } | null = null;
-const MATERIALS_VERSION_TTL_MS = 60_000; // 60 seconds
+let inFlightVersionPromise: Promise<number> | null = null;
+const MATERIALS_VERSION_TTL_MS = 300_000; // 5 minutes
 
 export function invalidateMaterialsVersionCache(): void {
   cachedMaterialsVersion = null;
+  inFlightVersionPromise = null;
 }
 
 /**
  * Fetches the current materials version number from Cloud Firestore.
- * Caches in memory for 60 seconds to protect daily read quotas.
+ * Caches in memory for 5 minutes and uses single-flight promise deduplication
+ * to protect daily Firestore read quotas.
  * Defaults to 1 if not set or on network failure.
  */
 export async function getMaterialsVersionFromFirestore(): Promise<number> {
@@ -121,23 +124,33 @@ export async function getMaterialsVersionFromFirestore(): Promise<number> {
     return cachedMaterialsVersion.version;
   }
 
-  const db = getFirestoreDb();
-  if (!db) return cachedMaterialsVersion?.version || 1;
-
-  try {
-    const docRef = doc(db, MATERIALS_VERSION_COLLECTION, MATERIALS_VERSION_DOC_ID);
-    const snap = await getDoc(docRef);
-    if (snap.exists()) {
-      const data = snap.data();
-      const val = typeof data?.version === 'number' ? data.version : Number(data?.version);
-      const version = Number.isFinite(val) && val > 0 ? val : 1;
-      cachedMaterialsVersion = { version, expiresAt: now + MATERIALS_VERSION_TTL_MS };
-      return version;
-    }
-  } catch (err) {
-    console.warn('[Firestore] Failed to fetch materials version, falling back to cached or 1:', err);
+  if (inFlightVersionPromise) {
+    return inFlightVersionPromise;
   }
-  return cachedMaterialsVersion?.version || 1;
+
+  inFlightVersionPromise = (async () => {
+    const db = getFirestoreDb();
+    if (!db) return cachedMaterialsVersion?.version || 1;
+
+    try {
+      const docRef = doc(db, MATERIALS_VERSION_COLLECTION, MATERIALS_VERSION_DOC_ID);
+      const snap = await getDoc(docRef);
+      if (snap.exists()) {
+        const data = snap.data();
+        const val = typeof data?.version === 'number' ? data.version : Number(data?.version);
+        const version = Number.isFinite(val) && val > 0 ? val : 1;
+        cachedMaterialsVersion = { version, expiresAt: Date.now() + MATERIALS_VERSION_TTL_MS };
+        return version;
+      }
+    } catch (err) {
+      console.warn('[Firestore] Failed to fetch materials version, falling back to cached or 1:', err);
+    }
+    return cachedMaterialsVersion?.version || 1;
+  })().finally(() => {
+    inFlightVersionPromise = null;
+  });
+
+  return inFlightVersionPromise;
 }
 
 /**

@@ -105,3 +105,23 @@ test('Catalogue cache end-to-end version invalidation', async () => {
   assert.equal(fourthResult.length, 2);
   assert.equal(firestoreReads, 2);
 });
+
+test('getMaterialsVersionFromFirestore handles concurrent calls with single-flight promise', async () => {
+  const { getMaterialsVersionFromFirestore, invalidateMaterialsVersionCache } = await import('../src/firebase/firestore.ts');
+  invalidateMaterialsVersionCache();
+
+  // Call 5 times concurrently
+  const versions = await Promise.all([
+    getMaterialsVersionFromFirestore(),
+    getMaterialsVersionFromFirestore(),
+    getMaterialsVersionFromFirestore(),
+    getMaterialsVersionFromFirestore(),
+    getMaterialsVersionFromFirestore()
+  ]);
+
+  assert.equal(versions.length, 5);
+  for (const v of versions) {
+    assert.equal(typeof v, 'number');
+    assert.ok(v >= 1);
+  }
+});

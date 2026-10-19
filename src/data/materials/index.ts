@@ -2,16 +2,18 @@ import type { MaterialItem, AcademicYear } from '../../types/materials';
 import { getPublicMaterials } from '../catalogue.server';
 import { getAllModules } from '../modules';
 import { subjectToSlug } from '../../utils/slug';
+import { getMaterialsVersionFromFirestore } from '../../firebase/firestore';
 
 const isReferenceModuleId = (moduleId?: string): boolean =>
   Boolean(moduleId && /^year\d+-reference-books$/.test(moduleId));
 
-// One pending read per runtime, including concurrent page/component renders.
-const loadMaterials = getPublicMaterials;
-
 /** Fetch the public catalogue from Firestore with a bounded runtime cache. Hides second semester materials. */
-export async function getAllMaterials(): Promise<MaterialItem[]> {
-  const [materials, activeModules] = await Promise.all([loadMaterials(), getAllModules()]);
+export async function getAllMaterials(version?: number): Promise<MaterialItem[]> {
+  const resolvedVersion = version ?? (await getMaterialsVersionFromFirestore());
+  const [materials, activeModules] = await Promise.all([
+    getPublicMaterials(resolvedVersion),
+    getAllModules(resolvedVersion)
+  ]);
   const activeModuleIds = new Set(activeModules.map((m) => m.id));
 
   return materials.filter((item) => {
@@ -33,8 +35,8 @@ export async function getAllMaterials(): Promise<MaterialItem[]> {
 /**
  * Filter materials by academic year from Firestore.
  */
-export async function getMaterialsByYear(year: AcademicYear): Promise<MaterialItem[]> {
-  const materials = await getAllMaterials();
+export async function getMaterialsByYear(year: AcademicYear, version?: number): Promise<MaterialItem[]> {
+  const materials = await getAllMaterials(version);
   return materials.filter((item) => {
     if (isReferenceModuleId(item.moduleId)) {
       return true;
@@ -46,8 +48,8 @@ export async function getMaterialsByYear(year: AcademicYear): Promise<MaterialIt
 /**
  * Filter materials by curriculum module ID from Firestore.
  */
-export async function getMaterialsByModule(moduleId: string): Promise<MaterialItem[]> {
-  const materials = await getAllMaterials();
+export async function getMaterialsByModule(moduleId: string, version?: number): Promise<MaterialItem[]> {
+  const materials = await getAllMaterials(version);
   if (isReferenceModuleId(moduleId)) {
     return materials.filter((item) => isReferenceModuleId(item.moduleId));
   }
@@ -59,10 +61,11 @@ export async function getMaterialsByModule(moduleId: string): Promise<MaterialIt
  */
 export async function getMaterialsByModuleAndSubject(
   moduleId: string,
-  subject: string
+  subject: string,
+  version?: number
 ): Promise<MaterialItem[]> {
   const targetSlug = subjectToSlug(subject);
-  const materials = await getAllMaterials();
+  const materials = await getAllMaterials(version);
 
   if (isReferenceModuleId(moduleId)) {
     return materials.filter(
@@ -78,16 +81,16 @@ export async function getMaterialsByModuleAndSubject(
 /**
  * Retrieve all video playlists from Firestore.
  */
-export async function getAllPlaylists(): Promise<MaterialItem[]> {
-  const materials = await getAllMaterials();
+export async function getAllPlaylists(version?: number): Promise<MaterialItem[]> {
+  const materials = await getAllMaterials(version);
   return materials.filter((item) => item.type === 'playlist' || Boolean(item.playlistId) || Boolean(item.videos));
 }
 
 /**
  * Retrieve a single video playlist by ID from Firestore.
  */
-export async function getPlaylistById(id: string): Promise<MaterialItem | null> {
-  const material = (await getAllMaterials()).find((item) => item.id === id);
+export async function getPlaylistById(id: string, version?: number): Promise<MaterialItem | null> {
+  const material = (await getAllMaterials(version)).find((item) => item.id === id);
   if (material && (material.type === 'playlist' || Boolean(material.playlistId) || Boolean(material.videos))) {
     return material;
   }
@@ -97,8 +100,8 @@ export async function getPlaylistById(id: string): Promise<MaterialItem | null> 
 /**
  * Retrieve a single material by ID from Firestore.
  */
-export async function getMaterialById(id: string): Promise<MaterialItem | null> {
-  const material = (await getAllMaterials()).find((item) => item.id === id);
+export async function getMaterialById(id: string, version?: number): Promise<MaterialItem | null> {
+  const material = (await getAllMaterials(version)).find((item) => item.id === id);
   if (material) return material;
   return null;
 }

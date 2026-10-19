@@ -3,18 +3,20 @@ import Layout from '../../layouts/Layout.astro';
 import ResourceGrid from '../../components/materials/ResourceGrid.astro';
 import { getCollectionById } from '../../data/collections';
 import { getModuleById } from '../../data/modules';
+import { getMaterialsVersionFromFirestore } from '../../firebase/firestore';
 
 const { id } = Astro.params;
 if (!id) {
   return Astro.redirect('/404');
 }
 
-const collection = await getCollectionById(id);
+const version = await getMaterialsVersionFromFirestore();
+const collection = await getCollectionById(id, version);
 if (!collection) {
   return Astro.redirect('/404');
 }
 
-const moduleInfo = collection.moduleId ? await getModuleById(collection.moduleId) : undefined;
+const moduleInfo = collection.moduleId ? await getModuleById(collection.moduleId, version) : undefined;
 const pageTitle = `${collection.titleEn || collection.title} - mediX`;
 const pageDesc = collection.descriptionEn || collection.description || 'Curated study collection for Ain Shams University Faculty of Medicine.';
 

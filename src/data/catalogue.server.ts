@@ -48,8 +48,8 @@ const internalMaterialsLoader = createTimedLoader((version?: number) =>
  * Checks /materials_version/current from Firestore; if the stored cache snapshot
  * matches this version, serves from cache without materials collection reads.
  */
-export const getPublicMaterials = async (): Promise<MaterialItem[]> => {
-  const currentVersion = await getMaterialsVersionFromFirestore();
+export const getPublicMaterials = async (version?: number): Promise<MaterialItem[]> => {
+  const currentVersion = version ?? (await getMaterialsVersionFromFirestore());
   return internalMaterialsLoader(currentVersion);
 };
 
@@ -62,8 +62,8 @@ const internalModulesLoader = createTimedLoader((version?: number) =>
   loadModulesSnapshot(version || 1)
 );
 
-export const getPublicModules = async (): Promise<ModuleInfo[]> => {
-  const currentVersion = await getMaterialsVersionFromFirestore();
+export const getPublicModules = async (version?: number): Promise<ModuleInfo[]> => {
+  const currentVersion = version ?? (await getMaterialsVersionFromFirestore());
   return internalModulesLoader(currentVersion);
 };
 
@@ -72,5 +72,7 @@ const isLesson = (value: unknown): value is Lesson => Boolean(value && typeof va
   typeof (value as Lesson).subject === 'string');
 const internalLessonsLoader = createTimedLoader((version?: number) =>
   loadCachedCatalogue(getActiveCacheStore(), 'lessons', () => fetchLessonsFromFirestore(true), isLesson, version || 1));
-export const getPublicLessons = async (): Promise<Lesson[]> =>
-  internalLessonsLoader(await getMaterialsVersionFromFirestore());
+export const getPublicLessons = async (version?: number): Promise<Lesson[]> => {
+  const currentVersion = version ?? (await getMaterialsVersionFromFirestore());
+  return internalLessonsLoader(currentVersion);
+};

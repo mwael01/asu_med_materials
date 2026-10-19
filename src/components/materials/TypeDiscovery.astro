@@ -3,6 +3,7 @@ import type { DiscoveryType } from '../../types/lessons';
 import { getAllMaterials } from '../../data/materials';
 import { getAllModules } from '../../data/modules';
 import { getPublicLessons } from '../../data/catalogue.server';
+import { getMaterialsVersionFromFirestore } from '../../firebase/firestore';
 import { matchesDiscoveryType } from '../../utils/studyContent';
 import ModuleDirectory from './ModuleDirectory.astro';
 import SavedYearScope from './SavedYearScope.astro';
@@ -10,10 +11,11 @@ import SavedYearScope from './SavedYearScope.astro';
 interface Props { type: DiscoveryType }
 const { type } = Astro.props;
 
+const version = await getMaterialsVersionFromFirestore();
 const [materials, modules, lessons] = await Promise.all([
-  getAllMaterials(),
-  getAllModules(),
-  getPublicLessons()
+  getAllMaterials(version),
+  getAllModules(version),
+  getPublicLessons(version)
 ]);
 
 // Filter modules for each year: only modules that contain active lessons with materials matching `type`

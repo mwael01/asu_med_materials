@@ -8,6 +8,7 @@ import Toast from '../components/common/Toast.astro';
 import PwaInstallToast from '../components/pwa/PwaInstallToast.astro';
 import Analytics from '@vercel/analytics/astro';
 import { RECAPTCHA_ENTERPRISE_SITE_KEY } from '../firebase/app-check';
+import { getMaterialsVersionFromFirestore } from '../firebase/firestore';
 import { ClientRouter } from 'astro:transitions';
 
 interface Props {
@@ -19,6 +20,8 @@ const {
   title = 'mediX - All-in-one Medical Study Hub',
   description = 'Batch drives, Telegram channels, YouTube lectures, and study notes for Ain Shams University Faculty of Medicine.'
 } = Astro.props;
+
+const catalogueVersion = await getMaterialsVersionFromFirestore();
 ---
 
 <!doctype html>
@@ -36,6 +39,7 @@ const {
     <meta name="format-detection" content="telephone=no" />
     <meta name="theme-color" content="#09090b" />
     <meta name="generator" content={Astro.generator} />
+    <meta name="catalogue-version" content={String(catalogueVersion)} />
     <title>{title}</title>
     <meta name="description" content={description} />
     <ClientRouter />

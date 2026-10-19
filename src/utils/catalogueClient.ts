@@ -13,11 +13,50 @@ declare global {
 }
 
 const STORAGE_KEY = 'asumed_catalogue_snapshot';
+const MODULES_STORAGE_KEY = 'asumed_modules_snapshot';
+const LESSONS_STORAGE_KEY = 'asumed_lessons_snapshot';
+const COLLECTIONS_STORAGE_KEY = 'asumed_collections_snapshot';
+
 const SNAPSHOT_EXPIRY_MS = 1000 * 60 * 30; // 30 minutes
 
 interface StoragePayload {
   timestamp: number;
+  version?: number;
   materials: MaterialItem[];
+}
+
+interface ModulesStoragePayload {
+  timestamp: number;
+  version?: number;
+  modules: ModuleInfo[];
+}
+
+interface LessonsStoragePayload {
+  timestamp: number;
+  version?: number;
+  lessons: Lesson[];
+}
+
+interface CollectionsStoragePayload {
+  timestamp: number;
+  collections: MaterialCollection[];
+}
+
+// Single-flight in-flight request locks to prevent duplicate network calls
+let materialsFetchPromise: Promise<MaterialItem[]> | null = null;
+let modulesFetchPromise: Promise<ModuleInfo[]> | null = null;
+let lessonsFetchPromise: Promise<Lesson[]> | null = null;
+let collectionsFetchPromise: Promise<MaterialCollection[]> | null = null;
+
+/**
+ * Reads the server-rendered catalogue version from the HTML document meta tag.
+ */
+export function getPageCatalogueVersion(): number | null {
+  if (typeof document === 'undefined') return null;
+  const meta = document.querySelector('meta[name="catalogue-version"]');
+  if (!meta) return null;
+  const val = parseInt(meta.getAttribute('content') || '', 10);
+  return Number.isFinite(val) && val > 0 ? val : null;
 }
 
 /**
@@ -40,16 +79,31 @@ export async function getClientMaterials(): Promise<MaterialItem[]> {
   let cachedPayload: StoragePayload | null = null;
   if (typeof window !== 'undefined' && window.localStorage) {
     try {
-      const raw = localStorage.getItem(STORAGE_KEY);
+      const raw = window.localStorage.getItem(STORAGE_KEY);
       if (raw) {
         cachedPayload = JSON.parse(raw);
         if (cachedPayload && Array.isArray(cachedPayload.materials) && cachedPayload.materials.length > 0) {
           window.__CACHED_MATERIALS = cachedPayload.materials;
 
-          // If snapshot is still relatively fresh, return it and revalidate asynchronously
+          const pageVersion = getPageCatalogueVersion();
+          // If stored version matches current page version, data is 100% up to date - NO network calls!
+          if (pageVersion && cachedPayload.version === pageVersion) {
+            return cachedPayload.materials;
+          }
+
           const isFresh = Date.now() - cachedPayload.timestamp < SNAPSHOT_EXPIRY_MS;
-          if (isFresh) {
+          // If fresh and no newer version indicated, return immediately without network fetch
+          if (isFresh && (!pageVersion || cachedPayload.version === pageVersion)) {
+            return cachedPayload.materials;
+          }
+
+          // If newer version exists on server, serve cached immediately and refresh in background once
+          if (pageVersion && cachedPayload.version && cachedPayload.version < pageVersion) {
             void revalidateCatalogueInBackground();
+            return cachedPayload.materials;
+          }
+
+          if (isFresh) {
             return cachedPayload.materials;
           }
         }
@@ -60,56 +114,48 @@ export async function getClientMaterials(): Promise<MaterialItem[]> {
   }
 
   // 3. Fetch from /api/materials (intercepted by Service Worker offline cache)
-  try {
-    const res = await fetch('/api/materials');
-    if (res.ok) {
-      const data: MaterialItem[] = await res.json();
-      if (Array.isArray(data) && data.length > 0) {
-        if (typeof window !== 'undefined') {
-          window.__CACHED_MATERIALS = data;
-          try {
-            const payload: StoragePayload = { timestamp: Date.now(), materials: data };
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
-          } catch {
-            // Storage quota exceeded or disabled
-          }
-        }
-        return data;
-      }
-    }
-  } catch {
-    // Network failure / offline
-  }
-
-  // If fetch failed but we had a stale snapshot, return stale snapshot
-  if (cachedPayload && Array.isArray(cachedPayload.materials)) {
-    return cachedPayload.materials;
-  }
-
-  return [];
+  return revalidateCatalogueInBackground(cachedPayload?.materials);
 }
 
 /**
  * Asynchronously refreshes the client materials snapshot in the background.
+ * Uses single-flight locking to avoid duplicate concurrent fetches.
  */
-async function revalidateCatalogueInBackground(): Promise<void> {
-  try {
-    const res = await fetch('/api/materials');
-    if (res.ok) {
-      const data: MaterialItem[] = await res.json();
-      if (Array.isArray(data) && data.length > 0 && typeof window !== 'undefined') {
-        window.__CACHED_MATERIALS = data;
-        const payload: StoragePayload = { timestamp: Date.now(), materials: data };
-        try {
-          localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
-        } catch {
-          // Ignore storage quota error
+export async function revalidateCatalogueInBackground(fallback?: MaterialItem[]): Promise<MaterialItem[]> {
+  if (materialsFetchPromise) return materialsFetchPromise;
+
+  materialsFetchPromise = (async () => {
+    try {
+      const res = await fetch('/api/materials');
+      if (res.ok) {
+        const data: MaterialItem[] = await res.json();
+        if (Array.isArray(data) && data.length > 0) {
+          if (typeof window !== 'undefined') {
+            window.__CACHED_MATERIALS = data;
+            const pageVersion = getPageCatalogueVersion() || 1;
+            const payload: StoragePayload = {
+              timestamp: Date.now(),
+              version: pageVersion,
+              materials: data
+            };
+            try {
+              window.localStorage?.setItem(STORAGE_KEY, JSON.stringify(payload));
+            } catch {
+              // Ignore storage quota error
+            }
+          }
+          return data;
         }
       }
+    } catch {
+      // Network failure / offline
     }
-  } catch {
-    // Ignore background revalidation errors
-  }
+    return fallback || [];
+  })().finally(() => {
+    materialsFetchPromise = null;
+  });
+
+  return materialsFetchPromise;
 }
 
 /**
@@ -123,15 +169,12 @@ export async function getClientMaterialsByIds(ids: string[]): Promise<MaterialIt
 }
 
 /**
- * Resolves a single material ID to a MaterialItem object using the client catalogue.
+ * Resolves a single material ID to a MaterialItem object.
  */
 export async function getClientMaterialById(id: string): Promise<MaterialItem | null> {
-  if (!id) return null;
   const materials = await getClientMaterials();
   return materials.find((m) => m.id === id) || null;
 }
-
-const COLLECTIONS_STORAGE_KEY = 'asumed_collections_snapshot';
 
 /**
  * Loads collections from in-memory cache, local snapshot, or /api/collections endpoint.
@@ -144,17 +187,17 @@ export async function getClientCollections(): Promise<MaterialCollection[]> {
   }
 
   // Local storage check
+  let cachedPayload: CollectionsStoragePayload | null = null;
   if (typeof window !== 'undefined' && window.localStorage) {
     try {
-      const raw = localStorage.getItem(COLLECTIONS_STORAGE_KEY);
+      const raw = window.localStorage.getItem(COLLECTIONS_STORAGE_KEY);
       if (raw) {
-        const payload = JSON.parse(raw);
-        if (payload && Array.isArray(payload.collections) && payload.collections.length > 0) {
-          window.__CACHED_COLLECTIONS = payload.collections;
-          const isFresh = Date.now() - payload.timestamp < SNAPSHOT_EXPIRY_MS;
+        cachedPayload = JSON.parse(raw);
+        if (cachedPayload && Array.isArray(cachedPayload.collections) && cachedPayload.collections.length > 0) {
+          window.__CACHED_COLLECTIONS = cachedPayload.collections;
+          const isFresh = Date.now() - cachedPayload.timestamp < SNAPSHOT_EXPIRY_MS;
           if (isFresh) {
-            void revalidateCollectionsInBackground();
-            return payload.collections;
+            return cachedPayload.collections;
           }
         }
       }
@@ -162,38 +205,35 @@ export async function getClientCollections(): Promise<MaterialCollection[]> {
   }
 
   // Fetch /api/collections
-  try {
-    const res = await fetch('/api/collections');
-    if (res.ok) {
-      const data: MaterialCollection[] = await res.json();
-      if (Array.isArray(data)) {
-        if (typeof window !== 'undefined') {
-          window.__CACHED_COLLECTIONS = data;
-          try {
-            localStorage.setItem(COLLECTIONS_STORAGE_KEY, JSON.stringify({ timestamp: Date.now(), collections: data }));
-          } catch {}
-        }
-        return data;
-      }
-    }
-  } catch {}
-
-  return [];
+  return revalidateCollectionsInBackground(cachedPayload?.collections);
 }
 
-async function revalidateCollectionsInBackground(): Promise<void> {
-  try {
-    const res = await fetch('/api/collections');
-    if (res.ok) {
-      const data: MaterialCollection[] = await res.json();
-      if (Array.isArray(data) && typeof window !== 'undefined') {
-        window.__CACHED_COLLECTIONS = data;
-        try {
-          localStorage.setItem(COLLECTIONS_STORAGE_KEY, JSON.stringify({ timestamp: Date.now(), collections: data }));
-        } catch {}
+export async function revalidateCollectionsInBackground(fallback?: MaterialCollection[]): Promise<MaterialCollection[]> {
+  if (collectionsFetchPromise) return collectionsFetchPromise;
+
+  collectionsFetchPromise = (async () => {
+    try {
+      const res = await fetch('/api/collections');
+      if (res.ok) {
+        const data: MaterialCollection[] = await res.json();
+        if (Array.isArray(data)) {
+          if (typeof window !== 'undefined') {
+            window.__CACHED_COLLECTIONS = data;
+            const payload: CollectionsStoragePayload = { timestamp: Date.now(), collections: data };
+            try {
+              window.localStorage.setItem(COLLECTIONS_STORAGE_KEY, JSON.stringify(payload));
+            } catch {}
+          }
+          return data;
+        }
       }
-    }
-  } catch {}
+    } catch {}
+    return fallback || [];
+  })().finally(() => {
+    collectionsFetchPromise = null;
+  });
+
+  return collectionsFetchPromise;
 }
 
 /**
@@ -213,13 +253,6 @@ export async function getClientCollectionById(id: string): Promise<MaterialColle
   if (!id) return null;
   const collections = await getClientCollections();
   return collections.find((c) => c.id === id) || null;
-}
-
-const MODULES_STORAGE_KEY = 'asumed_modules_snapshot';
-
-interface ModulesStoragePayload {
-  timestamp: number;
-  modules: ModuleInfo[];
 }
 
 /**
@@ -242,9 +275,23 @@ export async function getClientModules(): Promise<ModuleInfo[]> {
         cachedPayload = JSON.parse(raw);
         if (cachedPayload && Array.isArray(cachedPayload.modules) && cachedPayload.modules.length > 0) {
           window.__CACHED_MODULES = cachedPayload.modules;
+
+          const pageVersion = getPageCatalogueVersion();
+          if (pageVersion && cachedPayload.version === pageVersion) {
+            return cachedPayload.modules;
+          }
+
           const isFresh = Date.now() - cachedPayload.timestamp < SNAPSHOT_EXPIRY_MS;
-          if (isFresh) {
+          if (isFresh && (!pageVersion || cachedPayload.version === pageVersion)) {
+            return cachedPayload.modules;
+          }
+
+          if (pageVersion && cachedPayload.version && cachedPayload.version < pageVersion) {
             void revalidateModulesInBackground();
+            return cachedPayload.modules;
+          }
+
+          if (isFresh) {
             return cachedPayload.modules;
           }
         }
@@ -252,46 +299,41 @@ export async function getClientModules(): Promise<ModuleInfo[]> {
     } catch {}
   }
 
-  // 3. Fetch from /api/modules (intercepted by Service Worker offline cache)
-  try {
-    const res = await fetch('/api/modules');
-    if (res.ok) {
-      const data: ModuleInfo[] = await res.json();
-      if (Array.isArray(data) && data.length > 0) {
-        if (typeof window !== 'undefined') {
-          window.__CACHED_MODULES = data;
-          try {
-            const payload: ModulesStoragePayload = { timestamp: Date.now(), modules: data };
-            window.localStorage?.setItem(MODULES_STORAGE_KEY, JSON.stringify(payload));
-          } catch {}
-        }
-        return data;
-      }
-    }
-  } catch {}
-
-  // Fallback to stale snapshot if fetch failed (e.g. offline)
-  if (cachedPayload && Array.isArray(cachedPayload.modules)) {
-    return cachedPayload.modules;
-  }
-
-  return [];
+  // 3. Fetch from /api/modules
+  return revalidateModulesInBackground(cachedPayload?.modules);
 }
 
-async function revalidateModulesInBackground(): Promise<void> {
-  try {
-    const res = await fetch('/api/modules');
-    if (res.ok) {
-      const data: ModuleInfo[] = await res.json();
-      if (Array.isArray(data) && typeof window !== 'undefined') {
-        window.__CACHED_MODULES = data;
-        const payload: ModulesStoragePayload = { timestamp: Date.now(), modules: data };
-        try {
-          window.localStorage?.setItem(MODULES_STORAGE_KEY, JSON.stringify(payload));
-        } catch {}
+export async function revalidateModulesInBackground(fallback?: ModuleInfo[]): Promise<ModuleInfo[]> {
+  if (modulesFetchPromise) return modulesFetchPromise;
+
+  modulesFetchPromise = (async () => {
+    try {
+      const res = await fetch('/api/modules');
+      if (res.ok) {
+        const data: ModuleInfo[] = await res.json();
+        if (Array.isArray(data) && data.length > 0) {
+          if (typeof window !== 'undefined') {
+            window.__CACHED_MODULES = data;
+            const pageVersion = getPageCatalogueVersion() || 1;
+            const payload: ModulesStoragePayload = {
+              timestamp: Date.now(),
+              version: pageVersion,
+              modules: data
+            };
+            try {
+              window.localStorage?.setItem(MODULES_STORAGE_KEY, JSON.stringify(payload));
+            } catch {}
+          }
+          return data;
+        }
       }
-    }
-  } catch {}
+    } catch {}
+    return fallback || [];
+  })().finally(() => {
+    modulesFetchPromise = null;
+  });
+
+  return modulesFetchPromise;
 }
 
 /**
@@ -301,13 +343,6 @@ export async function getClientModuleById(id: string): Promise<ModuleInfo | null
   if (!id) return null;
   const modules = await getClientModules();
   return modules.find((m) => m.id === id) || null;
-}
-
-const LESSONS_STORAGE_KEY = 'asumed_lessons_snapshot';
-
-interface LessonsStoragePayload {
-  timestamp: number;
-  lessons: Lesson[];
 }
 
 /**
@@ -330,9 +365,23 @@ export async function getClientLessons(): Promise<Lesson[]> {
         cachedPayload = JSON.parse(raw);
         if (cachedPayload && Array.isArray(cachedPayload.lessons) && cachedPayload.lessons.length > 0) {
           window.__CACHED_LESSONS = cachedPayload.lessons;
+
+          const pageVersion = getPageCatalogueVersion();
+          if (pageVersion && cachedPayload.version === pageVersion) {
+            return cachedPayload.lessons;
+          }
+
           const isFresh = Date.now() - cachedPayload.timestamp < SNAPSHOT_EXPIRY_MS;
-          if (isFresh) {
+          if (isFresh && (!pageVersion || cachedPayload.version === pageVersion)) {
+            return cachedPayload.lessons;
+          }
+
+          if (pageVersion && cachedPayload.version && cachedPayload.version < pageVersion) {
             void revalidateLessonsInBackground();
+            return cachedPayload.lessons;
+          }
+
+          if (isFresh) {
             return cachedPayload.lessons;
           }
         }
@@ -340,52 +389,47 @@ export async function getClientLessons(): Promise<Lesson[]> {
     } catch {}
   }
 
-  // 3. Fetch from /api/lessons (intercepted by Service Worker offline cache)
-  try {
-    const res = await fetch('/api/lessons');
-    if (res.ok) {
-      const data: Lesson[] = await res.json();
-      if (Array.isArray(data) && data.length > 0) {
-        if (typeof window !== 'undefined') {
-          window.__CACHED_LESSONS = data;
-          try {
-            const payload: LessonsStoragePayload = { timestamp: Date.now(), lessons: data };
-            window.localStorage?.setItem(LESSONS_STORAGE_KEY, JSON.stringify(payload));
-          } catch {}
-        }
-        return data;
-      }
-    }
-  } catch {}
-
-  // Fallback to stale snapshot if fetch failed (e.g. offline)
-  if (cachedPayload && Array.isArray(cachedPayload.lessons)) {
-    return cachedPayload.lessons;
-  }
-
-  return [];
+  // 3. Fetch from /api/lessons
+  return revalidateLessonsInBackground(cachedPayload?.lessons);
 }
 
-async function revalidateLessonsInBackground(): Promise<void> {
-  try {
-    const res = await fetch('/api/lessons');
-    if (res.ok) {
-      const data: Lesson[] = await res.json();
-      if (Array.isArray(data) && typeof window !== 'undefined') {
-        window.__CACHED_LESSONS = data;
-        const payload: LessonsStoragePayload = { timestamp: Date.now(), lessons: data };
-        try {
-          window.localStorage?.setItem(LESSONS_STORAGE_KEY, JSON.stringify(payload));
-        } catch {}
+export async function revalidateLessonsInBackground(fallback?: Lesson[]): Promise<Lesson[]> {
+  if (lessonsFetchPromise) return lessonsFetchPromise;
+
+  lessonsFetchPromise = (async () => {
+    try {
+      const res = await fetch('/api/lessons');
+      if (res.ok) {
+        const data: Lesson[] = await res.json();
+        if (Array.isArray(data) && data.length > 0) {
+          if (typeof window !== 'undefined') {
+            window.__CACHED_LESSONS = data;
+            const pageVersion = getPageCatalogueVersion() || 1;
+            const payload: LessonsStoragePayload = {
+              timestamp: Date.now(),
+              version: pageVersion,
+              lessons: data
+            };
+            try {
+              window.localStorage?.setItem(LESSONS_STORAGE_KEY, JSON.stringify(payload));
+            } catch {}
+          }
+          return data;
+        }
       }
-    }
-  } catch {}
+    } catch {}
+    return fallback || [];
+  })().finally(() => {
+    lessonsFetchPromise = null;
+  });
+
+  return lessonsFetchPromise;
 }
 
 /**
- * Eagerly restores all catalogue snapshots from localStorage into in-memory window cache
- * and initiates non-blocking background revalidation. Guarantees instant 0ms access to
- * materials, modules, and lessons everywhere across the site.
+ * Eagerly restores all catalogue snapshots from localStorage into in-memory window cache.
+ * Guarantees instant 0ms access to materials, modules, and lessons everywhere across the site.
+ * Does NOT spam network requests when the stored version matches the current page version.
  */
 export function warmupCatalogueCache(): void {
   if (typeof window === 'undefined') return;
@@ -442,11 +486,17 @@ export function warmupCatalogueCache(): void {
     } catch {}
   }
 
-  // 5. Trigger background fetch / revalidation if needed
-  void getClientModules();
-  void getClientMaterials();
-  void getClientLessons();
+  // 5. Version-driven revalidation: only refresh in background if page reports a newer version
+  const pageVersion = getPageCatalogueVersion();
+  if (pageVersion) {
+    try {
+      const matRaw = window.localStorage?.getItem(STORAGE_KEY);
+      const matPayload = matRaw ? JSON.parse(matRaw) : null;
+      if (!matPayload || !matPayload.version || matPayload.version < pageVersion) {
+        void revalidateCatalogueInBackground();
+        void revalidateModulesInBackground();
+        void revalidateLessonsInBackground();
+      }
+    } catch {}
+  }
 }
-
-
-

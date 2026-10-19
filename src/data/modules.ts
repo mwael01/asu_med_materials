@@ -18,8 +18,8 @@ export const REFERENCE_BOOK_SUBJECTS: string[] = [
 const loadModules = getPublicModules;
 
 /** Fetch all modules; reuse the same pending read across SSR components. */
-export async function getAllModules(): Promise<ModuleInfo[]> {
-  const list = await loadModules();
+export async function getAllModules(version?: number): Promise<ModuleInfo[]> {
+  const list = await loadModules(version);
   return list.sort((a, b) => (a.order ?? 99) - (b.order ?? 99));
 }
 
@@ -28,8 +28,8 @@ export async function getAllModules(): Promise<ModuleInfo[]> {
  * Resolves the currently studied active module for an academic year.
  * If a module explicitly has active: true, it is selected; otherwise falls back to the first module in order.
  */
-export async function getActiveModuleForYear(year: number): Promise<ModuleInfo | null> {
-  const modules = await getAllModules();
+export async function getActiveModuleForYear(year: number, version?: number): Promise<ModuleInfo | null> {
+  const modules = await getAllModules(version);
   return resolveActiveModule(modules, year);
 }
 
@@ -51,16 +51,16 @@ export async function getAllModulesIncludingInactive(): Promise<ModuleInfo[]> {
 /**
  * Filter curriculum modules by academic year directly from Firestore.
  */
-export async function getModulesByYear(year: number): Promise<ModuleInfo[]> {
-  const modules = await getAllModules();
+export async function getModulesByYear(year: number, version?: number): Promise<ModuleInfo[]> {
+  const modules = await getAllModules(version);
   return modules.filter((m) => m.year === year);
 }
 
 /**
  * Fetch a single module by ID from Cloud Firestore.
  */
-export async function getModuleById(id: string): Promise<ModuleInfo | null> {
-  const mod = (await getAllModules()).find((module) => module.id === id);
+export async function getModuleById(id: string, version?: number): Promise<ModuleInfo | null> {
+  const mod = (await getAllModules(version)).find((module) => module.id === id);
   if (mod) return mod;
   return null;
 }

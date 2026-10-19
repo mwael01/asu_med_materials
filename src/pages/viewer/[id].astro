@@ -4,6 +4,7 @@ import TypeBadge from '../../components/materials/TypeBadge.astro';
 import ResourceCard from '../../components/materials/ResourceCard.astro';
 import { getMaterialById, getMaterialsByModule } from '../../data/materials';
 import { getModuleById } from '../../data/modules';
+import { getMaterialsVersionFromFirestore } from '../../firebase/firestore';
 import { subjectToSlug } from '../../utils/slug';
 import {
   getDocumentEmbedUrl,
@@ -18,7 +19,8 @@ if (!id) {
   return Astro.redirect('/?redirect=false');
 }
 
-const material = await getMaterialById(id);
+const version = await getMaterialsVersionFromFirestore();
+const material = await getMaterialById(id, version);
 if (!material) {
   return Astro.redirect('/?redirect=false');
 }
@@ -58,7 +60,7 @@ if (!embedUrl && !isBundle) {
 }
 
 const externalUrl = initialDoc.externalUrl || getDocumentExternalUrl(material.url);
-const moduleInfo = material.moduleId ? await getModuleById(material.moduleId) : undefined;
+const moduleInfo = material.moduleId ? await getModuleById(material.moduleId, version) : undefined;
 
 const titleEn = material.titleEn || material.title;
 const descEn = material.descriptionEn || material.description;
@@ -74,7 +76,7 @@ const authorText = rawAuthors.join(', ');
 // Related materials in the same module / subject
 let relatedMaterials: typeof material[] = [];
 if (material.moduleId) {
-  const moduleMaterials = await getMaterialsByModule(material.moduleId);
+  const moduleMaterials = await getMaterialsByModule(material.moduleId, version);
   relatedMaterials = moduleMaterials
     .filter((m) => m.id !== material.id)
     .sort((a, b) => {

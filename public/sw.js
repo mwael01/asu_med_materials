@@ -1,7 +1,7 @@
 // Service Worker for ASU Med Materials PWA
 // Cache visited pages for offline access without fetching the entire catalogue.
 
-const CACHE_NAME = 'asumed-cache-v8';
+const CACHE_NAME = 'asumed-cache-v9';
 
 // 1. Static brand assets, icons, core navigation routes, and catalogue APIs
 const PRECACHE_ASSETS = [
@@ -32,7 +32,8 @@ const PRECACHE_ASSETS = [
   '/api/materials',
   '/api/modules',
   '/api/lessons',
-  '/api/collections'
+  '/api/collections',
+  '/api/version'
 ];
 
 // Helper: fetch with network timeout
@@ -160,7 +161,8 @@ self.addEventListener('fetch', (event) => {
     url.pathname === '/api/materials' ||
     url.pathname === '/api/modules' ||
     url.pathname === '/api/lessons' ||
-    url.pathname === '/api/collections'
+    url.pathname === '/api/collections' ||
+    url.pathname === '/api/version'
   ) {
     event.respondWith(
       (async () => {
@@ -181,7 +183,8 @@ self.addEventListener('fetch', (event) => {
         const networkRes = await fetchPromise;
         if (networkRes) return networkRes;
 
-        return new Response('[]', {
+        const fallbackBody = url.pathname === '/api/version' ? '{"version":1}' : '[]';
+        return new Response(fallbackBody, {
           status: 200,
           headers: { 'Content-Type': 'application/json' }
         });

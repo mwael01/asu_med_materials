@@ -92,13 +92,13 @@ function resolveCollectionNode(
  * Retrieves a single collection by ID along with its resolved child materials,
  * parent group trail, and nested subgroups in curated order.
  */
-export async function getCollectionById(id: string): Promise<CollectionWithMaterials | null> {
+export async function getCollectionById(id: string, version?: number): Promise<CollectionWithMaterials | null> {
   if (!id) return null;
   const collections = await getAllCollections();
   const col = collections.find((c) => c.id === id);
   if (!col) return null;
 
-  const allMaterials = await getAllMaterials();
+  const allMaterials = await getAllMaterials(version);
   const materialMap = new Map<string, MaterialItem>();
   for (let i = 0; i < allMaterials.length; i++) {
     materialMap.set(allMaterials[i].id, allMaterials[i]);

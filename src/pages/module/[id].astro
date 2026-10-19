@@ -6,21 +6,23 @@ import SubjectIcon from '../../components/materials/SubjectIcon.astro';
 import { getModuleById } from '../../data/modules';
 import { getMaterialsByModule } from '../../data/materials';
 import { getPublicLessons } from '../../data/catalogue.server';
+import { getMaterialsVersionFromFirestore } from '../../firebase/firestore';
 import { getModuleAppearance } from '../../utils/subjectAppearance';
 import { subjectToSlug } from '../../utils/slug';
 import { lessonsForSubject } from '../../utils/lessons';
 import { matchesDiscoveryType } from '../../utils/studyContent';
 import type { DiscoveryType } from '../../types/lessons';
 
-const module = await getModuleById(Astro.params.id || '');
+const version = await getMaterialsVersionFromFirestore();
+const module = await getModuleById(Astro.params.id || '', version);
 if (!module) return Astro.redirect('/404');
 
 const typeParam = Astro.url.searchParams.get('type');
 const type: DiscoveryType | null = (typeParam === 'videos' || typeParam === 'pdfs' || typeParam === 'flashcards') ? typeParam : null;
 
 const [allLessons, materials] = await Promise.all([
-  getPublicLessons(),
-  getMaterialsByModule(module.id)
+  getPublicLessons(version),
+  getMaterialsByModule(module.id, version)
 ]);
 
 // Filter out unlessoned subjects; if type is active, require matching materials

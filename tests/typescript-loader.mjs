@@ -1,6 +1,12 @@
 import { readFile } from 'node:fs/promises';
 import ts from 'typescript';
 export async function resolve(specifier, context, next) {
+  if (specifier === 'astro:middleware') {
+    return {
+      url: 'data:text/javascript,export function defineMiddleware(fn) { return fn; }',
+      shortCircuit: true
+    };
+  }
   try { return await next(specifier, context); }
   catch (error) {
     if (specifier.startsWith('.') && !/\.(ts|js|mjs|cjs|json)$/i.test(specifier)) return next(`${specifier}.ts`, context);
