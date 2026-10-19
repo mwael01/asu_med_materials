@@ -38,6 +38,11 @@ export async function saveLessonToFirestore(lesson: Lesson): Promise<void> {
   if (assigned.docs.some(item => !materialMatchesLesson(item.data() as MaterialItem, lesson))) {
     throw new Error('Unassign materials before moving this lesson to another module or subject.');
   }
+  const linked = await getDocs(query(collection(db, 'material_lesson_links'), where('lessonId', '==', lesson.id)));
+  const existing = await getDoc(doc(db, 'lessons', lesson.id));
+  if (!linked.empty && existing.exists() && (existing.data().moduleId !== lesson.moduleId || existing.data().subject !== lesson.subject)) {
+    throw new Error('Unassign shared materials before moving this lesson to another module or subject.');
+  }
   await setDoc(doc(db, 'lessons', lesson.id).withConverter(lessonConverter), { ...lesson, title: lesson.title.trim() });
   await incrementMaterialsVersionInFirestore();
 }

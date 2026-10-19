@@ -23,7 +23,7 @@ export interface StudyEntry {
   tab: StudyTab;
   url: string;
   embedUrl: string | null;
-  embedType: 'iframe' | 'video' | 'none';
+  embedType: 'iframe' | 'video' | 'image' | 'none';
   /** Existing playlist progress uses the original video ID. */
   playlistProgress: boolean;
 }

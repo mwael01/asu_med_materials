@@ -7,6 +7,37 @@ import {
   getDocumentExternalUrl,
   getDocumentViewerPath
 } from '../src/utils/documentViewer.ts';
+import { isHostedDocumentUrl, getDocumentDownloadPath } from '../src/utils/documentViewer.ts';
+import { downloadHostedDocument } from '../src/utils/documentDownload.server.ts';
+
+test('downloads stream catalogue files with attachment filenames and do not follow redirects', async () => {
+  const document = { id: 'doc', title: 'ملخص\r\nlung', url: `https://asumed.eduvour.com/materials/sha256/${'a'.repeat(64)}.pdf` };
+  const response = await downloadHostedDocument(document, async (url, options) => {
+    assert.equal(url, document.url);
+    assert.equal(options.redirect, 'error');
+    return new Response('%PDF', { headers: { 'Content-Type': 'application/pdf', 'Content-Length': '4' } });
+  });
+  assert.equal(response.headers.get('Content-Type'), 'application/pdf');
+  assert.equal(response.headers.get('Content-Length'), '4');
+  assert.match(response.headers.get('Content-Disposition'), /^attachment;.*filename\*=UTF-8''/);
+  assert.equal(await response.text(), '%PDF');
+  let fetched = false;
+  assert.equal((await downloadHostedDocument({ ...document, url: 'http://localhost/private.pdf' }, async () => { fetched = true; })).status, 404);
+  assert.equal(fetched, false);
+  assert.equal((await downloadHostedDocument(document, async () => new Response('Missing', { status: 404 }))).status, 502);
+});
+
+test('hosted files embed directly and only immutable R2 documents can be downloaded', () => {
+  const url = `https://asumed.eduvour.com/materials/sha256/${'a'.repeat(64)}.pdf`;
+  assert.equal(getDocumentEmbedUrl(url), url);
+  assert.equal(isHostedDocumentUrl(url), true);
+  assert.equal(isHostedDocumentUrl(url + `?v=${'a'.repeat(64)}`), true);
+  assert.equal(getDocumentEmbedUrl(url + `?v=${'a'.repeat(64)}`), url + `?v=${'a'.repeat(64)}`);
+  assert.equal(isHostedDocumentUrl(url.replace('asumed.eduvour.com', 'asumed.eduvour.com.evil.test')), false);
+  assert.equal(isHostedDocumentUrl(url + '?redirect=http://localhost'), false);
+  assert.equal(isHostedDocumentUrl('http://127.0.0.1/private.pdf'), false);
+  assert.equal(getDocumentDownloadPath('a/b', 'x&y'), '/api/material-download?material=a%2Fb&document=x%26y');
+});
 
 test('extractDriveDocumentId extracts IDs from valid Google Drive file URLs', () => {
   assert.equal(

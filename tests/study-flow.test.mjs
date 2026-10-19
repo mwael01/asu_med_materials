@@ -5,6 +5,7 @@ import { runInNewContext } from 'node:vm';
 import ts from 'typescript';
 import * as progressHelpers from '../src/utils/studyProgress.ts';
 import * as searchHelpers from '../src/utils/search.ts';
+import * as documentHelpers from '../src/utils/documentViewer.ts';
 
 class Element {
   dataset = {}; attributes = new Map(); children = []; listeners = new Map(); selectors = new Map(); lists = new Map();
@@ -63,7 +64,7 @@ function playerEntry(materialId, itemId, tab = 'videos') {
 async function playerHarness(entries, requested, unavailableStorage = false) {
   const state = browser(`https://example.org/lesson/doctor${requested ? `?${new URLSearchParams({ item: requested })}` : ''}`);
   const root = new Element(); state.document.selectors.set('[data-doctor-player]', root);
-  const selectors = ['[data-study-entries]', '[data-study-frame]', '[data-study-video]', '[data-study-done]', '[data-study-save]', '[data-study-external]', '[data-study-title]', '[data-study-open]', '[data-study-status]', '[data-study-share]'];
+  const selectors = ['[data-study-entries]', '[data-study-frame]', '[data-study-video]', '[data-study-image]', '[data-study-done]', '[data-study-save]', '[data-study-external]', '[data-study-title]', '[data-study-open]', '[data-study-download]', '[data-study-status]', '[data-study-share]'];
   for (const selector of selectors) root.selectors.set(selector, new Element());
   root.querySelector('[data-study-entries]').textContent = JSON.stringify(entries);
   const tabs = [...new Set(entries.map(entry => entry.tab))].map(tab => { const element = new Element(); element.dataset.studyTab = tab; return element; });
@@ -78,12 +79,24 @@ async function playerHarness(entries, requested, unavailableStorage = false) {
     '../../utils/bookmarks': { setMaterialBookmarked(id, added) { state.bookmarks = added ? [...state.bookmarks,id] : state.bookmarks.filter(item => item !== id); state.window.dispatch('bookmarks-updated'); } },
     '../../utils/userSync': { syncStudiedToggle: async (id, done) => state.changes.push([id, done]) },
     '../../utils/studyProgress': progressHelpers,
+    '../../utils/documentViewer': documentHelpers,
   }, { ...state.globals(), ...(unavailableStorage ? { localStorage: {
     getItem() { throw new Error('Unavailable'); }, setItem() { throw new Error('Unavailable'); },
   } } : {}) });
   exports.initDoctorPlayer();
   return { state, root, tabs, panels, items, init: exports.initDoctorPlayer };
 }
+
+test('download action follows the active hosted document and hides for external resources', async () => {
+  const hosted = playerEntry('notes', 'page-1', 'pdfs');
+  hosted.url = `https://asumed.eduvour.com/materials/sha256/${'a'.repeat(64)}.pdf?v=${'a'.repeat(64)}`;
+  const { root, items } = await playerHarness([hosted, playerEntry('links', 'external', 'links')]);
+  const download = root.querySelector('[data-study-download]');
+  assert.equal(download.hidden, false);
+  assert.equal(download.href, '/api/material-download?material=notes&document=page-1');
+  items[1].dispatch('click');
+  assert.equal(download.hidden, true);
+});
 
 test('doctor player restores shared PDF, navigates tabs by keyboard and stops hidden media', async () => {
   const entries = [playerEntry('bundle', 'v1'), playerEntry('bundle', 'direct'), playerEntry('notes', 'pdf', 'pdfs'), playerEntry('links', 'link', 'links')];
@@ -125,6 +138,20 @@ test('doctor progress preserves legacy video IDs and only completes the whole so
   assert.deepEqual(state.studied, []);
   assert.equal(JSON.parse(state.storage.get('asumed_playlist_bundle')).v2, true);
   assert.equal(JSON.parse(state.storage.get('asumed_playlist_bundle')).v1, false);
+});
+
+test('image albums switch between ordered pages and release the hidden image source', async () => {
+  const image = { ...playerEntry('album', 'page-1', 'pdfs'), embedType: 'image', embedUrl: 'https://example.org/page.jpg' };
+  const video = playerEntry('recording', 'direct');
+  const { root, items } = await playerHarness([image, video], image.key);
+  assert.equal(root.querySelector('[data-study-image]').hidden, false);
+  assert.equal(root.querySelector('[data-study-image]').src, image.embedUrl);
+  assert.equal(root.querySelector('[data-study-image]').alt, image.title);
+  assert.equal(root.querySelector('[data-study-frame]').hidden, true);
+  items[1].dispatch('click');
+  assert.equal(root.querySelector('[data-study-image]').hidden, true);
+  assert.equal(root.querySelector('[data-study-image]').src, '');
+  assert.equal(root.querySelector('[data-study-video]').hidden, false);
 });
 
 test('saved-year home scopes update immediately and reveal the empty-year state', async () => {

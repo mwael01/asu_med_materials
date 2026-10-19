@@ -3,6 +3,8 @@ import { getPublicMaterials } from '../catalogue.server';
 import { getAllModules } from '../modules';
 import { subjectToSlug } from '../../utils/slug';
 import { getMaterialsVersionFromFirestore } from '../../firebase/firestore';
+import { getPublicLessons } from '../catalogue.server';
+import { assignedLessons } from '../../utils/materialLessonLinks';
 
 const isReferenceModuleId = (moduleId?: string): boolean =>
   Boolean(moduleId && /^year\d+-reference-books$/.test(moduleId));
@@ -79,7 +81,10 @@ export async function getMaterialsByModuleAndSubject(
   version?: number
 ): Promise<MaterialItem[]> {
   const targetSlug = subjectToSlug(subject);
-  const materials = await getAllMaterials(version);
+  const [materials, lessons] = await Promise.all([
+    getAllMaterials(version),
+    getPublicLessons(version)
+  ]);
 
   if (isReferenceModuleId(moduleId)) {
     return materials.filter(
@@ -88,7 +93,8 @@ export async function getMaterialsByModuleAndSubject(
   }
 
   return materials.filter(
-    (item) => item.moduleId === moduleId && item.subject && subjectToSlug(item.subject) === targetSlug
+    (item) => item.moduleId === moduleId && ((item.subject && subjectToSlug(item.subject) === targetSlug) ||
+      assignedLessons(item, lessons).some(lesson => subjectToSlug(lesson.subject) === targetSlug))
   );
 }
 

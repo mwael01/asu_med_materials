@@ -1,6 +1,7 @@
 ---
 import type { StudyEntry, StudyTab } from '../../types/lessons';
 import type { MaterialItem } from '../../types/materials';
+import DocumentImage from './DocumentImage.astro';
 interface Props { entries: StudyEntry[]; materials: MaterialItem[] }
 const { entries, materials } = Astro.props;
 const labels: Record<StudyTab, string> = { videos: 'Videos', pdfs: 'PDFs', links: 'Links' };
@@ -14,11 +15,13 @@ const tabs = (['videos', 'pdfs', 'links'] as const).filter(tab => entries.some(e
         <div data-study-viewport class="rounded-xl overflow-hidden border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900">
           <iframe data-study-frame title="Study material" class="w-full aspect-video" hidden allow="autoplay; fullscreen; picture-in-picture" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe>
           <video data-study-video class="w-full aspect-video" controls playsinline hidden></video>
+          <DocumentImage data-study-image alt="Study material" hidden />
           <div data-study-external class="p-8 text-sm text-zinc-500" hidden>Open this resource using the link below.</div>
         </div>
         <h2 data-study-title class="font-semibold text-base mt-4 break-words"></h2>
         <div class="flex flex-wrap items-center gap-2 mt-4 text-xs font-semibold">
           <a data-study-open target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-zinc-700 dark:text-zinc-300 hover:border-emerald-500 hover:text-emerald-600 transition-colors shadow-2xs">Open original &nearr;</a>
+          <a data-study-download hidden class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-zinc-700 dark:text-zinc-300 hover:border-emerald-500 hover:text-emerald-600 transition-colors cursor-pointer shadow-2xs">Download</a>
           <button type="button" data-study-done aria-pressed="false" class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-zinc-700 dark:text-zinc-300 hover:border-emerald-500 hover:text-emerald-600 transition-colors cursor-pointer shadow-2xs aria-pressed:bg-emerald-50 dark:aria-pressed:bg-emerald-950/50 aria-pressed:text-emerald-700 dark:aria-pressed:text-emerald-400 aria-pressed:border-emerald-500">Mark completed</button>
           <button type="button" data-study-save aria-pressed="false" class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-zinc-700 dark:text-zinc-300 hover:border-amber-500 hover:text-amber-600 transition-colors cursor-pointer shadow-2xs aria-pressed:bg-amber-50 dark:aria-pressed:bg-amber-950/50 aria-pressed:text-amber-700 dark:aria-pressed:text-amber-400 aria-pressed:border-amber-500">Save</button>
           <button type="button" data-study-share class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-zinc-700 dark:text-zinc-300 hover:border-emerald-500 hover:text-emerald-600 transition-colors cursor-pointer shadow-2xs">Copy link</button>

@@ -3,6 +3,7 @@ import { getStoredBookmarkIds, getStoredStudiedIds, saveStudiedIds } from '../..
 import { setMaterialBookmarked } from '../../utils/bookmarks';
 import { syncStudiedToggle } from '../../utils/userSync';
 import { entryProgressStorage, parseProgress } from '../../utils/studyProgress';
+import { getDocumentDownloadPath, isHostedDocumentUrl } from '../../utils/documentViewer';
 
 export function initDoctorPlayer(): void {
   const root = document.querySelector<HTMLElement>('[data-doctor-player]');
@@ -13,6 +14,7 @@ export function initDoctorPlayer(): void {
   const get = <T extends HTMLElement>(selector: string) => root.querySelector<T>(selector)!;
   const frame = get<HTMLIFrameElement>('[data-study-frame]');
   const video = get<HTMLVideoElement>('[data-study-video]');
+  const image = root.querySelector<HTMLImageElement>('[data-study-image]');
   const done = get<HTMLButtonElement>('[data-study-done]');
   const saved = get<HTMLButtonElement>('[data-study-save]');
   const tabs = [...root.querySelectorAll<HTMLButtonElement>('[data-study-tab]')];
@@ -60,6 +62,10 @@ export function initDoctorPlayer(): void {
     video.pause(); video.removeAttribute('src'); video.load();
     frame.hidden = entry.embedType !== 'iframe';
     video.hidden = entry.embedType !== 'video';
+    if (image) {
+      image.hidden = entry.embedType !== 'image'; image.removeAttribute('src');
+      if (entry.embedType === 'image' && entry.embedUrl) { image.src = entry.embedUrl; image.alt = entry.title; }
+    }
     get('[data-study-external]').hidden = entry.embedType !== 'none';
     if (entry.embedUrl && entry.embedType === 'iframe') frame.src = entry.embedUrl;
     if (entry.embedUrl && entry.embedType === 'video') video.src = entry.embedUrl;
@@ -68,6 +74,11 @@ export function initDoctorPlayer(): void {
     frame.style.height = entry.tab === 'pdfs' ? '70vh' : '';
     get('[data-study-title]').textContent = entry.title;
     get<HTMLAnchorElement>('[data-study-open]').href = entry.url;
+    const download = root!.querySelector<HTMLAnchorElement>('[data-study-download]');
+    if (download) {
+      download.hidden = !isHostedDocumentUrl(entry.url);
+      download.href = getDocumentDownloadPath(entry.materialId, entry.itemId);
+    }
     get('[data-study-status]').textContent = '';
     showTab(entry.tab);
     if (updateUrl) {

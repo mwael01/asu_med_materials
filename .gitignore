@@ -47,3 +47,11 @@ __pycache__/
 # Cloudflare Wrangler cache
 .wrangler/
 
+# Temporary material imports and Telegram authentication
+tmp/telegram-materials/
+.telegram-materials/
+*.session
+*.session-journal
+firebaseadmin.json
+tmp/firestore-rules-before-import.json
+

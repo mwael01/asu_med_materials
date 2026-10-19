@@ -1,5 +1,15 @@
 import type { DocumentItem, MaterialItem } from '../types/materials';
 
+export const isHostedDocumentUrl = (url: string): boolean =>
+  /^https:\/\/asumed\.eduvour\.com\/materials\/sha256\/[a-f0-9]{64}\.(pdf|jpg|jpeg|png)(?:\?v=[a-f0-9]{64})?$/.test(url);
+
+export function getDocumentDownloadPath(materialId: string, documentId: string): string {
+  return `/api/material-download?material=${encodeURIComponent(materialId)}&document=${encodeURIComponent(documentId)}`;
+}
+
+export const isImageDocument = (url: string): boolean =>
+  /^https?:\/\//i.test(url) && /\.(png|jpe?g|gif|webp|avif|bmp)(?:[?#]|$)/i.test(url);
+
 /**
  * Extracts a Google Drive file ID from view/preview/open/uc/edit URLs.
  * Explicitly ignores Google Drive folders (/drive/folders/).
@@ -62,6 +72,7 @@ export function isEmbeddableDocument(urlOrMaterial?: string | MaterialItem | nul
   }
   const url = urlOrMaterial;
   if (!url) return false;
+  if (isImageDocument(url)) return true;
 
   if (extractDriveDocumentId(url)) return true;
   if (/\.pdf(?:[?#]|$)/i.test(url)) return true;
@@ -74,6 +85,7 @@ export function isEmbeddableDocument(urlOrMaterial?: string | MaterialItem | nul
  */
 export function getDocumentEmbedUrl(url?: string): string | null {
   if (!url) return null;
+  if (isImageDocument(url) || isHostedDocumentUrl(url)) return url;
   const driveId = extractDriveDocumentId(url);
   if (driveId) {
     if (url.includes('docs.google.com/document/')) {

@@ -35,7 +35,7 @@
     "deploy:indexes": "firebase deploy --only firestore:indexes",
     "deploy:rules": "firebase deploy --only firestore:rules",
     "deploy:all": "firebase deploy --only firestore",
-    "test:lessons": "node --import ./scripts/register-typescript.mjs tests/lessons.test.mjs && node --import ./scripts/register-typescript.mjs tests/study-flow.test.mjs"
+    "test:lessons": "node --import ./scripts/register-typescript.mjs tests/lessons.test.mjs && node --import ./scripts/register-typescript.mjs tests/material-lesson-links.test.mjs && node --import ./scripts/register-typescript.mjs tests/study-flow.test.mjs"
   },
   "dependencies": {
     "@astrojs/check": "^0.9.10",

@@ -220,6 +220,25 @@
           "type": "string",
           "required": false,
           "description": "Optional reference to a lesson in the same module and subject"
+        },
+        "contentSha256": {
+          "type": "string",
+          "required": false,
+          "description": "SHA-256 of a single imported file"
+        },
+        "importSources": {
+          "type": "array",
+          "items": { "type": "string" },
+          "required": false
+        },
+        "importRunId": {
+          "type": "string",
+          "required": false
+        },
+        "importReviewStatus": {
+          "type": "string",
+          "required": false,
+          "description": "pending or reviewed; import audit marker without student-facing badges"
         }
       }
     },
@@ -538,7 +557,7 @@
     "lessons": {
       "collectionName": "lessons",
       "idField": "id",
-      "description": "Ordered subject lessons; materials reference these documents by lessonId.",
+      "description": "Ordered subject lessons; assignments use legacy lessonId or independent material_lesson_links.",
       "fields": {
         "id": {
           "type": "string",
@@ -564,6 +583,25 @@
           "type": "boolean",
           "required": true
         }
+      }
+    },
+    "material_lesson_links": {
+      "collectionName": "material_lesson_links",
+      "description": "Independent material/lesson pairs; both records must belong to the same module. Publicly readable and admin writable. Never duplicate material content for an assignment.",
+      "fields": {
+        "materialId": { "type": "string", "required": true },
+        "lessonId": { "type": "string", "required": true },
+        "moduleId": { "type": "string", "required": true }
+      }
+    },
+    "material_imports": {
+      "collectionName": "material_imports",
+      "description": "Admin-only publication runs, with entries/{entryId} transactional checkpoints. Temporary scrape data stays outside Firestore until publication.",
+      "fields": {
+        "moduleId": { "type": "string", "required": true },
+        "status": { "type": "string", "required": true },
+        "publishedCount": { "type": "integer", "required": false },
+        "updatedAt": { "type": "timestamp", "required": true }
       }
     }
   }

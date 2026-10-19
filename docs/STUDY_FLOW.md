@@ -29,17 +29,17 @@ Page content crossfades over 160ms using [native cross-document view transitions
 
 Firestore is the only catalogue source. `lessons/{id}` stores `id`, `title`, `moduleId`, `subject`, numeric `order`, and boolean `active`. Lessons refer to an existing module and one of its subjects. Public pages use active lessons from visible modules; existing semester and module visibility rules still apply.
 
-Materials optionally reference a lesson using `lessonId`. Assignment applies to the entire material, including its ordered `videos` and `documents`. No titles are interpreted as lesson assignments and no existing bundles are split. Collections retain their separate curated-pack behavior.
+Materials optionally reference a lesson using legacy `lessonId`, or several lessons through `material_lesson_links` documents containing `materialId`, `lessonId`, and `moduleId`. Shared links may span subjects within the same module. The catalogue caches links with the material version and attaches them to materials in memory; they are never stored as embedded `lessonLinks` fields. Legacy assignments retain their module/subject checks. Assignment applies to the entire material, including its ordered `videos` and `documents`. No titles are interpreted as public lesson assignments and no existing bundles are split. Collections retain their separate curated-pack behavior.
 
 Doctor groups derive from material `author` attribution. Joint authors appear in each matching doctor group; faculty attribution keeps a shared department group. General/batch attribution stays on the lesson resource list. Doctor keys encode normalized names without punctuation-stripping collisions. Renaming an author changes its doctor URL; material and lesson IDs remain stable.
 
-`studyContent.ts` resolves videos, PDFs/documents, and external links consistently for discovery and players. Mixed bundles can appear in both Videos and PDFs. Drive folders remain links. Structured videos take precedence over ambiguous Drive file URLs. As before, an untyped Drive file can only be classified as a document; authors should use structured video items for recordings. Flashcards open their dedicated study player rather than a doctor tab.
+`studyContent.ts` resolves videos, PDFs/documents, and external links consistently for discovery and players. Mixed bundles can appear in both Videos and PDFs. JPEG and other supported image documents render as ordered pages alongside PDFs. Drive folders remain links. Structured videos take precedence over ambiguous Drive file URLs. As before, an untyped Drive file can only be classified as a document; authors should use structured video items for recordings. Flashcards open their dedicated study player rather than a doctor tab.
 
 ## Admin workflow
 
 1. Open **Admin → Lessons**, choose the module and subject.
 2. Create a lesson with a title and order, or select an existing lesson to edit it. Uncheck Active to hide a lesson without deleting it.
-3. Assign each subject material using its lesson dropdown. Each change saves independently. Choose Subject resources to unassign it.
+3. Select all related lessons in each module material's multiple-selection list, then save that row. Clear the selection and save to unassign it. Assignments may cross subjects within the same module.
 4. Set a material's author through the existing material review form to attribute its videos, PDFs, or links to a doctor. Leave general links unassigned to display them on the subject page.
 5. The review form also accepts an optional lesson ID; publication validates its module and subject. Student submission types preserve an optional lesson reference through review.
 
@@ -49,13 +49,17 @@ Moving a lesson between subjects or modules requires unassigning its materials f
 
 Videos, PDFs, and Links tabs appear only when populated. Tab arrows, Home, and End work with keyboard focus. Selecting another type stops the previous video/embed. Mobile places the materials panel below the viewer. Non-embeddable materials offer Open original. Copy link includes the selected item key.
 
+Hosted PDFs on `asumed.eduvour.com/materials/sha256/` embed directly using browser PDF support. Both the standalone viewer and doctor workspace provide Download for hosted PDFs and images. `/api/material-download` resolves the selected document from the public Firestore catalogue and streams it with an attachment filename; arbitrary URLs and redirects are rejected. Browsers without inline PDF support can use Open original or Download.
+
+Materials retain optional `contentSha256`, `importSources`, `importRunId`, and `importReviewStatus` provenance fields. Uploaded materials marked `pending` remain available for later editorial review without student-facing badges.
+
 Bookmarks and whole-material completion use the original material ID. Video completion retains `asumed_playlist_<materialId>` and original video IDs. Other item completion uses `asumed_documents_<materialId>`. Whole-source completion is set only after every item in that source is complete. Per-item completion remains browser-local; existing account sync covers whole-material bookmarks and completion.
 
 Lessons use the same versioned server catalogue cache as modules/materials. Lesson saves and assignments increment `materials_version/current`. The version reader caches for up to 60 seconds; public HTML has a separate CDN cache and can remain stale until it refreshes. Saved-year scoping happens in the browser so anonymous cached HTML is shared safely across students. No study content is written to local catalogue files.
 
 ## Rollout and verification
 
-Deploy the updated Firestore rules **before** deploying the application: new public subject, search, discovery, and lesson routes read `lessons`. Until those rules are deployed, the previously denied collection cannot be read. No new composite index is needed: lesson assignment validation queries a single `lessonId` field. Do not delete existing materials or module-description fields.
+Deploy the updated Firestore rules **before** deploying the application: public routes read `lessons` and `material_lesson_links`; publication checkpoints in `material_imports` remain admin-only. Until those rules are deployed, a denied collection cannot be read. No new composite index is needed: assignment validation queries a single `lessonId` or `materialId` field. Do not delete existing materials or module-description fields.
 
 An empty lessons collection is supported. Existing materials stay in Subject resources or Links until an admin curates them. After rollout, create one lesson and assign a video bundle, document bundle, and doctor link in the same subject; verify desktop/mobile tabs and shared item URLs. Check guest year changes, signed-in profile year updates, flashcard links, Arabic search, and existing bookmarked URLs. Monitor SSR errors and Firestore reads as usual.
 

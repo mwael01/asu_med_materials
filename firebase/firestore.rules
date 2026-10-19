@@ -49,6 +49,25 @@ service cloud.firestore {
         request.resource.data.subject in get(/databases/$(database)/documents/modules/$(request.resource.data.moduleId)).data.subjects;
     }
 
+    match /material_lesson_links/{linkId} {
+      allow read: if true;
+      allow create, update: if isAdmin() &&
+        request.resource.data.keys().hasOnly(['materialId', 'lessonId', 'moduleId']) &&
+        request.resource.data.materialId is string && request.resource.data.lessonId is string &&
+        exists(/databases/$(database)/documents/materials/$(request.resource.data.materialId)) &&
+        exists(/databases/$(database)/documents/lessons/$(request.resource.data.lessonId)) &&
+        get(/databases/$(database)/documents/materials/$(request.resource.data.materialId)).data.moduleId == request.resource.data.moduleId &&
+        get(/databases/$(database)/documents/lessons/$(request.resource.data.lessonId)).data.moduleId == request.resource.data.moduleId;
+      allow delete: if isAdmin();
+    }
+
+    match /material_imports/{importId} {
+      allow read, write: if isAdmin();
+      match /entries/{entryId} {
+        allow read, write: if isAdmin();
+      }
+    }
+
     match /materials/{materialId} {
       allow read: if true;
       allow update: if (isAdmin() && validLessonAssignment()) || (

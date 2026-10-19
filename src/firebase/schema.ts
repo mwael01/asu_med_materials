@@ -15,6 +15,8 @@ export const COLLECTIONS = {
   MATERIALS: 'materials',
   MODULES: 'modules',
   LESSONS: 'lessons',
+  MATERIAL_LESSON_LINKS: 'material_lesson_links',
+  MATERIAL_IMPORTS: 'material_imports',
   USERS: 'users',
   SUBMISSIONS: 'submissions',
   FEEDBACK: 'feedback',
@@ -50,6 +52,10 @@ export interface MaterialDocument {
   moduleId?: string;
   subject?: string;
   lessonId?: string;
+  contentSha256?: string;
+  importSources?: string[];
+  importRunId?: string;
+  importReviewStatus?: 'pending' | 'reviewed';
   author?: string | string[];
   contributorUid?: string;
   contributorUsername?: string;
@@ -197,6 +203,10 @@ export const materialConverter: FirestoreDataConverter<MaterialItem> = {
       moduleId: material.moduleId || null,
       subject: material.subject || null,
       lessonId: material.lessonId || null,
+      contentSha256: material.contentSha256 || null,
+      importSources: material.importSources || null,
+      importRunId: material.importRunId || null,
+      importReviewStatus: material.importReviewStatus || null,
       author: material.author || null,
       contributorUid: material.contributorUid || null,
       contributorUsername: material.contributorUsername || null,
@@ -229,6 +239,10 @@ export const materialConverter: FirestoreDataConverter<MaterialItem> = {
       moduleId: data.moduleId || undefined,
       subject: data.subject || undefined,
       lessonId: data.lessonId || undefined,
+      contentSha256: data.contentSha256 || undefined,
+      importSources: Array.isArray(data.importSources) ? data.importSources : undefined,
+      importRunId: data.importRunId || undefined,
+      importReviewStatus: data.importReviewStatus === 'pending' || data.importReviewStatus === 'reviewed' ? data.importReviewStatus : undefined,
       author: data.author || undefined,
       contributorUid: data.contributorUid || undefined,
       contributorUsername: data.contributorUsername || undefined,

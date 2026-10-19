@@ -240,6 +240,12 @@ export async function saveMaterialToFirestore(material: MaterialItem): Promise<b
   if (!db) return false;
 
   try {
+    // Resolved links belong to their own collection, not the material payload.
+    const { lessonLinks: _resolvedLinks, ...storedMaterial } = material;
+    const links = await getDocs(query(collection(db, 'material_lesson_links'), where('materialId', '==', material.id)));
+    if (links.docs.some(link => link.data().moduleId !== material.moduleId)) {
+      throw new Error('Unassign shared lessons before moving this material to another module.');
+    }
     if (material.lessonId) {
       const lesson = await getDoc(doc(db, 'lessons', material.lessonId));
       if (!lesson.exists() || !materialMatchesLesson(material, lesson.data() as Lesson)) {
@@ -247,7 +253,7 @@ export async function saveMaterialToFirestore(material: MaterialItem): Promise<b
       }
     }
     const docRef = doc(db, MATERIALS_COLLECTION, material.id);
-    await setDoc(docRef, sanitizeFirestorePayload(material), { merge: true });
+    await setDoc(docRef, sanitizeFirestorePayload(storedMaterial), { merge: true });
     addUrlToVerificationCache(material);
     await incrementMaterialsVersionInFirestore();
     return true;

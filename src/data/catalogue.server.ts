@@ -6,6 +6,9 @@ import {
   getMaterialsVersionFromFirestore
 } from '../firebase/firestore';
 import { fetchLessonsFromFirestore } from '../firebase/lessons';
+import { fetchMaterialLessonLinks } from '../firebase/materialLessonLinks';
+import type { MaterialLessonLink } from '../types/materialLessonLinks';
+import { attachLessonLinks } from '../utils/materialLessonLinks';
 import type { Lesson } from '../types/lessons';
 import type { MaterialItem, ModuleInfo } from '../types/materials';
 import { loadCachedCatalogue, createMemoryCacheStore } from '../utils/catalogueCache';
@@ -50,7 +53,11 @@ const internalMaterialsLoader = createTimedLoader((version?: number) =>
  */
 export const getPublicMaterials = async (version?: number): Promise<MaterialItem[]> => {
   const currentVersion = version ?? (await getMaterialsVersionFromFirestore());
-  return internalMaterialsLoader(currentVersion);
+  const [materials, links] = await Promise.all([
+    internalMaterialsLoader(currentVersion),
+    internalLessonLinksLoader(currentVersion)
+  ]);
+  return attachLessonLinks(materials, links);
 };
 
 const loadModulesSnapshot = (version: number) => {
@@ -76,3 +83,9 @@ export const getPublicLessons = async (version?: number): Promise<Lesson[]> => {
   const currentVersion = version ?? (await getMaterialsVersionFromFirestore());
   return internalLessonsLoader(currentVersion);
 };
+
+const isLessonLink = (value: unknown): value is MaterialLessonLink => Boolean(value && typeof value === 'object' &&
+  typeof (value as MaterialLessonLink).materialId === 'string' && typeof (value as MaterialLessonLink).lessonId === 'string' &&
+  typeof (value as MaterialLessonLink).moduleId === 'string');
+const internalLessonLinksLoader = createTimedLoader((version?: number) =>
+  loadCachedCatalogue(getActiveCacheStore(), 'material_lesson_links', () => fetchMaterialLessonLinks(true), isLessonLink, version || 1));

@@ -1,9 +1,10 @@
-import { fetchLessonsFromFirestore, saveLessonToFirestore, assignMaterialToLesson } from '../../firebase/lessons';
+import { fetchLessonsFromFirestore, saveLessonToFirestore } from '../../firebase/lessons';
+import { fetchMaterialLessonLinks, assignMaterialToLessons } from '../../firebase/materialLessonLinks';
+import { attachLessonLinks, isMaterialAssignedToLesson, materialLessonLinkId } from '../../utils/materialLessonLinks';
 import { fetchMaterialsFromFirestore, fetchModulesFromFirestore } from '../../firebase/firestore';
 import { getCachedUserProfile } from '../../firebase/auth';
 import type { Lesson } from '../../types/lessons';
 import type { MaterialItem, ModuleInfo } from '../../types/materials';
-import { materialMatchesLesson } from '../../utils/lessons';
 import { subjectToSlug } from '../../utils/slug';
 
 export function initAdminLessons(): void {
@@ -25,32 +26,39 @@ export function initAdminLessons(): void {
   function resetForm() { form.reset(); editSelect.value = ''; }
   function renderAssignments() {
     assignments.replaceChildren();
-    const items = materials.filter(item => item.moduleId === moduleSelect.value && item.subject &&
-      subjectToSlug(item.subject) === subjectToSlug(subjectSelect.value));
+    const items = materials.filter(item => item.moduleId === moduleSelect.value);
     for (const material of items) {
       const row = document.createElement('div'); row.className = 'grid sm:grid-cols-[1fr_15rem] gap-2 items-center py-2 border-b border-zinc-100 dark:border-zinc-800';
       const title = document.createElement('span'); title.className = 'text-sm break-words'; title.textContent = material.titleEn || material.title;
       const select = document.createElement('select'); select.className = 'study-input'; select.setAttribute('aria-label', `Lesson for ${material.title}`);
-      select.append(new Option('Subject resources', ''));
-      for (const lesson of selectedLessons().filter(lesson => materialMatchesLesson(material, lesson))) {
-        select.append(new Option(lesson.title + (lesson.active ? '' : ' (inactive)'), lesson.id));
+      select.multiple = true; select.size = 4;
+      const moduleLessons = lessons.filter(lesson => lesson.moduleId === material.moduleId)
+        .sort((a, b) => a.subject.localeCompare(b.subject) || a.order - b.order);
+      for (const lesson of moduleLessons) {
+        const option = new Option(`${lesson.subject} · ${lesson.title}${lesson.active ? '' : ' (inactive)'}`, lesson.id);
+        option.selected = isMaterialAssignedToLesson(material, lesson);
+        select.append(option);
       }
-      if (material.lessonId && ![...select.options].some(option => option.value === material.lessonId)) {
-        select.append(new Option('Unavailable lesson — remove assignment', material.lessonId));
+      const previousIds = [...new Set([material.lessonId, ...(material.lessonLinks || []).map(link => link.lessonId)].filter((id): id is string => Boolean(id)))];
+      for (const id of previousIds.filter(id => !moduleLessons.some(lesson => lesson.id === id))) {
+        select.append(new Option('Unavailable lesson — deselect to remove', id, false, true));
       }
-      select.value = material.lessonId || '';
-      select.addEventListener('change', async () => {
-        const previous = material.lessonId || ''; select.disabled = true;
+      const control = document.createElement('div'); control.className = 'space-y-2';
+      const save = document.createElement('button'); save.type = 'button'; save.textContent = 'Save assignments'; save.className = 'text-sm text-emerald-600';
+      save.addEventListener('click', async () => {
+        const ids = [...select.selectedOptions].map(option => option.value);
+        select.disabled = true; save.disabled = true;
         try {
-          await assignMaterialToLesson(material.id, select.value || null);
-          material.lessonId = select.value || undefined;
+          await assignMaterialToLessons(material.id, ids);
+          material.lessonId = undefined;
+          material.lessonLinks = ids.map(lessonId => ({ id: materialLessonLinkId(material.id, lessonId), materialId: material.id, moduleId: material.moduleId!, lessonId }));
           status.textContent = 'Assignment saved.';
-        } catch (error) { select.value = previous; report(error); }
-        finally { select.disabled = false; }
+        } catch (error) { report(error); }
+        finally { select.disabled = false; save.disabled = false; }
       });
-      row.append(title, select); assignments.append(row);
+      control.append(select, save); row.append(title, control); assignments.append(row);
     }
-    if (!items.length) assignments.textContent = 'No materials in this subject yet.';
+    if (!items.length) assignments.textContent = 'No materials in this module yet.';
   }
   function renderSubject() {
     editSelect.replaceChildren(new Option('New lesson', ''), ...selectedLessons().map(lesson => new Option(`${lesson.order}. ${lesson.title}${lesson.active ? '' : ' (inactive)'}`, lesson.id)));
@@ -65,7 +73,8 @@ export function initAdminLessons(): void {
     if (loading || getCachedUserProfile()?.role !== 'admin') return;
     loading = true; status.textContent = 'Loading…';
     try {
-      [modules, lessons, materials] = await Promise.all([fetchModulesFromFirestore(undefined, true), fetchLessonsFromFirestore(true), fetchMaterialsFromFirestore(undefined, true)]);
+      const [loadedModules, loadedLessons, loadedMaterials, links] = await Promise.all([fetchModulesFromFirestore(undefined, true), fetchLessonsFromFirestore(true), fetchMaterialsFromFirestore(undefined, true), fetchMaterialLessonLinks(true)]);
+      modules = loadedModules; lessons = loadedLessons; materials = attachLessonLinks(loadedMaterials, links);
       const selectedModule = moduleSelect.value, selectedSubject = subjectSelect.value;
       moduleSelect.replaceChildren(...modules.map(module => new Option(`Year ${module.year} · ${module.title}`, module.id)));
       if (modules.some(module => module.id === selectedModule)) moduleSelect.value = selectedModule;

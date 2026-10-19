@@ -1,9 +1,10 @@
 import type { MaterialItem, VideoSourceType } from '../types/materials';
 import type { DiscoveryType, Lesson, StudyEntry } from '../types/lessons';
-import { getDocumentEmbedUrl, isEmbeddableDocument } from './documentViewer';
+import { getDocumentEmbedUrl, isEmbeddableDocument, isImageDocument } from './documentViewer';
 import { parseVideoSource } from './videoSources';
-import { lessonDoctors, lessonPath, materialMatchesLesson } from './lessons';
+import { lessonDoctors, lessonPath } from './lessons';
 import { isHttpUrl } from './materialLinks';
+import { assignedLessons } from './materialLessonLinks';
 
 export const isFlashcards = (material: MaterialItem): boolean =>
   material.type === 'flashcards' || Boolean(material.flashcardDeckId) || material.category === 'flashcards';
@@ -70,13 +71,13 @@ export function studyEntries(materials: MaterialItem[]): StudyEntry[] {
         const embed = getDocumentEmbedUrl(document.url);
         result.push({ ...base, key: JSON.stringify([material.id, 'documents', document.id]), itemId: document.id,
           title: document.title, tab: embed ? 'pdfs' : 'links', url: document.url,
-          embedUrl: embed, embedType: embed ? 'iframe' : 'none', playlistProgress: false });
+          embedUrl: embed, embedType: isImageDocument(document.url) ? 'image' : embed ? 'iframe' : 'none', playlistProgress: false });
       }
     } else if (!isVideoMaterial(material) && isHttpUrl(material.url)) {
       const embed = getDocumentEmbedUrl(material.url);
       result.push({ ...base, key: JSON.stringify([material.id, embed ? 'pdfs' : 'links', material.id]), itemId: material.id,
         title: base.bundleTitle, tab: embed ? 'pdfs' : 'links', url: material.url,
-        embedUrl: embed, embedType: embed ? 'iframe' : 'none', playlistProgress: false });
+        embedUrl: embed, embedType: isImageDocument(material.url) ? 'image' : embed ? 'iframe' : 'none', playlistProgress: false });
     }
   }
   return result;
@@ -97,7 +98,7 @@ export function legacyMaterialPath(material: MaterialItem): string {
 /** Shared by discovery and search; hidden or stale assignments keep their legacy destination. */
 export function materialStudyPath(material: MaterialItem, lessons: Lesson[], type?: DiscoveryType): string {
   if (isFlashcards(material)) return legacyMaterialPath(material);
-  const lesson = lessons.find(item => item.id === material.lessonId && item.active !== false && materialMatchesLesson(material, item));
+  const lesson = assignedLessons(material, lessons).sort((a, b) => a.order - b.order || a.id.localeCompare(b.id))[0];
   if (!lesson) return legacyMaterialPath(material);
   const doctor = lessonDoctors([material])[0];
   if (!doctor) return lessonPath(lesson);

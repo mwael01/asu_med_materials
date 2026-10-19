@@ -2,14 +2,15 @@
 import Layout from '../../../layouts/Layout.astro';
 import PageHeading from '../../../components/common/PageHeading.astro';
 import NavigationCards from '../../../components/common/NavigationCards.astro';
+import ResourceGrid from '../../../components/materials/ResourceGrid.astro';
 import { getModuleById } from '../../../data/modules';
 import { getMaterialsByModuleAndSubject } from '../../../data/materials';
 import { getPublicLessons } from '../../../data/catalogue.server';
 import { getMaterialsVersionFromFirestore } from '../../../firebase/firestore';
 import { subjectToSlug } from '../../../utils/slug';
-import { lessonsForSubject, lessonPath, isRevisionLesson } from '../../../utils/lessons';
-import { matchesDiscoveryType } from '../../../utils/studyContent';
-import type { DiscoveryType } from '../../../types/lessons';
+import { lessonsForSubject, lessonPath } from '../../../utils/lessons';
+import { studyEntries } from '../../../utils/studyContent';
+import { isMaterialAssignedToLesson } from '../../../utils/materialLessonLinks';
 
 const version = await getMaterialsVersionFromFirestore();
 const module = await getModuleById(Astro.params.id || '', version);
@@ -17,63 +18,23 @@ if (!module) return Astro.redirect('/404');
 const subject = module.subjects.find(item => subjectToSlug(item) === Astro.params.subject);
 if (!subject) return Astro.redirect('/404');
 
-const typeParam = Astro.url.searchParams.get('type');
-const type: DiscoveryType | null = (typeParam === 'videos' || typeParam === 'pdfs' || typeParam === 'flashcards') ? typeParam : null;
-
 const [materials, allLessons] = await Promise.all([
   getMaterialsByModuleAndSubject(module.id, subject, version),
   getPublicLessons(version)
 ]);
-
-const subjectLessons = lessonsForSubject(allLessons, module.id, subject);
-
-// Regular syllabus lessons are always visible to preserve complete curriculum structure
-const regularLessons = subjectLessons.filter(l => !isRevisionLesson(l));
-
-// Revision lessons (Practical, Assessments, Finals) are displayed only if they contain materials
-const revisionLessons = subjectLessons.filter(l => isRevisionLesson(l) && materials.some(m => m.lessonId === l.id));
-
-const typeLabels: Record<DiscoveryType, string> = {
-  videos: 'Videos',
-  pdfs: 'PDFs',
-  flashcards: 'Flashcards'
+const lessons = lessonsForSubject(allLessons, module.id, subject);
+const unassigned = materials.filter(item => !lessons.some(lesson => isMaterialAssignedToLesson(item, lesson)));
+const isGeneralLink = (item: typeof materials[number]) => {
+  const entries = studyEntries([item]);
+  return entries.length > 0 && entries.every(entry => entry.tab === 'links');
 };
-
-const crumbs = [
-  { title: 'Home', href: '/' },
-  ...(type ? [{ title: typeLabels[type], href: `/${type}` }] : []),
-  { title: module.title, href: `/module/${module.id}${type ? `?type=${type}` : ''}` }
-];
+const links = unassigned.filter(isGeneralLink);
+const resources = unassigned.filter(item => !isGeneralLink(item));
 ---
-<Layout title={`${subject} - ${module.title} - ASU Med`}>
-  <PageHeading title={subject} crumbs={crumbs} />
-  {regularLessons.length > 0 && (
-    <section>
-      <h2 class="text-base font-semibold mb-4">Lessons</h2>
-      <NavigationCards
-        items={regularLessons.map(lesson => ({
-          title: lesson.title,
-          href: lessonPath(lesson),
-          subject
-        }))}
-      />
-    </section>
-  )}
-
-  {revisionLessons.length > 0 && (
-    <section class={regularLessons.length > 0 ? 'mt-8' : ''}>
-      <h2 class="text-base font-semibold mb-4">Revisions</h2>
-      <NavigationCards
-        items={revisionLessons.map(lesson => ({
-          title: lesson.title,
-          href: lessonPath(lesson),
-          subject
-        }))}
-      />
-    </section>
-  )}
-
-  {!regularLessons.length && !revisionLessons.length && (
-    <p class="text-sm text-zinc-500">No lessons available yet.</p>
-  )}
+<Layout title={`${subject} - ${module.title} - ASU Med Materials`}>
+  <PageHeading title={subject} crumbs={[{ title: 'Home', href: '/' }, { title: module.title, href: `/module/${module.id}` }]} />
+  {lessons.length > 0 && <section><h2 class="text-base font-semibold mb-4">Lessons</h2><NavigationCards items={lessons.map(lesson => ({ title: lesson.title, href: lessonPath(lesson), subject }))} /></section>}
+  {resources.length > 0 && <section class="mt-8"><h2 class="text-base font-semibold mb-4">Subject resources</h2><ResourceGrid materials={resources} /></section>}
+  {links.length > 0 && <section class="mt-8"><h2 class="text-base font-semibold mb-4">Links</h2><ResourceGrid materials={links} /></section>}
+  {!lessons.length && !materials.length && <p class="text-sm text-zinc-500">No lessons or resources available yet.</p>}
 </Layout>

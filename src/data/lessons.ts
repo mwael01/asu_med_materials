@@ -1,7 +1,8 @@
 import { getPublicLessons } from './catalogue.server';
 import { getModuleById } from './modules';
 import { getMaterialsByModuleAndSubject } from './materials';
-import { lessonsForSubject, materialMatchesLesson } from '../utils/lessons';
+import { lessonsForSubject } from '../utils/lessons';
+import { isMaterialAssignedToLesson } from '../utils/materialLessonLinks';
 import { subjectToSlug } from '../utils/slug';
 import { getMaterialsVersionFromFirestore } from '../firebase/firestore';
 
@@ -17,6 +18,6 @@ export async function loadLessonPage(moduleId: string, subjectSlug: string, less
   const lesson = lessonsForSubject(lessons, module.id, subject).find(item => item.id === lessonId);
   if (!lesson) return null;
   const materials = (await getMaterialsByModuleAndSubject(module.id, subject, resolvedVersion))
-    .filter(item => item.lessonId === lesson.id && materialMatchesLesson(item, lesson));
+    .filter(item => isMaterialAssignedToLesson(item, lesson));
   return { module, lesson, materials };
 }

@@ -1,3 +1,5 @@
+import type { MaterialLessonLink } from './materialLessonLinks';
+
 export type AcademicYear = 1 | 2 | 3 | 4 | 5;
 
 export type ResourceType =
@@ -71,6 +73,12 @@ export interface MaterialItem {
   semester?: 1 | 2;
   subject?: string;
   lessonId?: string;
+  /** Resolved at read time from material_lesson_links; never stored on materials. */
+  lessonLinks?: MaterialLessonLink[];
+  contentSha256?: string;
+  importSources?: string[];
+  importRunId?: string;
+  importReviewStatus?: 'pending' | 'reviewed';
   author?: string | string[]; // Creator / Doctor / Teacher who prepared the materials
   contributorUid?: string; // Firebase Auth UID of the contributing user
   contributorUsername?: string; // Username handle of the contributing user
