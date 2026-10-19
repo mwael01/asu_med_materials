@@ -9,7 +9,7 @@ import { getMaterialsByModuleAndSubject } from '../../../data/materials';
 import { getPublicLessons } from '../../../data/catalogue.server';
 import { getMaterialsVersionFromFirestore } from '../../../firebase/firestore';
 import { subjectToSlug } from '../../../utils/slug';
-import { lessonsForSubject, lessonPath } from '../../../utils/lessons';
+import { lessonsForSubject, lessonPath, isRevisionLesson } from '../../../utils/lessons';
 import { studyEntries } from '../../../utils/studyContent';
 import { isMaterialAssignedToLesson } from '../../../utils/materialLessonLinks';
 
@@ -52,8 +52,15 @@ const crumbs: NavCrumb[] = [
   }
 ];
 
-const lessons = lessonsForSubject(allLessons, module.id, subject);
-const unassigned = materials.filter(item => !lessons.some(lesson => isMaterialAssignedToLesson(item, lesson)));
+const subjectLessons = lessonsForSubject(allLessons, module.id, subject);
+
+// Regular syllabus lessons are always visible to preserve complete curriculum structure
+const regularLessons = subjectLessons.filter(l => !isRevisionLesson(l));
+
+// Revision lessons (Practical, Assessments, Finals) are displayed only if they contain materials
+const revisionLessons = subjectLessons.filter(l => isRevisionLesson(l) && materials.some(m => m.lessonId === l.id));
+
+const unassigned = materials.filter(item => !subjectLessons.some(lesson => isMaterialAssignedToLesson(item, lesson)));
 const isGeneralLink = (item: typeof materials[number]) => {
   const entries = studyEntries([item]);
   return entries.length > 0 && entries.every(entry => entry.tab === 'links');
@@ -64,8 +71,45 @@ const resources = unassigned.filter(item => !isGeneralLink(item));
 
 <Layout title={`${subject} - ${module.title} - ASU Med`} crumbs={crumbs} backHref={`/module/${module.id}`}>
   <PageHeading title={subject} />
-  {lessons.length > 0 && <section><h2 class="text-base font-semibold mb-4">Lessons</h2><NavigationCards items={lessons.map(lesson => ({ title: lesson.title, href: lessonPath(lesson), subject }))} /></section>}
-  {resources.length > 0 && <section class="mt-8"><h2 class="text-base font-semibold mb-4">Subject resources</h2><ResourceGrid materials={resources} /></section>}
-  {links.length > 0 && <section class="mt-8"><h2 class="text-base font-semibold mb-4">Links</h2><ResourceGrid materials={links} /></section>}
-  {!lessons.length && !materials.length && <p class="text-sm text-zinc-500">No lessons or resources available yet.</p>}
+
+  <!-- Regular Lessons (always shown, even if empty) -->
+  <section>
+    <h2 class="text-base font-semibold mb-4">Lessons</h2>
+    <NavigationCards
+      items={regularLessons.map(lesson => ({
+        title: lesson.title,
+        href: lessonPath(lesson),
+        subject
+      }))}
+      emptyMessage="No lessons available yet."
+    />
+  </section>
+
+  <!-- Revision Lessons (hidden if empty) -->
+  {revisionLessons.length > 0 && (
+    <section class="mt-8">
+      <h2 class="text-base font-semibold mb-4">Revisions</h2>
+      <NavigationCards
+        items={revisionLessons.map(lesson => ({
+          title: lesson.title,
+          href: lessonPath(lesson),
+          subject
+        }))}
+      />
+    </section>
+  )}
+
+  {resources.length > 0 && (
+    <section class="mt-8">
+      <h2 class="text-base font-semibold mb-4">Subject resources</h2>
+      <ResourceGrid materials={resources} />
+    </section>
+  )}
+
+  {links.length > 0 && (
+    <section class="mt-8">
+      <h2 class="text-base font-semibold mb-4">Links</h2>
+      <ResourceGrid materials={links} />
+    </section>
+  )}
 </Layout>
