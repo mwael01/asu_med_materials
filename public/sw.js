@@ -1,7 +1,7 @@
 // Service Worker for ASU Med Materials PWA
 // Cache visited pages for offline access without fetching the entire catalogue.
 
-const CACHE_NAME = 'asumed-cache-v9';
+const CACHE_NAME = 'asumed-cache-v10';
 
 // 1. Static brand assets, icons, core navigation routes, and catalogue APIs
 const PRECACHE_ASSETS = [
@@ -228,15 +228,17 @@ self.addEventListener('fetch', (event) => {
     (async () => {
       const cache = await caches.open(CACHE_NAME);
       const path = url.pathname;
+      const hasSearch = Boolean(url.search);
       const withSlash = path.endsWith('/') ? path : path + '/';
       const noSlash = path.endsWith('/') && path !== '/' ? path.slice(0, -1) : path;
 
-      // 1. Check if cached version exists (exact, path, or slash variants)
-      const cached =
-        (await cache.match(request, { ignoreSearch: true })) ||
-        (await cache.match(path, { ignoreSearch: true })) ||
-        (await cache.match(withSlash, { ignoreSearch: true })) ||
-        (await cache.match(noSlash, { ignoreSearch: true }));
+      // 1. Check if cached version exists (exact request match; do not ignore search parameters)
+      const cached = hasSearch
+        ? await cache.match(request)
+        : (await cache.match(request)) ||
+          (await cache.match(path)) ||
+          (await cache.match(withSlash)) ||
+          (await cache.match(noSlash));
 
       // 2. Network fetch promise that updates the cache in background
       const fetchPromise = (async () => {
@@ -245,9 +247,12 @@ self.addEventListener('fetch', (event) => {
           if (networkResponse && networkResponse.status === 200) {
             const copy = networkResponse.clone();
             await cache.put(request, copy);
-            await cache.put(path, networkResponse.clone());
-            if (withSlash !== path) await cache.put(withSlash, networkResponse.clone());
-            if (noSlash !== path) await cache.put(noSlash, networkResponse.clone());
+            // Only associate bare path with unparameterized responses to avoid poisoning root routes!
+            if (!hasSearch) {
+              await cache.put(path, networkResponse.clone());
+              if (withSlash !== path) await cache.put(withSlash, networkResponse.clone());
+              if (noSlash !== path) await cache.put(noSlash, networkResponse.clone());
+            }
           }
           return networkResponse;
         } catch {

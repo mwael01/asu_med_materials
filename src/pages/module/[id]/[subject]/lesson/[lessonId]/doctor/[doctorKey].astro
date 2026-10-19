@@ -4,35 +4,23 @@ import PageHeading from '../../../../../../../components/common/PageHeading.astr
 import DoctorPlayer from '../../../../../../../components/study/DoctorPlayer.astro';
 import { loadLessonPage } from '../../../../../../../data/lessons';
 import { lessonDoctors, lessonPath } from '../../../../../../../utils/lessons';
-import { studyEntries, isFlashcards, matchesDiscoveryType } from '../../../../../../../utils/studyContent';
+import { studyEntries, isFlashcards } from '../../../../../../../utils/studyContent';
 import { subjectToSlug } from '../../../../../../../utils/slug';
-import type { DiscoveryType } from '../../../../../../../types/lessons';
 
 const context = await loadLessonPage(Astro.params.id || '', Astro.params.subject || '', Astro.params.lessonId || '');
 if (!context) return Astro.redirect('/404');
 const { module, lesson, materials } = context;
 
-const typeParam = Astro.url.searchParams.get('type');
-const type: DiscoveryType | null = (typeParam === 'videos' || typeParam === 'pdfs' || typeParam === 'flashcards') ? typeParam : null;
-
 const doctor = lessonDoctors(materials.filter(item => !isFlashcards(item))).find(item => item.key === Astro.params.doctorKey);
 if (!doctor) return Astro.redirect('/404');
 
-const doctorItems = type ? doctor.items.filter(item => matchesDiscoveryType(item, type)) : doctor.items;
-const entries = studyEntries(doctorItems);
-
-const typeLabels: Record<DiscoveryType, string> = {
-  videos: 'Videos',
-  pdfs: 'PDFs',
-  flashcards: 'Flashcards'
-};
+const entries = studyEntries(doctor.items);
 
 const crumbs = [
   { title: 'Home', href: '/' },
-  ...(type ? [{ title: typeLabels[type], href: `/${type}` }] : []),
-  { title: module.title, href: `/module/${module.id}${type ? `?type=${type}` : ''}` },
-  { title: lesson.subject, href: `/module/${module.id}/${subjectToSlug(lesson.subject)}${type ? `?type=${type}` : ''}` },
-  { title: lesson.title, href: `${lessonPath(lesson)}${type ? `?type=${type}` : ''}` }
+  { title: module.title, href: `/module/${module.id}` },
+  { title: lesson.subject, href: `/module/${module.id}/${subjectToSlug(lesson.subject)}` },
+  { title: lesson.title, href: lessonPath(lesson) }
 ];
 ---
 <Layout title={`${doctor.name} - ${lesson.title} - ASU Med`}>

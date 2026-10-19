@@ -404,3 +404,89 @@ test('dedicated revision lessons (practical, assessments, finals) and empty-revi
   assert.equal(visibleParaRevisions[0].id, paraFinalsLesson.id);
   assert.equal(visibleParaRevisions.some(l => l.id === paraAssessmentsLesson.id), false, 'Empty para assessment must be hidden');
 });
+
+test('unauthored and general practical materials appear in otherResources without being swallowed', () => {
+  const doctorLecture = material({
+    id: 'lec-1',
+    title: 'Ashraf Lecture',
+    url: 'https://youtu.be/ashraf',
+    type: 'youtube',
+    category: 'lectures',
+    author: 'Dr. Ashraf Ramzy'
+  });
+
+  const practicalVideo = material({
+    id: 'prac-1',
+    title: 'Clinical Examination Practical',
+    url: 'https://youtube.com/playlist?list=practical123',
+    type: 'playlist',
+    category: 'lectures'
+    // author omitted (unauthored practical video)
+  });
+
+  const pdfGuide = material({
+    id: 'pdf-1',
+    title: 'Practical Lab Guide',
+    url: 'https://drive.google.com/file/d/guide/view',
+    type: 'drive',
+    category: 'summaries'
+  });
+
+  const allItems = [doctorLecture, practicalVideo, pdfGuide];
+
+  const lectureMaterials = allItems.filter(item => !isFlashcards(item) && !isMcqMaterial(item) && (isVideoMaterial(item) || item.category === 'lectures'));
+  const doctors = lessonDoctors(lectureMaterials.length ? lectureMaterials : allItems.filter(item => !isFlashcards(item) && !isMcqMaterial(item) && !isPdfMaterial(item)));
+  const doctorMaterials = new Set(doctors.flatMap(doctor => doctor.items.map(item => item.id)));
+
+  const pdfs = allItems.filter(isPdfMaterial);
+  const flashcards = allItems.filter(isFlashcards);
+  const mcqs = allItems.filter(isMcqMaterial);
+
+  const handledIds = new Set([
+    ...doctorMaterials,
+    ...pdfs.map(m => m.id),
+    ...flashcards.map(m => m.id),
+    ...mcqs.map(m => m.id),
+  ]);
+  const otherResources = allItems.filter(item => !handledIds.has(item.id));
+
+  // Doctor lecture is handled by Doctors
+  assert.equal(doctors.length, 1);
+  assert.equal(doctors[0].name, 'Dr. Ashraf Ramzy');
+
+  // PDF guide is handled by PDFs
+  assert.equal(pdfs.length, 1);
+  assert.equal(pdfs[0].id, 'pdf-1');
+
+  // Unauthored practical video is NOT swallowed and is preserved in otherResources
+  assert.equal(otherResources.length, 1);
+  assert.equal(otherResources[0].id, 'prac-1');
+  assert.equal(otherResources[0].title, 'Clinical Examination Practical');
+});
+
+test('runtime defensive deduplication eliminates duplicate IDs and duplicate (moduleId, url) entries', () => {
+  const mat1 = material({ id: 'm1', moduleId: 'mod-1', url: 'https://example.org/doc1' });
+  const mat1DuplicateId = material({ id: 'm1', moduleId: 'mod-1', url: 'https://example.org/doc1-alt' });
+  const mat2DuplicateUrl = material({ id: 'm2', moduleId: 'mod-1', url: 'https://example.org/doc1' });
+  const mat3DifferentModuleSameUrl = material({ id: 'm3', moduleId: 'mod-2', url: 'https://example.org/doc1' });
+  const mat4Unique = material({ id: 'm4', moduleId: 'mod-1', url: 'https://example.org/doc2' });
+
+  const rawList = [mat1, mat1DuplicateId, mat2DuplicateUrl, mat3DifferentModuleSameUrl, mat4Unique];
+
+  const seenIds = new Set();
+  const seenUrls = new Set();
+  const deduplicated = rawList.filter(item => {
+    if (seenIds.has(item.id)) return false;
+    seenIds.add(item.id);
+    if (item.url && item.moduleId) {
+      const urlKey = `${item.moduleId}:${item.url.trim()}`;
+      if (seenUrls.has(urlKey)) return false;
+      seenUrls.add(urlKey);
+    }
+    return true;
+  });
+
+  assert.equal(deduplicated.length, 3);
+  assert.deepEqual(deduplicated.map(m => m.id), ['m1', 'm3', 'm4']);
+});
+

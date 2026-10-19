@@ -27,15 +27,11 @@ const [materials, allLessons] = await Promise.all([
 
 const subjectLessons = lessonsForSubject(allLessons, module.id, subject);
 
-// Filter lessons by type if active
-const lessons = type
-  ? subjectLessons.filter(lesson =>
-      materials.some(m => m.lessonId === lesson.id && matchesDiscoveryType(m, type))
-    )
-  : subjectLessons;
+// Regular syllabus lessons are always visible to preserve complete curriculum structure
+const regularLessons = subjectLessons.filter(l => !isRevisionLesson(l));
 
-const regularLessons = lessons.filter(l => !isRevisionLesson(l));
-const revisionLessons = lessons.filter(l => isRevisionLesson(l) && materials.some(m => m.lessonId === l.id));
+// Revision lessons (Practical, Assessments, Finals) are displayed only if they contain materials
+const revisionLessons = subjectLessons.filter(l => isRevisionLesson(l) && materials.some(m => m.lessonId === l.id));
 
 const typeLabels: Record<DiscoveryType, string> = {
   videos: 'Videos',
@@ -57,7 +53,7 @@ const crumbs = [
       <NavigationCards
         items={regularLessons.map(lesson => ({
           title: lesson.title,
-          href: `${lessonPath(lesson)}${type ? `?type=${type}` : ''}`,
+          href: lessonPath(lesson),
           subject
         }))}
       />
@@ -70,7 +66,7 @@ const crumbs = [
       <NavigationCards
         items={revisionLessons.map(lesson => ({
           title: lesson.title,
-          href: `${lessonPath(lesson)}${type ? `?type=${type}` : ''}`,
+          href: lessonPath(lesson),
           subject
         }))}
       />

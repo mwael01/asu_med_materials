@@ -13,45 +13,33 @@ const context = await loadLessonPage(Astro.params.id || '', Astro.params.subject
 if (!context) return Astro.redirect('/404');
 const { module, lesson, materials } = context;
 
-const typeParam = Astro.url.searchParams.get('type');
-const type: DiscoveryType | null = (typeParam === 'videos' || typeParam === 'pdfs' || typeParam === 'flashcards') ? typeParam : null;
-
-// Filter materials if type is specified
-const activeMaterials = type ? materials.filter(item => matchesDiscoveryType(item, type)) : materials;
-
 // 1. Doctors (explanations, video series, playlists, and lecture recordings)
-const lectureMaterials = activeMaterials.filter(item => !isFlashcards(item) && !isMcqMaterial(item) && (isVideoMaterial(item) || item.category === 'lectures'));
-const doctors = lessonDoctors(lectureMaterials.length ? lectureMaterials : activeMaterials.filter(item => !isFlashcards(item) && !isMcqMaterial(item) && !isPdfMaterial(item)));
+const lectureMaterials = materials.filter(item => !isFlashcards(item) && !isMcqMaterial(item) && (isVideoMaterial(item) || item.category === 'lectures'));
+const doctors = lessonDoctors(lectureMaterials.length ? lectureMaterials : materials.filter(item => !isFlashcards(item) && !isMcqMaterial(item) && !isPdfMaterial(item)));
+const doctorMaterials = new Set(doctors.flatMap(doctor => doctor.items.map(item => item.id)));
 
 // 2. PDFs (summaries, lecture slides, books, documents)
-const pdfs = activeMaterials.filter(isPdfMaterial);
+const pdfs = materials.filter(isPdfMaterial);
 
 // 3. Flashcards (interactive study decks)
-const flashcards = activeMaterials.filter(isFlashcards);
+const flashcards = materials.filter(isFlashcards);
 
 // 4. MCQs (question banks, quizzes, previous exam questions)
-const mcqs = activeMaterials.filter(isMcqMaterial);
+const mcqs = materials.filter(isMcqMaterial);
 
 // 5. Other resources (any remaining resources not fitting into above categories)
 const handledIds = new Set([
-  ...lectureMaterials.map(m => m.id),
+  ...doctorMaterials,
   ...pdfs.map(m => m.id),
   ...flashcards.map(m => m.id),
   ...mcqs.map(m => m.id),
 ]);
-const otherResources = activeMaterials.filter(item => !handledIds.has(item.id));
-
-const typeLabels: Record<DiscoveryType, string> = {
-  videos: 'Videos',
-  pdfs: 'PDFs',
-  flashcards: 'Flashcards'
-};
+const otherResources = materials.filter(item => !handledIds.has(item.id));
 
 const crumbs = [
   { title: 'Home', href: '/' },
-  ...(type ? [{ title: typeLabels[type], href: `/${type}` }] : []),
-  { title: module.title, href: `/module/${module.id}${type ? `?type=${type}` : ''}` },
-  { title: lesson.subject, href: `/module/${module.id}/${subjectToSlug(lesson.subject)}${type ? `?type=${type}` : ''}` }
+  { title: module.title, href: `/module/${module.id}` },
+  { title: lesson.subject, href: `/module/${module.id}/${subjectToSlug(lesson.subject)}` }
 ];
 ---
 <Layout title={`${lesson.title} - ASU Med`}>
@@ -64,7 +52,7 @@ const crumbs = [
         <NavigationCards
           items={doctors.map(doctor => ({
             title: doctor.name,
-            href: `${lessonPath(lesson)}/doctor/${doctor.key}${type ? `?type=${type}` : ''}`
+            href: `${lessonPath(lesson)}/doctor/${doctor.key}`
           }))}
         />
       </section>
@@ -99,5 +87,5 @@ const crumbs = [
     )}
   </div>
 
-  {!activeMaterials.length && <p class="text-sm text-zinc-500">No materials available for this lesson.</p>}
+  {!materials.length && <p class="text-sm text-zinc-500">No materials available for this lesson.</p>}
 </Layout>

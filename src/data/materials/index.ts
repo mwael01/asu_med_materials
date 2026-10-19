@@ -7,7 +7,7 @@ import { getMaterialsVersionFromFirestore } from '../../firebase/firestore';
 const isReferenceModuleId = (moduleId?: string): boolean =>
   Boolean(moduleId && /^year\d+-reference-books$/.test(moduleId));
 
-/** Fetch the public catalogue from Firestore with a bounded runtime cache. Hides second semester materials. */
+/** Fetch the public catalogue from Firestore with a bounded runtime cache. Hides second semester materials and deduplicates records. */
 export async function getAllMaterials(version?: number): Promise<MaterialItem[]> {
   const resolvedVersion = version ?? (await getMaterialsVersionFromFirestore());
   const [materials, activeModules] = await Promise.all([
@@ -16,7 +16,7 @@ export async function getAllMaterials(version?: number): Promise<MaterialItem[]>
   ]);
   const activeModuleIds = new Set(activeModules.map((m) => m.id));
 
-  return materials.filter((item) => {
+  const filtered = materials.filter((item) => {
     // Hide second semester materials
     if (item.semester === 2) {
       return false;
@@ -27,6 +27,20 @@ export async function getAllMaterials(version?: number): Promise<MaterialItem[]>
         return true;
       }
       return activeModuleIds.has(item.moduleId);
+    }
+    return true;
+  });
+
+  // Defensive deduplication by ID and unique (moduleId, url)
+  const seenIds = new Set<string>();
+  const seenUrls = new Set<string>();
+  return filtered.filter((item) => {
+    if (seenIds.has(item.id)) return false;
+    seenIds.add(item.id);
+    if (item.url && item.moduleId) {
+      const urlKey = `${item.moduleId}:${item.url.trim()}`;
+      if (seenUrls.has(urlKey)) return false;
+      seenUrls.add(urlKey);
     }
     return true;
   });
