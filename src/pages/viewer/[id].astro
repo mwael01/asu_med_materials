@@ -1,5 +1,6 @@
 ---
 import Layout from '../../layouts/Layout.astro';
+import type { NavCrumb } from '../../types/navigation';
 import TypeBadge from '../../components/materials/TypeBadge.astro';
 import ResourceCard from '../../components/materials/ResourceCard.astro';
 import DocumentImage from '../../components/study/DocumentImage.astro';
@@ -97,59 +98,38 @@ const backFallbackUrl = material.moduleId
     ? `/module/${material.moduleId}/${subjectToSlug(material.subject)}`
     : `/module/${material.moduleId}`
   : `/year/${material.year}`;
+
+const crumbs: NavCrumb[] = [];
+if (material.year) {
+  crumbs.push({
+    title: `Year ${material.year}`,
+    href: `/year/${material.year}`
+  });
+}
+if (moduleInfo) {
+  crumbs.push({
+    title: moduleInfo.title,
+    href: `/module/${moduleInfo.id}`
+  });
+}
+if (material.subject && moduleInfo) {
+  crumbs.push({
+    title: material.subject,
+    href: `/module/${moduleInfo.id}/${subjectToSlug(material.subject)}`
+  });
+}
+crumbs.push({
+  title: titleEn
+});
 ---
 
 <Layout
   title={`${titleEn} | Document Viewer | ASU Med`}
   description={descEn || `Read and study ${titleEn} online on ASU Med.`}
+  crumbs={crumbs}
+  backHref={backFallbackUrl}
 >
   <div class="max-w-6xl mx-auto px-4 sm:px-6 py-6 space-y-6">
-    <!-- Breadcrumbs & Back Navigation -->
-    <nav class="flex items-center justify-between text-xs text-zinc-500 dark:text-zinc-400">
-      <div class="flex items-center gap-1.5 flex-wrap">
-        <a href="/" class="hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">Home</a>
-        <span>&gt;</span>
-        <a href={`/year/${material.year}`} class="hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">
-          Year {material.year}
-        </a>
-        {moduleInfo && (
-          <>
-            <span>&gt;</span>
-            <a href={`/module/${moduleInfo.id}`} class="hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">
-              {moduleInfo.title}
-            </a>
-          </>
-        )}
-        {material.subject && moduleInfo && (
-          <>
-            <span>&gt;</span>
-            <a
-              href={`/module/${moduleInfo.id}/${subjectToSlug(material.subject)}`}
-              class="hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors"
-            >
-              {material.subject}
-            </a>
-          </>
-        )}
-        <span>&gt;</span>
-        <span class="text-zinc-800 dark:text-zinc-200 font-semibold truncate max-w-[200px] sm:max-w-[320px]">
-          {titleEn}
-        </span>
-      </div>
-
-      <button
-        type="button"
-        id="viewer-back-btn"
-        data-fallback={backFallbackUrl}
-        class="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-semibold rounded-lg bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-zinc-700 dark:text-zinc-300 transition-colors cursor-pointer shrink-0"
-        title="Go back"
-      >
-        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
-        </svg>
-        <span>Back</span>
-      </button>
-    </nav>
 
     <!-- Document Info Card & Actions Header -->
     <header class="bg-white dark:bg-zinc-900 border border-zinc-200/80 dark:border-zinc-800 rounded-2xl p-4 sm:p-5 shadow-xs space-y-4">

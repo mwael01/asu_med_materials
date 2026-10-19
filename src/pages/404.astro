@@ -4,7 +4,7 @@ import Layout from '../layouts/Layout.astro';
 const title = 'Page Not Found - ASU Med';
 ---
 
-<Layout title={title}>
+<Layout title={title} crumbs={[{ title: '404' }]} backHref="/">
   <div class="min-h-[60vh] flex items-center justify-center px-4">
     <div class="text-center space-y-6">
       <div class="text-8xl font-black text-emerald-600 dark:text-emerald-400">404</div>

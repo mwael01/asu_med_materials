@@ -15,3 +15,15 @@ export interface NavigationCardItem {
   subject?: string;
   appearance?: SubjectAppearance;
 }
+
+export interface NavCrumbOption {
+  title: string;
+  href: string;
+  active?: boolean;
+}
+
+export interface NavCrumb {
+  title: string;
+  href?: string;
+  menu?: NavCrumbOption[];
+}

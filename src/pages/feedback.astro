@@ -9,15 +9,12 @@ const modules = await getAllModules();
 <Layout
   title="Feedback & Suggestions - ASU Med"
   description="Share your feedback, suggest features, or report broken links and errors to help improve ASU Med for all medical students."
+  crumbs={[{ title: 'Feedback' }]}
+  backHref="/"
 >
   <div class="max-w-xl mx-auto py-4 text-start">
-    <!-- Breadcrumb & Header -->
+    <!-- Header -->
     <div class="mb-5">
-      <div class="flex items-center gap-1.5 text-xs text-zinc-500 dark:text-zinc-400 mb-2">
-        <a href="/?redirect=false" class="hover:text-emerald-600 dark:hover:text-emerald-400">Home</a>
-        <span>/</span>
-        <span class="text-zinc-900 dark:text-zinc-100 font-bold">Feedback</span>
-      </div>
       <h1 class="text-xl sm:text-2xl font-extrabold text-zinc-900 dark:text-zinc-100 mb-1">
         Feedback & Suggestions
       </h1>

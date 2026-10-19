@@ -2,28 +2,80 @@
 import Layout from '../../../../../../../layouts/Layout.astro';
 import PageHeading from '../../../../../../../components/common/PageHeading.astro';
 import DoctorPlayer from '../../../../../../../components/study/DoctorPlayer.astro';
+import type { NavCrumb } from '../../../../../../../types/navigation';
 import { loadLessonPage } from '../../../../../../../data/lessons';
-import { lessonDoctors, lessonPath } from '../../../../../../../utils/lessons';
+import { getAllModules } from '../../../../../../../data/modules';
+import { getPublicLessons } from '../../../../../../../data/catalogue.server';
+import { getMaterialsVersionFromFirestore } from '../../../../../../../firebase/firestore';
+import { lessonDoctors, lessonPath, lessonsForSubject } from '../../../../../../../utils/lessons';
 import { studyEntries, isFlashcards } from '../../../../../../../utils/studyContent';
 import { subjectToSlug } from '../../../../../../../utils/slug';
 
-const context = await loadLessonPage(Astro.params.id || '', Astro.params.subject || '', Astro.params.lessonId || '');
+const version = await getMaterialsVersionFromFirestore();
+const context = await loadLessonPage(Astro.params.id || '', Astro.params.subject || '', Astro.params.lessonId || '', version);
 if (!context) return Astro.redirect('/404');
 const { module, lesson, materials } = context;
 
-const doctor = lessonDoctors(materials.filter(item => !isFlashcards(item))).find(item => item.key === Astro.params.doctorKey);
+const allDoctors = lessonDoctors(materials.filter(item => !isFlashcards(item)));
+const doctor = allDoctors.find(item => item.key === Astro.params.doctorKey);
 if (!doctor) return Astro.redirect('/404');
 
-const entries = studyEntries(doctor.items);
+const [allModules, allLessons] = await Promise.all([
+  getAllModules(version),
+  getPublicLessons(version)
+]);
+const siblingModules = allModules.filter(item => item.year === module.year && item.active !== false);
+const siblingLessons = lessonsForSubject(allLessons, module.id, lesson.subject);
 
-const crumbs = [
-  { title: 'Home', href: '/' },
-  { title: module.title, href: `/module/${module.id}` },
-  { title: lesson.subject, href: `/module/${module.id}/${subjectToSlug(lesson.subject)}` },
-  { title: lesson.title, href: lessonPath(lesson) }
+const subjectSlug = subjectToSlug(lesson.subject);
+const moduleMenu = siblingModules.map(m => ({
+  title: m.title,
+  href: `/module/${m.id}`,
+  active: m.id === module.id
+}));
+const subjectMenu = module.subjects.map(s => ({
+  title: s,
+  href: `/module/${module.id}/${subjectToSlug(s)}`,
+  active: subjectToSlug(s) === subjectSlug
+}));
+const lessonMenu = siblingLessons.map(l => ({
+  title: l.title,
+  href: lessonPath(l),
+  active: l.id === lesson.id
+}));
+const doctorMenu = allDoctors.map(d => ({
+  title: d.name,
+  href: `${lessonPath(lesson)}/doctor/${d.key}`,
+  active: d.key === doctor.key
+}));
+
+const crumbs: NavCrumb[] = [
+  {
+    title: module.title,
+    href: `/module/${module.id}`,
+    menu: moduleMenu
+  },
+  {
+    title: lesson.subject,
+    href: `/module/${module.id}/${subjectSlug}`,
+    menu: subjectMenu
+  },
+  {
+    title: lesson.title,
+    href: lessonPath(lesson),
+    menu: lessonMenu
+  },
+  {
+    title: doctor.name,
+    menu: doctorMenu
+  }
 ];
+
+const backHref = lessonPath(lesson);
+const entries = studyEntries(doctor.items);
 ---
-<Layout title={`${doctor.name} - ${lesson.title} - ASU Med`}>
-  <PageHeading title={doctor.name} crumbs={crumbs} />
+
+<Layout title={`${doctor.name} - ${lesson.title} - ASU Med`} crumbs={crumbs} backHref={backHref}>
+  <PageHeading title={doctor.name} />
   <DoctorPlayer entries={entries} materials={doctor.items} />
 </Layout>

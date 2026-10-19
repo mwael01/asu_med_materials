@@ -1,6 +1,7 @@
 ---
 import Layout from '../../layouts/Layout.astro';
 import StudyPlayer from '../../components/flashcards/StudyPlayer.astro';
+import type { NavCrumb } from '../../types/navigation';
 import { getFlashcardDeck, getFlashcardCards } from '../../firebase/flashcards';
 
 const { id } = Astro.params;
@@ -18,11 +19,19 @@ if (!deck) {
 const cards = deck.activeRevisionId
   ? await getFlashcardCards(deck.id, deck.activeRevisionId)
   : [];
+
+const crumbs: NavCrumb[] = [
+  {
+    title: deck.title
+  }
+];
 ---
 
 <Layout
   title={`${deck.title} | Flashcards - ASU Med`}
   description={`Interactive flashcards for ${deck.title} with offline study and progress tracking.`}
+  crumbs={crumbs}
+  backHref="/"
 >
   <div class="py-2 sm:py-4 px-1 sm:px-0">
     <StudyPlayer deck={deck} initialCards={cards} />

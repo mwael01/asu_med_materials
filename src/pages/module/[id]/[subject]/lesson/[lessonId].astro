@@ -3,89 +3,141 @@ import Layout from '../../../../../layouts/Layout.astro';
 import PageHeading from '../../../../../components/common/PageHeading.astro';
 import NavigationCards from '../../../../../components/common/NavigationCards.astro';
 import ResourceGrid from '../../../../../components/materials/ResourceGrid.astro';
+import type { NavCrumb } from '../../../../../types/navigation';
 import { loadLessonPage } from '../../../../../data/lessons';
-import { lessonDoctors, lessonPath } from '../../../../../utils/lessons';
-import { isFlashcards, isMcqMaterial, isPdfMaterial, isVideoMaterial, matchesDiscoveryType } from '../../../../../utils/studyContent';
+import { getAllModules } from '../../../../../data/modules';
+import { getPublicLessons } from '../../../../../data/catalogue.server';
+import { getMaterialsVersionFromFirestore } from '../../../../../firebase/firestore';
+import { lessonDoctors, lessonPath, lessonsForSubject } from '../../../../../utils/lessons';
+import { isFlashcards } from '../../../../../utils/studyContent';
 import { subjectToSlug } from '../../../../../utils/slug';
-import type { DiscoveryType } from '../../../../../types/lessons';
 
-const context = await loadLessonPage(Astro.params.id || '', Astro.params.subject || '', Astro.params.lessonId || '');
+const version = await getMaterialsVersionFromFirestore();
+const context = await loadLessonPage(Astro.params.id || '', Astro.params.subject || '', Astro.params.lessonId || '', version);
 if (!context) return Astro.redirect('/404');
 const { module, lesson, materials } = context;
 
-// 1. Doctors (explanations, video series, playlists, and lecture recordings)
-const lectureMaterials = materials.filter(item => !isFlashcards(item) && !isMcqMaterial(item) && (isVideoMaterial(item) || item.category === 'lectures'));
-const doctors = lessonDoctors(lectureMaterials.length ? lectureMaterials : materials.filter(item => !isFlashcards(item) && !isMcqMaterial(item) && !isPdfMaterial(item)));
-const doctorMaterials = new Set(doctors.flatMap(doctor => doctor.items.map(item => item.id)));
-
-// 2. PDFs (summaries, lecture slides, books, documents)
-const pdfs = materials.filter(isPdfMaterial);
-
-// 3. Flashcards (interactive study decks)
-const flashcards = materials.filter(isFlashcards);
-
-// 4. MCQs (question banks, quizzes, previous exam questions)
-const mcqs = materials.filter(isMcqMaterial);
-
-// 5. Other resources (any remaining resources not fitting into above categories)
-const handledIds = new Set([
-  ...doctorMaterials,
-  ...pdfs.map(m => m.id),
-  ...flashcards.map(m => m.id),
-  ...mcqs.map(m => m.id),
+const [allModules, allLessons] = await Promise.all([
+  getAllModules(version),
+  getPublicLessons(version)
 ]);
-const otherResources = materials.filter(item => !handledIds.has(item.id));
+const siblingModules = allModules.filter(item => item.year === module.year && item.active !== false);
+const siblingLessons = lessonsForSubject(allLessons, module.id, lesson.subject);
 
-const crumbs = [
-  { title: 'Home', href: '/' },
-  { title: module.title, href: `/module/${module.id}` },
-  { title: lesson.subject, href: `/module/${module.id}/${subjectToSlug(lesson.subject)}` }
+const subjectSlug = subjectToSlug(lesson.subject);
+const moduleMenu = siblingModules.map(m => ({
+  title: m.title,
+  href: `/module/${m.id}`,
+  active: m.id === module.id
+}));
+const subjectMenu = module.subjects.map(s => ({
+  title: s,
+  href: `/module/${module.id}/${subjectToSlug(s)}`,
+  active: subjectToSlug(s) === subjectSlug
+}));
+const lessonMenu = siblingLessons.map(l => ({
+  title: l.title,
+  href: lessonPath(l),
+  active: l.id === lesson.id
+}));
+
+const crumbs: NavCrumb[] = [
+  {
+    title: module.title,
+    href: `/module/${module.id}`,
+    menu: moduleMenu
+  },
+  {
+    title: lesson.subject,
+    href: `/module/${module.id}/${subjectSlug}`,
+    menu: subjectMenu
+  },
+  {
+    title: lesson.title,
+    menu: lessonMenu
+  }
 ];
+
+const backHref = `/module/${module.id}/${subjectSlug}`;
+
+const flashcards = materials.filter(isFlashcards);
+const doctors = lessonDoctors(materials.filter(item => !isFlashcards(item)));
+const doctorMaterials = new Set(doctors.flatMap(doctor => doctor.items.map(item => item.id)));
+const general = materials.filter(item => !isFlashcards(item) && !doctorMaterials.has(item.id));
 ---
-<Layout title={`${lesson.title} - ASU Med`}>
-  <PageHeading title={lesson.title} crumbs={crumbs} />
 
-  <div class="space-y-8">
-    {doctors.length > 0 && (
-      <section>
-        <h2 class="text-base font-semibold mb-4">Doctors</h2>
-        <NavigationCards
-          items={doctors.map(doctor => ({
-            title: doctor.name,
-            href: `${lessonPath(lesson)}/doctor/${doctor.key}`
-          }))}
-        />
-      </section>
-    )}
+<Layout title={`${lesson.title} - ASU Med`} crumbs={crumbs} backHref={backHref}>
+  <PageHeading title={lesson.title} />
 
-    {pdfs.length > 0 && (
-      <section>
-        <h2 class="text-base font-semibold mb-4">PDFs</h2>
-        <ResourceGrid materials={pdfs} />
-      </section>
-    )}
+  <!-- Doctors Section (Sky Blue accent with Doctor Icon) -->
+  {doctors.length > 0 && (
+    <section class="border border-sky-100/90 dark:border-sky-900/30 bg-sky-50/30 dark:bg-sky-950/10 rounded-2xl p-4 sm:p-5">
+      <div class="flex items-center justify-between gap-3 mb-4">
+        <div class="flex items-center gap-2.5">
+          <div class="w-8 h-8 rounded-lg bg-sky-100 text-sky-700 dark:bg-sky-950/70 dark:text-sky-300 flex items-center justify-center shrink-0 border border-sky-200/60 dark:border-sky-800/60">
+            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M4.5 3v5a5.5 5.5 0 0 0 11 0V3m-11 0h3m8 0h3M10 13.5v3.5a4.5 4.5 0 0 0 9 0V15m0 0a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5Z" />
+            </svg>
+          </div>
+          <div>
+            <h2 class="text-sm sm:text-base font-bold text-zinc-900 dark:text-zinc-100">Doctors & Lectures</h2>
+          </div>
+        </div>
+        <span class="text-xs font-semibold px-2 py-0.5 rounded-md bg-sky-100/70 dark:bg-sky-900/40 text-sky-700 dark:text-sky-300">
+          {doctors.length} {doctors.length === 1 ? 'doctor' : 'doctors'}
+        </span>
+      </div>
+      <NavigationCards items={doctors.map(doctor => ({ title: doctor.name, href: `${lessonPath(lesson)}/doctor/${doctor.key}` }))} />
+    </section>
+  )}
 
-    {flashcards.length > 0 && (
-      <section>
-        <h2 class="text-base font-semibold mb-4">Flashcards</h2>
-        <ResourceGrid materials={flashcards} />
-      </section>
-    )}
+  <!-- Flashcards Section (Amber accent with Cards Icon) -->
+  {flashcards.length > 0 && (
+    <section class="mt-6 border border-amber-100/90 dark:border-amber-900/30 bg-amber-50/30 dark:bg-amber-950/10 rounded-2xl p-4 sm:p-5">
+      <div class="flex items-center justify-between gap-3 mb-4">
+        <div class="flex items-center gap-2.5">
+          <div class="w-8 h-8 rounded-lg bg-amber-100 text-amber-700 dark:bg-amber-950/70 dark:text-amber-300 flex items-center justify-center shrink-0 border border-amber-200/60 dark:border-amber-800/60">
+            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect width="13" height="15" x="3" y="6" rx="2" />
+              <path d="M7 6V4a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-2" />
+            </svg>
+          </div>
+          <div>
+            <h2 class="text-sm sm:text-base font-bold text-zinc-900 dark:text-zinc-100">Flashcards</h2>
+          </div>
+        </div>
+        <span class="text-xs font-semibold px-2 py-0.5 rounded-md bg-amber-100/70 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300">
+          {flashcards.length} {flashcards.length === 1 ? 'deck' : 'decks'}
+        </span>
+      </div>
+      <ResourceGrid materials={flashcards} />
+    </section>
+  )}
 
-    {mcqs.length > 0 && (
-      <section>
-        <h2 class="text-base font-semibold mb-4">MCQs</h2>
-        <ResourceGrid materials={mcqs} />
-      </section>
-    )}
+  <!-- Lesson Resources Section (Emerald accent with Document Icon) -->
+  {general.length > 0 && (
+    <section class="mt-6 border border-emerald-100/90 dark:border-emerald-900/30 bg-emerald-50/30 dark:bg-emerald-950/10 rounded-2xl p-4 sm:p-5">
+      <div class="flex items-center justify-between gap-3 mb-4">
+        <div class="flex items-center gap-2.5">
+          <div class="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-700 dark:bg-emerald-950/70 dark:text-emerald-300 flex items-center justify-center shrink-0 border border-emerald-200/60 dark:border-emerald-800/60">
+            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+              <polyline points="14 2 14 8 20 8" />
+              <line x1="16" y1="13" x2="8" y2="13" />
+              <line x1="16" y1="17" x2="8" y2="17" />
+            </svg>
+          </div>
+          <div>
+            <h2 class="text-sm sm:text-base font-bold text-zinc-900 dark:text-zinc-100">Lesson Resources</h2>
+          </div>
+        </div>
+        <span class="text-xs font-semibold px-2 py-0.5 rounded-md bg-emerald-100/70 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300">
+          {general.length} {general.length === 1 ? 'resource' : 'resources'}
+        </span>
+      </div>
+      <ResourceGrid materials={general} />
+    </section>
+  )}
 
-    {otherResources.length > 0 && (
-      <section>
-        <h2 class="text-base font-semibold mb-4">Other resources</h2>
-        <ResourceGrid materials={otherResources} />
-      </section>
-    )}
-  </div>
-
-  {!materials.length && <p class="text-sm text-zinc-500">No materials available for this lesson.</p>}
+  {!materials.length && <p class="text-sm text-zinc-500 py-6">No materials assigned to this lesson yet.</p>}
 </Layout>

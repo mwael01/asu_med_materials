@@ -11,14 +11,20 @@ import { RECAPTCHA_ENTERPRISE_SITE_KEY } from '../firebase/app-check';
 import { getMaterialsVersionFromFirestore } from '../firebase/firestore';
 import { ClientRouter } from 'astro:transitions';
 
+import type { NavCrumb } from '../types/navigation';
+
 interface Props {
   title?: string;
   description?: string;
+  crumbs?: NavCrumb[];
+  backHref?: string;
 }
 
 const {
   title = 'ASU Med - All-in-one Medical Study Hub',
-  description = 'Batch drives, Telegram channels, YouTube lectures, and study notes for Ain Shams University Faculty of Medicine.'
+  description = 'Batch drives, Telegram channels, YouTube lectures, and study notes for Ain Shams University Faculty of Medicine.',
+  crumbs,
+  backHref
 } = Astro.props;
 
 const catalogueVersion = await getMaterialsVersionFromFirestore();
@@ -84,7 +90,7 @@ const catalogueVersion = await getMaterialsVersionFromFirestore();
     )}
   </head>
   <body class="min-h-dvh flex flex-col bg-zinc-950 text-zinc-100 antialiased selection:bg-emerald-500 selection:text-white">
-    <Navbar />
+    <Navbar crumbs={crumbs} backHref={backHref} />
 
     <main class="page-content flex-1 w-full max-w-6xl mx-auto px-4 sm:px-6 py-6 pb-[calc(1.5rem+env(safe-area-inset-bottom,0px))]">
       <slot />

@@ -1,5 +1,6 @@
 ---
 import Layout from '../../layouts/Layout.astro';
+import type { NavCrumb } from '../../types/navigation';
 import TypeBadge from '../../components/materials/TypeBadge.astro';
 import { getPlaylistById } from '../../data/materials';
 import { getModuleById } from '../../data/modules';
@@ -76,42 +77,37 @@ const primaryBadgeType =
           : 'playlist';
 
 const initialTitle = hasDiscreteVideos ? videos[0].title : (titleEn || playlist.title);
+
+const crumbs: NavCrumb[] = [];
+let backHref = '/';
+
+if (playlist.moduleId && moduleInfo) {
+  crumbs.push({
+    title: moduleInfo.title,
+    href: `/module/${playlist.moduleId}`
+  });
+  backHref = `/module/${playlist.moduleId}`;
+}
+
+if (playlist.subject && playlist.moduleId) {
+  crumbs.push({
+    title: playlist.subject,
+    href: `/module/${playlist.moduleId}/${subjectToSlug(playlist.subject)}`
+  });
+  backHref = `/module/${playlist.moduleId}/${subjectToSlug(playlist.subject)}`;
+}
+
+crumbs.push({
+  title: titleEn || playlist.title
+});
 ---
 
 <Layout
   title={`${titleEn || playlist.title} - ASU Med`}
   description={`Playlists and lecture series for ${titleEn || playlist.title}.`}
+  crumbs={crumbs}
+  backHref={backHref}
 >
-  <!-- Breadcrumb -->
-  <nav class="flex items-center gap-2 text-xs text-zinc-500 dark:text-zinc-400 mb-4" aria-label="Breadcrumb navigation">
-    <a href="/?redirect=false" class="hover:text-emerald-600 dark:hover:text-emerald-400">Home</a>
-    <span>/</span>
-    {playlist.moduleId && (
-      <>
-        <a
-          href={`/module/${playlist.moduleId}`}
-          class="hover:text-emerald-600 dark:hover:text-emerald-400"
-        >
-          {moduleInfo?.title || 'Module'}
-        </a>
-        <span>/</span>
-      </>
-    )}
-    {playlist.subject && playlist.moduleId && (
-      <>
-        <a
-          href={`/module/${playlist.moduleId}/${subjectToSlug(playlist.subject)}`}
-          class="hover:text-emerald-600 dark:hover:text-emerald-400"
-        >
-          {playlist.subject}
-        </a>
-        <span>/</span>
-      </>
-    )}
-    <span
-      class="text-zinc-900 dark:text-zinc-100 font-bold truncate max-w-[200px] sm:max-w-xs"
-    >{titleEn || playlist.title}</span>
-  </nav>
 
   <!-- Playlist Header & Progress Banner -->
   <div class="bg-white dark:bg-zinc-900 border border-zinc-200/90 dark:border-zinc-800 rounded-2xl p-4 sm:p-6 mb-6 text-start shadow-2xs" data-material-id={playlist.id}>

@@ -3,7 +3,8 @@ import Layout from '../../../layouts/Layout.astro';
 import PageHeading from '../../../components/common/PageHeading.astro';
 import NavigationCards from '../../../components/common/NavigationCards.astro';
 import ResourceGrid from '../../../components/materials/ResourceGrid.astro';
-import { getModuleById } from '../../../data/modules';
+import type { NavCrumb } from '../../../types/navigation';
+import { getModuleById, getAllModules } from '../../../data/modules';
 import { getMaterialsByModuleAndSubject } from '../../../data/materials';
 import { getPublicLessons } from '../../../data/catalogue.server';
 import { getMaterialsVersionFromFirestore } from '../../../firebase/firestore';
@@ -18,10 +19,39 @@ if (!module) return Astro.redirect('/404');
 const subject = module.subjects.find(item => subjectToSlug(item) === Astro.params.subject);
 if (!subject) return Astro.redirect('/404');
 
-const [materials, allLessons] = await Promise.all([
+const [materials, allLessons, allModules] = await Promise.all([
   getMaterialsByModuleAndSubject(module.id, subject, version),
-  getPublicLessons(version)
+  getPublicLessons(version),
+  getAllModules(version)
 ]);
+
+const siblingModules = allModules.filter(m => m.year === module.year && m.active !== false);
+const subjectSlug = subjectToSlug(subject);
+
+const moduleMenu = siblingModules.map(m => ({
+  title: m.title,
+  href: `/module/${m.id}`,
+  active: m.id === module.id
+}));
+
+const subjectMenu = module.subjects.map(s => ({
+  title: s,
+  href: `/module/${module.id}/${subjectToSlug(s)}`,
+  active: subjectToSlug(s) === subjectSlug
+}));
+
+const crumbs: NavCrumb[] = [
+  {
+    title: module.title,
+    href: `/module/${module.id}`,
+    menu: moduleMenu
+  },
+  {
+    title: subject,
+    menu: subjectMenu
+  }
+];
+
 const lessons = lessonsForSubject(allLessons, module.id, subject);
 const unassigned = materials.filter(item => !lessons.some(lesson => isMaterialAssignedToLesson(item, lesson)));
 const isGeneralLink = (item: typeof materials[number]) => {
@@ -31,8 +61,9 @@ const isGeneralLink = (item: typeof materials[number]) => {
 const links = unassigned.filter(isGeneralLink);
 const resources = unassigned.filter(item => !isGeneralLink(item));
 ---
-<Layout title={`${subject} - ${module.title} - ASU Med Materials`}>
-  <PageHeading title={subject} crumbs={[{ title: 'Home', href: '/' }, { title: module.title, href: `/module/${module.id}` }]} />
+
+<Layout title={`${subject} - ${module.title} - ASU Med`} crumbs={crumbs} backHref={`/module/${module.id}`}>
+  <PageHeading title={subject} />
   {lessons.length > 0 && <section><h2 class="text-base font-semibold mb-4">Lessons</h2><NavigationCards items={lessons.map(lesson => ({ title: lesson.title, href: lessonPath(lesson), subject }))} /></section>}
   {resources.length > 0 && <section class="mt-8"><h2 class="text-base font-semibold mb-4">Subject resources</h2><ResourceGrid materials={resources} /></section>}
   {links.length > 0 && <section class="mt-8"><h2 class="text-base font-semibold mb-4">Links</h2><ResourceGrid materials={links} /></section>}

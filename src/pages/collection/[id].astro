@@ -1,5 +1,6 @@
 ---
 import Layout from '../../layouts/Layout.astro';
+import type { NavCrumb } from '../../types/navigation';
 import ResourceGrid from '../../components/materials/ResourceGrid.astro';
 import { getCollectionById } from '../../data/collections';
 import { getModuleById } from '../../data/modules';
@@ -29,49 +30,38 @@ const categoryBadgeClasses: Record<string, string> = {
 };
 
 const badgeClass = categoryBadgeClasses[collection.category] || categoryBadgeClasses.general;
+
+const crumbs: NavCrumb[] = [];
+let backHref = '/';
+
+if (collection.year) {
+  crumbs.push({
+    title: `Year ${collection.year}`,
+    href: `/year/${collection.year}`
+  });
+  backHref = `/year/${collection.year}`;
+}
+if (moduleInfo) {
+  crumbs.push({
+    title: moduleInfo.title,
+    href: `/module/${moduleInfo.id}`
+  });
+  backHref = `/module/${moduleInfo.id}`;
+}
+if (collection.parent) {
+  crumbs.push({
+    title: collection.parent.titleEn || collection.parent.title,
+    href: `/collection/${collection.parent.id}`
+  });
+  backHref = `/collection/${collection.parent.id}`;
+}
+crumbs.push({
+  title: collection.titleEn || collection.title
+});
 ---
 
-<Layout title={pageTitle} description={pageDesc}>
+<Layout title={pageTitle} description={pageDesc} crumbs={crumbs} backHref={backHref}>
   <div class="max-w-6xl mx-auto space-y-6">
-    <!-- Breadcrumb -->
-    <nav class="flex items-center gap-2 text-xs text-zinc-500 dark:text-zinc-400 overflow-x-auto no-scrollbar py-1" aria-label="Breadcrumb navigation">
-      <a href="/?redirect=false" class="hover:text-emerald-600 dark:hover:text-emerald-400 whitespace-nowrap">Home</a>
-      <span>/</span>
-      <a
-        href={`/?year=${collection.year}`}
-        class="hover:text-emerald-600 dark:hover:text-emerald-400 whitespace-nowrap"
-      >
-        Year {collection.year}
-      </a>
-      {moduleInfo && (
-        <>
-          <span>/</span>
-          <a
-            href={`/module/${moduleInfo.id}`}
-            class="hover:text-emerald-600 dark:hover:text-emerald-400 whitespace-nowrap"
-          >
-            {moduleInfo.title}
-          </a>
-        </>
-      )}
-      {collection.parent && (
-        <>
-          <span>/</span>
-          <a
-            href={`/collection/${collection.parent.id}`}
-            class="hover:text-emerald-600 dark:hover:text-emerald-400 whitespace-nowrap font-medium"
-          >
-            {collection.parent.titleEn || collection.parent.title}
-          </a>
-        </>
-      )}
-      <span>/</span>
-      <span
-        class="text-zinc-900 dark:text-zinc-100 font-bold truncate max-w-[200px] sm:max-w-xs"
-      >
-        {collection.titleEn || collection.title}
-      </span>
-    </nav>
 
     <!-- Collection Header Card -->
     <header class="p-5 sm:p-6 rounded-2xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 shadow-xs" data-collection-id={collection.id}>

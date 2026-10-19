@@ -3,53 +3,59 @@ import Layout from '../../layouts/Layout.astro';
 import PageHeading from '../../components/common/PageHeading.astro';
 import NavigationCards from '../../components/common/NavigationCards.astro';
 import SubjectIcon from '../../components/materials/SubjectIcon.astro';
-import { getModuleById } from '../../data/modules';
-import { getMaterialsByModule } from '../../data/materials';
+import type { NavCrumb } from '../../types/navigation';
+import { getModuleById, getAllModules } from '../../data/modules';
 import { getPublicLessons } from '../../data/catalogue.server';
 import { getMaterialsVersionFromFirestore } from '../../firebase/firestore';
 import { getModuleAppearance } from '../../utils/subjectAppearance';
 import { subjectToSlug } from '../../utils/slug';
 import { lessonsForSubject } from '../../utils/lessons';
-import { matchesDiscoveryType } from '../../utils/studyContent';
-import type { DiscoveryType } from '../../types/lessons';
 
 const version = await getMaterialsVersionFromFirestore();
 const module = await getModuleById(Astro.params.id || '', version);
 if (!module) return Astro.redirect('/404');
 
-const typeParam = Astro.url.searchParams.get('type');
-const type: DiscoveryType | null = (typeParam === 'videos' || typeParam === 'pdfs' || typeParam === 'flashcards') ? typeParam : null;
-
-const [allLessons, materials] = await Promise.all([
+const [allLessons, allModules] = await Promise.all([
   getPublicLessons(version),
-  getMaterialsByModule(module.id, version)
+  getAllModules(version)
 ]);
 
-// Filter out unlessoned subjects; if type is active, require matching materials
+// Filter out unlessoned subjects
 const activeSubjects = module.subjects.filter(subject => {
-  const subjectLessons = lessonsForSubject(allLessons, module.id, subject);
-  if (subjectLessons.length === 0) return false;
-  if (!type) return true;
-  const lessonIds = new Set(subjectLessons.map(l => l.id));
-  return materials.some(m => m.lessonId && lessonIds.has(m.lessonId) && matchesDiscoveryType(m, type));
+  return lessonsForSubject(allLessons, module.id, subject).length > 0;
 });
 
-const appearance = getModuleAppearance(module);
+const siblingModules = allModules.filter(m => m.year === module.year && m.active !== false);
 
-const typeLabels: Record<DiscoveryType, string> = {
-  videos: 'Videos',
-  pdfs: 'PDFs',
-  flashcards: 'Flashcards'
-};
+const yearMenu = ([1, 2, 3, 4, 5] as const).map(y => ({
+  title: `Year ${y}`,
+  href: `/year/${y}`,
+  active: y === module.year
+}));
 
-const crumbs = [
-  { title: 'Home', href: '/' },
-  { title: 'Modules', href: '/modules' },
-  ...(type ? [{ title: typeLabels[type], href: `/${type}` }] : [])
+const moduleMenu = siblingModules.map(m => ({
+  title: m.title,
+  href: `/module/${m.id}`,
+  active: m.id === module.id
+}));
+
+const crumbs: NavCrumb[] = [
+  {
+    title: `Year ${module.year}`,
+    href: `/year/${module.year}`,
+    menu: yearMenu
+  },
+  {
+    title: module.title,
+    menu: moduleMenu
+  }
 ];
+
+const appearance = getModuleAppearance(module);
 ---
-<Layout title={`${module.title} - ASU Med`}>
-  <PageHeading title={module.title} crumbs={crumbs}>
+
+<Layout title={`${module.title} - ASU Med`} crumbs={crumbs} backHref={`/year/${module.year}`}>
+  <PageHeading title={module.title}>
     <div class="flex items-center gap-2">
       <a
         href="/modules"
@@ -64,11 +70,11 @@ const crumbs = [
   </PageHeading>
 
   <NavigationCards
-    items={activeSubjects.map(subject => ({
+    items={(activeSubjects.length > 0 ? activeSubjects : module.subjects).map(subject => ({
       title: subject,
-      href: `/module/${module.id}/${subjectToSlug(subject)}${type ? `?type=${type}` : ''}`,
+      href: `/module/${module.id}/${subjectToSlug(subject)}`,
       subject
     }))}
-    emptyMessage="No subjects with lessons available yet."
+    emptyMessage="No subjects available yet."
   />
 </Layout>

@@ -2,12 +2,27 @@
 import Layout from '../../layouts/Layout.astro';
 import PageHeading from '../../components/common/PageHeading.astro';
 import ModuleDirectory from '../../components/materials/ModuleDirectory.astro';
+import type { NavCrumb } from '../../types/navigation';
 import { getModulesByYear } from '../../data/modules';
+
 const year = Number(Astro.params.year);
-if (![1,2,3,4,5].includes(year)) return Astro.redirect('/404');
+if (![1, 2, 3, 4, 5].includes(year)) return Astro.redirect('/404');
 const modules = await getModulesByYear(year);
+
+const yearMenu = ([1, 2, 3, 4, 5] as const).map(y => ({
+  title: `Year ${y}`,
+  href: `/year/${y}`,
+  active: y === year
+}));
+
+const crumbs: NavCrumb[] = [
+  {
+    title: `Year ${year}`,
+    menu: yearMenu
+  }
+];
 ---
-<Layout title={`Year ${year} - ASU Med`}>
-  <PageHeading title={`Year ${year}`} crumbs={[{ title: 'Home', href: '/' }, { title: 'Modules', href: '/modules' }]} />
+<Layout title={`Year ${year} - ASU Med`} crumbs={crumbs} backHref="/">
+  <PageHeading title={`Year ${year}`} />
   <ModuleDirectory modules={modules} />
 </Layout>

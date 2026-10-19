@@ -9,6 +9,8 @@ const modules = await getAllModulesIncludingInactive();
 <Layout
   title="Admin Dashboard - ASU Med"
   description="Administration and content management portal for Ain Shams University Faculty of Medicine study materials."
+  crumbs={[{ title: 'Admin' }]}
+  backHref="/"
 >
   <div class="max-w-4xl mx-auto py-4">
     <!-- Admin Content Container (Active when user.role === 'admin') -->
