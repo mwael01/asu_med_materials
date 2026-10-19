@@ -3,6 +3,36 @@ import type { DocumentItem, MaterialItem } from '../types/materials';
 export const isHostedDocumentUrl = (url: string): boolean =>
   /^https:\/\/asumed\.eduvour\.com\/materials\/sha256\/[a-f0-9]{64}\.(pdf|jpg|jpeg|png)(?:\?v=[a-f0-9]{64})?$/.test(url);
 
+/**
+ * Checks if a URL or document represents a PDF file that should be rendered with PDF.js.
+ * This includes Cloudflare R2 hosted PDFs, direct PDF links, and local offline blob URLs.
+ * Google Drive files are excluded because they use Google's native preview iframe.
+ */
+export function isPdfDocument(url?: string): boolean {
+  if (!url) return false;
+  const clean = url.trim();
+  if (clean.startsWith('blob:')) return true;
+  if (isHostedDocumentUrl(clean) && /\.pdf/i.test(clean)) return true;
+  if (extractDriveDocumentId(clean)) return false;
+  if (/\.pdf(?:[?#]|$)/i.test(clean)) return true;
+  return false;
+}
+
+export type DocumentViewerType = 'pdf' | 'iframe' | 'image' | 'none';
+
+/**
+ * Determines the appropriate viewer renderer type for a given document URL.
+ */
+export function getDocumentViewerType(url?: string): DocumentViewerType {
+  if (!url) return 'none';
+  const clean = url.trim();
+  if (isImageDocument(clean)) return 'image';
+  if (isPdfDocument(clean)) return 'pdf';
+  if (extractDriveDocumentId(clean)) return 'iframe';
+  if (getDocumentEmbedUrl(clean)) return 'iframe';
+  return 'none';
+}
+
 export function getDocumentDownloadPath(materialId: string, documentId: string): string {
   return `/api/material-download?material=${encodeURIComponent(materialId)}&document=${encodeURIComponent(documentId)}`;
 }

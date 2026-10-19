@@ -30,7 +30,8 @@ const PRECACHE_ASSETS = [
   '/api/modules',
   '/api/lessons',
   '/api/collections',
-  '/api/version'
+  '/api/version',
+  '/vendor/pdfjs/pdf.worker.min.mjs'
 ];
 
 // Helper: fetch with network timeout

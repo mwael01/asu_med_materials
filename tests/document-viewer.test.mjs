@@ -3,6 +3,8 @@ import assert from 'node:assert/strict';
 import {
   extractDriveDocumentId,
   isEmbeddableDocument,
+  isPdfDocument,
+  getDocumentViewerType,
   getDocumentEmbedUrl,
   getDocumentExternalUrl,
   getDocumentViewerPath,
@@ -147,5 +149,33 @@ test('getDocumentDownloadUrl generates direct download links without proxy', () 
   assert.equal(getDocumentDownloadUrl('https://t.me/asu_channel'), null);
   assert.equal(getDocumentDownloadUrl('https://youtube.com/watch?v=12345678901'), null);
   assert.equal(getDocumentDownloadUrl(undefined), null);
+});
+
+test('isPdfDocument and getDocumentViewerType classify R2 PDFs and Drive embeds accurately', () => {
+  const r2Pdf = `https://asumed.eduvour.com/materials/sha256/${'c'.repeat(64)}.pdf`;
+  const r2Image = `https://asumed.eduvour.com/materials/sha256/${'c'.repeat(64)}.png`;
+  const driveFile = 'https://drive.google.com/file/d/1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs/view';
+  const driveFolder = 'https://drive.google.com/drive/folders/batch-123';
+  const localBlob = 'blob:http://localhost:4321/1234-5678';
+  const directPdf = 'https://example.com/lecture_notes.pdf?token=xyz';
+  const directImage = 'https://example.com/histology.jpg';
+
+  // isPdfDocument
+  assert.equal(isPdfDocument(r2Pdf), true);
+  assert.equal(isPdfDocument(directPdf), true);
+  assert.equal(isPdfDocument(localBlob), true);
+  assert.equal(isPdfDocument(driveFile), false);
+  assert.equal(isPdfDocument(r2Image), false);
+  assert.equal(isPdfDocument(driveFolder), false);
+  assert.equal(isPdfDocument(''), false);
+
+  // getDocumentViewerType
+  assert.equal(getDocumentViewerType(r2Pdf), 'pdf');
+  assert.equal(getDocumentViewerType(directPdf), 'pdf');
+  assert.equal(getDocumentViewerType(localBlob), 'pdf');
+  assert.equal(getDocumentViewerType(driveFile), 'iframe');
+  assert.equal(getDocumentViewerType(r2Image), 'image');
+  assert.equal(getDocumentViewerType(directImage), 'image');
+  assert.equal(getDocumentViewerType(driveFolder), 'none');
 });
 

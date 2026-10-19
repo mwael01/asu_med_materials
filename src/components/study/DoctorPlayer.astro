@@ -2,6 +2,7 @@
 import type { StudyEntry, StudyTab } from '../../types/lessons';
 import type { MaterialItem } from '../../types/materials';
 import DocumentImage from './DocumentImage.astro';
+import PdfViewer from './PdfViewer.astro';
 interface Props { entries: StudyEntry[]; materials: MaterialItem[] }
 const { entries, materials } = Astro.props;
 const labels: Record<StudyTab, string> = { videos: 'Videos', pdfs: 'PDFs', links: 'Links' };
@@ -12,10 +13,11 @@ const tabs = (['videos', 'pdfs', 'links'] as const).filter(tab => entries.some(e
   {entries.length ? (
     <div class="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_20rem] gap-5 items-start">
       <section aria-label="Study viewer" class="min-w-0">
-        <div data-study-viewport class="rounded-xl overflow-hidden border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900">
+        <div data-study-viewport class="rounded-xl overflow-hidden border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 relative">
           <iframe data-study-frame title="Study material" class="w-full aspect-video" hidden allow="autoplay; fullscreen; picture-in-picture" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe>
           <video data-study-video class="w-full aspect-video" controls playsinline hidden></video>
           <DocumentImage data-study-image alt="Study material" hidden />
+          <PdfViewer id="doctor-pdf-viewer" class="w-full h-[70vh] min-h-[460px]" hidden />
           <div data-study-external class="p-8 text-sm text-zinc-500" hidden>Open this resource using the link below.</div>
         </div>
         <h2 data-study-title class="font-semibold text-base mt-4 break-words"></h2>
@@ -85,7 +87,8 @@ const tabs = (['videos', 'pdfs', 'links'] as const).filter(tab => entries.some(e
     justify-content: center !important;
   }
   [data-study-viewport].study-viewport-fullscreen iframe,
-  [data-study-viewport].study-viewport-fullscreen video {
+  [data-study-viewport].study-viewport-fullscreen video,
+  [data-study-viewport].study-viewport-fullscreen [data-pdf-viewer] {
     width: 100vw !important;
     height: 100vh !important;
     max-height: 100vh !important;

@@ -5,6 +5,7 @@ import TypeBadge from '../../components/materials/TypeBadge.astro';
 import ResourceCard from '../../components/materials/ResourceCard.astro';
 import DocumentImage from '../../components/study/DocumentImage.astro';
 import StudyFolderDrawer from '../../components/study/StudyFolderDrawer.astro';
+import PdfViewer from '../../components/study/PdfViewer.astro';
 import { getMaterialById, getMaterialsByModule } from '../../data/materials';
 import { getModuleById } from '../../data/modules';
 import { getMaterialsVersionFromFirestore } from '../../firebase/firestore';
@@ -16,6 +17,7 @@ import {
   resolveDocumentItems,
   isEmbeddableDocument,
   isImageDocument,
+  isPdfDocument,
   getDocumentDownloadUrl
 } from '../../utils/documentViewer';
 
@@ -45,22 +47,27 @@ const parsedDocuments = documents.map((doc, idx) => ({
   url: doc.url,
   embedUrl: getDocumentEmbedUrl(doc.url),
   externalUrl: getDocumentExternalUrl(doc.url),
-  isEmbeddable: isEmbeddableDocument(doc.url)
+  isEmbeddable: isEmbeddableDocument(doc.url),
+  isPdf: isPdfDocument(doc.url),
+  isImage: isImageDocument(doc.url)
 }));
 
-// Find initial document (first embeddable or first document)
-const initialDocIndex = Math.max(0, parsedDocuments.findIndex((d) => Boolean(d.embedUrl)));
+// Find initial document (first embeddable, PDF, or first document)
+const initialDocIndex = Math.max(0, parsedDocuments.findIndex((d) => Boolean(d.embedUrl) || d.isPdf));
 const initialDoc = parsedDocuments[initialDocIndex] || {
   id: material.id,
   title: material.title,
   url: material.url,
   embedUrl: getDocumentEmbedUrl(material.url),
   externalUrl: getDocumentExternalUrl(material.url),
-  isEmbeddable: isEmbeddableDocument(material.url)
+  isEmbeddable: isEmbeddableDocument(material.url),
+  isPdf: isPdfDocument(material.url),
+  isImage: isImageDocument(material.url)
 };
 
+const isInitialPdf = initialDoc.isPdf ?? isPdfDocument(material.url);
 const embedUrl = initialDoc.embedUrl || getDocumentEmbedUrl(material.url);
-if (!embedUrl && !isBundle) {
+if (!embedUrl && !isInitialPdf && !isBundle) {
   return Astro.redirect(material.url);
 }
 
@@ -359,8 +366,10 @@ crumbs.push({
               data-doc-index={idx}
               data-doc-id={doc.id}
               data-doc-title={doc.title}
+              data-doc-url={doc.url}
               data-embed-url={doc.embedUrl || ''}
-              data-is-image={isImageDocument(doc.url) ? 'true' : 'false'}
+              data-is-image={doc.isImage ? 'true' : 'false'}
+              data-is-pdf={doc.isPdf ? 'true' : 'false'}
               data-external-url={doc.externalUrl}
               data-download-url={getDocumentDownloadUrl(doc.url, material.id, doc.id) || ''}
               title={doc.title}
@@ -396,7 +405,10 @@ crumbs.push({
       <!-- Skeleton Loading Indicator -->
       <div
         id="viewer-skeleton"
-        class="absolute inset-0 z-20 flex flex-col items-center justify-center bg-zinc-100 dark:bg-zinc-900 transition-opacity duration-300 pointer-events-none"
+        class:list={[
+          'absolute inset-0 z-20 flex flex-col items-center justify-center bg-zinc-100 dark:bg-zinc-900 transition-opacity duration-300 pointer-events-none',
+          initialDoc.isPdf && 'hidden'
+        ]}
       >
         <div class="animate-pulse flex flex-col items-center gap-3 text-center p-6">
           <div class="w-12 h-12 rounded-2xl bg-zinc-200 dark:bg-zinc-800 flex items-center justify-center text-zinc-400">
@@ -411,17 +423,25 @@ crumbs.push({
         </div>
       </div>
 
-      <!-- Embedded Iframe -->
+      <!-- Embedded PDF.js Reader (Cloudflare R2, direct PDFs, and local offline blobs) -->
+      <PdfViewer
+        id="viewer-pdf"
+        initialUrl={initialDoc.isPdf ? initialDoc.url : ''}
+        title={initialDoc.title}
+        hidden={!initialDoc.isPdf}
+      />
+
+      <!-- Embedded Iframe (Google Drive, Docs, Slides, and web embeds) -->
       <iframe
         id="viewer-iframe"
-        src={!isImageDocument(initialDoc.url) ? embedUrl : undefined}
-        hidden={isImageDocument(initialDoc.url)}
+        src={!initialDoc.isImage && !initialDoc.isPdf ? embedUrl : undefined}
+        hidden={initialDoc.isImage || initialDoc.isPdf}
         class="w-full h-full border-0 rounded-2xl"
         allow="autoplay; fullscreen"
         loading="eager"
         title={initialDoc.title || titleEn}
       ></iframe>
-      <DocumentImage id="viewer-image" src={isImageDocument(initialDoc.url) ? initialDoc.url : undefined} alt={initialDoc.title} hidden={!isImageDocument(initialDoc.url)} />
+      <DocumentImage id="viewer-image" src={initialDoc.isImage ? initialDoc.url : undefined} alt={initialDoc.title} hidden={!initialDoc.isImage} />
     </main>
 
     <!-- Bottom Helper Note -->
@@ -517,6 +537,7 @@ crumbs.push({
     initStudiedMaterials();
 
     const container = document.getElementById('viewer-container');
+    const pdfRoot = document.getElementById('viewer-pdf');
     const iframe = document.getElementById('viewer-iframe') as HTMLIFrameElement | null;
     const image = document.getElementById('viewer-image') as HTMLImageElement | null;
     const skeleton = document.getElementById('viewer-skeleton');
@@ -530,6 +551,45 @@ crumbs.push({
     const downloadBtnText = document.getElementById('viewer-download-btn-text');
     const dlIcon = document.getElementById('download-icon-dl');
     const savedIcon = document.getElementById('download-icon-saved');
+
+    let pdfViewer: any = null;
+    if (pdfRoot) {
+      import('../../scripts/study/pdfViewerController').then(({ createPdfViewer }) => {
+        pdfViewer = createPdfViewer(pdfRoot);
+      }).catch(err => console.error('Failed to init PDF viewer:', err));
+    }
+
+    signal.addEventListener('abort', () => {
+      pdfViewer?.destroy();
+    });
+
+    const openLocalDocument = (blobUrl: string, title?: string, path?: string) => {
+      const isPdf = path ? path.toLowerCase().endsWith('.pdf') : true;
+      if (isPdf && pdfRoot) {
+        if (image) image.hidden = true;
+        if (iframe) {
+          iframe.hidden = true;
+          iframe.removeAttribute('src');
+        }
+        pdfRoot.hidden = false;
+        skeleton?.classList.add('hidden');
+        if (pdfViewer) {
+          pdfViewer.load(blobUrl, title || 'Local Document');
+        } else {
+          import('../../scripts/study/pdfViewerController').then(({ createPdfViewer }) => {
+            pdfViewer = createPdfViewer(pdfRoot);
+            pdfViewer.load(blobUrl, title || 'Local Document');
+          });
+        }
+      } else if (iframe) {
+        if (image) image.hidden = true;
+        if (pdfRoot) pdfRoot.hidden = true;
+        iframe.hidden = false;
+        iframe.src = blobUrl;
+        iframe.title = title || 'Local Document';
+        skeleton?.classList.add('hidden');
+      }
+    };
 
     // 1. Hide skeleton when iframe loads
     if (iframe && skeleton) {
@@ -658,11 +718,8 @@ crumbs.push({
         const hasPerm = await verifyFolderPermission(handle, false);
         if (!hasPerm) return;
         const blobUrl = await readLocalFileBlobUrl(handle, localPath);
-        if (blobUrl && iframe) {
-          if (image) image.hidden = true;
-          iframe.hidden = false;
-          iframe.src = blobUrl;
-          skeleton?.classList.add('hidden');
+        if (blobUrl) {
+          openLocalDocument(blobUrl, downloadBtn.dataset.title || 'Local Document', localPath);
           const showFn = (window as any).showToast;
           if (typeof showFn === 'function') {
             showFn({
@@ -718,18 +775,14 @@ crumbs.push({
     }, { signal });
 
     window.addEventListener('study-folder-load-document', (e: any) => {
-      const { blobUrl, title } = e.detail || {};
-      if (blobUrl && iframe) {
-        if (image) image.hidden = true;
-        iframe.hidden = false;
-        iframe.src = blobUrl;
-        iframe.title = title || 'Local Document';
-        skeleton?.classList.add('hidden');
+      const { blobUrl, title, path } = e.detail || {};
+      if (blobUrl) {
+        openLocalDocument(blobUrl, title, path);
         const showFn = (window as any).showToast;
         if (typeof showFn === 'function') {
           showFn({
             type: 'success',
-            message: `Viewing offline document: ${title}`,
+            message: `Viewing offline document: ${title || 'Document'}`,
             duration: 2500
           });
         }
@@ -770,12 +823,43 @@ crumbs.push({
       const docId = targetBtn.getAttribute('data-doc-id') || '';
       const downloadUrl = targetBtn.getAttribute('data-download-url') || null;
       const isImage = targetBtn.getAttribute('data-is-image') === 'true';
+      const isPdf = targetBtn.getAttribute('data-is-pdf') === 'true';
+      const docUrl = targetBtn.getAttribute('data-doc-url') || '';
 
       if (image) {
         image.hidden = !isImage; image.removeAttribute('src');
         if (isImage && external) { image.src = external; image.alt = title; }
       }
-      if (iframe) iframe.hidden = isImage;
+      if (pdfRoot) {
+        pdfRoot.hidden = !isPdf;
+        if (isPdf && docUrl) {
+          skeleton?.classList.add('hidden');
+          if (pdfViewer) {
+            pdfViewer.load(docUrl, title);
+          } else {
+            import('../../scripts/study/pdfViewerController').then(({ createPdfViewer }) => {
+              pdfViewer = createPdfViewer(pdfRoot);
+              pdfViewer.load(docUrl, title);
+            });
+          }
+        }
+      }
+      if (iframe) {
+        iframe.hidden = isImage || isPdf;
+        if (!isImage && !isPdf) {
+          if (embed) {
+            if (skeleton) {
+              skeleton.classList.remove('hidden', 'opacity-0');
+            }
+            iframe.src = embed;
+            iframe.title = title;
+          } else if (external) {
+            window.open(external, '_blank');
+          }
+        } else {
+          iframe.removeAttribute('src');
+        }
+      }
 
       // Update active pill classes
       trackItems.forEach((btn, i) => {
@@ -814,21 +898,6 @@ crumbs.push({
         syncDownloadBtnState(downloadBtn.dataset.materialId || '', docId, downloadUrl);
       }
 
-      // Update Iframe Preview
-      if (iframe) {
-        if (isImage) {
-          iframe.removeAttribute('src'); skeleton?.classList.add('hidden');
-        } else if (embed) {
-          if (skeleton) {
-            skeleton.classList.remove('hidden', 'opacity-0');
-          }
-          iframe.src = embed;
-          iframe.title = title;
-        } else if (external) {
-          window.open(external, '_blank');
-        }
-      }
-
       // Scroll active pill into view smoothly
       targetBtn.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
     }
@@ -860,11 +929,8 @@ crumbs.push({
             const hasPerm = await verifyFolderPermission(handle, false);
             if (hasPerm) {
               const blobUrl = await readLocalFileBlobUrl(handle, rec.relativePath);
-              if (blobUrl && iframe) {
-                if (image) image.hidden = true;
-                iframe.hidden = false;
-                iframe.src = blobUrl;
-                skeleton?.classList.add('hidden');
+              if (blobUrl) {
+                openLocalDocument(blobUrl, downloadBtn?.dataset.title || 'Local Document', rec.relativePath);
                 const showFn = (window as any).showToast;
                 if (typeof showFn === 'function') {
                   showFn({

@@ -48,6 +48,7 @@
     "astro": "^7.3.3",
     "cheerio": "^1.2.0",
     "firebase": "^12.19.0",
+    "pdfjs-dist": "^6.4.299",
     "tailwindcss": "^4.3.3",
     "typescript": "^6",
     "vercel": "^59.23.2"

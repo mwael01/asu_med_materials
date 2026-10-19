@@ -3,7 +3,7 @@ import { getStoredBookmarkIds, getStoredStudiedIds, saveStudiedIds } from '../..
 import { setMaterialBookmarked } from '../../utils/bookmarks';
 import { syncStudiedToggle } from '../../utils/userSync';
 import { entryProgressStorage, parseProgress } from '../../utils/studyProgress';
-import { getDocumentDownloadUrl } from '../../utils/documentViewer';
+import { getDocumentDownloadUrl, isPdfDocument } from '../../utils/documentViewer';
 import { isMaterialInLocalFolder } from '../../utils/localFolderManager';
 
 export function initDoctorPlayer(): void {
@@ -16,6 +16,7 @@ export function initDoctorPlayer(): void {
   const frame = get<HTMLIFrameElement>('[data-study-frame]');
   const video = get<HTMLVideoElement>('[data-study-video]');
   const image = root.querySelector<HTMLImageElement>('[data-study-image]');
+  const pdfRoot = root.querySelector<HTMLElement>('[data-pdf-viewer]');
   const done = get<HTMLButtonElement>('[data-study-done]');
   const saved = get<HTMLButtonElement>('[data-study-save]');
   const tabs = [...root.querySelectorAll<HTMLButtonElement>('[data-study-tab]')];
@@ -23,6 +24,13 @@ export function initDoctorPlayer(): void {
   const lifecycle = new AbortController();
   const progress = new Map<string, Record<string, boolean>>();
   let current = entries[0];
+  let pdfViewer: any = null;
+
+  if (pdfRoot && typeof window !== 'undefined' && 'ResizeObserver' in window) {
+    import('./pdfViewerController').then(({ createPdfViewer }) => {
+      pdfViewer = createPdfViewer(pdfRoot);
+    }).catch(() => {});
+  }
 
   function readProgress(entry: StudyEntry): Record<string, boolean> {
     const { key } = entryProgressStorage(entry);
@@ -58,18 +66,37 @@ export function initDoctorPlayer(): void {
   }
   function select(entry: StudyEntry, updateUrl = true) {
     current = entry;
+    const isPdf = entry.tab === 'pdfs' && isPdfDocument(entry.url);
+    const isImage = entry.embedType === 'image';
+    const isVideo = entry.embedType === 'video';
+    const isIframe = !isPdf && entry.embedType === 'iframe';
+    const isNone = entry.embedType === 'none' && !isPdf;
+
     // Removing inactive sources stops media and avoids retaining hidden embeds.
     frame.removeAttribute('src');
     video.pause(); video.removeAttribute('src'); video.load();
-    frame.hidden = entry.embedType !== 'iframe';
-    video.hidden = entry.embedType !== 'video';
+    frame.hidden = !isIframe;
+    video.hidden = !isVideo;
     if (image) {
-      image.hidden = entry.embedType !== 'image'; image.removeAttribute('src');
-      if (entry.embedType === 'image' && entry.embedUrl) { image.src = entry.embedUrl; image.alt = entry.title; }
+      image.hidden = !isImage; image.removeAttribute('src');
+      if (isImage && entry.embedUrl) { image.src = entry.embedUrl; image.alt = entry.title; }
     }
-    get('[data-study-external]').hidden = entry.embedType !== 'none';
-    if (entry.embedUrl && entry.embedType === 'iframe') frame.src = entry.embedUrl;
-    if (entry.embedUrl && entry.embedType === 'video') video.src = entry.embedUrl;
+    if (pdfRoot) {
+      pdfRoot.hidden = !isPdf;
+      if (isPdf && entry.url) {
+        if (pdfViewer) {
+          pdfViewer.load(entry.url, entry.title);
+        } else if (typeof window !== 'undefined' && 'ResizeObserver' in window) {
+          import('./pdfViewerController').then(({ createPdfViewer }) => {
+            pdfViewer = createPdfViewer(pdfRoot);
+            pdfViewer.load(entry.url, entry.title);
+          }).catch(() => {});
+        }
+      }
+    }
+    get('[data-study-external]').hidden = !isNone;
+    if (entry.embedUrl && isIframe) frame.src = entry.embedUrl;
+    if (entry.embedUrl && isVideo) video.src = entry.embedUrl;
     frame.title = entry.title;
     frame.classList.toggle('aspect-video', entry.tab !== 'pdfs');
     frame.style.height = entry.tab === 'pdfs' ? '70vh' : '';
@@ -183,6 +210,7 @@ export function initDoctorPlayer(): void {
     lifecycle.abort();
     video.pause();
     frame.removeAttribute('src');
+    pdfViewer?.destroy();
     if (document.body) document.body.style.overflow = '';
   }, { once: true });
   select(entries.find(entry => entry.key === new URL(location.href).searchParams.get('item')) || entries[0], false);

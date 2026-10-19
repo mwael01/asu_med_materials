@@ -28,6 +28,9 @@ export default defineConfig({
             if (id.includes('node_modules/firebase/app') || id.includes('node_modules/@firebase/app')) {
               return 'vendor-firebase-app';
             }
+            if (id.includes('node_modules/pdfjs-dist')) {
+              return 'vendor-pdfjs';
+            }
           }
         }
       }
