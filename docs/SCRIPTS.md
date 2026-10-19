@@ -2,6 +2,10 @@
 
 This document outlines automated helper scripts designed to assist AI agents and developers in maintaining, synchronizing, and expanding educational materials in the ASU Med Materials platform.
 
+## Telegram respiratory importer
+
+`pnpm materials:telegram` collects bot files/links into an ignored temporary run, generates a review report, and publishes approved entries only through a separate explicit command. See [TELEGRAM_MATERIALS.md](./TELEGRAM_MATERIALS.md) for login, archive coverage, multi-lesson assignments, review, and resumable R2/Firestore publication. Temporary staging is the explicit exception to the local material-data restriction; the website always reads Firestore.
+
 ---
 
 ## 1. Cloud Firestore Schema Synchronizer

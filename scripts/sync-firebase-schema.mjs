@@ -11,7 +11,7 @@
  */
 
 import { initializeApp } from 'firebase/app';
-import { getFirestore, collection, getDocs } from 'firebase/firestore';
+import { getFirestore, collection, getDocs, getCountFromServer } from 'firebase/firestore';
 import { readFileSync, existsSync, writeFileSync } from 'fs';
 import { resolve, dirname } from 'path';
 import { fileURLToPath } from 'url';
@@ -109,6 +109,16 @@ try {
     adminLogsCount = logsSnap.size;
   } catch {}
 
+  // Aggregate public assignment collections without downloading their records.
+  const assignmentCounts = {};
+  for (const name of ['lessons', 'material_lesson_links']) {
+    try {
+      assignmentCounts[name] = (await getCountFromServer(collection(db, name))).data().count;
+    } catch {
+      console.warn(`   - ${name}: count unavailable; retaining previous schema metadata`);
+    }
+  }
+
   console.log(`📊 Remote Collections Status:`);
   console.log(`   - materials:    ${materials.length} documents`);
   console.log(`   - modules:      ${modules.length} documents`);
@@ -129,6 +139,9 @@ try {
     if (schema.collections?.users) schema.collections.users.totalDocuments = usersCount;
     if (schema.collections?.submissions) schema.collections.submissions.totalDocuments = submissionsCount;
     if (schema.collections) {
+      for (const [name, count] of Object.entries(assignmentCounts)) {
+        if (schema.collections[name]) schema.collections[name].totalDocuments = count;
+      }
       if (!schema.collections.feedback) {
         schema.collections.feedback = { totalDocuments: feedbackCount };
       } else {
