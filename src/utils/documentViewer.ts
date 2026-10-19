@@ -47,14 +47,23 @@ export function getDocumentDownloadPath(materialId: string, documentId: string):
 export function getDocumentDownloadUrl(
   url?: string,
   materialId?: string,
-  documentId?: string
+  documentId?: string,
+  title?: string
 ): string | null {
   if (!url) return null;
   const clean = url.trim();
 
   // 1. Hosted R2 document via internal streaming attachment endpoint
-  if (isHostedDocumentUrl(clean) && materialId && documentId) {
-    return getDocumentDownloadPath(materialId, documentId);
+  if (isHostedDocumentUrl(clean)) {
+    if (materialId && documentId) {
+      return getDocumentDownloadPath(materialId, documentId);
+    }
+    if (materialId) {
+      return `/api/material-download?material=${encodeURIComponent(materialId)}`;
+    }
+    const params = new URLSearchParams({ url: clean });
+    if (title) params.set('filename', title);
+    return `/api/material-download?${params.toString()}`;
   }
 
   // 2. Google Drive document / file (direct zero-proxy download)
@@ -108,7 +117,11 @@ export function hasDiscreteDocuments(material?: MaterialItem | null): boolean {
 export function resolveDocumentItems(material?: MaterialItem | null): DocumentItem[] {
   if (!material) return [];
   if (hasDiscreteDocuments(material)) {
-    return material.documents || [];
+    return (material.documents || []).map((doc, idx) => ({
+      ...doc,
+      id: doc.id || `doc_${idx + 1}`,
+      title: doc.title || (material.documents && material.documents.length === 1 ? (material.title || `Document ${idx + 1}`) : `Document ${idx + 1}`),
+    }));
   }
   if (material.url) {
     return [

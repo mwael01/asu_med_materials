@@ -105,10 +105,14 @@ export function initDoctorPlayer(): void {
     const download = root!.querySelector<HTMLAnchorElement>('[data-study-download]');
     const downloadText = root!.querySelector<HTMLElement>('[data-study-download-text]');
     if (download) {
-      const dlUrl = getDocumentDownloadUrl(entry.url, entry.materialId, entry.itemId);
+      const dlUrl = getDocumentDownloadUrl(entry.url, entry.materialId, entry.itemId, entry.title);
       download.hidden = !dlUrl;
       if (dlUrl) {
         download.href = dlUrl;
+        const ext = entry.url.split('.').pop()?.split(/[?#]/)[0] || 'pdf';
+        const cleanTitle = (entry.title || 'Document').replace(/[/\\?%*:|"<>]/g, ' ').trim();
+        const filename = cleanTitle.toLowerCase().endsWith(`.${ext}`) ? cleanTitle : `${cleanTitle}.${ext}`;
+        download.setAttribute('download', filename);
       }
     }
     void isMaterialInLocalFolder(entry.materialId, entry.itemId).then(localRec => {

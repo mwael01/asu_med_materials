@@ -9,12 +9,17 @@ export async function downloadHostedDocument(document: DocumentItem, fetchFile: 
     });
     if (!upstream.ok || !upstream.body) return new Response('File unavailable', { status: 502 });
     const extension = new URL(document.url).pathname.split('.').pop()!;
-    const title = document.title.replace(/[\r\n\u0000-\u001f/\\]/g, ' ').trim().slice(0, 180) || 'Document';
-    const filename = title.toLowerCase().endsWith(`.${extension}`) ? title : `${title}.${extension}`;
+    const rawTitle = (document.title || 'Document').replace(/[\r\n\u0000-\u001f/\\]/g, ' ').trim().slice(0, 180) || 'Document';
+    const filename = rawTitle.toLowerCase().endsWith(`.${extension}`) ? rawTitle : `${rawTitle}.${extension}`;
     const encoded = encodeURIComponent(filename).replace(/['()*]/g, c => `%${c.charCodeAt(0).toString(16).toUpperCase()}`);
+
+    // Create an ASCII-safe fallback for older/mobile clients that do not parse filename*=UTF-8''
+    const asciiSafe = rawTitle.normalize('NFKD').replace(/[^\w\s.-]/g, '').trim().replace(/\s+/g, '_').slice(0, 100);
+    const fallbackFilename = asciiSafe.toLowerCase().endsWith(`.${extension}`) ? asciiSafe : `${asciiSafe || 'document'}.${extension}`;
+
     const headers = new Headers({
       'Content-Type': upstream.headers.get('Content-Type') || 'application/octet-stream',
-      'Content-Disposition': `attachment; filename="document.${extension}"; filename*=UTF-8''${encoded}`,
+      'Content-Disposition': `attachment; filename="${fallbackFilename}"; filename*=UTF-8''${encoded}`,
       'Cache-Control': 'public, max-age=3600',
       'X-Content-Type-Options': 'nosniff',
     });

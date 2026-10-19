@@ -8,7 +8,8 @@ import {
   getDocumentEmbedUrl,
   getDocumentExternalUrl,
   getDocumentViewerPath,
-  getDocumentDownloadUrl
+  getDocumentDownloadUrl,
+  resolveDocumentItems
 } from '../src/utils/documentViewer.ts';
 import { isHostedDocumentUrl, getDocumentDownloadPath } from '../src/utils/documentViewer.ts';
 import { downloadHostedDocument } from '../src/utils/documentDownload.server.ts';
@@ -23,7 +24,13 @@ test('downloads stream catalogue files with attachment filenames and do not foll
   assert.equal(response.headers.get('Content-Type'), 'application/pdf');
   assert.equal(response.headers.get('Content-Length'), '4');
   assert.match(response.headers.get('Content-Disposition'), /^attachment;.*filename\*=UTF-8''/);
+  assert.match(response.headers.get('Content-Disposition'), /filename="lung\.pdf"/);
   assert.equal(await response.text(), '%PDF');
+
+  const englishDoc = { id: 'doc2', title: 'Cardiovascular Physiology', url: `https://asumed.eduvour.com/materials/sha256/${'b'.repeat(64)}.pdf` };
+  const engResp = await downloadHostedDocument(englishDoc, async () => new Response('%PDF', { headers: { 'Content-Type': 'application/pdf' } }));
+  assert.equal(engResp.headers.get('Content-Disposition'), 'attachment; filename="Cardiovascular_Physiology.pdf"; filename*=UTF-8\'\'Cardiovascular%20Physiology.pdf');
+
   let fetched = false;
   assert.equal((await downloadHostedDocument({ ...document, url: 'http://localhost/private.pdf' }, async () => { fetched = true; })).status, 404);
   assert.equal(fetched, false);
@@ -121,11 +128,23 @@ test('getDocumentExternalUrl and getDocumentViewerPath format correct destinatio
 });
 
 test('getDocumentDownloadUrl generates direct download links without proxy', () => {
-  // Hosted R2 document
+  // Hosted R2 document with material and document IDs
   const hostedUrl = `https://asumed.eduvour.com/materials/sha256/${'b'.repeat(64)}.pdf`;
   assert.equal(
     getDocumentDownloadUrl(hostedUrl, 'material-123', 'doc-456'),
     '/api/material-download?material=material-123&document=doc-456'
+  );
+
+  // Hosted R2 document with material ID only
+  assert.equal(
+    getDocumentDownloadUrl(hostedUrl, 'material-123'),
+    '/api/material-download?material=material-123'
+  );
+
+  // Hosted R2 document without IDs routes through streaming download rather than exposing raw bucket hash
+  assert.equal(
+    getDocumentDownloadUrl(hostedUrl, undefined, undefined, 'Histology Atlas'),
+    `/api/material-download?url=${encodeURIComponent(hostedUrl)}&filename=Histology+Atlas`
   );
 
   // Google Drive document (zero-proxy direct download URL)
@@ -149,6 +168,33 @@ test('getDocumentDownloadUrl generates direct download links without proxy', () 
   assert.equal(getDocumentDownloadUrl('https://t.me/asu_channel'), null);
   assert.equal(getDocumentDownloadUrl('https://youtube.com/watch?v=12345678901'), null);
   assert.equal(getDocumentDownloadUrl(undefined), null);
+});
+
+test('resolveDocumentItems generates structured fallback IDs and clean document titles', () => {
+  const multiMaterial = {
+    id: 'mat-bundle',
+    title: 'Anatomy Lab Handouts',
+    documents: [
+      { url: 'https://example.com/doc1.pdf' },
+      { url: 'https://example.com/doc2.pdf', title: 'Upper Limb' }
+    ]
+  };
+  const resolved = resolveDocumentItems(multiMaterial);
+  assert.equal(resolved[0].id, 'doc_1');
+  assert.equal(resolved[0].title, 'Document 1');
+  assert.equal(resolved[1].id, 'doc_2');
+  assert.equal(resolved[1].title, 'Upper Limb');
+
+  const singleMaterial = {
+    id: 'mat-single',
+    title: 'Physiology Lecture',
+    documents: [
+      { url: 'https://example.com/doc.pdf' }
+    ]
+  };
+  const singleResolved = resolveDocumentItems(singleMaterial);
+  assert.equal(singleResolved[0].id, 'doc_1');
+  assert.equal(singleResolved[0].title, 'Physiology Lecture');
 });
 
 test('isPdfDocument and getDocumentViewerType classify R2 PDFs and Drive embeds accurately', () => {
