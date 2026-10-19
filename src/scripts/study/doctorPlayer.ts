@@ -3,7 +3,8 @@ import { getStoredBookmarkIds, getStoredStudiedIds, saveStudiedIds } from '../..
 import { setMaterialBookmarked } from '../../utils/bookmarks';
 import { syncStudiedToggle } from '../../utils/userSync';
 import { entryProgressStorage, parseProgress } from '../../utils/studyProgress';
-import { getDocumentDownloadPath, isHostedDocumentUrl } from '../../utils/documentViewer';
+import { getDocumentDownloadUrl } from '../../utils/documentViewer';
+import { isMaterialInLocalFolder } from '../../utils/localFolderManager';
 
 export function initDoctorPlayer(): void {
   const root = document.querySelector<HTMLElement>('[data-doctor-player]');
@@ -75,9 +76,23 @@ export function initDoctorPlayer(): void {
     get('[data-study-title]').textContent = entry.title;
     get<HTMLAnchorElement>('[data-study-open]').href = entry.url;
     const download = root!.querySelector<HTMLAnchorElement>('[data-study-download]');
+    const downloadText = root!.querySelector<HTMLElement>('[data-study-download-text]');
     if (download) {
-      download.hidden = !isHostedDocumentUrl(entry.url);
-      download.href = getDocumentDownloadPath(entry.materialId, entry.itemId);
+      const dlUrl = getDocumentDownloadUrl(entry.url, entry.materialId, entry.itemId);
+      download.hidden = !dlUrl;
+      if (dlUrl) {
+        download.href = dlUrl;
+      }
+    }
+    void isMaterialInLocalFolder(entry.materialId, entry.itemId).then(localRec => {
+      if (downloadText) {
+        downloadText.textContent = localRec ? 'Saved in Folder ✓' : 'Download';
+      }
+    });
+    const reader = root!.querySelector<HTMLAnchorElement>('[data-study-reader]');
+    if (reader) {
+      reader.hidden = entry.tab !== 'pdfs';
+      reader.href = `/viewer/${encodeURIComponent(entry.materialId)}`;
     }
     get('[data-study-status]').textContent = '';
     showTab(entry.tab);
@@ -145,7 +160,30 @@ export function initDoctorPlayer(): void {
     refresh();
   }, { signal: lifecycle.signal });
   window.addEventListener('storage', refreshFromStorage, { signal: lifecycle.signal });
-  window.addEventListener('popstate', () => select(entries.find(entry => entry.key === new URL(location.href).searchParams.get('item')) || entries[0], false), { signal: lifecycle.signal });
-  document.addEventListener('astro:before-swap', () => { lifecycle.abort(); video.pause(); frame.removeAttribute('src'); }, { once: true });
+  const viewport = root.querySelector<HTMLElement>('[data-study-viewport]');
+  const fsBtn = root.querySelector<HTMLButtonElement>('[data-study-fullscreen]');
+  const fsText = root.querySelector<HTMLElement>('[data-study-fullscreen-text]');
+  let isFs = false;
+  fsBtn?.addEventListener('click', () => {
+    isFs = !isFs;
+    viewport?.classList.toggle('study-viewport-fullscreen', isFs);
+    if (fsText) fsText.textContent = isFs ? 'Exit' : 'Expand';
+    if (document.body) document.body.style.overflow = isFs ? 'hidden' : '';
+  }, { signal: lifecycle.signal });
+  window.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && isFs) {
+      isFs = false;
+      viewport?.classList.remove('study-viewport-fullscreen');
+      if (fsText) fsText.textContent = 'Expand';
+      if (document.body) document.body.style.overflow = '';
+    }
+  }, { signal: lifecycle.signal });
+
+  document.addEventListener('astro:before-swap', () => {
+    lifecycle.abort();
+    video.pause();
+    frame.removeAttribute('src');
+    if (document.body) document.body.style.overflow = '';
+  }, { once: true });
   select(entries.find(entry => entry.key === new URL(location.href).searchParams.get('item')) || entries[0], false);
 }

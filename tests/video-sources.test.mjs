@@ -7,7 +7,8 @@ import {
   isDirectVideoUrl,
   isTelegramUrl,
   parseVideoSource,
-  determinePrimaryPlaylistSource
+  determinePrimaryPlaylistSource,
+  getVideoDownloadUrl
 } from '../src/utils/videoSources.ts';
 
 test('extractDriveFileId correctly extracts Google Drive file IDs', () => {
@@ -144,3 +145,28 @@ test('determinePrimaryPlaylistSource detects dominant source type', () => {
   };
   assert.equal(determinePrimaryPlaylistSource(tgPlaylist), 'telegram');
 });
+
+test('getVideoDownloadUrl extracts direct video and Google Drive download links without proxy', () => {
+  // Direct video file
+  assert.equal(
+    getVideoDownloadUrl('https://example.com/videos/anatomy_lecture1.mp4'),
+    'https://example.com/videos/anatomy_lecture1.mp4'
+  );
+  assert.equal(
+    getVideoDownloadUrl('https://example.com/videos/pathology.webm?token=abc'),
+    'https://example.com/videos/pathology.webm?token=abc'
+  );
+
+  // Google Drive video file
+  assert.equal(
+    getVideoDownloadUrl('https://drive.google.com/file/d/1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs/view'),
+    'https://drive.google.com/uc?export=download&id=1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs'
+  );
+
+  // YouTube / Telegram / External website (no direct download)
+  assert.equal(getVideoDownloadUrl('https://www.youtube.com/watch?v=dQw4w9WgXcQ'), null);
+  assert.equal(getVideoDownloadUrl('https://t.me/histo_channel/1'), null);
+  assert.equal(getVideoDownloadUrl('https://drive.google.com/drive/folders/batchId'), null);
+  assert.equal(getVideoDownloadUrl(undefined), null);
+});
+

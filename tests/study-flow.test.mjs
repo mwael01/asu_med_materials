@@ -6,6 +6,7 @@ import ts from 'typescript';
 import * as progressHelpers from '../src/utils/studyProgress.ts';
 import * as searchHelpers from '../src/utils/search.ts';
 import * as documentHelpers from '../src/utils/documentViewer.ts';
+import * as folderHelpers from '../src/utils/localFolderManager.ts';
 
 class Element {
   dataset = {}; attributes = new Map(); children = []; listeners = new Map(); selectors = new Map(); lists = new Map();
@@ -80,6 +81,7 @@ async function playerHarness(entries, requested, unavailableStorage = false) {
     '../../utils/userSync': { syncStudiedToggle: async (id, done) => state.changes.push([id, done]) },
     '../../utils/studyProgress': progressHelpers,
     '../../utils/documentViewer': documentHelpers,
+    '../../utils/localFolderManager': folderHelpers,
   }, { ...state.globals(), ...(unavailableStorage ? { localStorage: {
     getItem() { throw new Error('Unavailable'); }, setItem() { throw new Error('Unavailable'); },
   } } : {}) });

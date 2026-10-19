@@ -7,6 +7,40 @@ export function getDocumentDownloadPath(materialId: string, documentId: string):
   return `/api/material-download?material=${encodeURIComponent(materialId)}&document=${encodeURIComponent(documentId)}`;
 }
 
+/**
+ * Resolves the direct download URL for a document.
+ * Returns /api/material-download for hosted R2 files.
+ * Returns direct Google Drive download link (export=download) for Google Drive files.
+ * Returns direct URL for direct document links.
+ * Returns null for non-downloadable external websites.
+ */
+export function getDocumentDownloadUrl(
+  url?: string,
+  materialId?: string,
+  documentId?: string
+): string | null {
+  if (!url) return null;
+  const clean = url.trim();
+
+  // 1. Hosted R2 document via internal streaming attachment endpoint
+  if (isHostedDocumentUrl(clean) && materialId && documentId) {
+    return getDocumentDownloadPath(materialId, documentId);
+  }
+
+  // 2. Google Drive document / file (direct zero-proxy download)
+  const driveId = extractDriveDocumentId(clean);
+  if (driveId) {
+    return `https://drive.google.com/uc?export=download&id=${driveId}`;
+  }
+
+  // 3. Direct document files (.pdf, images, .docx, .pptx)
+  if (/\.(pdf|png|jpe?g|webp|gif|docx?|pptx?)(?:[?#]|$)/i.test(clean)) {
+    return clean;
+  }
+
+  return null;
+}
+
 export const isImageDocument = (url: string): boolean =>
   /^https?:\/\//i.test(url) && /\.(png|jpe?g|gif|webp|avif|bmp)(?:[?#]|$)/i.test(url);
 

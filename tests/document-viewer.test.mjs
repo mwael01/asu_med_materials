@@ -5,7 +5,8 @@ import {
   isEmbeddableDocument,
   getDocumentEmbedUrl,
   getDocumentExternalUrl,
-  getDocumentViewerPath
+  getDocumentViewerPath,
+  getDocumentDownloadUrl
 } from '../src/utils/documentViewer.ts';
 import { isHostedDocumentUrl, getDocumentDownloadPath } from '../src/utils/documentViewer.ts';
 import { downloadHostedDocument } from '../src/utils/documentDownload.server.ts';
@@ -116,3 +117,35 @@ test('getDocumentExternalUrl and getDocumentViewerPath format correct destinatio
   );
   assert.equal(getDocumentViewerPath('bld-dr-ahmed-notes'), '/viewer/bld-dr-ahmed-notes');
 });
+
+test('getDocumentDownloadUrl generates direct download links without proxy', () => {
+  // Hosted R2 document
+  const hostedUrl = `https://asumed.eduvour.com/materials/sha256/${'b'.repeat(64)}.pdf`;
+  assert.equal(
+    getDocumentDownloadUrl(hostedUrl, 'material-123', 'doc-456'),
+    '/api/material-download?material=material-123&document=doc-456'
+  );
+
+  // Google Drive document (zero-proxy direct download URL)
+  assert.equal(
+    getDocumentDownloadUrl('https://drive.google.com/file/d/1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs/view'),
+    'https://drive.google.com/uc?export=download&id=1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs'
+  );
+  assert.equal(
+    getDocumentDownloadUrl('https://drive.google.com/open?id=1234567890abcdef'),
+    'https://drive.google.com/uc?export=download&id=1234567890abcdef'
+  );
+
+  // Direct PDF and document files
+  assert.equal(
+    getDocumentDownloadUrl('https://example.com/histology_atlas.pdf?v=1'),
+    'https://example.com/histology_atlas.pdf?v=1'
+  );
+
+  // Excluded or non-downloadable links
+  assert.equal(getDocumentDownloadUrl('https://drive.google.com/drive/folders/folderId'), null);
+  assert.equal(getDocumentDownloadUrl('https://t.me/asu_channel'), null);
+  assert.equal(getDocumentDownloadUrl('https://youtube.com/watch?v=12345678901'), null);
+  assert.equal(getDocumentDownloadUrl(undefined), null);
+});
+

@@ -9,6 +9,7 @@ import { subjectToSlug } from '../../utils/slug';
 import {
   parseVideoSource,
   determinePrimaryPlaylistSource,
+  getVideoDownloadUrl,
   type ParsedVideoSource
 } from '../../utils/videoSources';
 
@@ -240,6 +241,7 @@ crumbs.push({
           id="embed-video-player"
           controls
           playsinline
+          preload="metadata"
           class:list={['w-full h-full object-contain bg-black', initialParsed.embedType !== 'video' && 'hidden']}
           src={initialParsed.embedType === 'video' && initialParsed.embedUrl ? initialParsed.embedUrl : undefined}
         ></video>
@@ -332,6 +334,24 @@ crumbs.push({
           >
             <img id="current-source-icon" src={initialParsed.icon} alt="" class="w-3.5 h-3.5 object-contain" />
             <span id="current-source-name">{initialParsed.sourceLabelEn}</span>
+          </a>
+
+          <!-- Download Video Button (Direct / Google Drive) -->
+          <a
+            id="current-video-download-btn"
+            href={getVideoDownloadUrl(initialParsed.externalUrl) || '#'}
+            target="_blank"
+            rel="noopener noreferrer"
+            class:list={[
+              'inline-flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-lg border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors',
+              !getVideoDownloadUrl(initialParsed.externalUrl) && 'hidden'
+            ]}
+            title="Download Video"
+          >
+            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
+            </svg>
+            <span id="current-video-download-text">Download</span>
           </a>
         </div>
       </div>
@@ -668,6 +688,23 @@ crumbs.push({
       if (currentExternalBtn) {
         currentExternalBtn.href = externalUrl;
         currentExternalBtn.title = `Open on ${sourceLabel}`;
+      }
+
+      const downloadBtn = document.getElementById('current-video-download-btn');
+      if (downloadBtn) {
+        let dlUrl = null;
+        if (sourceType === 'drive') {
+          const driveMatch = externalUrl.match(/\/file\/d\/([a-zA-Z0-9_-]+)/) || externalUrl.match(/[?&]id=([a-zA-Z0-9_-]+)/);
+          if (driveMatch) dlUrl = `https://drive.google.com/uc?export=download&id=${driveMatch[1]}`;
+        } else if (embedType === 'video' && (embedUrl || externalUrl)) {
+          dlUrl = embedUrl || externalUrl;
+        }
+        if (dlUrl) {
+          downloadBtn.classList.remove('hidden');
+          downloadBtn.href = dlUrl;
+        } else {
+          downloadBtn.classList.add('hidden');
+        }
       }
 
       if (stepperLabel) {

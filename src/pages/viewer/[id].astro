@@ -4,6 +4,7 @@ import type { NavCrumb } from '../../types/navigation';
 import TypeBadge from '../../components/materials/TypeBadge.astro';
 import ResourceCard from '../../components/materials/ResourceCard.astro';
 import DocumentImage from '../../components/study/DocumentImage.astro';
+import StudyFolderDrawer from '../../components/study/StudyFolderDrawer.astro';
 import { getMaterialById, getMaterialsByModule } from '../../data/materials';
 import { getModuleById } from '../../data/modules';
 import { getMaterialsVersionFromFirestore } from '../../firebase/firestore';
@@ -15,8 +16,7 @@ import {
   resolveDocumentItems,
   isEmbeddableDocument,
   isImageDocument,
-  isHostedDocumentUrl,
-  getDocumentDownloadPath
+  getDocumentDownloadUrl
 } from '../../utils/documentViewer';
 
 const { id } = Astro.params;
@@ -65,6 +65,7 @@ if (!embedUrl && !isBundle) {
 }
 
 const externalUrl = initialDoc.externalUrl || getDocumentExternalUrl(material.url);
+const initialDownloadUrl = getDocumentDownloadUrl(initialDoc.url, material.id, initialDoc.id);
 const moduleInfo = material.moduleId ? await getModuleById(material.moduleId, version) : undefined;
 
 const titleEn = material.titleEn || material.title;
@@ -228,7 +229,47 @@ crumbs.push({
             </svg>
             <span id="viewer-drive-btn-text">Open original</span>
           </a>
-          <a id="viewer-download-btn" data-material-id={material.id} href={getDocumentDownloadPath(material.id, initialDoc.id)} hidden={!isHostedDocumentUrl(initialDoc.url)} class="text-xs font-semibold text-emerald-600 hover:underline">Download</a>
+          <!-- Download / Open Local File Button -->
+          <a
+            id="viewer-download-btn"
+            href={initialDownloadUrl || '#'}
+            target="_blank"
+            rel="noopener noreferrer"
+            data-material-id={material.id}
+            data-doc-id={initialDoc.id}
+            data-year={material.year || 1}
+            data-module={moduleInfo?.title || 'General'}
+            data-subject={material.subject || 'General'}
+            data-title={initialDoc.title}
+            data-url={initialDoc.url}
+            data-download-url={initialDownloadUrl || ''}
+            hidden={!initialDownloadUrl}
+            class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-semibold transition-all cursor-pointer shadow-2xs border-zinc-200/80 dark:border-zinc-800 bg-white dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 hover:border-emerald-500 hover:text-emerald-600 dark:hover:text-emerald-400"
+            title="Download document for offline reading"
+          >
+            <svg id="download-icon-dl" class="w-3.5 h-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
+            </svg>
+            <svg id="download-icon-saved" class="w-3.5 h-3.5 hidden text-emerald-600 dark:text-emerald-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+            </svg>
+            <span id="viewer-download-btn-text">Download</span>
+          </a>
+
+          <!-- Study Folder Drawer Trigger -->
+          <button
+            type="button"
+            id="viewer-folder-btn"
+            class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-semibold transition-all cursor-pointer shadow-2xs border-zinc-200/80 dark:border-zinc-800 bg-white dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-700/60"
+            title="Manage offline study folder"
+            aria-label="Manage offline study folder"
+          >
+            <svg class="w-3.5 h-3.5 text-zinc-500 dark:text-zinc-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12.75V12A2.25 2.25 0 014.5 9.75h15A2.25 2.25 0 0121.75 12v.75m-8.69-6.44l-2.12-2.12a1.5 1.5 0 00-1.061-.44H4.5A2.25 2.25 0 002.25 6v12a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9a2.25 2.25 0 00-2.25-2.25h-5.379a1.5 1.5 0 01-1.06-.44z" />
+            </svg>
+            <span class="hidden sm:inline">Study Folder</span>
+            <span id="folder-status-dot" class="w-1.5 h-1.5 rounded-full bg-zinc-300 dark:bg-zinc-600"></span>
+          </button>
 
           <!-- Fullscreen Toggle -->
           <button
@@ -311,6 +352,7 @@ crumbs.push({
               data-embed-url={doc.embedUrl || ''}
               data-is-image={isImageDocument(doc.url) ? 'true' : 'false'}
               data-external-url={doc.externalUrl}
+              data-download-url={getDocumentDownloadUrl(doc.url, material.id, doc.id) || ''}
               title={doc.title}
             >
               <span class="w-4 h-4 rounded-full bg-zinc-200 dark:bg-zinc-700 flex items-center justify-center text-[10px] font-bold shrink-0">
@@ -418,6 +460,8 @@ crumbs.push({
       </section>
     )}
   </div>
+
+  <StudyFolderDrawer />
 </Layout>
 
 <style>
@@ -444,7 +488,13 @@ crumbs.push({
 <script>
   import { initBookmarkButtons, renderBookmarkButtons } from '../../utils/bookmarks';
   import { initStudiedMaterials, updateStudiedCardUI } from '../../utils/studied';
-  import { getDocumentDownloadPath, isHostedDocumentUrl } from '../../utils/documentViewer';
+  import {
+    isMaterialInLocalFolder,
+    getStoredDirectoryHandle,
+    verifyFolderPermission,
+    readLocalFileBlobUrl,
+    saveFileToCurriculumFolder
+  } from '../../utils/localFolderManager';
 
   let viewerAbort: AbortController | null = null;
 
@@ -466,6 +516,10 @@ crumbs.push({
     const fullscreenFloatingCloseBtn = document.getElementById('fullscreen-close-floating-btn');
     const copyLinkBtn = document.getElementById('viewer-copy-link-btn');
     const backBtn = document.getElementById('viewer-back-btn');
+    const downloadBtn = document.getElementById('viewer-download-btn') as HTMLAnchorElement | null;
+    const downloadBtnText = document.getElementById('viewer-download-btn-text');
+    const dlIcon = document.getElementById('download-icon-dl');
+    const savedIcon = document.getElementById('download-icon-saved');
 
     // 1. Hide skeleton when iframe loads
     if (iframe && skeleton) {
@@ -554,14 +608,138 @@ crumbs.push({
       }
     }, { signal });
 
-    // 5. Multi-Document Bundle Switching
+    // 5. Download & Local Study Folder Integration
+    async function syncDownloadBtnState(matId: string, docId: string, dlUrl: string | null): Promise<void> {
+      if (!downloadBtn || !downloadBtnText || !dlIcon || !savedIcon) return;
+      if (!dlUrl) {
+        downloadBtn.hidden = true;
+        return;
+      }
+      downloadBtn.hidden = false;
+      downloadBtn.href = dlUrl;
+
+      const localRecord = await isMaterialInLocalFolder(matId, docId);
+      if (localRecord) {
+        downloadBtn.dataset.isLocal = 'true';
+        downloadBtn.dataset.localPath = localRecord.relativePath;
+        downloadBtnText.textContent = 'Saved in Folder ✓';
+        downloadBtn.title = 'Saved locally on your device (0 MB quota). Click to view local copy.';
+        downloadBtn.classList.add('border-emerald-500/60', 'text-emerald-700', 'dark:text-emerald-300');
+        dlIcon.classList.add('hidden');
+        savedIcon.classList.remove('hidden');
+      } else {
+        downloadBtn.dataset.isLocal = 'false';
+        downloadBtn.removeAttribute('data-local-path');
+        downloadBtnText.textContent = 'Download';
+        downloadBtn.title = 'Download document for offline reading';
+        downloadBtn.classList.remove('border-emerald-500/60', 'text-emerald-700', 'dark:text-emerald-300');
+        dlIcon.classList.remove('hidden');
+        savedIcon.classList.add('hidden');
+      }
+    }
+
+    downloadBtn?.addEventListener('click', async (e) => {
+      if (downloadBtn.dataset.isLocal === 'true') {
+        e.preventDefault();
+        const localPath = downloadBtn.dataset.localPath;
+        if (!localPath) return;
+        const handle = await getStoredDirectoryHandle();
+        if (!handle) return;
+        const hasPerm = await verifyFolderPermission(handle, false);
+        if (!hasPerm) return;
+        const blobUrl = await readLocalFileBlobUrl(handle, localPath);
+        if (blobUrl && iframe) {
+          if (image) image.hidden = true;
+          iframe.hidden = false;
+          iframe.src = blobUrl;
+          skeleton?.classList.add('hidden');
+          const showFn = (window as any).showToast;
+          if (typeof showFn === 'function') {
+            showFn({
+              type: 'success',
+              message: 'Opened local copy from Study Folder (0 MB quota used)',
+              duration: 2500
+            });
+          }
+        }
+      } else {
+        const dlUrl = downloadBtn.getAttribute('href');
+        const isHosted = dlUrl && dlUrl.startsWith('/api/material-download');
+        if (isHosted) {
+          const handle = await getStoredDirectoryHandle();
+          if (handle) {
+            const hasWritePerm = await verifyFolderPermission(handle, true);
+            if (hasWritePerm) {
+              e.preventDefault();
+              try {
+                if (downloadBtnText) downloadBtnText.textContent = 'Saving...';
+                const res = await fetch(dlUrl);
+                if (res.ok) {
+                  const blob = await res.blob();
+                  const year = Number(downloadBtn.dataset.year) || 1;
+                  const modTitle = downloadBtn.dataset.module || 'General';
+                  const subj = downloadBtn.dataset.subject || 'General';
+                  const docTitle = downloadBtn.dataset.title || 'document';
+                  const matId = downloadBtn.dataset.materialId || '';
+                  const docId = downloadBtn.dataset.docId || '';
+
+                  await saveFileToCurriculumFolder(handle, year, modTitle, subj, docTitle, blob, matId, docId);
+                  await syncDownloadBtnState(matId, docId, dlUrl);
+                  window.dispatchEvent(new CustomEvent('study-folder-updated'));
+                  const showFn = (window as any).showToast;
+                  if (typeof showFn === 'function') {
+                    showFn({
+                      type: 'success',
+                      message: `Saved to Study Folder: Year ${year} / ${modTitle}`,
+                      duration: 3000
+                    });
+                  }
+                  return;
+                }
+              } catch (err) {
+                console.error('Failed to save to folder:', err);
+              } finally {
+                if (downloadBtnText) downloadBtnText.textContent = 'Download';
+              }
+            }
+          }
+        }
+      }
+    }, { signal });
+
+    window.addEventListener('study-folder-load-document', (e: any) => {
+      const { blobUrl, title } = e.detail || {};
+      if (blobUrl && iframe) {
+        if (image) image.hidden = true;
+        iframe.hidden = false;
+        iframe.src = blobUrl;
+        iframe.title = title || 'Local Document';
+        skeleton?.classList.add('hidden');
+        const showFn = (window as any).showToast;
+        if (typeof showFn === 'function') {
+          showFn({
+            type: 'success',
+            message: `Viewing offline document: ${title}`,
+            duration: 2500
+          });
+        }
+      }
+    }, { signal });
+
+    window.addEventListener('study-folder-updated', () => {
+      const currentDocId = downloadBtn?.dataset.docId || '';
+      const currentMaterialId = downloadBtn?.dataset.materialId || '';
+      const currentDlUrl = downloadBtn?.getAttribute('href') || null;
+      syncDownloadBtnState(currentMaterialId, currentDocId, currentDlUrl);
+    }, { signal });
+
+    // 6. Multi-Document Bundle Switching
     const trackItems = document.querySelectorAll<HTMLButtonElement>('.doc-track-item');
     const prevBtn = document.getElementById('doc-prev-btn') as HTMLButtonElement | null;
     const nextBtn = document.getElementById('doc-next-btn') as HTMLButtonElement | null;
     const counterBadge = document.getElementById('doc-counter-badge');
     const driveBtn = document.getElementById('viewer-drive-btn') as HTMLAnchorElement | null;
     const bottomDriveLink = document.getElementById('viewer-bottom-drive-link') as HTMLAnchorElement | null;
-    const downloadBtn = document.getElementById('viewer-download-btn') as HTMLAnchorElement | null;
 
     let activeDocIndex = 0;
     trackItems.forEach((btn, idx) => {
@@ -579,7 +757,10 @@ crumbs.push({
       const embed = targetBtn.getAttribute('data-embed-url');
       const external = targetBtn.getAttribute('data-external-url');
       const title = targetBtn.getAttribute('data-doc-title') || 'Document';
+      const docId = targetBtn.getAttribute('data-doc-id') || '';
+      const downloadUrl = targetBtn.getAttribute('data-download-url') || null;
       const isImage = targetBtn.getAttribute('data-is-image') === 'true';
+
       if (image) {
         image.hidden = !isImage; image.removeAttribute('src');
         if (isImage && external) { image.src = external; image.alt = title; }
@@ -612,15 +793,15 @@ crumbs.push({
       if (prevBtn) prevBtn.disabled = idx === 0;
       if (nextBtn) nextBtn.disabled = idx === trackItems.length - 1;
 
-      // Update External Links
+      // Update External Links & Download State
       if (external) {
         if (driveBtn) driveBtn.href = external;
         if (bottomDriveLink) bottomDriveLink.href = external;
-        if (downloadBtn) {
-          downloadBtn.hidden = !isHostedDocumentUrl(external);
-          const documentId = targetBtn.getAttribute('data-doc-id') || '';
-          downloadBtn.href = getDocumentDownloadPath(downloadBtn.dataset.materialId || '', documentId);
-        }
+      }
+      if (downloadBtn) {
+        downloadBtn.dataset.docId = docId;
+        downloadBtn.dataset.title = title;
+        syncDownloadBtnState(downloadBtn.dataset.materialId || '', docId, downloadUrl);
       }
 
       // Update Iframe Preview
@@ -653,6 +834,41 @@ crumbs.push({
     nextBtn?.addEventListener('click', () => {
       if (activeDocIndex < trackItems.length - 1) switchDocument(activeDocIndex + 1);
     }, { signal });
+
+    // Initial Local Download Button Status Check
+    const initMatId = downloadBtn?.dataset.materialId || '';
+    const initDocId = downloadBtn?.dataset.docId || '';
+    const initDlUrl = downloadBtn?.dataset.downloadUrl || downloadBtn?.getAttribute('href') || null;
+    syncDownloadBtnState(initMatId, initDocId, initDlUrl);
+
+    // If offline on initial load, auto-load local copy if available
+    if (!navigator.onLine) {
+      isMaterialInLocalFolder(initMatId, initDocId).then(async (rec) => {
+        if (rec) {
+          const handle = await getStoredDirectoryHandle();
+          if (handle) {
+            const hasPerm = await verifyFolderPermission(handle, false);
+            if (hasPerm) {
+              const blobUrl = await readLocalFileBlobUrl(handle, rec.relativePath);
+              if (blobUrl && iframe) {
+                if (image) image.hidden = true;
+                iframe.hidden = false;
+                iframe.src = blobUrl;
+                skeleton?.classList.add('hidden');
+                const showFn = (window as any).showToast;
+                if (typeof showFn === 'function') {
+                  showFn({
+                    type: 'info',
+                    message: 'Offline mode: loaded local document from Study Folder',
+                    duration: 3500
+                  });
+                }
+              }
+            }
+          }
+        }
+      });
+    }
 
     // Re-sync UI state for studied and bookmarks
     renderBookmarkButtons();

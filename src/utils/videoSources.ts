@@ -214,3 +214,26 @@ export function determinePrimaryPlaylistSource(playlist: MaterialItem): VideoSou
 
   return 'youtube';
 }
+
+/**
+ * Resolves direct download URL for a video source if directly downloadable.
+ * Returns Google Drive direct download URL (export=download) for Google Drive videos.
+ * Returns direct URL for HTML5 direct video files (.mp4, .webm, etc.).
+ * Returns null for third-party embeds (YouTube, Vimeo, Telegram).
+ */
+export function getVideoDownloadUrl(url?: string): string | null {
+  if (!url) return null;
+  const clean = url.trim();
+
+  const driveId = extractDriveFileId(clean);
+  if (driveId) {
+    return `https://drive.google.com/uc?export=download&id=${driveId}`;
+  }
+
+  if (isDirectVideoUrl(clean)) {
+    return clean;
+  }
+
+  return null;
+}
+

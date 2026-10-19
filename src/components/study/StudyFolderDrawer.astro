@@ -1,0 +1,459 @@
+---
+// Offline Study Folder Slide-over Drawer
+// Integrates with File System Access API & IndexedDB to manage local curriculum PDFs
+---
+
+<!-- Slide-over Drawer -->
+<aside
+  id="study-folder-drawer"
+  class="fixed inset-y-0 right-0 z-50 w-full sm:w-[420px] bg-white dark:bg-zinc-900 border-l border-zinc-200 dark:border-zinc-800 shadow-2xl transform translate-x-full transition-transform duration-300 ease-in-out flex flex-col"
+  aria-labelledby="study-folder-drawer-title"
+  role="dialog"
+  aria-modal="true"
+  aria-hidden="true"
+>
+  <!-- Drawer Header -->
+  <div class="p-4 pt-[calc(1rem+env(safe-area-inset-top,0px))] border-b border-zinc-200 dark:border-zinc-800 flex items-center justify-between">
+    <div class="flex items-center gap-2.5">
+      <div class="w-9 h-9 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
+        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12.75V12A2.25 2.25 0 014.5 9.75h15A2.25 2.25 0 0121.75 12v.75m-8.69-6.44l-2.12-2.12a1.5 1.5 0 00-1.061-.44H4.5A2.25 2.25 0 002.25 6v12a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9a2.25 2.25 0 00-2.25-2.25h-5.379a1.5 1.5 0 01-1.06-.44z" />
+        </svg>
+      </div>
+      <div>
+        <h2 id="study-folder-drawer-title" class="font-bold text-zinc-900 dark:text-zinc-100 text-sm sm:text-base leading-tight">
+          Offline Study Folder
+        </h2>
+        <p class="text-[11px] text-zinc-500 dark:text-zinc-400">
+          Device storage for offline PDFs & quota saving
+        </p>
+      </div>
+    </div>
+
+    <button
+      type="button"
+      id="close-study-folder-drawer"
+      class="p-1.5 text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors cursor-pointer"
+      aria-label="Close study folder drawer"
+    >
+      <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+      </svg>
+    </button>
+  </div>
+
+  <!-- Drawer Body -->
+  <div class="flex-1 overflow-y-auto p-4 space-y-4">
+    <!-- Folder Connection Status Box -->
+    <div class="p-3.5 rounded-xl border border-zinc-200/80 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-800/50 space-y-3">
+      <div class="flex items-center justify-between gap-2">
+        <div class="flex items-center gap-2">
+          <span id="folder-status-indicator" class="w-2.5 h-2.5 rounded-full bg-zinc-300 dark:bg-zinc-600"></span>
+          <span id="folder-status-text" class="text-xs font-bold text-zinc-800 dark:text-zinc-200">
+            No Study Folder Connected
+          </span>
+        </div>
+      </div>
+
+      <p id="folder-status-desc" class="text-xs text-zinc-500 dark:text-zinc-400 leading-relaxed">
+        Select a folder on your device. Downloaded PDFs are organized by Year and Module, avoiding duplicate downloads.
+      </p>
+
+      <!-- Action Buttons -->
+      <div class="flex items-center gap-2 flex-wrap">
+        <button
+          type="button"
+          id="btn-choose-study-folder"
+          class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-emerald-600 hover:bg-emerald-700 text-white transition-colors cursor-pointer shadow-2xs"
+        >
+          <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+          </svg>
+          <span id="btn-choose-folder-text">Select Study Folder</span>
+        </button>
+
+        <button
+          type="button"
+          id="btn-rescan-study-folder"
+          class="hidden inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 text-xs font-semibold hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors cursor-pointer shadow-2xs"
+          title="Rescan folder for new files"
+        >
+          <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" />
+          </svg>
+          <span>Rescan</span>
+        </button>
+
+        <button
+          type="button"
+          id="btn-disconnect-study-folder"
+          class="hidden inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-rose-600 dark:text-rose-400 text-xs font-semibold hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-colors cursor-pointer shadow-2xs"
+          title="Disconnect this folder"
+        >
+          <span>Disconnect</span>
+        </button>
+      </div>
+
+      <!-- Fallback manual file picker (Safari / iOS / Firefox) -->
+      <div id="study-folder-fallback-section" class="hidden pt-2 border-t border-zinc-200 dark:border-zinc-700">
+        <label
+          for="study-folder-fallback-file"
+          class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-xs font-semibold text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-700 cursor-pointer shadow-2xs"
+        >
+          <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
+          </svg>
+          <span>Open Any Offline PDF</span>
+        </label>
+        <input type="file" id="study-folder-fallback-file" accept=".pdf,image/*" class="hidden" />
+      </div>
+    </div>
+
+    <!-- Saved Files Section -->
+    <div class="space-y-3">
+      <div class="flex items-center justify-between">
+        <h3 class="text-xs font-bold text-zinc-900 dark:text-zinc-100 uppercase tracking-wider">
+          Saved Files (<span id="saved-files-count">0</span>)
+        </h3>
+      </div>
+
+      <!-- Empty State -->
+      <div id="study-folder-empty-state" class="py-10 text-center space-y-2">
+        <div class="w-10 h-10 mx-auto rounded-full bg-zinc-100 dark:bg-zinc-800 text-zinc-400 flex items-center justify-center">
+          <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
+          </svg>
+        </div>
+        <p class="text-xs font-semibold text-zinc-600 dark:text-zinc-400">
+          No files in Study Folder
+        </p>
+        <p class="text-[11px] text-zinc-400 dark:text-zinc-500 max-w-[260px] mx-auto">
+          Files downloaded or copied into your study folder will appear here for fast offline reading.
+        </p>
+      </div>
+
+      <!-- Files List Container -->
+      <div id="study-folder-files-list" class="space-y-2 hidden">
+        <!-- Rendered dynamically -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Drawer Footer -->
+  <div class="p-3 pb-[calc(1rem+env(safe-area-inset-bottom,0px))] border-t border-zinc-200 dark:border-zinc-800 text-center bg-zinc-50/50 dark:bg-zinc-900/50">
+    <p class="text-[11px] text-zinc-400 dark:text-zinc-500">
+      Permissions are remembered across sessions • Zero quota used when reading offline
+    </p>
+  </div>
+</aside>
+
+<!-- Backdrop overlay -->
+<div
+  id="study-folder-backdrop"
+  class="fixed inset-0 z-40 bg-zinc-900/50 backdrop-blur-xs hidden transition-opacity"
+  aria-hidden="true"
+></div>
+
+<script>
+  import {
+    isFileSystemAccessSupported,
+    getStoredDirectoryHandle,
+    saveStoredDirectoryHandle,
+    disconnectStudyFolder,
+    verifyFolderPermission,
+    scanAndIndexFolder,
+    listIndexedFiles,
+    readLocalFileBlobUrl,
+    deleteLocalFile,
+    type StoredFileRecord
+  } from '../../utils/localFolderManager';
+
+  let folderAbort: AbortController | null = null;
+  let cachedHandle: FileSystemDirectoryHandle | null = null;
+
+  function formatBytes(bytes: number): string {
+    if (bytes === 0) return '0 B';
+    const k = 1024;
+    const sizes = ['B', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
+  }
+
+  function initStudyFolderDrawer(): void {
+    if (folderAbort) folderAbort.abort();
+    folderAbort = new AbortController();
+    const { signal } = folderAbort;
+
+    const drawer = document.getElementById('study-folder-drawer');
+    const backdrop = document.getElementById('study-folder-backdrop');
+    const closeBtn = document.getElementById('close-study-folder-drawer');
+    const triggerBtns = document.querySelectorAll('#viewer-folder-btn, .study-folder-trigger');
+
+    const statusIndicator = document.getElementById('folder-status-indicator');
+    const statusText = document.getElementById('folder-status-text');
+    const statusDesc = document.getElementById('folder-status-desc');
+    const chooseBtn = document.getElementById('btn-choose-study-folder');
+    const chooseBtnText = document.getElementById('btn-choose-folder-text');
+    const rescanBtn = document.getElementById('btn-rescan-study-folder');
+    const disconnectBtn = document.getElementById('btn-disconnect-study-folder');
+    const fallbackSection = document.getElementById('study-folder-fallback-section');
+    const fallbackFileInput = document.getElementById('study-folder-fallback-file') as HTMLInputElement | null;
+
+    const emptyState = document.getElementById('study-folder-empty-state');
+    const filesList = document.getElementById('study-folder-files-list');
+    const filesCount = document.getElementById('saved-files-count');
+    const globalDot = document.getElementById('folder-status-dot');
+
+    const supported = isFileSystemAccessSupported();
+    if (!supported && fallbackSection) {
+      fallbackSection.classList.remove('hidden');
+      if (chooseBtn) chooseBtn.classList.add('hidden');
+    }
+
+    function openDrawer(): void {
+      if (!drawer || !backdrop) return;
+      refreshUI();
+      drawer.classList.remove('translate-x-full');
+      backdrop.classList.remove('hidden');
+      document.body.style.overflow = 'hidden';
+      drawer.setAttribute('aria-hidden', 'false');
+    }
+
+    function closeDrawer(): void {
+      if (!drawer || !backdrop) return;
+      drawer.classList.add('translate-x-full');
+      backdrop.classList.add('hidden');
+      document.body.style.overflow = '';
+      drawer.setAttribute('aria-hidden', 'true');
+    }
+
+    triggerBtns.forEach((btn) => btn.addEventListener('click', openDrawer, { signal }));
+    closeBtn?.addEventListener('click', closeDrawer, { signal });
+    backdrop?.addEventListener('click', closeDrawer, { signal });
+
+    async function checkHandleStatus(): Promise<FileSystemDirectoryHandle | null> {
+      if (!supported) return null;
+      try {
+        const handle = await getStoredDirectoryHandle();
+        if (handle) {
+          cachedHandle = handle;
+          return handle;
+        }
+      } catch {}
+      cachedHandle = null;
+      return null;
+    }
+
+    async function refreshUI(): Promise<void> {
+      const handle = await checkHandleStatus();
+      const files = await listIndexedFiles();
+
+      if (filesCount) filesCount.textContent = String(files.length);
+
+      if (handle) {
+        if (statusIndicator) {
+          statusIndicator.classList.remove('bg-zinc-300', 'dark:bg-zinc-600');
+          statusIndicator.classList.add('bg-emerald-500');
+        }
+        if (globalDot) {
+          globalDot.classList.remove('bg-zinc-300', 'dark:bg-zinc-600');
+          globalDot.classList.add('bg-emerald-500');
+        }
+        if (statusText) statusText.textContent = `Folder Connected: ${handle.name}`;
+        if (statusDesc) statusDesc.textContent = `Files in "${handle.name}" are indexed. Click any file below to read offline instantly.`;
+        if (chooseBtnText) chooseBtnText.textContent = 'Change Folder';
+        rescanBtn?.classList.remove('hidden');
+        disconnectBtn?.classList.remove('hidden');
+      } else {
+        if (statusIndicator) {
+          statusIndicator.classList.remove('bg-emerald-500');
+          statusIndicator.classList.add('bg-zinc-300', 'dark:bg-zinc-600');
+        }
+        if (globalDot) {
+          globalDot.classList.remove('bg-emerald-500');
+          globalDot.classList.add('bg-zinc-300', 'dark:bg-zinc-600');
+        }
+        if (statusText) statusText.textContent = 'No Study Folder Connected';
+        if (statusDesc) statusDesc.textContent = 'Select a folder on your device. Downloaded PDFs are organized by Year and Module, avoiding duplicate downloads.';
+        if (chooseBtnText) chooseBtnText.textContent = 'Select Study Folder';
+        rescanBtn?.classList.add('hidden');
+        disconnectBtn?.classList.add('hidden');
+      }
+
+      renderFilesList(files);
+    }
+
+    function renderFilesList(files: StoredFileRecord[]): void {
+      if (!filesList || !emptyState) return;
+      if (files.length === 0) {
+        emptyState.classList.remove('hidden');
+        filesList.classList.add('hidden');
+        filesList.innerHTML = '';
+        return;
+      }
+
+      emptyState.classList.add('hidden');
+      filesList.classList.remove('hidden');
+      filesList.innerHTML = '';
+
+      files.forEach((file) => {
+        const itemEl = document.createElement('div');
+        itemEl.className = 'p-2.5 rounded-xl border border-zinc-200/80 dark:border-zinc-800 bg-white dark:bg-zinc-900 flex items-center justify-between gap-3 shadow-2xs';
+
+        const infoEl = document.createElement('div');
+        infoEl.className = 'min-w-0 flex-1';
+
+        const nameEl = document.createElement('p');
+        nameEl.className = 'text-xs font-semibold text-zinc-900 dark:text-zinc-100 truncate';
+        // Clean display name (strip [m-...] prefix if present)
+        nameEl.textContent = file.fileName.replace(/^\[m-[^\]]+\]-/, '');
+        nameEl.title = file.relativePath;
+
+        const metaEl = document.createElement('p');
+        metaEl.className = 'text-[11px] text-zinc-400 dark:text-zinc-500 truncate';
+        metaEl.textContent = `${file.relativePath.split('/').slice(0, -1).join(' / ') || 'Root'} • ${formatBytes(file.size)}`;
+
+        infoEl.appendChild(nameEl);
+        infoEl.appendChild(metaEl);
+
+        const actionsEl = document.createElement('div');
+        actionsEl.className = 'flex items-center gap-1 shrink-0';
+
+        // Open in Viewer Button
+        const openBtn = document.createElement('button');
+        openBtn.type = 'button';
+        openBtn.className = 'px-2 py-1 rounded-lg text-xs font-semibold bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-100 dark:hover:bg-emerald-900 transition-colors cursor-pointer';
+        openBtn.textContent = 'Open';
+        openBtn.addEventListener('click', async () => {
+          if (!cachedHandle) return;
+          const hasPerm = await verifyFolderPermission(cachedHandle, false);
+          if (!hasPerm) return;
+          const blobUrl = await readLocalFileBlobUrl(cachedHandle, file.relativePath);
+          if (blobUrl) {
+            window.dispatchEvent(
+              new CustomEvent('study-folder-load-document', {
+                detail: {
+                  blobUrl,
+                  title: file.fileName,
+                  relativePath: file.relativePath
+                }
+              })
+            );
+            closeDrawer();
+          }
+        });
+
+        // Delete Button
+        const delBtn = document.createElement('button');
+        delBtn.type = 'button';
+        delBtn.className = 'p-1 text-zinc-400 hover:text-rose-600 dark:hover:text-rose-400 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors cursor-pointer';
+        delBtn.title = 'Delete local file';
+        delBtn.setAttribute('aria-label', `Delete ${file.fileName}`);
+        delBtn.innerHTML = `
+          <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
+          </svg>
+        `;
+        delBtn.addEventListener('click', async () => {
+          if (!cachedHandle) return;
+          const hasPerm = await verifyFolderPermission(cachedHandle, true);
+          if (!hasPerm) return;
+          if (confirm(`Delete "${file.fileName}" from your study folder?`)) {
+            await deleteLocalFile(cachedHandle, file);
+            await refreshUI();
+            window.dispatchEvent(new CustomEvent('study-folder-updated'));
+          }
+        });
+
+        actionsEl.appendChild(openBtn);
+        actionsEl.appendChild(delBtn);
+
+        itemEl.appendChild(infoEl);
+        itemEl.appendChild(actionsEl);
+        filesList.appendChild(itemEl);
+      });
+    }
+
+    // Connect / Change Folder Button
+    chooseBtn?.addEventListener('click', async () => {
+      try {
+        const picker = (window as any).showDirectoryPicker;
+        if (!picker) return;
+        const handle = await picker({ mode: 'readwrite' });
+        if (handle) {
+          await saveStoredDirectoryHandle(handle);
+          cachedHandle = handle;
+          await scanAndIndexFolder(handle);
+          await refreshUI();
+          window.dispatchEvent(new CustomEvent('study-folder-updated'));
+          const showFn = (window as any).showToast;
+          if (typeof showFn === 'function') {
+            showFn({
+              type: 'success',
+              message: `Connected "${handle.name}" study folder`,
+              duration: 2500
+            });
+          }
+        }
+      } catch (err: any) {
+        if (err?.name !== 'AbortError') {
+          console.error('Error selecting directory:', err);
+        }
+      }
+    }, { signal });
+
+    // Rescan Folder Button
+    rescanBtn?.addEventListener('click', async () => {
+      if (!cachedHandle) return;
+      const hasPerm = await verifyFolderPermission(cachedHandle, false);
+      if (!hasPerm) return;
+      try {
+        const records = await scanAndIndexFolder(cachedHandle);
+        await refreshUI();
+        window.dispatchEvent(new CustomEvent('study-folder-updated'));
+        const showFn = (window as any).showToast;
+        if (typeof showFn === 'function') {
+          showFn({
+            type: 'success',
+            message: `Rescanned ${records.length} files in Study Folder`,
+            duration: 2000
+          });
+        }
+      } catch (err) {
+        console.error('Error rescanning folder:', err);
+      }
+    }, { signal });
+
+    // Disconnect Folder Button
+    disconnectBtn?.addEventListener('click', async () => {
+      await disconnectStudyFolder();
+      cachedHandle = null;
+      await refreshUI();
+      window.dispatchEvent(new CustomEvent('study-folder-updated'));
+    }, { signal });
+
+    // Fallback File Input (Mobile / Safari)
+    fallbackFileInput?.addEventListener('change', () => {
+      const file = fallbackFileInput.files?.[0];
+      if (file) {
+        const blobUrl = URL.createObjectURL(file);
+        window.dispatchEvent(
+          new CustomEvent('study-folder-load-document', {
+            detail: {
+              blobUrl,
+              title: file.name,
+              relativePath: file.name
+            }
+          })
+        );
+        closeDrawer();
+      }
+    }, { signal });
+
+    // Initial passive status check
+    refreshUI();
+  }
+
+  initStudyFolderDrawer();
+  document.addEventListener('astro:after-swap', initStudyFolderDrawer);
+</script>
