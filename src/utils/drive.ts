@@ -42,16 +42,32 @@ export async function fetchDriveMetadata(driveUrl: string): Promise<DriveFile[]>
   const html = await res.text();
   const files: DriveFile[] = [];
 
-  const fileRegex = /"([a-zA-Z0-9_-]{25,})"\s*,\s*"([^"]+)"\s*,\s*"([^"]+)"/g;
-  let m;
-  while ((m = fileRegex.exec(html)) !== null) {
-    const [, id, name, mimeType] = m;
-    files.push({
-      id,
-      name: name.replace(/\\u0026/g, '&').replace(/\\"/g, '"'),
-      mimeType,
-      url: `https://drive.google.com/file/d/${id}/view`
-    });
+  const ivdMatch = html.match(/window\['_DRIVE_ivd'\]\s*=\s*'([^']+)'/);
+  if (ivdMatch) {
+    try {
+      const uEscape = ivdMatch[1].replace(/\\x([0-9a-fA-F]{2})/g, '\\u00$1');
+      const decoded = JSON.parse('"' + uEscape.replace(/"/g, '\\"') + '"');
+      const data = JSON.parse(decoded);
+      if (Array.isArray(data) && Array.isArray(data[0])) {
+        for (const item of data[0]) {
+          const fileId = item[0];
+          const fileName = item[2];
+          const mimeType = item[3] || 'application/octet-stream';
+          if (fileId && fileName) {
+            files.push({
+              id: fileId,
+              name: fileName,
+              mimeType,
+              url: mimeType === 'application/vnd.google-apps.folder'
+                ? `https://drive.google.com/drive/folders/${fileId}`
+                : `https://drive.google.com/file/d/${fileId}/view`
+            });
+          }
+        }
+      }
+    } catch {
+      // Fallback to title / regex below
+    }
   }
 
   if (files.length === 0) {

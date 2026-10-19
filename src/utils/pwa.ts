@@ -41,6 +41,41 @@ export function isIosDevice(): boolean {
   return (isIos || isIpadOs) && !(window as any).MSStream;
 }
 
+export const PWA_DISMISS_DURATION_MS = 24 * 60 * 60 * 1000; // 24 hours
+
+export function isHomePage(pathname: string): boolean {
+  if (!pathname) return true;
+  const clean = pathname.replace(/\/+$/, '') || '/';
+  return clean === '/' || clean === '/index.html';
+}
+
+export function isPwaPromptDismissed(now = Date.now()): boolean {
+  if (typeof window === 'undefined') return false;
+  try {
+    const until = Number(localStorage.getItem('asumed_pwa_dismissed_until') || '0');
+    return now < until;
+  } catch {
+    return false;
+  }
+}
+
+export function setPwaPromptDismissed(durationMs = PWA_DISMISS_DURATION_MS, now = Date.now()): void {
+  if (typeof window === 'undefined') return;
+  try {
+    localStorage.setItem('asumed_pwa_dismissed_until', String(now + durationMs));
+  } catch {}
+}
+
+export function shouldShowPwaInstallPrompt(
+  pathname: string,
+  isInstalledOrStandalone = false,
+  isDismissed = false
+): boolean {
+  if (isInstalledOrStandalone) return false;
+  if (isDismissed) return false;
+  return isHomePage(pathname);
+}
+
 /**
  * Registers the service worker for PWA caching and installability.
  */

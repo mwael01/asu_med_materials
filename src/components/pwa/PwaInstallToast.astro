@@ -3,119 +3,133 @@
 ---
 
 <script>
-  import { isPwaInstalledOrStandalone, isIosDevice } from '../../utils/pwa';
+  import {
+    isPwaInstalledOrStandalone,
+    isIosDevice,
+    isHomePage,
+    isPwaPromptDismissed,
+    setPwaPromptDismissed,
+    shouldShowPwaInstallPrompt
+  } from '../../utils/pwa';
 
-  function initPwaInstallPrompt(): void {
-    // CRITICAL: If the site is already a PWA or installed, NEVER show this toast
-    if (isPwaInstalledOrStandalone()) {
+  declare global {
+    interface Window {
+      __PWA_DEFERRED_PROMPT?: any;
+      __PWA_LISTENERS_INITIALIZED?: boolean;
+    }
+  }
+
+  function cleanupActiveToast(): void {
+    const toastEl = document.querySelector('[data-toast-id="pwa-install-toast"]');
+    if (toastEl) toastEl.remove();
+  }
+
+  function showInstallToast(isIos = false): void {
+    const currentPath = window.location.pathname || '/';
+    if (!shouldShowPwaInstallPrompt(currentPath, isPwaInstalledOrStandalone(), isPwaPromptDismissed())) {
+      cleanupActiveToast();
       return;
     }
 
-    const isYearPage = /^\/year\/(\d+)(\/.*)?$/.test(window.location.pathname || '');
+    const showFn = (window as any).showToast;
+    if (typeof showFn !== 'function') return;
 
-    // Only show the install prompt when a year page is loaded, never on the home/start screen.
-    if (!isYearPage) {
-      return;
-    }
+    // Immediately record 24-hour dismissal so refreshing or closing does not repeatedly re-trigger
+    setPwaPromptDismissed();
 
-    // Service worker is registered automatically by @vite-pwa/astro integration
-
-    let deferredPrompt: any = null;
-
-    // Check if dismissed in this browsing session
-    let isDismissed = false;
-    try {
-      isDismissed = sessionStorage.getItem('asumed_pwa_prompt_dismissed') === 'true';
-    } catch {}
-
-    function showInstallNotification(isIos: boolean = false): void {
-      if (isPwaInstalledOrStandalone() || isDismissed || !isYearPage) return;
-
-      const showFn = (window as any).showToast;
-      if (typeof showFn !== 'function') return;
-
-      try {
-        sessionStorage.setItem('asumed_pwa_prompt_dismissed', 'true');
-      } catch {}
-      isDismissed = true;
-
-      const isAr = document.documentElement.lang === 'ar';
-
-      if (isIos) {
-        showFn({
-          id: 'pwa-install-toast',
-          type: 'pwa',
-          title: isAr ? 'تثبيت التطبيق على الشاشة الرئيسية' : 'Install App to Home Screen',
-          message: isAr
-            ? 'اضغط على زر المشاركة في متصفح Safari ثم اختر "إضافة إلى الصفحة الرئيسية (+)".'
-            : 'Tap the Share button in Safari and choose "Add to Home Screen (+)".',
-          duration: 10000
-        });
-      } else {
-        showFn({
-          id: 'pwa-install-toast',
-          type: 'pwa',
-          title: isAr ? 'تثبيت التطبيق' : 'Install Web App',
-          message: isAr
-            ? 'نزّل الموقع كتطبيق خفيف على جهازك لتصفح المصادر بسرعة وبدون شريط المتصفح.'
-            : 'Install this app on your device for faster access and offline capabilities.',
-          duration: 0, // Keeps it visible until user action
-          action: {
-            label: isAr ? 'تثبيت الآن' : 'Install Now',
-            onClick: async () => {
-              if (deferredPrompt) {
-                try {
-                  deferredPrompt.prompt();
-                  const choiceResult = await deferredPrompt.userChoice;
-                  if (choiceResult?.outcome === 'accepted') {
-                    localStorage.setItem('asumed_pwa_installed', 'true');
-                  }
-                } catch (e) {}
-                deferredPrompt = null;
+    if (isIos) {
+      showFn({
+        id: 'pwa-install-toast',
+        type: 'pwa',
+        title: 'Install mediX to Home Screen',
+        message: 'Tap the Share button in Safari and choose "Add to Home Screen (+)".',
+        duration: 10000
+      });
+    } else {
+      showFn({
+        id: 'pwa-install-toast',
+        type: 'pwa',
+        title: 'Install mediX Web App',
+        message: 'Install mediX on your device for instant offline access and faster study materials.',
+        duration: 0, // Keeps it visible until user action
+        action: {
+          label: 'Install Now',
+          onClick: async () => {
+            const promptEvent = window.__PWA_DEFERRED_PROMPT;
+            if (promptEvent) {
+              try {
+                promptEvent.prompt();
+                const choiceResult = await promptEvent.userChoice;
+                if (choiceResult?.outcome === 'accepted') {
+                  localStorage.setItem('asumed_pwa_installed', 'true');
+                  cleanupActiveToast();
+                } else {
+                  setPwaPromptDismissed();
+                }
+              } catch {
+                setPwaPromptDismissed();
               }
+              window.__PWA_DEFERRED_PROMPT = null;
             }
           }
-        });
-      }
-    }
-
-    // Standard PWA install trigger (Chrome, Edge, Android Chrome, Samsung Internet, Opera)
-    const pwaAbort = new AbortController();
-    window.addEventListener('beforeinstallprompt', (e) => {
-      // Prevent browser default mini-infobar
-      e.preventDefault();
-
-      // Double-check if website is already running in standalone mode
-      if (isPwaInstalledOrStandalone() || !isYearPage) {
-        return;
-      }
-
-      deferredPrompt = e;
-
-      // Display toast after a short delay for optimal user experience
-      setTimeout(() => {
-        showInstallNotification(false);
-      }, 2500);
-    }, { signal: pwaAbort.signal });
-
-    // Handle iOS Safari guidance if not already installed as standalone
-    if (isIosDevice() && !isPwaInstalledOrStandalone() && !isDismissed && isYearPage) {
-      setTimeout(() => {
-        if (!isPwaInstalledOrStandalone() && isYearPage) {
-          showInstallNotification(true);
         }
-      }, 4000);
+      });
+    }
+  }
+
+  function initPwaInstallPrompt(): void {
+    const pathname = window.location.pathname || '/';
+
+    // Strictly remove toast if user navigated away from the home page
+    if (!isHomePage(pathname)) {
+      cleanupActiveToast();
+      return;
     }
 
-    // Listen for app installed event to permanently silence the toast
+    if (!shouldShowPwaInstallPrompt(pathname, isPwaInstalledOrStandalone(), isPwaPromptDismissed())) {
+      cleanupActiveToast();
+      return;
+    }
+
+    // If beforeinstallprompt was already captured
+    if (window.__PWA_DEFERRED_PROMPT) {
+      setTimeout(() => {
+        showInstallToast(false);
+      }, 2000);
+      return;
+    }
+
+    // Handle iOS Safari guidance on the home page
+    if (isIosDevice()) {
+      setTimeout(() => {
+        showInstallToast(true);
+      }, 3500);
+    }
+  }
+
+  // Register global listeners once across client router transitions
+  if (typeof window !== 'undefined' && !window.__PWA_LISTENERS_INITIALIZED) {
+    window.__PWA_LISTENERS_INITIALIZED = true;
+
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      window.__PWA_DEFERRED_PROMPT = e;
+
+      const pathname = window.location.pathname || '/';
+      if (shouldShowPwaInstallPrompt(pathname, isPwaInstalledOrStandalone(), isPwaPromptDismissed())) {
+        setTimeout(() => {
+          showInstallToast(false);
+        }, 2000);
+      }
+    });
+
     window.addEventListener('appinstalled', () => {
       try {
         localStorage.setItem('asumed_pwa_installed', 'true');
       } catch {}
-      deferredPrompt = null;
-      const toastEl = document.querySelector('[data-toast-id="pwa-install-toast"]');
-      if (toastEl) toastEl.remove();
-    }, { signal: pwaAbort.signal });
+      window.__PWA_DEFERRED_PROMPT = null;
+      cleanupActiveToast();
+    });
   }
 
   // Initialize on page load and on view transitions

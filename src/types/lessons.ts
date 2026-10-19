@@ -7,6 +7,7 @@ export interface Lesson {
   subject: string;
   order: number;
   active: boolean;
+  isRevision?: boolean;
 }
 
 export type StudyTab = 'videos' | 'pdfs' | 'links';
