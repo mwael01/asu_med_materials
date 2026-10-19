@@ -5,7 +5,7 @@ import NavigationCards from '../../../../../components/common/NavigationCards.as
 import ResourceGrid from '../../../../../components/materials/ResourceGrid.astro';
 import { loadLessonPage } from '../../../../../data/lessons';
 import { lessonDoctors, lessonPath } from '../../../../../utils/lessons';
-import { isFlashcards, matchesDiscoveryType } from '../../../../../utils/studyContent';
+import { isFlashcards, isMcqMaterial, isPdfMaterial, isVideoMaterial, matchesDiscoveryType } from '../../../../../utils/studyContent';
 import { subjectToSlug } from '../../../../../utils/slug';
 import type { DiscoveryType } from '../../../../../types/lessons';
 
@@ -19,10 +19,27 @@ const type: DiscoveryType | null = (typeParam === 'videos' || typeParam === 'pdf
 // Filter materials if type is specified
 const activeMaterials = type ? materials.filter(item => matchesDiscoveryType(item, type)) : materials;
 
+// 1. Doctors (explanations, video series, playlists, and lecture recordings)
+const lectureMaterials = activeMaterials.filter(item => !isFlashcards(item) && !isMcqMaterial(item) && (isVideoMaterial(item) || item.category === 'lectures'));
+const doctors = lessonDoctors(lectureMaterials.length ? lectureMaterials : activeMaterials.filter(item => !isFlashcards(item) && !isMcqMaterial(item) && !isPdfMaterial(item)));
+
+// 2. PDFs (summaries, lecture slides, books, documents)
+const pdfs = activeMaterials.filter(isPdfMaterial);
+
+// 3. Flashcards (interactive study decks)
 const flashcards = activeMaterials.filter(isFlashcards);
-const doctors = lessonDoctors(activeMaterials.filter(item => !isFlashcards(item)));
-const doctorMaterials = new Set(doctors.flatMap(doctor => doctor.items.map(item => item.id)));
-const general = activeMaterials.filter(item => !isFlashcards(item) && !doctorMaterials.has(item.id));
+
+// 4. MCQs (question banks, quizzes, previous exam questions)
+const mcqs = activeMaterials.filter(isMcqMaterial);
+
+// 5. Other resources (any remaining resources not fitting into above categories)
+const handledIds = new Set([
+  ...lectureMaterials.map(m => m.id),
+  ...pdfs.map(m => m.id),
+  ...flashcards.map(m => m.id),
+  ...mcqs.map(m => m.id),
+]);
+const otherResources = activeMaterials.filter(item => !handledIds.has(item.id));
 
 const typeLabels: Record<DiscoveryType, string> = {
   videos: 'Videos',
@@ -39,28 +56,48 @@ const crumbs = [
 ---
 <Layout title={`${lesson.title} - mediX`}>
   <PageHeading title={lesson.title} crumbs={crumbs} />
-  {doctors.length > 0 && (
-    <section>
-      <h2 class="text-base font-semibold mb-4">Doctors</h2>
-      <NavigationCards
-        items={doctors.map(doctor => ({
-          title: doctor.name,
-          href: `${lessonPath(lesson)}/doctor/${doctor.key}${type ? `?type=${type}` : ''}`
-        }))}
-      />
-    </section>
-  )}
-  {flashcards.length > 0 && (
-    <section class="mt-8">
-      <h2 class="text-base font-semibold mb-4">Flashcards</h2>
-      <ResourceGrid materials={flashcards} />
-    </section>
-  )}
-  {general.length > 0 && (
-    <section class="mt-8">
-      <h2 class="text-base font-semibold mb-4">Lesson resources</h2>
-      <ResourceGrid materials={general} />
-    </section>
-  )}
+
+  <div class="space-y-8">
+    {doctors.length > 0 && (
+      <section>
+        <h2 class="text-base font-semibold mb-4">Doctors</h2>
+        <NavigationCards
+          items={doctors.map(doctor => ({
+            title: doctor.name,
+            href: `${lessonPath(lesson)}/doctor/${doctor.key}${type ? `?type=${type}` : ''}`
+          }))}
+        />
+      </section>
+    )}
+
+    {pdfs.length > 0 && (
+      <section>
+        <h2 class="text-base font-semibold mb-4">PDFs</h2>
+        <ResourceGrid materials={pdfs} />
+      </section>
+    )}
+
+    {flashcards.length > 0 && (
+      <section>
+        <h2 class="text-base font-semibold mb-4">Flashcards</h2>
+        <ResourceGrid materials={flashcards} />
+      </section>
+    )}
+
+    {mcqs.length > 0 && (
+      <section>
+        <h2 class="text-base font-semibold mb-4">MCQs</h2>
+        <ResourceGrid materials={mcqs} />
+      </section>
+    )}
+
+    {otherResources.length > 0 && (
+      <section>
+        <h2 class="text-base font-semibold mb-4">Other resources</h2>
+        <ResourceGrid materials={otherResources} />
+      </section>
+    )}
+  </div>
+
   {!activeMaterials.length && <p class="text-sm text-zinc-500">No materials available for this lesson.</p>}
 </Layout>

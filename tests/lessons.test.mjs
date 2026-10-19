@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { lessonDoctors, doctorKey, lessonPath, lessonsForSubject, materialMatchesLesson, validateLesson } from '../src/utils/lessons.ts';
-import { studyEntries, matchesDiscoveryType, materialStudyPath, legacyMaterialPath } from '../src/utils/studyContent.ts';
+import { studyEntries, matchesDiscoveryType, materialStudyPath, legacyMaterialPath, isFlashcards, isMcqMaterial, isPdfMaterial, isVideoMaterial } from '../src/utils/studyContent.ts';
 import { entryProgressStorage, parseProgress } from '../src/utils/studyProgress.ts';
 import { materialConverter, submissionConverter } from '../src/firebase/schema.ts';
 import { createDraft, serializeDraft } from '../src/utils/materialDrafts.ts';
@@ -205,6 +205,93 @@ test('shared lesson names across multiple subjects maintain isolated material as
 
   assert.equal(materialMatchesLesson(histoMaterial, histoNoseLesson), true);
   assert.equal(materialMatchesLesson(histoMaterial, anatNoseLesson), false);
+});
+
+test('lesson material partitioning divides Doctors, PDFs, Flashcards, and MCQs into separate sections and hides empty ones', () => {
+  const lectureVideo = material({
+    id: 'mat-lec-1',
+    title: 'Nose Anatomy Lecture 1',
+    url: 'https://youtu.be/test1234',
+    type: 'youtube',
+    category: 'lectures',
+    author: 'Dr. Ashraf Ramzy'
+  });
+
+  const pdfSummary = material({
+    id: 'mat-pdf-1',
+    title: 'Anatomy Respiratory Notes',
+    url: 'https://drive.google.com/file/d/testfile/view',
+    type: 'drive',
+    category: 'summaries',
+    author: 'Dr. Youssef Shoukry'
+  });
+
+  const flashcardDeck = material({
+    id: 'flashcards-deck-1',
+    title: 'Unit 1::Ch1::Anatomy',
+    url: '/flashcards/deck-1',
+    type: 'flashcards',
+    category: 'flashcards',
+    flashcardDeckId: 'deck-1'
+  });
+
+  const mcqBank = material({
+    id: 'mat-mcq-1',
+    title: 'Anatomy MCQs & Question Bank (أسئلة وبنك)',
+    url: 'https://drive.google.com/file/d/mcqfile/view',
+    type: 'drive',
+    category: 'exams',
+    tags: ['anatomy', 'mcq', 'أسئلة']
+  });
+
+  // Verify classifier functions
+  assert.equal(isFlashcards(flashcardDeck), true);
+  assert.equal(isFlashcards(lectureVideo), false);
+  assert.equal(isFlashcards(mcqBank), false);
+
+  assert.equal(isMcqMaterial(mcqBank), true);
+  assert.equal(isMcqMaterial(flashcardDeck), false);
+  assert.equal(isMcqMaterial(pdfSummary), false);
+  assert.equal(isMcqMaterial(lectureVideo), false);
+
+  assert.equal(isPdfMaterial(pdfSummary), true);
+  assert.equal(isPdfMaterial(lectureVideo), false);
+  assert.equal(isPdfMaterial(flashcardDeck), false);
+  assert.equal(isPdfMaterial(mcqBank), false);
+
+  // Full lesson with all 4 categories present
+  const allMaterials = [lectureVideo, pdfSummary, flashcardDeck, mcqBank];
+
+  const lectureMaterials = allMaterials.filter(m => !isFlashcards(m) && !isMcqMaterial(m) && (isVideoMaterial(m) || m.category === 'lectures'));
+  const doctors = lessonDoctors(lectureMaterials);
+  const pdfs = allMaterials.filter(isPdfMaterial);
+  const flashcards = allMaterials.filter(isFlashcards);
+  const mcqs = allMaterials.filter(isMcqMaterial);
+
+  assert.equal(doctors.length, 1);
+  assert.equal(doctors[0].name, 'Dr. Ashraf Ramzy');
+  assert.equal(pdfs.length, 1);
+  assert.equal(pdfs[0].id, 'mat-pdf-1');
+  assert.equal(flashcards.length, 1);
+  assert.equal(flashcards[0].id, 'flashcards-deck-1');
+  assert.equal(mcqs.length, 1);
+  assert.equal(mcqs[0].id, 'mat-mcq-1');
+
+  // Verify flashcards never leak into doctors
+  assert.ok(!doctors.some(d => d.items.some(item => isFlashcards(item))));
+
+  // Partial lesson missing MCQs and Doctors
+  const partialMaterials = [pdfSummary, flashcardDeck];
+  const partialLectures = partialMaterials.filter(m => !isFlashcards(m) && !isMcqMaterial(m) && (isVideoMaterial(m) || m.category === 'lectures'));
+  const partialDoctors = lessonDoctors(partialLectures);
+  const partialPdfs = partialMaterials.filter(isPdfMaterial);
+  const partialFlashcards = partialMaterials.filter(isFlashcards);
+  const partialMcqs = partialMaterials.filter(isMcqMaterial);
+
+  assert.equal(partialDoctors.length, 0, 'Doctors section must be empty (hidden)');
+  assert.equal(partialPdfs.length, 1, 'PDFs section must have 1 item');
+  assert.equal(partialFlashcards.length, 1, 'Flashcards section must have 1 item');
+  assert.equal(partialMcqs.length, 0, 'MCQs section must be empty (hidden)');
 });
 
 

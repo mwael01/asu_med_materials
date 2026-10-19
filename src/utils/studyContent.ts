@@ -6,13 +6,35 @@ import { lessonDoctors, lessonPath, materialMatchesLesson } from './lessons';
 import { isHttpUrl } from './materialLinks';
 
 export const isFlashcards = (material: MaterialItem): boolean =>
-  material.type === 'flashcards' || Boolean(material.flashcardDeckId);
+  material.type === 'flashcards' || Boolean(material.flashcardDeckId) || material.category === 'flashcards';
 
 export function isVideoMaterial(material: MaterialItem): boolean {
   if (material.videos?.length || material.playlistId || ['youtube', 'playlist'].includes(material.type)) return true;
   // Drive file IDs alone cannot distinguish a PDF from a video.
   return /\.(mp4|webm|mov)(?:[?#]|$)/i.test(material.url) ||
     /^(https?:\/\/)?(www\.)?(youtube\.com|youtu\.be|vimeo\.com)\//i.test(material.url);
+}
+
+export function isMcqMaterial(material: MaterialItem): boolean {
+  if (isFlashcards(material)) return false;
+  if (material.type === 'exam' || material.category === 'exams') return true;
+  const mcqRegex = /\b(mcq|mcqs|quiz|exam|questions|question bank)\b/i;
+  const mcqArabicRegex = /(أسئلة|اسئلة|امتحان|امتحانات|بنك أسئلة|بنك الاسئلة|كويز)/i;
+  if (material.tags?.some(tag => mcqRegex.test(tag) || mcqArabicRegex.test(tag))) return true;
+  if (mcqRegex.test(material.title) || mcqArabicRegex.test(material.title)) return true;
+  if (material.titleEn && mcqRegex.test(material.titleEn)) return true;
+  return false;
+}
+
+export function isPdfMaterial(material: MaterialItem): boolean {
+  if (isFlashcards(material) || isMcqMaterial(material)) return false;
+  if (isVideoMaterial(material) || material.category === 'lectures') return false;
+  if (material.category === 'summaries' || material.category === 'references') return true;
+  if (material.type === 'summary' || material.type === 'book') return true;
+  if (material.documents?.length) return true;
+  if (/\.pdf(?:[?#]|$)/i.test(material.url)) return true;
+  if (material.type === 'drive' && !material.url.includes('/folders/')) return true;
+  return false;
 }
 
 export function studyEntries(materials: MaterialItem[]): StudyEntry[] {
