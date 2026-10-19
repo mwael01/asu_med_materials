@@ -14,6 +14,8 @@ export interface PdfViewerInstance {
   zoomIn(): Promise<void>;
   zoomOut(): Promise<void>;
   fitWidth(): Promise<void>;
+  toggleFullscreen(force?: boolean): void;
+  isFullscreen(): boolean;
   getCurrentPage(): number;
   getTotalPages(): number;
 }
@@ -27,6 +29,9 @@ export function createPdfViewer(root: HTMLElement): PdfViewerInstance {
   const zoomInBtn = root.querySelector<HTMLButtonElement>('.pdf-zoom-in-btn');
   const zoomOutBtn = root.querySelector<HTMLButtonElement>('.pdf-zoom-out-btn');
   const fitWidthBtn = root.querySelector<HTMLButtonElement>('.pdf-fit-width-btn');
+  const fullscreenBtn = root.querySelector<HTMLButtonElement>('.pdf-fullscreen-btn');
+  const fullscreenEnterIcon = root.querySelector<SVGElement>('.pdf-fullscreen-enter-icon');
+  const fullscreenExitIcon = root.querySelector<SVGElement>('.pdf-fullscreen-exit-icon');
   const zoomLabel = root.querySelector<HTMLElement>('.pdf-zoom-label');
   const viewportEl = root.querySelector<HTMLElement>('.pdf-viewport');
   const canvas = root.querySelector<HTMLCanvasElement>('.pdf-canvas');
@@ -111,8 +116,10 @@ export function createPdfViewer(root: HTMLElement): PdfViewerInstance {
 
       let scale = currentZoom;
       if (isFitWidth) {
-        // Calculate container available width minus padding (32px)
-        const availableWidth = Math.max(240, viewportEl.clientWidth - 32);
+        // Calculate container available width minus exact padding
+        const padLeft = parseFloat(getComputedStyle(viewportEl).paddingLeft) || 16;
+        const padRight = parseFloat(getComputedStyle(viewportEl).paddingRight) || 16;
+        const availableWidth = Math.max(240, viewportEl.clientWidth - padLeft - padRight);
         scale = availableWidth / unscaledViewport.width;
         currentZoom = scale;
       }
@@ -128,13 +135,16 @@ export function createPdfViewer(root: HTMLElement): PdfViewerInstance {
       const ctx = canvas.getContext('2d', { alpha: false });
       if (!ctx) return;
 
-      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      // Fill white background across physical drawing buffer
       ctx.fillStyle = '#ffffff';
-      ctx.fillRect(0, 0, viewport.width, viewport.height);
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      const transform = dpr !== 1 ? [dpr, 0, 0, dpr, 0, 0] : undefined;
 
       const renderContext = {
         canvas: canvas,
         canvasContext: ctx,
+        transform: transform,
         viewport: viewport,
         intent: 'display'
       };
@@ -210,6 +220,10 @@ export function createPdfViewer(root: HTMLElement): PdfViewerInstance {
       pdfDoc = loadedPdf;
       totalPages = loadedPdf.numPages;
       currentPage = 1;
+      if (viewportEl) {
+        viewportEl.scrollTop = 0;
+        viewportEl.scrollLeft = 0;
+      }
       updateControls();
 
       await renderCurrentPage();
@@ -225,6 +239,10 @@ export function createPdfViewer(root: HTMLElement): PdfViewerInstance {
     if (target === currentPage) return;
     currentPage = target;
     setLoading(true, `Loading page ${currentPage}...`);
+    if (viewportEl) {
+      viewportEl.scrollTop = 0;
+      viewportEl.scrollLeft = 0;
+    }
     await renderCurrentPage();
   }
 
@@ -257,6 +275,64 @@ export function createPdfViewer(root: HTMLElement): PdfViewerInstance {
     await renderCurrentPage();
   }
 
+  // --- Fullscreen Viewport Mode ---
+  let isStandaloneFs = false;
+
+  function isCurrentlyFullscreen(): boolean {
+    return isStandaloneFs ||
+      root.classList.contains('pdf-viewer-fullscreen') ||
+      Boolean(root.closest('.doc-viewer-fullscreen')) ||
+      Boolean(root.closest('.study-viewport-fullscreen')) ||
+      (typeof document !== 'undefined' && document.fullscreenElement === root);
+  }
+
+  function updateFullscreenIcons(): void {
+    const active = isCurrentlyFullscreen();
+    fullscreenEnterIcon?.classList.toggle('hidden', active);
+    fullscreenExitIcon?.classList.toggle('hidden', !active);
+    if (fullscreenBtn) {
+      fullscreenBtn.title = active ? 'Exit fullscreen (Esc)' : 'Toggle fullscreen (F)';
+      fullscreenBtn.setAttribute('aria-label', active ? 'Exit fullscreen' : 'Toggle fullscreen');
+    }
+  }
+
+  function toggleFullscreen(force?: boolean): void {
+    const nextState = typeof force === 'boolean' ? force : !isCurrentlyFullscreen();
+
+    // 1. If inside #viewer-container in viewer/[id].astro
+    const viewerContainer = root.closest('#viewer-container');
+    const parentFullscreenBtn = document.getElementById('viewer-fullscreen-btn');
+    if (viewerContainer && parentFullscreenBtn) {
+      const isParentFs = viewerContainer.classList.contains('doc-viewer-fullscreen');
+      if (isParentFs !== nextState) {
+        parentFullscreenBtn.click();
+      }
+      updateFullscreenIcons();
+      return;
+    }
+
+    // 2. If inside [data-study-viewport] in DoctorPlayer.astro
+    const doctorPlayer = root.closest('[data-doctor-player]');
+    const studyFsBtn = doctorPlayer?.querySelector<HTMLButtonElement>('[data-study-fullscreen]');
+    const studyViewport = doctorPlayer?.querySelector<HTMLElement>('[data-study-viewport]');
+    if (studyViewport && studyFsBtn) {
+      const isStudyFs = studyViewport.classList.contains('study-viewport-fullscreen');
+      if (isStudyFs !== nextState) {
+        studyFsBtn.click();
+      }
+      updateFullscreenIcons();
+      return;
+    }
+
+    // 3. Standalone CSS-based fullscreen mode (compatible with iOS Safari, Android, and Desktop)
+    isStandaloneFs = nextState;
+    root.classList.toggle('pdf-viewer-fullscreen', nextState);
+    if (document.body) {
+      document.body.style.overflow = nextState ? 'hidden' : '';
+    }
+    updateFullscreenIcons();
+  }
+
   // --- Attach Controls & Event Listeners ---
   prevBtn?.addEventListener('click', () => { prevPage(); }, { signal });
   nextBtn?.addEventListener('click', () => { nextPage(); }, { signal });
@@ -277,7 +353,39 @@ export function createPdfViewer(root: HTMLElement): PdfViewerInstance {
   zoomInBtn?.addEventListener('click', () => { zoomIn(); }, { signal });
   zoomOutBtn?.addEventListener('click', () => { zoomOut(); }, { signal });
   fitWidthBtn?.addEventListener('click', () => { fitWidth(); }, { signal });
+  fullscreenBtn?.addEventListener('click', () => { toggleFullscreen(); }, { signal });
   retryBtn?.addEventListener('click', () => { if (currentUrl) load(currentUrl); }, { signal });
+
+  // Keyboard shortcut: 'f' or 'F' to toggle fullscreen, 'Escape' to exit standalone fullscreen
+  window.addEventListener('keydown', (e: KeyboardEvent) => {
+    const tag = (document.activeElement?.tagName || '').toLowerCase();
+    if (tag === 'input' || tag === 'textarea') return;
+
+    if ((e.key === 'f' || e.key === 'F') && !e.ctrlKey && !e.metaKey && !e.altKey) {
+      if (root.matches(':hover') || root.contains(document.activeElement)) {
+        e.preventDefault();
+        toggleFullscreen();
+      }
+    } else if (e.key === 'Escape' && isStandaloneFs) {
+      toggleFullscreen(false);
+    }
+  }, { signal });
+
+  // Sync fullscreen icons if parent container enters/exits fullscreen externally
+  const containerToWatch = root.closest('#viewer-container') || root.closest('[data-study-viewport]');
+  if (containerToWatch && typeof MutationObserver !== 'undefined') {
+    const mutObs = new MutationObserver(() => {
+      updateFullscreenIcons();
+    });
+    mutObs.observe(containerToWatch, { attributes: true, attributeFilter: ['class'] });
+    signal.addEventListener('abort', () => mutObs.disconnect());
+  }
+
+  if (typeof document !== 'undefined') {
+    document.addEventListener('fullscreenchange', () => {
+      updateFullscreenIcons();
+    }, { signal });
+  }
 
   // Touch Swipe for mobile slide-flipping
   let touchStartX = 0;
@@ -331,6 +439,7 @@ export function createPdfViewer(root: HTMLElement): PdfViewerInstance {
         }
       }, 150);
     }
+    updateFullscreenIcons();
   });
 
   if (viewportEl) {
@@ -348,6 +457,11 @@ export function createPdfViewer(root: HTMLElement): PdfViewerInstance {
     abortController.abort();
     resizeObserver.disconnect();
     clearTimeout(resizeTimer);
+
+    if (isStandaloneFs) {
+      root.classList.remove('pdf-viewer-fullscreen');
+      if (document.body) document.body.style.overflow = '';
+    }
 
     if (currentRenderTask) {
       try { currentRenderTask.cancel(); } catch {}
@@ -372,6 +486,8 @@ export function createPdfViewer(root: HTMLElement): PdfViewerInstance {
     zoomIn,
     zoomOut,
     fitWidth,
+    toggleFullscreen,
+    isFullscreen: isCurrentlyFullscreen,
     getCurrentPage: () => currentPage,
     getTotalPages: () => totalPages
   };
