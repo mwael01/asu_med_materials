@@ -17,7 +17,7 @@ if (!collection) {
 }
 
 const moduleInfo = collection.moduleId ? await getModuleById(collection.moduleId, version) : undefined;
-const pageTitle = `${collection.titleEn || collection.title} - mediX`;
+const pageTitle = `${collection.titleEn || collection.title} - ASU Med`;
 const pageDesc = collection.descriptionEn || collection.description || 'Curated study collection for Ain Shams University Faculty of Medicine.';
 
 const categoryBadgeClasses: Record<string, string> = {

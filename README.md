@@ -1,4 +1,4 @@
-# mediX - منصة مصادر طب عين شمس
+# ASU Med - منصة مصادر طب عين شمس
 
 The all-in-one directory for Ain Shams University (FOM-ASU) medical students to share and access study materials, central batch Google Drives, Telegram channels, YouTube playlists, summaries, and exam recalls.
 

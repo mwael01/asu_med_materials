@@ -7,7 +7,7 @@ const year = Number(Astro.params.year);
 if (![1,2,3,4,5].includes(year)) return Astro.redirect('/404');
 const modules = await getModulesByYear(year);
 ---
-<Layout title={`Year ${year} - mediX`}>
+<Layout title={`Year ${year} - ASU Med`}>
   <PageHeading title={`Year ${year}`} crumbs={[{ title: 'Home', href: '/' }, { title: 'Modules', href: '/modules' }]} />
   <ModuleDirectory modules={modules} />
 </Layout>
