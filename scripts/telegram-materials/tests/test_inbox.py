@@ -10,7 +10,7 @@ from types import SimpleNamespace
 from unittest.mock import AsyncMock, patch
 
 from firebase_admin import firestore
-from telegram_materials.inbox_core import SOURCE_ID, MAX_R2_BYTES, asset_key, fingerprint, item_keys, message_key, storage_for
+from telegram_materials.inbox_core import SOURCE_ID, MAX_R2_BYTES, asset_key, fingerprint, item_keys, message_key, resource_keys, storage_for
 from telegram_materials.inbox_repository import InboxRepository
 from telegram_materials.inbox_sync import ingest, mark_missing, sync
 from telegram_materials.inbox_analysis import analyze, seed_assets
@@ -34,8 +34,17 @@ class MemoryRepo(InboxRepository):
         old = self.records.get((collection, key), {})
         result = copy.deepcopy(old) if merge else {}
         for name, v in value.items():
-            result[name] = old.get(name, 0) + v.value if isinstance(v, firestore.Increment) else copy.deepcopy(v)
+            if v is firestore.DELETE_FIELD:
+                result.pop(name, None)
+            else:
+                result[name] = old.get(name, 0) + v.value if isinstance(v, firestore.Increment) else copy.deepcopy(v)
         self.records[collection, key] = result
+
+    def delete(self, collection, key, tx):
+        self.records.pop((collection, key), None)
+
+    def lesson_links(self, material_id, tx=None):
+        return [link for link in self.list('material_lesson_links') if link['materialId'] == material_id]
 
     def list(self, collection, statuses=None, *, message_id=None, limit=None, after=None, order='__name__', descending=False):
         values = [{**copy.deepcopy(value), 'id': key} for (c, key), value in self.records.items()
@@ -95,7 +104,7 @@ class InboxTests(unittest.TestCase):
         self.item = self.repo.list('material_inbox_items')[0]
         self.repo.write('material_inbox_items', self.item['id'], {'status': 'needs_review'})
         self.repo.write('material_inbox_batches', 'batch', {'sourceId': SOURCE_ID, 'status': 'needs_review', 'itemIds': [self.item['id']]})
-        self.repo.write('material_asset_index', '__catalogue__', {'complete': True, 'version': 0, 'generation': 'test'})
+        self.repo.write('material_asset_index', 'catalogue-state', {'complete': True, 'version': 0, 'generation': 'test'})
 
     def tearDown(self):
         self.lease.__exit__(None, None, None)
@@ -174,6 +183,7 @@ class InboxTests(unittest.TestCase):
         self.assertEqual(self.repo.read('materials_version', 'current')['version'], 1)
         material = self.repo.list('materials')[0]
         self.assertEqual(material['documents'][0]['mimeType'], 'application/pdf')
+        self.assertEqual(material['documents'][0]['title'], material['title'])
         self.assertEqual(material['url'], 'https://t.me/asumedmaterials/2')
         self.assertEqual(material['importReviewStatus'], 'pending')
 
@@ -217,6 +227,45 @@ class InboxTests(unittest.TestCase):
             self.repo._renew(initial=True)
         self.repo.owner = owner
 
+    def prepare_assignment_correction(self):
+        self.repo.write('lessons', 'resp-lesson', {'subject': 'Pathology'})
+        self.repo.write('materials', 'existing', {'moduleId': 'resp', 'title': 'Keep editorial title', 'bookmarksCount': 7,
+            'url': self.item['url'], 'subject': 'Microbiology', 'lessonId': 'previous-lesson'})
+        self.repo.write('material_lesson_links', 'old-link', {'materialId': 'existing', 'lessonId': 'previous-lesson', 'moduleId': 'resp'})
+        self.repo.write('material_lesson_links', 'unrelated', {'materialId': 'another', 'lessonId': 'previous-lesson', 'moduleId': 'resp'})
+        self.repo.write('material_asset_index', asset_key(next(iter(item_keys(self.item)))), {'materials': {'existing': 'resp'}})
+        return self.create_plan(action='reuse', existingMaterialId='existing', replaceLessonAssignments=True)
+
+    def test_assignment_correction_is_explicit_atomic_and_idempotent(self):
+        plan_id = self.prepare_assignment_correction()
+        self.assertEqual(self.repo.read('materials', 'existing')['subject'], 'Microbiology')
+        self.assertEqual(self.repo.read('material_inbox_batches/batch/plans', plan_id)['previousLessonIds'], ['previous-lesson'])
+        approve(self.repo, 'batch'); self.apply(); self.apply()
+        material = self.repo.read('materials', 'existing')
+        self.assertEqual(material['subject'], 'Pathology')
+        self.assertEqual(material['lessonId'], 'resp-lesson')
+        self.assertEqual(material['title'], 'Keep editorial title')
+        self.assertEqual(material['bookmarksCount'], 7)
+        self.assertIsNone(self.repo.read('material_lesson_links', 'old-link'))
+        self.assertIsNotNone(self.repo.read('material_lesson_links', 'unrelated'))
+        self.assertEqual(len(self.repo.lesson_links('existing')), 1)
+        self.assertEqual(self.repo.read('materials_version', 'current')['version'], 1)
+
+    def test_assignment_correction_rejects_concurrent_edits(self):
+        self.prepare_assignment_correction(); approve(self.repo, 'batch')
+        self.repo.write('materials', 'existing', {'lessonId': 'newer-editorial-choice'})
+        with self.assertRaisesRegex(ValueError, 'assignments changed'):
+            self.apply()
+        self.assertIsNotNone(self.repo.read('material_lesson_links', 'old-link'))
+
+    def test_assignment_correction_rolls_back_deletions_on_failure(self):
+        self.prepare_assignment_correction(); approve(self.repo, 'batch')
+        self.repo.fail_commit = True
+        with self.assertRaises(ConnectionError):
+            self.apply()
+        self.assertEqual(self.repo.read('materials', 'existing')['subject'], 'Microbiology')
+        self.assertIsNotNone(self.repo.read('material_lesson_links', 'old-link'))
+
     def test_old_module_defaults_cannot_accept_foreign_lesson_ids(self):
         decision = self.decision(lessonIds=['other-lesson'])
         with self.assertRaisesRegex(ValueError, 'selected module'):
@@ -229,6 +278,13 @@ class InboxTests(unittest.TestCase):
         first = {**self.item, 'archiveItemId': 'parent', 'memberPath': 'first.pdf'}
         second = {**first, 'memberPath': 'second.pdf'}
         self.assertFalse(item_keys(first) & item_keys(second))
+
+    def test_playlist_share_tracking_does_not_create_distinct_assets(self):
+        first = {'kind': 'playlist', 'url': 'https://youtube.com/playlist?list=PLExample&si=first'}
+        second = {'kind': 'playlist', 'url': 'https://www.youtube.com/playlist?si=second&list=PLExample'}
+        self.assertEqual(item_keys(first), item_keys(second))
+        self.assertTrue(item_keys(first).issubset(resource_keys({'type': 'playlist', **second})))
+        self.assertFalse(item_keys(first) & item_keys({'url': 'https://youtube.com/playlist?list=PLOther'}))
 
     def test_repeated_file_inside_one_bundle_is_rejected(self):
         self.repo.write('material_inbox_items', 'repeated', {**self.item, 'status': 'needs_review'})

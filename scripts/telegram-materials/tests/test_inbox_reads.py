@@ -1,6 +1,7 @@
 """Read-volume regression tests exercise the real repository with a counting backend."""
 import asyncio
 import copy
+import re
 import unittest
 from datetime import datetime, timedelta, timezone
 from types import SimpleNamespace
@@ -25,6 +26,8 @@ class Snapshot:
 
 class Reference:
     def __init__(self, db, collection, key):
+        if re.fullmatch(r'__.*__', key):
+            raise ValueError('Firestore reserves double-underscore document IDs')
         self.db, self.collection, self.key = db, collection, key
 
     def get(self, transaction=None):
@@ -72,7 +75,7 @@ class Query:
             rows = [row for row in rows if (order(row) < self.cursor if self.descending else order(row) > self.cursor)]
         return rows[:self.maximum] if self.maximum is not None else rows
 
-    def stream(self):
+    def stream(self, transaction=None):
         rows = self.values()
         self.db.queries.append((self.collection, self.maximum, self.order))
         self.db.reads += max(1, len(rows))
@@ -101,6 +104,10 @@ class ReadEfficiencyTests(unittest.TestCase):
         self.repo = InboxRepository(self.db)
         self.repo.owner = 'worker'
         self.repo._lease_expires_at = (datetime.now(timezone.utc) + timedelta(minutes=10)).isoformat()
+
+    def test_index_checkpoint_can_be_read_using_a_valid_firestore_document_id(self):
+        self.assertIsNone(index_state(self.repo))
+        self.assertEqual(self.db.reads, 1)
 
     def test_selected_lessons_cost_three_reads_even_with_ten_thousand_other_lessons(self):
         self.db.rows['modules', 'resp'] = {'year': 2}

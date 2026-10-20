@@ -33,7 +33,7 @@ pnpm materials:telegram inbox index --limit 50
 # Repeat until complete: true. The cursor is durable in Firestore.
 ```
 
-This is the only inbox command that enumerates all catalogue materials. Each invocation reads at most the selected page (default 50, maximum 200) and the identity records needed for that page; it does not download files. `material_asset_index/__catalogue__` records the catalogue version, generation, last material ID and completion state. An unchanged version is a no-op without any material enumeration. Interrupted pages resume safely. Use `--rebuild` only on the first invocation when deliberately starting over.
+This is the only inbox command that enumerates all catalogue materials. Each invocation reads at most the selected page (default 50, maximum 200) and the identity records needed for that page; it does not download files. `material_asset_index/catalogue-state` records the catalogue version, generation, last material ID and completion state. An unchanged version is a no-op without any material enumeration. Interrupted pages resume safely. Use `--rebuild` only on the first invocation when deliberately starting over.
 
 Routine analysis looks up each resource's identity directly. An incomplete/stale index sets `duplicateCheck: index_required`; evidence analysis can continue, but approval/publication stays blocked until indexing completes. External catalogue edits that increment `materials_version/current` invalidate the index. Refresh it in bounded pages. Inbox publication updates the identities and index version in the same transaction as the material, so its own publications need no rebuild. Old index generations are ignored, including associations for deleted materials. External Admin scripts must increment the catalogue version when changing materials; after an unversioned edit, use `inbox index --rebuild`.
 
@@ -75,6 +75,8 @@ pnpm materials:telegram inbox decide --batch BATCH_ID --item ITEM_ID \
 ```
 
 Other actions are `ignore` (deliberate exclusion) and `duplicate` (verified exact match requiring no added coverage). Amend an unpublished decision with `--plan PLAN_ID` and the same items. Amend every pending destination to hold before retrying analysis. Approved batches are immutable; source edits create new revision-specific items and require a new review.
+
+For an explicitly requested classification correction, add `--replace-lessons` to a `reuse` decision. Its review preview includes the old and proposed lesson IDs. Publication replaces the existing assignments and updates the subject/legacy lesson field atomically, preserving the material ID, title, author and bookmarks. It binds the original assignment snapshot and refuses concurrent assignment changes. Ordinary reuse only adds associations. Shared YouTube playlists use their playlist ID for identity, ignoring sharing parameters such as `si`, while original source posts remain in the queue audit.
 
 ## Publish after explicit approval
 

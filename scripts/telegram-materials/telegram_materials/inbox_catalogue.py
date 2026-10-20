@@ -5,7 +5,7 @@ import uuid
 
 from .inbox_core import asset_key, now, resource_keys
 
-INDEX_ID = '__catalogue__'
+INDEX_ID = 'catalogue-state'
 
 
 def version(repo, tx=None):

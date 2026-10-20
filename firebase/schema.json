@@ -642,7 +642,7 @@
     },
     "material_imports": {
       "collectionName": "material_imports",
-      "description": "Admin-only publication runs, with entries/{entryId} transactional checkpoints. Temporary scrape data stays outside Firestore until publication.",
+      "description": "Admin-only publication runs and source sync checkpoints, with entries/{entryId} revisions and review/publication state. ASU2Learn uses asu2learn-respiratory for links-only discovery directly in Firestore; see docs/ASU2LEARN.md. Legacy Telegram bot runs use temporary staging until publication.",
       "fields": {
         "moduleId": {
           "type": "string",
@@ -826,7 +826,7 @@
     "material_asset_index": {
       "collectionName": "material_asset_index",
       "idField": "id",
-      "description": "Admin-only hashed identity lookup: content SHA-256 takes priority, Telegram media identity for oversized attachments, or canonical URL for links. materials maps material IDs to module IDs; uploadedUrl is an immutable verified R2 object. Provenance post URLs do not identify distinct file editions. __catalogue__ is the resumable version/generation/cursor checkpoint; identity associations from stale generations are ignored. Inbox publication advances index and catalogue versions atomically.",
+      "description": "Admin-only hashed identity lookup: content SHA-256 takes priority, Telegram media identity for oversized attachments, or canonical URL for links. materials maps material IDs to module IDs; uploadedUrl is an immutable verified R2 object. Provenance post URLs do not identify distinct file editions. catalogue-state is the resumable version/generation/cursor checkpoint; identity associations from stale generations are ignored. Inbox publication advances index and catalogue versions atomically.",
       "fields": {
         "key": {
           "type": "string",

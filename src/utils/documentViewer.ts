@@ -90,6 +90,12 @@ export const isImageDocument = (url: string): boolean =>
 export function extractDriveDocumentId(url?: string): string | null {
   if (!url) return null;
   const trimmed = url.trim();
+  try {
+    const parsed = new URL(trimmed);
+    if (parsed.protocol !== 'https:' || !['drive.google.com', 'docs.google.com'].includes(parsed.hostname)) return null;
+  } catch {
+    return null;
+  }
   if (/\/drive\/folders\//i.test(trimmed)) return null;
 
   const fileDMatch = trimmed.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);

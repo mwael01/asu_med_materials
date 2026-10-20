@@ -11,6 +11,14 @@ import {
   getVideoDownloadUrl
 } from '../src/utils/videoSources.ts';
 
+test('Moodle activity IDs remain external links, not Drive embeddings', () => {
+  const url = 'https://asu2learn.asu.edu.eg/medicine/mod/url/view.php?id=94478';
+  assert.equal(extractDriveFileId(url), null);
+  assert.equal(parseVideoSource(url).embedType, 'none');
+  assert.equal(parseVideoSource(url).externalUrl, url);
+  assert.equal(getVideoDownloadUrl(url), null);
+});
+
 test('audio tracks use native playback or Telegram fallback with hosted downloads', () => {
   const url = `https://asumed.eduvour.com/materials/sha256/${'b'.repeat(64)}.m4a?v=${'b'.repeat(64)}`;
   assert.equal(parseVideoSource(url, undefined, 'direct', 'audio').embedType, 'audio');

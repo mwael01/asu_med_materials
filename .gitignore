@@ -51,6 +51,7 @@ __pycache__/
 tmp/telegram-materials/
 tmp/telegram-inbox/
 .telegram-materials/
+.asu2learn/
 *.session
 *.session-journal
 firebaseadmin.json

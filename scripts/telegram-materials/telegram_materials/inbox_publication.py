@@ -21,6 +21,11 @@ def plans(repo, batch_id):
     return batch, repo.list(f'material_inbox_batches/{batch_id}/plans')
 
 
+def assignment_fingerprint(material, links):
+    return fingerprint({'subject': material.get('subject'), 'lessonId': material.get('lessonId'),
+        'links': sorted((link['id'], link.get('lessonId'), link.get('moduleId')) for link in links)})
+
+
 def decide(repo, batch_id, ids, decision, plan_id=None):
     batch, previous = plans(repo, batch_id)
     if batch['status'] in {'approved', 'publishing', 'published'}:
@@ -56,6 +61,11 @@ def decide(repo, batch_id, ids, decision, plan_id=None):
             raise ValueError('Existing material must belong to the selected module')
         if any(decision['existingMaterialId'] not in matches(repo, item) for item in items):
             raise ValueError('Reuse requires verified identity matches for every selected item')
+        if decision.get('replaceLessonAssignments'):
+            links = repo.lesson_links(target['id'])
+            decision = {**decision, 'assignmentFingerprint': assignment_fingerprint(target, links),
+                'previousSubject': target.get('subject'),
+                'previousLessonIds': sorted({link['lessonId'] for link in links} | ({target['lessonId']} if target.get('lessonId') else set()))}
     plan_id = plan_id or uuid.uuid4().hex
     value = {**decision, 'sourceId': SOURCE_ID, 'itemIds': ids, 'revisions': {i['id']: i['revision'] for i in items},
              'status': 'needs_review', 'createdAt': now()}
@@ -94,6 +104,13 @@ def validate_plans(repo, batch_id):
         if len(plan['itemIds']) * 5 + len(plan['lessonIds']) + 6 > 450:
             raise ValueError('Publication group is too large for one transaction; split it before approval')
         validate_decision(plan, modules, lessons)
+        if plan.get('replaceLessonAssignments') and plan.get('status') != 'published':
+            target = repo.read('materials', plan['existingMaterialId'])
+            links = repo.lesson_links(plan['existingMaterialId'])
+            if not target or assignment_fingerprint(target, links) != plan.get('assignmentFingerprint'):
+                raise ValueError('Existing lesson assignments changed; review the correction again')
+            if len(links) + len(plan['lessonIds']) + len(plan['itemIds']) * 5 + 6 > 450:
+                raise ValueError('Too many existing lesson links for one correction transaction')
         for item_id in plan['itemIds']:
             item = repo.read('material_inbox_items', item_id)
             current = repo.read('material_inbox', message_key(item['messageId']))
@@ -153,7 +170,7 @@ def material_payload(plan, module, lessons, members, urls, material_id):
         url = urls[member['id']]
         kind = member['kind']
         source_type = 'direct' if member['storage'] == 'r2' else video_link_type(url) or 'telegram'
-        title = member.get('reviewedTitle') or member['title']
+        title = member.get('reviewedTitle') or (plan['title'] if len(members) == 1 else member['title'])
         if kind == 'playlist':
             recordings.extend(member['videos'])
         elif kind in {'audio', 'video'} or video_link_type(url):
@@ -181,7 +198,9 @@ def material_payload(plan, module, lessons, members, urls, material_id):
 async def publish(repo, client, batch_id, apply=False):
     batch, decisions, digest, modules, lessons = validate_plans(repo, batch_id)
     summary = [{'planId': p['id'], 'title': p['title'], 'action': p['action'], 'moduleId': p['moduleId'],
-                'lessonIds': p['lessonIds'], 'items': p['itemIds']} for p in decisions]
+                'lessonIds': p['lessonIds'], 'items': p['itemIds'],
+                'replaceLessonAssignments': bool(p.get('replaceLessonAssignments')),
+                'previousLessonIds': p.get('previousLessonIds', [])} for p in decisions]
     if not apply:
         return summary
     if batch.get('status') not in {'approved', 'publishing', 'published'} or batch.get('approvedDigest') != digest:
@@ -235,6 +254,7 @@ async def publish(repo, client, batch_id, apply=False):
             sources = [repo.read('material_inbox', message_key(i['messageId']), tx) for i in members]
             live_items = [repo.read('material_inbox_items', i['id'], tx) for i in members]
             asset_records = {key: repo.read('material_asset_index', asset_key(key), tx) or {} for key in indexed_keys}
+            old_links = repo.lesson_links(mid, tx) if plan.get('replaceLessonAssignments') else []
             if current_plan.get('status') == 'published':
                 return
             if not live_index.get('complete') or live_index.get('version') != live_version:
@@ -251,6 +271,8 @@ async def publish(repo, client, batch_id, apply=False):
                 raise ValueError('Material ID collision')
             if plan['action'] == 'reuse' and (not material or material.get('moduleId') != module['id']):
                 raise ValueError('Existing material changed or was deleted')
+            if plan.get('replaceLessonAssignments') and assignment_fingerprint(material, old_links) != plan.get('assignmentFingerprint'):
+                raise ValueError('Existing lesson assignments changed during publication; review again')
             for key in identities:
                 record = asset_records[key]
                 if record.get('generation') == live_index['generation'] and plan['action'] == 'create' and any(m != mid and mod == module['id'] for m, mod in record.get('materials', {}).items()):
@@ -258,8 +280,18 @@ async def publish(repo, client, batch_id, apply=False):
             if plan['action'] == 'create':
                 repo.write('materials', mid, payload, tx, merge=False)
             else:
-                repo.write('materials', mid, {'importReviewStatus': 'pending', 'importRunId': batch_id,
-                    'importSources': sorted(set((material.get('importSources') or []) + payload['importSources']))}, tx)
+                changes = {'importReviewStatus': 'pending', 'importRunId': batch_id,
+                    'importSources': sorted(set((material.get('importSources') or []) + payload['importSources']))}
+                if plan.get('replaceLessonAssignments'):
+                    subjects = {lesson['subject'] for lesson in assigned}
+                    changes.update(subject=next(iter(subjects)) if len(subjects) == 1 else firestore.DELETE_FIELD,
+                                   lessonId=plan['lessonIds'][0] if len(subjects) == 1 else firestore.DELETE_FIELD)
+                    if len(old_links) + len(plan['lessonIds']) + len(plan['itemIds']) * 5 + 6 > 450:
+                        raise ValueError('Too many lesson links for one correction transaction')
+                    for link in old_links:
+                        if link['lessonId'] not in plan['lessonIds']:
+                            repo.delete('material_lesson_links', link['id'], tx)
+                repo.write('materials', mid, changes, tx)
             for lid in plan['lessonIds']:
                 repo.write('material_lesson_links', link_id(mid, lid), {'materialId': mid, 'lessonId': lid, 'moduleId': module['id']}, tx, merge=False)
             for item, live in zip(members, live_items):

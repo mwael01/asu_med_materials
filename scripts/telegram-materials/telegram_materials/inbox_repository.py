@@ -62,6 +62,14 @@ class InboxRepository:
         else:
             tx.set(ref, value, merge=merge)
 
+    def delete(self, collection, key, tx):
+        self._invalidate(collection, key)
+        tx.delete(self.ref(collection, key))
+
+    def lesson_links(self, material_id, tx=None):
+        query = self.db.collection('material_lesson_links').where(filter=FieldFilter('materialId', '==', material_id))
+        return [{**doc.to_dict(), 'id': doc.id} for doc in query.stream(transaction=tx)]
+
     def atomic(self, callback):
         def attempt(tx):
             # A Firestore retry gets a fresh snapshot; never reuse an earlier attempt.

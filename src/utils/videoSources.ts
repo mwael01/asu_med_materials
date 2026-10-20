@@ -3,7 +3,7 @@ import type {
   VideoSourceType,
   VideoEmbedType
 } from '../types/materials';
-import { getDocumentDownloadUrl, isHostedDocumentUrl } from './documentViewer';
+import { extractDriveDocumentId, getDocumentDownloadUrl, isHostedDocumentUrl } from './documentViewer';
 
 export interface ParsedVideoSource {
   sourceType: VideoSourceType;
@@ -19,13 +19,7 @@ export interface ParsedVideoSource {
  * Extracts a Google Drive file ID from view/preview/open/uc URLs.
  */
 export function extractDriveFileId(url?: string): string | null {
-  if (!url) return null;
-  const trimmed = url.trim();
-  const fileDMatch = trimmed.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
-  if (fileDMatch) return fileDMatch[1];
-  const idParamMatch = trimmed.match(/[?&]id=([a-zA-Z0-9_-]+)/);
-  if (idParamMatch) return idParamMatch[1];
-  return null;
+  return extractDriveDocumentId(url);
 }
 
 /**

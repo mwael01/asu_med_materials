@@ -5,6 +5,7 @@ import hashlib
 import json
 import re
 from datetime import datetime, timezone
+from urllib.parse import parse_qs, urlsplit
 
 from .core import identity, resource_key
 
@@ -41,6 +42,15 @@ def file_hash(path) -> str:
         return hashlib.file_digest(handle, 'sha256').hexdigest()
 
 
+def url_identity(url: str) -> str:
+    parts = urlsplit(url)
+    host = (parts.hostname or '').lower().removeprefix('www.')
+    playlist = parse_qs(parts.query).get('list', [])
+    if host in {'youtube.com', 'm.youtube.com', 'music.youtube.com'} and parts.path.rstrip('/') == '/playlist' and playlist:
+        return 'youtube-playlist:' + playlist[0]
+    return resource_key(url)
+
+
 def resource_keys(material: dict) -> set[str]:
     keys = set()
     if material.get('contentSha256'):
@@ -49,13 +59,13 @@ def resource_keys(material: dict) -> set[str]:
         url = item.get('url')
         if not isinstance(url, str) or not url.startswith(('https://', 'http://')):
             continue
-        keys.add('url:' + resource_key(url))
+        keys.add('url:' + url_identity(url))
         match = re.search(r'/materials/sha256/([a-f0-9]{64})\.', url)
         if match:
             keys.add('sha256:' + match[1])
     for url in material.get('importSources') or []:
         if isinstance(url, str) and url.startswith(('https://', 'http://')):
-            keys.add('url:' + resource_key(url))
+            keys.add('url:' + url_identity(url))
     return keys
 
 
@@ -104,10 +114,12 @@ def item_keys(item: dict) -> set[str]:
         return {'archive:' + fingerprint({'parent': item['archiveItemId'], 'member': item['memberPath']})}
     if item.get('telegramIdentity'):
         return {'telegram:' + item['telegramIdentity']}
-    return {'url:' + resource_key(item['url'])}
+    return {'url:' + url_identity(item['url'])}
 
 
 def validate_decision(decision: dict, modules: list[dict], lessons: list[dict]) -> None:
+    if decision.get('replaceLessonAssignments') and decision['action'] != 'reuse':
+        raise ValueError('Replacing lesson assignments requires reuse of an existing material')
     if decision['action'] not in {'create', 'reuse', 'hold', 'ignore', 'duplicate'}:
         raise ValueError('Action must be create, reuse, hold, ignore or duplicate')
     if not decision.get('reason', '').strip():

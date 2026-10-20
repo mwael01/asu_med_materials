@@ -24,6 +24,7 @@ def add_parser(commands):
     decision.add_argument('--action', choices=['create', 'reuse', 'hold', 'ignore', 'duplicate'], required=True)
     decision.add_argument('--module'); decision.add_argument('--lesson', action='append', default=[])
     decision.add_argument('--title'); decision.add_argument('--author'); decision.add_argument('--existing-material')
+    decision.add_argument('--replace-lessons', action='store_true', help='Explicitly replace existing lesson assignments on a reused material')
     decision.add_argument('--category', default='summaries', choices=['central', 'lectures', 'practical', 'summaries', 'exams', 'references'])
     decision.add_argument('--reason', required=True)
     approve = sub.add_parser('approve'); approve.add_argument('--batch', required=True)
@@ -75,7 +76,8 @@ def run(args):
                 from .inbox_publication import decide
                 result = {'planId': decide(repo, args.batch, args.item, {'action': args.action, 'moduleId': args.module,
                     'lessonIds': list(dict.fromkeys(args.lesson)), 'title': args.title, 'author': args.author,
-                    'existingMaterialId': args.existing_material, 'category': args.category, 'reason': args.reason}, args.plan)}
+                    'existingMaterialId': args.existing_material, 'replaceLessonAssignments': args.replace_lessons,
+                    'category': args.category, 'reason': args.reason}, args.plan)}
             elif command == 'approve':
                 from .inbox_publication import approve
                 result = approve(repo, args.batch)

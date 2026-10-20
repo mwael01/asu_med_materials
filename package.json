@@ -39,6 +39,8 @@
     "deploy:all": "firebase deploy --only firestore",
     "test:lessons": "node --import ./scripts/register-typescript.mjs tests/lessons.test.mjs && node --import ./scripts/register-typescript.mjs tests/material-lesson-links.test.mjs && node --import ./scripts/register-typescript.mjs tests/study-flow.test.mjs",
     "materials:telegram": "scripts/telegram-materials/.venv/bin/python scripts/telegram-materials/run.py",
+    "materials:asu2learn": "scripts/telegram-materials/.venv/bin/python scripts/asu2learn/run.py",
+    "test:asu2learn": "node tests/asu2learn-parser.test.mjs && scripts/telegram-materials/.venv/bin/python -m unittest discover -s scripts/asu2learn -p 'test_*.py' -v",
     "test:telegram-materials": "PYTHONPATH=scripts/telegram-materials scripts/telegram-materials/.venv/bin/python -m unittest discover -s scripts/telegram-materials/tests -v"
   },
   "dependencies": {

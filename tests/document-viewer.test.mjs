@@ -84,6 +84,12 @@ test('extractDriveDocumentId extracts IDs from valid Google Drive file URLs', ()
 });
 
 test('extractDriveDocumentId excludes Google Drive folders and invalid inputs', () => {
+  for (const url of ['https://asu2learn.asu.edu.eg/medicine/mod/resource/view.php?id=123', 'https://drive.google.com.evil.test/open?id=123']) {
+    assert.equal(extractDriveDocumentId(url), null);
+    assert.equal(getDocumentEmbedUrl(url), null);
+    assert.equal(getDocumentDownloadUrl(url), null);
+    assert.equal(getDocumentExternalUrl(url), url);
+  }
   assert.equal(extractDriveDocumentId('https://drive.google.com/drive/folders/12345folderId'), null);
   assert.equal(extractDriveDocumentId('https://drive.google.com/drive/u/0/folders/67890folderId'), null);
   assert.equal(extractDriveDocumentId('https://t.me/asu_channel'), null);

@@ -2,6 +2,10 @@
 
 This document outlines automated helper scripts designed to assist AI agents and developers in maintaining, synchronizing, and expanding educational materials in the ASU Med Materials platform.
 
+## ASU2Learn respiratory sync
+
+Use `pnpm materials:asu2learn login`, `scan`, `status`, then review and `publish --apply`. The [ASU2Learn guide](./ASU2LEARN.md) covers links-only collection, university login, multi-lesson assignments, recording playlists and future rescans. Metadata and review checkpoints live directly in Firestore; no course files or videos are downloaded or uploaded.
+
 ## Telegram respiratory importer
 
 For ongoing submissions to `@asumedmaterials`, use the persistent, curriculum-wide **[Telegram inbox queue](./TELEGRAM_INBOX.md)**: `pnpm materials:telegram inbox sync`, `inbox analyze`, then review before explicit publication. Firestore remembers all states and decisions; local downloads are disposable.
