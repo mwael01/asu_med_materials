@@ -92,7 +92,7 @@ Shared archives otherwise include only content with explicit respiratory or dist
 
 Run `pnpm materials:telegram normalize-scope --run tmp/telegram-materials/respiratory` to reject unapproved entries explicitly named for another module (such as CVS, renal, or GIT), and skip matching pending file jobs. Titles that also mention respiratory remain for review; this is a conservative filename check, not medical content classification.
 
-Lesson suggestions are title/context overlap candidates, not approvals. Arabic/English wording, subject ambiguity, generic filenames, attribution, mixed modules, and duplicate catalogue matches require review. Existing materials are matched by canonical source URL or stored content hash; title-only similarities never merge automatically.
+Lesson suggestions are title/context overlap candidates, not approvals. Arabic/English wording, subject ambiguity, generic filenames, attribution, mixed modules, and duplicate catalogue matches require review. Existing materials are matched by canonical source URL or stored content hash; title-only similarities never merge automatically. Moodle/ASU2Learn materials always use `author: 'ASU Faculty Staff'` and belong to Faculty & Department Staff in every assigned lesson, even when source titles identify lecturers; never assign those materials to individual doctor folders.
 
 Group related videos or image/document pages in the intended order:
 

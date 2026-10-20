@@ -3,6 +3,7 @@ import type { MaterialItem, ModuleInfo } from '../types/materials';
 import type { UserProfile } from '../types/profile';
 import { VALID_CATEGORIES, VALID_TYPES } from './aiParser';
 import { isHttpUrl } from './materialLinks';
+import { DEPARTMENT_AUTHOR, isDepartmentMaterial } from './teacherGrouping';
 export function draftCredit(admin: UserProfile | null, source?: Partial<DraftCredit>): DraftCredit {
   if (source?.sourceSubmissionId) return {
     contributor:source.contributor || 'فاعل خير', contributorUid:source.contributorUid,
@@ -38,7 +39,7 @@ export function serializeDraft(draft: MaterialDraft, modules: ModuleInfo[]): Mat
   const title = (draft.title?.trim() || draft.titleEn?.trim() || '');
   const titleEn = draft.titleEn?.trim() || title;
   const desc = draft.description?.trim() || draft.descriptionEn?.trim() || undefined;
-  return {
+  const material: MaterialItem = {
     id: draft.materialId,
     title,
     titleEn,
@@ -60,4 +61,6 @@ export function serializeDraft(draft: MaterialDraft, modules: ModuleInfo[]): Mat
     documents: draft.documents && draft.documents.length > 0 ? draft.documents : undefined,
     createdAt: new Date().toISOString(),
   };
+  if (isDepartmentMaterial(material)) material.author = DEPARTMENT_AUTHOR;
+  return material;
 }

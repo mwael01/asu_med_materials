@@ -24,6 +24,8 @@ Requests allow public HTTP/HTTPS URLs on standard ports only. Each destination a
 
 Each draft captures its contributor and submission ID when created. Direct additions credit the current admin. Student submissions retain student credit, including guest submissions without a UID. Authors are separate and support multiple names. The publishing admin is recorded in the activity log. Metadata and transient issues never create local material files.
 
+Moodle and ASU2Learn materials always belong to **Faculty & Department Staff**. Extraction prompts request `ASU Faculty Staff`, and draft serialization enforces department ownership from official source URLs, titles and tags even when a draft names a lecturer. Speaker context never assigns these materials to individual doctor folders; contributor credit remains separate.
+
 Drafts have stable publication IDs. Publishing checks live duplicates and requests explicit confirmation for duplicates. Saved drafts are removed while failed drafts remain. A source submission is approved only when its saved drafts leave no remaining drafts from that submission. Changing or cancelling the input invalidates outstanding AI requests; editing an existing individual draft prevents incoming AI results from overwriting it.
 
 ## Validation

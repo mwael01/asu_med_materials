@@ -10,6 +10,7 @@ from client import BASE, COURSE, internal
 
 MODULE = 'year2-respiratory'
 SOURCE = 'asu2learn-respiratory'
+DEPARTMENT_AUTHOR = 'ASU Faculty Staff'
 ALLOWED = {'resource', 'url', 'page', 'folder', 'book', 'h5pactivity'}
 VIDEO = re.compile(r'\b(video|recording|recorded|lecture recording)\b|فيديو|تسجيل', re.I)
 
@@ -113,10 +114,7 @@ def build_material(entries, lessons, group, title):
     material = {'id': mid, 'title': title, 'url': entries[0]['url'], 'type': 'website',
                 'moduleId': MODULE, 'year': 2, 'semester': 1, 'tags': ['ASU2Learn'],
                 'category': reviewed[0]['category'], 'importSources': sorted({url for e in entries for url in [e['url'], e.get('sourceUrl', e['url'])]}),
-                'importRunId': SOURCE, 'importReviewStatus': 'reviewed'}
-    authors = sorted({author for review in reviewed for author in review.get('authors', [])})
-    if authors:
-        material['author'] = authors[0] if len(authors) == 1 else authors
+                'importRunId': SOURCE, 'importReviewStatus': 'reviewed', 'author': DEPARTMENT_AUTHOR}
     if len(subjects) == 1:
         material.update(subject=next(iter(subjects)), lessonId=lesson_ids[0])
     if kinds == {'video'}:

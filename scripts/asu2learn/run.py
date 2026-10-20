@@ -34,7 +34,7 @@ def main():
     review.add_argument('--kind', choices=['link', 'video'], required=True)
     review.add_argument('--category', choices=['central', 'lectures', 'practical', 'summaries', 'exams', 'references'], required=True)
     review.add_argument('--reason', required=True)
-    review.add_argument('--author', action='append', help='Reviewed lecturer attribution; repeat for joint teaching')
+    review.add_argument('--author', action='append', help='Optional source speaker context only; published owner is always ASU Faculty Staff')
     ignore = sub.add_parser('ignore', help='Record why a non-study activity is excluded')
     ignore.add_argument('--entry', action='append', required=True)
     ignore.add_argument('--reason', required=True)

@@ -71,6 +71,19 @@ test('publication requires title and year, permits general material, validates v
   draft.title = item.title; draft.titleEn = ''; assert.equal(serializeDraft(draft,modules).title, item.title);
   draft.videos = [{id:'x',title:'',url:'javascript:alert(1)'}]; assert.ok(validateDraft(draft,modules).some(i => i.field === 'videos'));
 });
+test('official course drafts publish under staff ownership while preserving contributor credit', () => {
+  for (const source of [
+    { title: 'ASU2Learn lecture', url },
+    { title: 'Moodle lecture', url },
+    { title: 'Official lecture', url: 'https://asu2learn.asu.edu.eg/medicine/mod/url/view.php?id=123' },
+  ]) {
+    const draft = createDraft({ ...item, ...source, author: ['Dr. Named Speaker'] }, draftCredit(admin));
+    const saved = serializeDraft(draft, modules);
+    assert.equal(saved.author, 'ASU Faculty Staff');
+    assert.equal(saved.contributorUid, admin.uid);
+    assert.equal(saved.url, source.url);
+  }
+});
 test('playlist retains only evidenced videos, with stable grouping', () => {
   const playlist = 'https://www.youtube.com/playlist?list=PLtest';
   const id = 'AbCdEf12345';
@@ -86,6 +99,7 @@ test('prompt includes all curriculum and explicit authorship, naming and bilingu
   const many = Array.from({length:40},(_,i) => ({...modules[0],id:`module-${i}`}));
   const prompt = buildExtractionPrompt('يا شباب notes '+url,many);
   assert.ok(prompt.includes('module-39')); assert.ok(prompt.includes('UNTRUSTED DATA')); assert.ok(prompt.includes('titleEn')); assert.ok(prompt.includes('not message senders'));
+  assert.ok(prompt.includes('Moodle and ASU2Learn')); assert.ok(prompt.includes('ASU Faculty Staff'));
 });
 test('preview parser handles entities, attribute order, explicit author and login pages', () => {
   const preview = parsePreviewHtml('<title>Fallback</title><meta content="Blood &amp; Tissue" property="og:title"><meta name="description" content="Lecture notes"><meta name="author" content="Dr. Test">',url);

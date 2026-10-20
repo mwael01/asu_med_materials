@@ -36,6 +36,16 @@ test('doctor URLs remain stable across ordering, multiple authors, Arabic and pu
   assert.ok(groups.some(group => group.key === 'department'));
 });
 
+test('official source materials open the shared department workspace', () => {
+  const official = material({ id: 'asu2learn-lecture', lessonId: lesson.id, author: 'Dr. Example' });
+  const doctors = lessonDoctors([official, material({ id: 'moodle-lecture', author: undefined }),
+    material({ id: 'independent', author: 'Dr. Example' })]);
+  assert.deepEqual(doctors.find(group => group.key === 'department').items.map(item => item.id), ['asu2learn-lecture', 'moodle-lecture']);
+  assert.deepEqual(doctors.find(group => group.key === doctorKey('Dr. Example')).items.map(item => item.id), ['independent']);
+  const path = new URL(materialStudyPath(official, [lesson]), 'https://example.org');
+  assert.equal(path.pathname, `${lessonPath(lesson)}/doctor/department`);
+});
+
 test('mixed video and PDF bundles retain order and item identity, excluding drive folders from PDFs', () => {
   const mixed = material({ type: 'playlist', videos: [
     { id: 'video-b', title: 'Second', youtubeId: 'abcdefghijk' },

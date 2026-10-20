@@ -1,5 +1,7 @@
 import type { MaterialItem } from '../types/materials';
 
+export const DEPARTMENT_AUTHOR = 'ASU Faculty Staff';
+
 export interface TeacherGroup {
   id: string;
   name: string;
@@ -15,6 +17,7 @@ const DEPARTMENT_PATTERNS = [
   /asu faculty/i,
   /asu moodle/i,
   /moodle/i,
+  /asu\s*2\s*learn/i,
   /faculty stream/i,
   /faculty/i,
   /department/i,
@@ -24,6 +27,27 @@ const DEPARTMENT_PATTERNS = [
 
 function isDepartmentName(name: string): boolean {
   return DEPARTMENT_PATTERNS.some((pattern) => pattern.test(name));
+}
+
+/** Official course materials belong to staff even when a source names a speaker. */
+export function isDepartmentMaterial(material: MaterialItem): boolean {
+  const authors = Array.isArray(material.author) ? material.author : material.author ? [material.author] : [];
+  if (authors.some(isDepartmentName)) return true;
+  if (/^(?:asu2learn|moodle)(?:-|$)/i.test(material.importRunId || '')) return true;
+  if (/^(?:asu2learn-)|(?:^|[-_])moodle(?:[-_]|$)/i.test(material.id)) return true;
+  if ([material.title, material.titleEn, ...(material.tags || [])].some(value =>
+    /\b(?:moodle|asu2learn|college staff|faculty staff|faculty stream|department staff)\b|موودل|مودل/i.test(value || ''))) return true;
+  const urls = [material.url, ...(material.importSources || []),
+    ...(material.documents || []).map(item => item.url), ...(material.videos || []).map(item => item.url)];
+  return urls.some(value => {
+    try {
+      const url = new URL(value || '');
+      return ['http:', 'https:'].includes(url.protocol) &&
+        ['asu2learn.asu.edu.eg', 'moodle.asu.edu.eg'].includes(url.hostname);
+    } catch {
+      return false;
+    }
+  });
 }
 
 /**
@@ -36,6 +60,10 @@ export function groupMaterialsByTeacher(materials: MaterialItem[]): TeacherGroup
   const generalItems: MaterialItem[] = [];
 
   for (const material of materials) {
+    if (isDepartmentMaterial(material)) {
+      if (!departmentItems.some(item => item.id === material.id)) departmentItems.push(material);
+      continue;
+    }
     const rawAuthors = Array.isArray(material.author)
       ? material.author
       : material.author
@@ -51,12 +79,7 @@ export function groupMaterialsByTeacher(materials: MaterialItem[]): TeacherGroup
 
     let assigned = false;
     for (const author of cleanedAuthors) {
-      if (isDepartmentName(author)) {
-        if (!departmentItems.some((m) => m.id === material.id)) {
-          departmentItems.push(material);
-        }
-        assigned = true;
-      } else if (
+      if (
         /^(dr|doctor|دكتور|د\.)/i.test(author) ||
         !/(asu|zone|batch|drive|anki|groups)/i.test(author)
       ) {

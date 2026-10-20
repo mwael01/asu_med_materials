@@ -1,6 +1,27 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { groupMaterialsByTeacher } from '../src/utils/teacherGrouping.ts';
+import { groupMaterialsByTeacher, isDepartmentMaterial } from '../src/utils/teacherGrouping.ts';
+
+test('official Moodle and ASU2Learn sources exclusively use the department folder', () => {
+  const base = { title: 'Lecture', url: 'https://example.org/lecture', type: 'website', year: 2, tags: [], author: 'Dr. Example' };
+  const materials = [
+    { ...base, id: 'asu2learn-series' },
+    { ...base, id: 'lecture', title: 'Lecture — ASU2Learn', author: undefined },
+    { ...base, id: 'resp-moodle-lecture' },
+    { ...base, id: 'mirrored', importSources: ['https://asu2learn.asu.edu.eg/medicine/mod/url/view.php?id=123'] },
+    { ...base, id: 'tagged', tags: ['Moodle'] },
+    { ...base, id: 'staff-joint', author: ['Dr. Example', 'ASU Faculty Staff'] },
+    { ...base, id: 'imported', importRunId: 'asu2learn-respiratory' },
+    { ...base, id: 'nested', documents: [{ id: 'file', url: 'https://moodle.asu.edu.eg/mod/resource/view.php?id=1' }] },
+    { ...base, id: 'independent' },
+    { ...base, id: 'untrusted', url: 'https://asu2learn.asu.edu.eg.evil.test/lecture' },
+  ];
+  const groups = groupMaterialsByTeacher(materials);
+  assert.deepEqual(groups.find(group => group.isDepartment).items.map(item => item.id), materials.slice(0, 8).map(item => item.id));
+  assert.deepEqual(groups.find(group => group.name === 'Dr. Example').items.map(item => item.id), ['independent', 'untrusted']);
+  assert.equal(groups.some(group => group.isGeneral), false);
+  assert.equal(isDepartmentMaterial(materials[9]), false);
+});
 
 test('groupMaterialsByTeacher groups materials by named doctor descending by count', () => {
   const materials = [
@@ -81,4 +102,12 @@ test('groupMaterialsByTeacher handles multiple authors array without duplicates'
 
 test('groupMaterialsByTeacher returns empty array on empty input', () => {
   assert.deepEqual(groupMaterialsByTeacher([]), []);
+});
+
+test('official college staff mirrors and Arabic Moodle titles retain department ownership', () => {
+  for (const title of ['Microbiology revision (College Staff Stream)', 'محاضرات مودل الكلية']) {
+    const groups = groupMaterialsByTeacher([{ id: 'college-source', title, author: 'Dr. Named Speaker', url: 'https://example.org/video', type: 'website', year: 2 }]);
+    assert.equal(groups.length, 1);
+    assert.equal(groups[0].isDepartment, true);
+  }
 });

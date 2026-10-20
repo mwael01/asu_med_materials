@@ -154,5 +154,19 @@ class Publication(unittest.TestCase):
         self.assertEqual(material['contributorUsername'], 'editor')
         self.assertEqual(self.repo.publish(True)[0]['status'], 'unchanged')
 
+    def test_department_ownership_updates_legacy_payload_and_checkpoints_together(self):
+        self.prepare()
+        mid = self.repo.publish(True)[0]['materialId']
+        material = self.db.rows['materials/' + mid]
+        material.update(author='Dr. Previous Speaker', bookmarksCount=9)
+        entry = self.db.rows[self.source + '/entries/activity-1']
+        entry['publishedMaterial']['author'] = 'Dr. Previous Speaker'
+        entry['publishedFingerprint'] = 'legacy-attribution'
+        self.assertEqual(self.repo.publish(True)[0]['materialId'], mid)
+        self.assertEqual(self.db.rows['materials/' + mid]['author'], 'ASU Faculty Staff')
+        self.assertEqual(self.db.rows['materials/' + mid]['bookmarksCount'], 9)
+        self.assertEqual(self.db.rows[self.source + '/entries/activity-1']['publishedMaterial']['author'], 'ASU Faculty Staff')
+        self.assertEqual(self.repo.publish(True)[0]['status'], 'unchanged')
+
 
 if __name__ == '__main__': unittest.main()

@@ -46,6 +46,13 @@ class Policies(unittest.TestCase):
         with self.assertRaises(ValueError):
             build_material(entries, [{**l, 'active': False} for l in lessons], 'x', 'x')
 
+    def test_source_speakers_never_become_individual_material_authors(self):
+        lessons = [{'id': 'lung', 'moduleId': MODULE, 'title': 'Lung', 'subject': 'Anatomy'}]
+        entry = {'id': '1', 'title': 'Lung', 'url': 'https://example.org/lecture',
+                 'review': {'lessonIds': ['lung'], 'kind': 'link', 'category': 'lectures', 'authors': ['Dr. Example']}}
+        material, _ = build_material([entry], lessons, 'lung', 'Lung — ASU2Learn')
+        self.assertEqual(material['author'], 'ASU Faculty Staff')
+
     def test_binary_redirect_is_never_requested(self):
         class Response:
             is_redirect = True
