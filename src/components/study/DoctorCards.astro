@@ -1,0 +1,94 @@
+---
+import type { Lesson, LessonDoctor } from '../../types/lessons';
+import { getDoctorMaterialCounts } from '../../utils/studyContent';
+import { lessonPath } from '../../utils/lessons';
+import { getInitials } from '../../utils/contributors';
+
+interface Props {
+  doctors: LessonDoctor[];
+  lesson: Lesson;
+}
+
+const { doctors, lesson } = Astro.props;
+---
+
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5">
+  {doctors.map(doctor => {
+    const counts = getDoctorMaterialCounts(doctor.items);
+    const isDepartment = doctor.key === 'department' || /faculty|department|قسم|الكلية/i.test(doctor.name);
+
+    return (
+      <a
+        href={`${lessonPath(lesson)}/doctor/${doctor.key}`}
+        class="group flex flex-col justify-between overflow-hidden rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-4 sm:p-5 transition-all duration-150 hover:border-sky-500/80 hover:shadow-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500"
+      >
+        <div class="flex items-start gap-3">
+          {isDepartment ? (
+            <div class="w-10 h-10 rounded-xl bg-indigo-100 dark:bg-indigo-950/70 text-indigo-700 dark:text-indigo-300 flex items-center justify-center shrink-0 border border-indigo-200/60 dark:border-indigo-800/60 shadow-2xs">
+              <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M4.26 10.147a60.438 60.438 0 0 1-.491 6.347A48.62 48.62 0 0 1 12 20.904a48.62 48.62 0 0 1 8.232-4.41 60.46 60.46 0 0 0-.491-6.347m-15.482 0a50.636 50.636 0 0 0-2.658-.813A59.906 59.906 0 0 1 12 3.493a59.903 59.903 0 0 1 10.399 5.84c-.896.248-1.783.52-2.658.814m-15.482 0A50.717 50.717 0 0 1 12 13.489a50.702 50.702 0 0 1 7.74-3.342" />
+              </svg>
+            </div>
+          ) : (
+            <div class="w-10 h-10 rounded-xl bg-sky-100 dark:bg-sky-950/70 text-sky-700 dark:text-sky-300 font-bold text-xs flex items-center justify-center shrink-0 border border-sky-200/60 dark:border-sky-800/60 shadow-2xs">
+              {getInitials(doctor.name.replace(/^(dr|doctor|دكتور|د\.)\s*/i, ''))}
+            </div>
+          )}
+
+          <div class="min-w-0 flex-1">
+            <h3 class="text-sm sm:text-base font-bold text-zinc-900 dark:text-zinc-100 group-hover:text-sky-600 dark:group-hover:text-sky-400 transition-colors line-clamp-2">
+              {doctor.name}
+            </h3>
+          </div>
+        </div>
+
+        {/* Elegant count badges row (only showing categories with count > 0) */}
+        <div class="mt-4 pt-3 border-t border-zinc-100 dark:border-zinc-800/80 flex flex-wrap items-center gap-1.5 text-[11px]">
+          {counts.videos > 0 && (
+            <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300 border border-rose-200/60 dark:border-rose-800/60 font-medium">
+              <svg class="w-3 h-3 text-rose-600 dark:text-rose-400 shrink-0" viewBox="0 0 24 24" fill="currentColor" stroke="none">
+                <polygon points="5 3 19 12 5 21 5 3"></polygon>
+              </svg>
+              <span>{counts.videos} {counts.videos === 1 ? 'video' : 'videos'}</span>
+            </span>
+          )}
+
+          {counts.pdfs > 0 && (
+            <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-emerald-200/60 dark:border-emerald-800/60 font-medium">
+              <svg class="w-3 h-3 text-emerald-600 dark:text-emerald-400 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                <polyline points="14 2 14 8 20 8"></polyline>
+              </svg>
+              <span>{counts.pdfs} {counts.pdfs === 1 ? 'PDF' : 'PDFs'}</span>
+            </span>
+          )}
+
+          {counts.mcqs > 0 && (
+            <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 border border-amber-200/60 dark:border-amber-800/60 font-medium">
+              <svg class="w-3 h-3 text-amber-600 dark:text-amber-400 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"></circle>
+                <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
+                <line x1="12" y1="17" x2="12.01" y2="17"></line>
+              </svg>
+              <span>{counts.mcqs} {counts.mcqs === 1 ? 'MCQ' : 'MCQs'}</span>
+            </span>
+          )}
+
+          {counts.links > 0 && (
+            <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-sky-50 dark:bg-sky-950/40 text-sky-700 dark:text-sky-300 border border-sky-200/60 dark:border-sky-800/60 font-medium">
+              <svg class="w-3 h-3 text-sky-600 dark:text-sky-400 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
+                <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
+              </svg>
+              <span>{counts.links} {counts.links === 1 ? 'link' : 'links'}</span>
+            </span>
+          )}
+
+          {counts.total === 0 && (
+            <span class="text-zinc-400 dark:text-zinc-500 text-xs italic">No materials</span>
+          )}
+        </div>
+      </a>
+    );
+  })}
+</div>

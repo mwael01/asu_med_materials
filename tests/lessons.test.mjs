@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { lessonDoctors, doctorKey, lessonPath, lessonsForSubject, materialMatchesLesson, validateLesson, isRevisionLesson } from '../src/utils/lessons.ts';
-import { studyEntries, matchesDiscoveryType, materialStudyPath, legacyMaterialPath, isFlashcards, isMcqMaterial, isPdfMaterial, isVideoMaterial } from '../src/utils/studyContent.ts';
+import { studyEntries, matchesDiscoveryType, materialStudyPath, legacyMaterialPath, isFlashcards, isMcqMaterial, isPdfMaterial, isVideoMaterial, getDoctorMaterialCounts } from '../src/utils/studyContent.ts';
 import { entryProgressStorage, parseProgress } from '../src/utils/studyProgress.ts';
 import { materialConverter, submissionConverter } from '../src/firebase/schema.ts';
 import { createDraft, serializeDraft } from '../src/utils/materialDrafts.ts';
@@ -499,4 +499,124 @@ test('runtime defensive deduplication eliminates duplicate IDs and duplicate (mo
   assert.equal(deduplicated.length, 3);
   assert.deepEqual(deduplicated.map(m => m.id), ['m1', 'm3', 'm4']);
 });
+
+test('getDoctorMaterialCounts accurately counts granular videos, PDFs, MCQs, and links while ignoring flashcards', () => {
+  // 1. Multi-item playlist with 4 videos
+  const playlist = material({
+    id: 'mat-playlist-1',
+    type: 'playlist',
+    category: 'lectures',
+    author: 'Dr. Test',
+    videos: [
+      { id: 'v1', title: 'Part 1', youtubeId: 'vid1' },
+      { id: 'v2', title: 'Part 2', youtubeId: 'vid2' },
+      { id: 'v3', title: 'Part 3', youtubeId: 'vid3' },
+      { id: 'v4', title: 'Part 4', youtubeId: 'vid4' }
+    ]
+  });
+
+  // 2. Standalone YouTube video
+  const singleVideo = material({
+    id: 'mat-vid-1',
+    type: 'youtube',
+    category: 'lectures',
+    url: 'https://youtube.com/watch?v=single1',
+    author: 'Dr. Test'
+  });
+
+  // 3. Multi-document PDF bundle with 2 PDFs
+  const docBundle = material({
+    id: 'mat-bundle-1',
+    type: 'summary',
+    category: 'summaries',
+    author: 'Dr. Test',
+    documents: [
+      { id: 'd1', title: 'Handout 1', url: 'https://example.org/doc1.pdf', mimeType: 'application/pdf' },
+      { id: 'd2', title: 'Handout 2', url: 'https://example.org/doc2.pdf', mimeType: 'application/pdf' }
+    ]
+  });
+
+  // 4. Standalone PDF
+  const singlePdf = material({
+    id: 'mat-pdf-1',
+    type: 'drive',
+    category: 'summaries',
+    url: 'https://drive.google.com/file/d/pdf123/view',
+    author: 'Dr. Test'
+  });
+
+  // 5. MCQ Question Bank
+  const mcqMaterial = material({
+    id: 'mat-mcq-1',
+    type: 'exam',
+    category: 'exams',
+    title: 'Physiology MCQs & Question Bank',
+    url: 'https://drive.google.com/file/d/mcq123/view',
+    author: 'Dr. Test',
+    tags: ['mcq', 'أسئلة']
+  });
+
+  // 6. External Links: Drive folder and Telegram channel
+  const driveFolder = material({
+    id: 'mat-drive-folder',
+    type: 'drive',
+    url: 'https://drive.google.com/drive/folders/folder123',
+    author: 'Dr. Test'
+  });
+
+  const telegramLink = material({
+    id: 'mat-telegram',
+    type: 'telegram',
+    url: 'https://t.me/drtest_channel',
+    author: 'Dr. Test'
+  });
+
+  // 7. Flashcards (should be completely ignored in doctor counts)
+  const flashcardDeck = material({
+    id: 'mat-deck-1',
+    type: 'flashcards',
+    category: 'flashcards',
+    flashcardDeckId: 'deck-1',
+    author: 'Dr. Test'
+  });
+
+  // Test full assortment: 4 (playlist) + 1 (single) = 5 videos
+  // 2 (bundle) + 1 (single) = 3 PDFs
+  // 1 MCQ
+  // 2 links
+  const allDoctorMaterials = [
+    playlist,
+    singleVideo,
+    docBundle,
+    singlePdf,
+    mcqMaterial,
+    driveFolder,
+    telegramLink,
+    flashcardDeck
+  ];
+
+  const counts = getDoctorMaterialCounts(allDoctorMaterials);
+  assert.equal(counts.videos, 5, 'Should count 4 playlist videos + 1 standalone video = 5');
+  assert.equal(counts.pdfs, 3, 'Should count 2 bundle PDFs + 1 standalone PDF = 3');
+  assert.equal(counts.mcqs, 1, 'Should count 1 MCQ resource');
+  assert.equal(counts.links, 2, 'Should count 2 external links (drive folder + telegram)');
+  assert.equal(counts.total, 11, 'Total should be 5 + 3 + 1 + 2 = 11 (ignoring flashcards)');
+
+  // Test zero counts on doctor with only videos
+  const videoOnlyCounts = getDoctorMaterialCounts([singleVideo]);
+  assert.equal(videoOnlyCounts.videos, 1);
+  assert.equal(videoOnlyCounts.pdfs, 0);
+  assert.equal(videoOnlyCounts.mcqs, 0);
+  assert.equal(videoOnlyCounts.links, 0);
+  assert.equal(videoOnlyCounts.total, 1);
+
+  // Test zero counts on empty doctor
+  const emptyCounts = getDoctorMaterialCounts([]);
+  assert.equal(emptyCounts.videos, 0);
+  assert.equal(emptyCounts.pdfs, 0);
+  assert.equal(emptyCounts.mcqs, 0);
+  assert.equal(emptyCounts.links, 0);
+  assert.equal(emptyCounts.total, 0);
+});
+
 

@@ -108,3 +108,67 @@ export function materialStudyPath(material: MaterialItem, lessons: Lesson[], typ
   if (selected) params.set('item', selected.key);
   return `${lessonPath(lesson)}/doctor/${doctor.key}${params.size ? `?${params}` : ''}`;
 }
+
+export interface DoctorMaterialCounts {
+  videos: number;
+  pdfs: number;
+  mcqs: number;
+  links: number;
+  total: number;
+}
+
+export function getDoctorMaterialCounts(materials: MaterialItem[]): DoctorMaterialCounts {
+  let videos = 0;
+  let pdfs = 0;
+  let mcqs = 0;
+  let links = 0;
+
+  for (const material of materials) {
+    if (isFlashcards(material)) continue;
+
+    // 1. MCQ materials (Exams, question banks, quiz files)
+    if (isMcqMaterial(material)) {
+      mcqs += material.documents?.length || 1;
+      continue;
+    }
+
+    // 2. Video items (count individual videos if playlist/series)
+    if (material.videos?.length) {
+      videos += material.videos.length;
+    } else if (isVideoMaterial(material)) {
+      videos += 1;
+    }
+
+    // 3. Document bundles
+    if (material.documents?.length) {
+      for (const doc of material.documents) {
+        const isDocVideo = /\.(mp4|webm|mov)(?:[?#]|$)/i.test(doc.url) || doc.type === 'youtube' || doc.type === 'playlist';
+        if (isDocVideo) {
+          if (!material.videos?.length) videos += 1;
+        } else if (doc.mimeType === 'application/pdf' || /\.pdf(?:[?#]|$)/i.test(doc.url) || doc.type === 'summary' || doc.type === 'book') {
+          pdfs += 1;
+        } else {
+          links += 1;
+        }
+      }
+      continue;
+    }
+
+    // 4. Standalone PDF
+    if (isPdfMaterial(material)) {
+      pdfs += 1;
+      continue;
+    }
+
+    // 5. If already counted as video, do not treat as link
+    if (material.videos?.length || isVideoMaterial(material)) {
+      continue;
+    }
+
+    // 6. External link (Drive folders, websites, Telegram, WhatsApp, etc.)
+    links += 1;
+  }
+
+  const total = videos + pdfs + mcqs + links;
+  return { videos, pdfs, mcqs, links, total };
+}

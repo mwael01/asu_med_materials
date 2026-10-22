@@ -1,7 +1,7 @@
 ---
 import Layout from '../../../../../layouts/Layout.astro';
 import PageHeading from '../../../../../components/common/PageHeading.astro';
-import NavigationCards from '../../../../../components/common/NavigationCards.astro';
+import DoctorCards from '../../../../../components/study/DoctorCards.astro';
 import ResourceGrid from '../../../../../components/materials/ResourceGrid.astro';
 import type { NavCrumb } from '../../../../../types/navigation';
 import { loadLessonPage } from '../../../../../data/lessons';
@@ -102,7 +102,7 @@ const general = materials.filter(item => !isFlashcards(item) && !doctorMaterials
           {doctors.length} {doctors.length === 1 ? 'doctor' : 'doctors'}
         </span>
       </div>
-      <NavigationCards items={doctors.map(doctor => ({ title: doctor.name, href: `${lessonPath(lesson)}/doctor/${doctor.key}` }))} />
+      <DoctorCards doctors={doctors} lesson={lesson} />
     </section>
   )}
 
