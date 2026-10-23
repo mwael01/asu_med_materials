@@ -119,7 +119,7 @@ def put_r2(path: Path, entry: dict) -> str:
         return url
     command = [str(ROOT / "node_modules/.bin/wrangler"), "r2", "object", "put", f"{bucket}/{key}",
                "--file", str(path), "--content-type", entry["mime"],
-               "--cache-control", "public, max-age=31536000, immutable", "--content-disposition", "inline", "--remote"]
+               "--cache-control", "public, max-age=31536000, immutable" + (", no-transform" if entry["mime"] == "text/html" else ""), "--content-disposition", "inline", "--remote"]
     environment = {**os.environ, "CI": "1", "WRANGLER_SEND_METRICS": "false", "NO_UPDATE_NOTIFIER": "1"}
     for attempt in range(3):
         result = subprocess.run(command, cwd=ROOT, env=environment, capture_output=True, text=True, timeout=600)

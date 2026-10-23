@@ -1,5 +1,7 @@
 import tempfile
 import unittest
+from unittest.mock import patch
+from types import SimpleNamespace
 from pathlib import Path
 
 from telegram_materials.inbox_media import inspect_file
@@ -31,3 +33,16 @@ class HtmlDocumentTests(unittest.TestCase):
             path.write_text('<!doctype html><html><head><title>Quiz</title></head><body>Truncated')
             with self.assertRaisesRegex(ValueError, 'complete'):
                 inspect_file(path, 'file')
+
+
+    def test_html_upload_prevents_cdn_rewriting_before_integrity_verification(self):
+        from telegram_materials.store import put_r2
+        with tempfile.TemporaryDirectory() as folder:
+            path = Path(folder) / 'quiz.html'
+            path.write_text('<!doctype html><html><head><title>Quiz</title></head><body>Question</body></html>')
+            entry = inspect_file(path, 'file')
+            with patch('telegram_materials.store.verify_r2', side_effect=[False, True]), patch('telegram_materials.store.subprocess.run', return_value=SimpleNamespace(returncode=0)) as upload:
+                put_r2(path, entry)
+                args = upload.call_args.args[0]
+                self.assertIn('no-transform', args[args.index('--cache-control') + 1])
+                self.assertEqual(args[args.index('--content-type') + 1], 'text/html')

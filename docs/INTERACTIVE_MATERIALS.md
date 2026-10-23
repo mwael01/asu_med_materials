@@ -16,7 +16,7 @@ pnpm materials:telegram inbox approve --batch BATCH_ID
 pnpm materials:telegram inbox publish --batch BATCH_ID --apply
 ```
 
-HTML publication requires explicit `--reviewed-html` confirmation bound into approval. Assets use the existing immutable R2 hash paths, correct `text/html` MIME, inline disposition and 25 MB limit. The original bytes remain unchanged. Materials contain ordered `documents` with `mimeType: text/html`; no new material type is required.
+HTML publication requires explicit `--reviewed-html` confirmation bound into approval. Assets use the existing immutable R2 hash paths, correct `text/html` MIME, inline disposition and 25 MB limit. HTML uploads include `Cache-Control: no-transform` to prevent CDN script injection or rewriting from changing the reviewed bytes. Publication checks the public checksum; the original bytes remain unchanged. Materials contain ordered `documents` with `mimeType: text/html`; no new material type is required.
 
 Only immutable HTML hosted on the existing materials domain is embedded. `InteractiveDocument.astro` supplies a separate sandboxed iframe with scripts allowed, an opaque origin, no parent navigation/form permissions and no referrer. The same component serves the standalone reader and the lesson workspace's Interactive tab. CSS radio-button quizzes work without scripts. External HTML links remain ordinary links. Download serves the original file as an attachment; switching resources releases the old frame.
 
