@@ -273,6 +273,7 @@ test('image controls zoom, reset and initialize once', async () => {
   panel.dispatch('click', { target: { closest: () => zoom } });
   assert.equal(image.dataset.zoom, '1.25');
   assert.equal(image.style.width, '125%');
+  assert.equal(image.style.maxWidth, 'none');
   assert.equal(image.style.maxHeight, 'none');
   const reset = { dataset: {}, hasAttribute: key => key === 'data-image-reset' };
   panel.dispatch('click', { target: { closest: () => reset } });

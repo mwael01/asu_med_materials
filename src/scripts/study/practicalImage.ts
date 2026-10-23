@@ -26,6 +26,7 @@ export function initPracticalImages(): void {
     const image = container?.querySelector<HTMLImageElement>('img');
     if (!image) return;
     image.style.height = 'auto';
+    image.style.maxWidth = 'none';
     image.parentElement!.style.overflow = 'auto';
     panel.addEventListener('click', event => {
       const button = (event.target as HTMLElement).closest<HTMLButtonElement>('button');
