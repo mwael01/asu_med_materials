@@ -26,6 +26,9 @@ export interface StudyEntry {
   embedType: 'iframe' | 'video' | 'audio' | 'image' | 'none';
   /** Existing playlist progress uses the original video ID. */
   playlistProgress: boolean;
+  description?: string;
+  altText?: string;
+  sourceUrls?: string[];
 }
 
 export interface LessonDoctor {

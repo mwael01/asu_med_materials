@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import { runInNewContext } from 'node:vm';
 import ts from 'typescript';
+import * as practicalImages from '../src/scripts/study/practicalImage.ts';
 import * as progressHelpers from '../src/utils/studyProgress.ts';
 import * as searchHelpers from '../src/utils/search.ts';
 import * as documentHelpers from '../src/utils/documentViewer.ts';
@@ -76,6 +77,7 @@ async function playerHarness(entries, requested, unavailableStorage = false) {
   const storage = { getStoredBookmarkIds: () => state.bookmarks, getStoredStudiedIds: () => state.studied,
     saveStudiedIds(ids) { state.studied = Array.from(ids); state.window.dispatch('studied-updated'); } };
   const exports = await loadClient('scripts/study/doctorPlayer.ts', {
+    './practicalImage': practicalImages,
     '../../utils/storage': storage,
     '../../utils/bookmarks': { setMaterialBookmarked(id, added) { state.bookmarks = added ? [...state.bookmarks,id] : state.bookmarks.filter(item => item !== id); state.window.dispatch('bookmarks-updated'); } },
     '../../utils/userSync': { syncStudiedToggle: async (id, done) => state.changes.push([id, done]) },
@@ -236,4 +238,46 @@ test('doctor progress remains in memory when browser storage is unavailable', as
   items[1].dispatch('click');
   root.querySelector('[data-study-done]').dispatch('click');
   assert.deepEqual(state.studied, ['bundle']);
+});
+
+
+test('practical image notes switch safely and reset zoom without rendering markup', () => {
+  const root = new Element(), panel = new Element(), text = new Element(), sources = new Element(), image = new Element();
+  root.selectors.set('[data-practical-image]', panel);
+  panel.selectors.set('[data-image-description]', text);
+  panel.selectors.set('[data-image-sources]', sources);
+  sources.replaceChildren = (...children) => { sources.children = children; };
+  practicalImages.updatePracticalImage(root, image, '<script>not HTML</script>', 'Bronchiole micrograph', []);
+  assert.equal(text.textContent, '<script>not HTML</script>');
+  assert.equal(image.alt, 'Bronchiole micrograph');
+  assert.equal(panel.hidden, false);
+  image.dataset.zoom = '3';
+  practicalImages.updatePracticalImage(root, image, 'Second image', 'Lung section', []);
+  assert.equal(text.textContent, 'Second image');
+  assert.equal(image.dataset.zoom, '1');
+  image.hidden = true;
+  practicalImages.updatePracticalImage(root, image);
+  assert.equal(panel.hidden, true);
+  assert.equal(text.textContent, '');
+});
+
+
+test('image controls zoom, reset and initialize once', async () => {
+  const state = browser(), panel = new Element(), container = new Element(), image = new Element();
+  panel.parentElement = container; image.parentElement = container;
+  container.selectors.set('img', image);
+  state.document.lists.set('[data-practical-image]', [panel]);
+  const controller = await loadClient('scripts/study/practicalImage.ts', {}, state.globals());
+  controller.initPracticalImages(); controller.initPracticalImages();
+  const zoom = { dataset: { imageZoom: '1.25' }, hasAttribute: () => false };
+  panel.dispatch('click', { target: { closest: () => zoom } });
+  assert.equal(image.dataset.zoom, '1.25');
+  assert.equal(image.style.width, '125%');
+  assert.equal(image.style.maxHeight, 'none');
+  const reset = { dataset: {}, hasAttribute: key => key === 'data-image-reset' };
+  panel.dispatch('click', { target: { closest: () => reset } });
+  assert.equal(image.dataset.zoom, '1');
+  assert.equal(image.style.width, '100%');
+  assert.equal(image.style.maxHeight, '80vh');
+  assert.equal(panel.listeners.get('click').length, 1);
 });

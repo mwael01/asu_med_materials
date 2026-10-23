@@ -238,3 +238,19 @@ test('isPdfDocument and getDocumentViewerType classify R2 PDFs and Drive embeds 
   assert.equal(getDocumentViewerType(driveFolder), 'none');
 });
 
+
+
+test('practical descriptions and collection membership survive Firestore conversion and study entries', async () => {
+  const { materialConverter } = await import('../src/firebase/schema.ts');
+  const { studyEntries, materialStudyPath } = await import('../src/utils/studyContent.ts');
+  const material = { id: 'slides', title: 'Respiratory microscopy', year: 2, type: 'other', category: 'practical', tags: [],
+    moduleId: 'resp', subject: 'Histology', lessonId: 'practical', practicalImageCollection: 'slides', url: 'https://example.org/image.jpg',
+    documents: [{ id: 'club', title: 'Club cell', url: 'https://example.org/image.jpg', mimeType: 'image/jpeg', description: 'Apical secretory granules.', altText: 'Club cell by TEM', sourceUrls: ['https://example.org/reference'] }] };
+  const converted = materialConverter.fromFirestore({ id: material.id, data: () => materialConverter.toFirestore(material) });
+  assert.equal(converted.practicalImageCollection, 'slides');
+  const entry = studyEntries([converted])[0];
+  assert.equal(entry.description, material.documents[0].description);
+  assert.equal(entry.altText, 'Club cell by TEM');
+  assert.deepEqual(entry.sourceUrls, material.documents[0].sourceUrls);
+  assert.equal(materialStudyPath(converted, [{ id: 'practical', moduleId: 'resp', subject: 'Histology', title: 'Practical', order: 90, active: true }]), '/viewer/slides');
+});

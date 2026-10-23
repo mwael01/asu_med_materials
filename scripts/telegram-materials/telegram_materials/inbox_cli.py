@@ -27,6 +27,14 @@ def add_parser(commands):
     decision.add_argument('--replace-lessons', action='store_true', help='Explicitly replace existing lesson assignments on a reused material')
     decision.add_argument('--category', default='summaries', choices=['central', 'lectures', 'practical', 'summaries', 'exams', 'references'])
     decision.add_argument('--reason', required=True)
+    decision.add_argument('--recording', action='store_true', help='Verified external recording link; publish as an ordered playlist track')
+    decision.add_argument('--video-id', action='append', default=[], help='Publish only these reviewed YouTube IDs from a mixed playlist')
+    decision.add_argument('--image-collection', choices=['slides', 'gross'])
+    annotation = sub.add_parser('annotate', help='Save reviewed image study notes on an unpublished plan')
+    annotation.add_argument('--batch', required=True); annotation.add_argument('--plan', required=True)
+    annotation.add_argument('--item', required=True); annotation.add_argument('--title', required=True)
+    annotation.add_argument('--description', required=True); annotation.add_argument('--alt-text', required=True)
+    annotation.add_argument('--source', action='append', default=[])
     approve = sub.add_parser('approve'); approve.add_argument('--batch', required=True)
     publish = sub.add_parser('publish'); publish.add_argument('--batch', required=True); publish.add_argument('--apply', action='store_true')
     retry = sub.add_parser('retry'); retry.add_argument('--item', action='append')
@@ -77,7 +85,11 @@ def run(args):
                 result = {'planId': decide(repo, args.batch, args.item, {'action': args.action, 'moduleId': args.module,
                     'lessonIds': list(dict.fromkeys(args.lesson)), 'title': args.title, 'author': args.author,
                     'existingMaterialId': args.existing_material, 'replaceLessonAssignments': args.replace_lessons,
-                    'category': args.category, 'reason': args.reason}, args.plan)}
+                    'category': args.category, 'selectedVideoIds': args.video_id, 'forceRecording': args.recording, 'practicalImageCollection': args.image_collection, 'reason': args.reason}, args.plan)}
+            elif command == 'annotate':
+                from .inbox_publication import annotate
+                result = annotate(repo, args.batch, args.plan, args.item, {
+                    'title': args.title, 'description': args.description, 'altText': args.alt_text, 'sourceUrls': args.source})
             elif command == 'approve':
                 from .inbox_publication import approve
                 result = approve(repo, args.batch)

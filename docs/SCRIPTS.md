@@ -162,3 +162,5 @@ Run `node --experimental-strip-types scripts/test-catalogue-cache.mjs` with Node
 ### Admin AI regression tests
 
 Run `pnpm test:admin-ai` (Node 22.12+). The suite covers extraction normalization, bilingual persistence/search, attribution, curriculum uncertainty, public-preview protections, and endpoint authorization using synthetic fixtures and mocked services. `scripts/register-typescript.mjs` loads TypeScript in memory using the installed compiler; it does not generate material data files or access live Firestore.
+
+Practical image collections, English study descriptions, annotation commands and viewer behavior: [Practical image uploads](./PRACTICAL_IMAGES.md).

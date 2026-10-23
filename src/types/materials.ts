@@ -34,6 +34,9 @@ export interface DocumentItem {
   url: string;
   type?: ResourceType;
   mimeType?: string;
+  description?: string;
+  altText?: string;
+  sourceUrls?: string[];
 }
 
 export type MaterialCategory =
@@ -90,6 +93,7 @@ export interface MaterialItem {
   playlistId?: string; // YouTube playlist ID if applicable
   flashcardDeckId?: string;
   videos?: PlaylistItem[]; // Individual videos for multi-part video series
+  practicalImageCollection?: 'slides' | 'gross';
   documents?: DocumentItem[]; // Individual documents for multi-file study bundles
   bookmarksCount?: number; // Total number of students who bookmarked/loved this material
 }

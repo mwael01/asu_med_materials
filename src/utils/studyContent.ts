@@ -70,7 +70,7 @@ export function studyEntries(materials: MaterialItem[]): StudyEntry[] {
         }
         const embed = getDocumentEmbedUrl(document.url);
         result.push({ ...base, key: JSON.stringify([material.id, 'documents', document.id]), itemId: document.id,
-          title: document.title, tab: embed || document.mimeType === 'application/pdf' || document.mimeType?.startsWith('image/') ? 'pdfs' : 'links', url: document.url,
+          title: document.title, description: document.description, altText: document.altText, sourceUrls: document.sourceUrls, tab: embed || document.mimeType === 'application/pdf' || document.mimeType?.startsWith('image/') ? 'pdfs' : 'links', url: document.url,
           embedUrl: embed, embedType: isImageDocument(document.url) ? 'image' : embed ? 'iframe' : 'none', playlistProgress: false });
       }
     } else if (!isVideoMaterial(material) && isHttpUrl(material.url)) {
@@ -100,6 +100,7 @@ export function materialStudyPath(material: MaterialItem, lessons: Lesson[], typ
   if (isFlashcards(material)) return legacyMaterialPath(material);
   const lesson = assignedLessons(material, lessons).sort((a, b) => a.order - b.order || a.id.localeCompare(b.id))[0];
   if (!lesson) return legacyMaterialPath(material);
+  if (material.practicalImageCollection) return `/viewer/${encodeURIComponent(material.id)}`;
   const doctor = lessonDoctors([material])[0];
   if (!doctor) return lessonPath(lesson);
   const entries = studyEntries([material]);

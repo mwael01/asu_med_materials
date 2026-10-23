@@ -6,7 +6,7 @@ from urllib.parse import urlsplit
 from firebase_admin import firestore
 
 from .core import link_id, video_link_type
-from .inbox_core import SOURCE_ID, MAX_R2_BYTES, TERMINAL, asset_key, fingerprint, item_keys, message_key, now, resource_keys, validate_decision
+from .inbox_core import SOURCE_ID, MAX_R2_BYTES, TERMINAL, asset_key, fingerprint, item_keys, message_key, now, resource_keys, validate_decision, validate_image_plan
 from .inbox_analysis import matches
 from .inbox_catalogue import INDEX_ID, index_state, version
 from .inbox_media import cache_path, ensure_cache, inspect_file
@@ -32,6 +32,7 @@ def decide(repo, batch_id, ids, decision, plan_id=None):
         raise ValueError('Approved batches are immutable; analyze or retry in a new batch')
     if not ids or not set(ids).issubset(batch['itemIds']):
         raise ValueError('Choose items in this batch')
+    old_plan = {}
     if plan_id:
         old_plan = next((p for p in previous if p['id'] == plan_id), None)
         if not old_plan or old_plan['status'] == 'published' or set(old_plan['itemIds']) != set(ids):
@@ -52,7 +53,7 @@ def decide(repo, batch_id, ids, decision, plan_id=None):
             raise ValueError('Resolve pending destination plans before ignoring or holding this item')
         if decision['action'] in {'create', 'reuse'} and item.get('status') in {'queued', 'analyzing', 'failed'}:
             raise ValueError('Analyze and resolve errors before creating a publication decision')
-    kinds = {item['kind'] in {'audio', 'video', 'playlist'} or bool(video_link_type(item['url'])) for item in items}
+    kinds = {item['kind'] in {'audio', 'video', 'playlist'} or bool(video_link_type(item['url'])) or (decision.get('forceRecording', False) and item['kind'] == 'link') for item in items}
     if decision['action'] in {'create', 'reuse'} and len(kinds) > 1:
         raise ValueError('Group recordings and documents into separate materials')
     if decision['action'] == 'reuse':
@@ -67,6 +68,8 @@ def decide(repo, batch_id, ids, decision, plan_id=None):
                 'previousSubject': target.get('subject'),
                 'previousLessonIds': sorted({link['lessonId'] for link in links} | ({target['lessonId']} if target.get('lessonId') else set()))}
     plan_id = plan_id or uuid.uuid4().hex
+    if plan_id and old_plan.get('imageAnnotations'):
+        decision = {**decision, 'imageAnnotations': old_plan['imageAnnotations']}
     value = {**decision, 'sourceId': SOURCE_ID, 'itemIds': ids, 'revisions': {i['id']: i['revision'] for i in items},
              'status': 'needs_review', 'createdAt': now()}
     def commit(tx):
@@ -92,6 +95,28 @@ def decide(repo, batch_id, ids, decision, plan_id=None):
     return plan_id
 
 
+def annotate(repo, batch_id, plan_id, item_id, note):
+    batch, decisions = plans(repo, batch_id)
+    plan = next((p for p in decisions if p['id'] == plan_id), None)
+    if not plan or item_id not in plan['itemIds'] or plan.get('action') != 'create':
+        raise ValueError('Choose an image in an existing create plan')
+    item = repo.read('material_inbox_items', item_id)
+    if not item or not item.get('mime', '').startswith('image/'):
+        raise ValueError('Annotations require an image')
+    if any(not isinstance(note.get(key), str) or not note[key].strip() for key in ['title', 'description', 'altText']):
+        raise ValueError('Title, description and alternative text are required')
+    def commit(tx):
+        repo.guard(tx)
+        live_batch = repo.read('material_inbox_batches', batch_id, tx)
+        live_plan = repo.read(f'material_inbox_batches/{batch_id}/plans', plan_id, tx)
+        if live_batch['status'] in {'approved', 'publishing', 'published'} or live_plan['status'] == 'published':
+            raise ValueError('Approved/published annotations are immutable; create a new review batch')
+        notes = {**live_plan.get('imageAnnotations', {}), item_id: note}
+        repo.write(f'material_inbox_batches/{batch_id}/plans', plan_id, {'imageAnnotations': notes}, tx)
+    repo.atomic(commit)
+    return {'planId': plan_id, 'annotatedItem': item_id}
+
+
 def validate_plans(repo, batch_id):
     batch, decisions = plans(repo, batch_id)
     actionable = [p for p in decisions if p['action'] in {'create', 'reuse'}]
@@ -104,6 +129,13 @@ def validate_plans(repo, batch_id):
         if len(plan['itemIds']) * 5 + len(plan['lessonIds']) + 6 > 450:
             raise ValueError('Publication group is too large for one transaction; split it before approval')
         validate_decision(plan, modules, lessons)
+        if plan.get('forceRecording') and any(repo.read('material_inbox_items', key)['kind'] not in {'link', 'audio', 'video', 'playlist'} for key in plan['itemIds']):
+            raise ValueError('Recording plans cannot contain documents or images')
+        if plan.get('selectedVideoIds'):
+            available = {v.get('youtubeId') or v['id'] for key in plan['itemIds'] for v in (repo.read('material_inbox_items', key).get('videos') or [])}
+            if plan['action'] != 'create' or not set(plan['selectedVideoIds']).issubset(available):
+                raise ValueError('Selected video IDs must belong to the reviewed source playlist')
+        validate_image_plan(plan, [repo.read('material_inbox_items', key) for key in plan['itemIds']], lessons)
         if plan.get('replaceLessonAssignments') and plan.get('status') != 'published':
             target = repo.read('materials', plan['existingMaterialId'])
             links = repo.lesson_links(plan['existingMaterialId'])
@@ -165,21 +197,25 @@ def material_payload(plan, module, lessons, members, urls, material_id):
         value.update(subject=next(iter(subjects)), lessonId=plan['lessonIds'][0])
     if plan.get('author'):
         value['author'] = plan['author']
+    if plan.get('practicalImageCollection'):
+        value['practicalImageCollection'] = plan['practicalImageCollection']
     recordings, documents = [], []
     for member in members:
         url = urls[member['id']]
         kind = member['kind']
-        source_type = 'direct' if member['storage'] == 'r2' else video_link_type(url) or 'telegram'
+        source_type = 'direct' if member['storage'] == 'r2' else video_link_type(url) or ('telegram' if member['storage'] == 'telegram' else 'external')
         title = member.get('reviewedTitle') or (plan['title'] if len(members) == 1 else member['title'])
         if kind == 'playlist':
-            recordings.extend(member['videos'])
-        elif kind in {'audio', 'video'} or video_link_type(url):
+            recordings.extend(v for v in member['videos'] if not plan.get('selectedVideoIds') or (v.get('youtubeId') or v['id']) in plan['selectedVideoIds'])
+        elif kind in {'audio', 'video'} or video_link_type(url) or plan.get('forceRecording'):
             recordings.append({'id': member['id'][:32], 'title': title, 'url': url,
                                'sourceType': source_type, 'mediaKind': 'audio' if kind == 'audio' else 'video'})
         else:
             doc = {'id': member['id'][:32], 'title': title, 'url': url}
             if member.get('mime'):
                 doc['mimeType'] = member['mime']
+            if member['id'] in plan.get('imageAnnotations', {}):
+                doc.update(plan['imageAnnotations'][member['id']])
             documents.append(doc)
     if recordings:
         value.update(type='playlist', videos=recordings)
@@ -199,6 +235,10 @@ async def publish(repo, client, batch_id, apply=False):
     batch, decisions, digest, modules, lessons = validate_plans(repo, batch_id)
     summary = [{'planId': p['id'], 'title': p['title'], 'action': p['action'], 'moduleId': p['moduleId'],
                 'lessonIds': p['lessonIds'], 'items': p['itemIds'],
+                'practicalImageCollection': p.get('practicalImageCollection'),
+                'imageAnnotations': p.get('imageAnnotations', {}),
+                'selectedVideoIds': p.get('selectedVideoIds', []),
+                'forceRecording': p.get('forceRecording', False),
                 'replaceLessonAssignments': bool(p.get('replaceLessonAssignments')),
                 'previousLessonIds': p.get('previousLessonIds', [])} for p in decisions]
     if not apply:

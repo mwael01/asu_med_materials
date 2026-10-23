@@ -3,6 +3,7 @@ import Layout from '../../layouts/Layout.astro';
 import type { NavCrumb } from '../../types/navigation';
 import TypeBadge from '../../components/materials/TypeBadge.astro';
 import ResourceCard from '../../components/materials/ResourceCard.astro';
+import PracticalImage from '../../components/study/PracticalImage.astro';
 import DocumentImage from '../../components/study/DocumentImage.astro';
 import StudyFolderDrawer from '../../components/study/StudyFolderDrawer.astro';
 import PdfViewer from '../../components/study/PdfViewer.astro';
@@ -48,6 +49,7 @@ const parsedDocuments = documents.map((doc, idx) => {
   const downloadName = cleanTitle.toLowerCase().endsWith(`.${extension}`) ? cleanTitle : `${cleanTitle}.${extension}`;
 
   return {
+    description: doc.description, altText: doc.altText, sourceUrls: doc.sourceUrls,
     id: doc.id || `doc_${idx + 1}`,
     title: rawTitle,
     downloadName,
@@ -61,8 +63,10 @@ const parsedDocuments = documents.map((doc, idx) => {
 });
 
 // Find initial document (first embeddable, PDF, or first document)
-const initialDocIndex = Math.max(0, parsedDocuments.findIndex((d) => Boolean(d.embedUrl) || d.isPdf));
+const selectedDocument = Astro.url.searchParams.get('document');
+const initialDocIndex = Math.max(0, selectedDocument ? parsedDocuments.findIndex(d => d.id === selectedDocument) : parsedDocuments.findIndex(d => Boolean(d.embedUrl) || d.isPdf));
 const initialDoc = parsedDocuments[initialDocIndex] || {
+  description: undefined, altText: undefined, sourceUrls: undefined,
   id: material.id,
   title: material.title,
   downloadName: `${(material.title || 'Document').replace(/[/\\?%*:|"<>]/g, ' ').trim()}.pdf`,
@@ -379,6 +383,9 @@ crumbs.push({
               data-doc-title={doc.title}
               data-doc-url={doc.url}
               data-embed-url={doc.embedUrl || ''}
+              data-description={doc.description}
+              data-alt-text={doc.altText}
+              data-source-urls={JSON.stringify(doc.sourceUrls || [])}
               data-is-image={doc.isImage ? 'true' : 'false'}
               data-is-pdf={doc.isPdf ? 'true' : 'false'}
               data-external-url={doc.externalUrl}
@@ -399,7 +406,7 @@ crumbs.push({
     <!-- Document Viewer Container -->
     <main
       id="viewer-container"
-      class="relative w-full h-[76vh] min-h-[520px] lg:h-[84vh] rounded-2xl overflow-hidden border border-zinc-200/80 dark:border-zinc-800 bg-zinc-100 dark:bg-zinc-900 shadow-sm transition-all"
+      class="relative w-full h-[76vh] min-h-[520px] lg:h-[84vh] rounded-2xl overflow-auto border border-zinc-200/80 dark:border-zinc-800 bg-zinc-100 dark:bg-zinc-900 shadow-sm transition-all"
     >
       <!-- Exit Fullscreen Floating Button (visible only in fullscreen) -->
       <button
@@ -453,7 +460,8 @@ crumbs.push({
         loading="eager"
         title={initialDoc.title || titleEn}
       ></iframe>
-      <DocumentImage id="viewer-image" src={initialDoc.isImage ? initialDoc.url : undefined} alt={initialDoc.title} hidden={!initialDoc.isImage} />
+      <DocumentImage id="viewer-image" src={initialDoc.isImage ? initialDoc.url : undefined} alt={initialDoc.altText || initialDoc.title} hidden={!initialDoc.isImage} />
+      <PracticalImage visible={initialDoc.isImage} description={initialDoc.isImage ? initialDoc.description : undefined} sourceUrls={initialDoc.sourceUrls} />
     </main>
 
     <!-- Bottom Helper Note -->
@@ -528,6 +536,7 @@ crumbs.push({
 </style>
 
 <script>
+  import { updatePracticalImage } from '../../scripts/study/practicalImage';
   import { initBookmarkButtons, renderBookmarkButtons } from '../../utils/bookmarks';
   import { initStudiedMaterials, updateStudiedCardUI } from '../../utils/studied';
   import {
@@ -577,6 +586,8 @@ crumbs.push({
 
     const openLocalDocument = (blobUrl: string, title?: string, path?: string) => {
       const isPdf = path ? path.toLowerCase().endsWith('.pdf') : true;
+      const notes = container?.querySelector<HTMLElement>('[data-practical-image]');
+      if (notes) notes.hidden = true;
       if (isPdf && pdfRoot) {
         if (image) image.hidden = true;
         if (iframe) {
@@ -842,6 +853,8 @@ crumbs.push({
         image.hidden = !isImage; image.removeAttribute('src');
         if (isImage && external) { image.src = external; image.alt = title; }
       }
+      if (image) updatePracticalImage(image.parentElement!, image, targetBtn.dataset.description, targetBtn.dataset.altText, JSON.parse(targetBtn.dataset.sourceUrls || '[]'));
+      const selectedUrl = new URL(location.href); selectedUrl.searchParams.set('document', docId); history.replaceState(null, '', selectedUrl);
       if (pdfRoot) {
         pdfRoot.hidden = !isPdf;
         if (isPdf && docUrl) {
@@ -916,6 +929,13 @@ crumbs.push({
       // Scroll active pill into view smoothly
       targetBtn.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
     }
+
+    window.addEventListener('keydown', event => {
+      if (!image || image.hidden || event.altKey || event.ctrlKey || event.metaKey || (event.target instanceof HTMLElement && event.target.closest('input, textarea, select, button, a, [contenteditable]'))) return;
+      if (event.key === 'ArrowRight' || event.key === 'ArrowLeft') {
+        event.preventDefault(); switchDocument(activeDocIndex + (event.key === 'ArrowRight' ? 1 : -1));
+      }
+    }, { signal });
 
     trackItems.forEach((btn, idx) => {
       btn.addEventListener('click', () => switchDocument(idx), { signal });

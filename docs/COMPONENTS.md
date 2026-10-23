@@ -382,3 +382,5 @@ Flashcard decks are integrated directly into module pages ([`src/pages/module/[i
 - **AdminLessonManager**: Lazy-loaded lesson editor and per-material assignment controls. Lists inactive lessons for management; validates module/subject relationships before saving.
 
 Public module/subject routes use these components instead of SubjectBar and FilterToolbar. Legacy grouping components remain available to existing consumers. See [Study flow](STUDY_FLOW.md) for data and route details.
+
+Practical image collections, English study descriptions, annotation commands and viewer behavior: [Practical image uploads](./PRACTICAL_IMAGES.md).

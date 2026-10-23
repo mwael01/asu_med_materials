@@ -1,3 +1,4 @@
+import { updatePracticalImage } from './practicalImage';
 import type { StudyEntry, StudyTab } from '../../types/lessons';
 import { getStoredBookmarkIds, getStoredStudiedIds, saveStudiedIds } from '../../utils/storage';
 import { setMaterialBookmarked } from '../../utils/bookmarks';
@@ -87,6 +88,7 @@ export function initDoctorPlayer(): void {
       image.hidden = !isImage; image.removeAttribute('src');
       if (isImage && entry.embedUrl) { image.src = entry.embedUrl; image.alt = entry.title; }
     }
+    if (image) updatePracticalImage(root!, image, entry.description, entry.altText, entry.sourceUrls);
     if (pdfRoot) {
       pdfRoot.hidden = !isPdf;
       if (isPdf && entry.url) {
@@ -129,7 +131,7 @@ export function initDoctorPlayer(): void {
     const reader = root!.querySelector<HTMLAnchorElement>('[data-study-reader]');
     if (reader) {
       reader.hidden = entry.tab !== 'pdfs';
-      reader.href = `/viewer/${encodeURIComponent(entry.materialId)}`;
+      reader.href = `/viewer/${encodeURIComponent(entry.materialId)}?document=${encodeURIComponent(entry.itemId)}`;
     }
     get('[data-study-status]').textContent = '';
     showTab(entry.tab);

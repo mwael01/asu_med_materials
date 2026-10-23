@@ -73,7 +73,7 @@ const subjectLessons = lessonsForSubject(allLessons, module.id, subject);
 const regularLessons = subjectLessons.filter(l => !isRevisionLesson(l));
 
 // Revision lessons (Practical, Assessments, Finals) are displayed only if they contain materials
-const revisionLessons = subjectLessons.filter(l => isRevisionLesson(l) && materials.some(m => m.lessonId === l.id));
+const revisionLessons = subjectLessons.filter(l => isRevisionLesson(l) && materials.some(m => isMaterialAssignedToLesson(m, l)));
 
 const unassigned = materials.filter(item => !subjectLessons.some(lesson => isMaterialAssignedToLesson(item, lesson)));
 const isGeneralLink = (item: typeof materials[number]) => {

@@ -28,6 +28,7 @@ export interface ParsedAIMaterial {
   tags: string[];
   playlistId?: string;
   videos?: PlaylistItem[];
+  practicalImageCollection?: 'slides' | 'gross';
   documents?: DocumentItem[];
   issues?: ReviewIssue[];
 }

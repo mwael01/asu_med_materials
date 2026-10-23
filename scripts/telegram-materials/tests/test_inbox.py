@@ -15,7 +15,7 @@ from telegram_materials.inbox_repository import InboxRepository
 from telegram_materials.inbox_sync import ingest, mark_missing, sync
 from telegram_materials.inbox_analysis import analyze, seed_assets
 from telegram_materials.inbox_media import cache_path, expand_archive, inspect_file
-from telegram_materials.inbox_publication import approve, decide, publish
+from telegram_materials.inbox_publication import approve, decide, publish, annotate, validate_plans, material_payload
 
 
 class MemoryRepo(InboxRepository):
@@ -115,6 +115,46 @@ class InboxTests(unittest.TestCase):
 
     def create_plan(self, **extra):
         return decide(self.repo, 'batch', [self.item['id']], self.decision(**extra))
+
+    def test_image_notes_are_required_bound_to_approval_and_preserved_in_payload(self):
+        self.repo.write('lessons', 'resp-lesson', {'revisionType': 'practical'})
+        self.repo.write('material_inbox_items', self.item['id'], {'mime': 'image/jpeg', 'storage': 'r2', 'sha256': 'a' * 64, 'bytes': 100})
+        plan_id = self.create_plan(category='practical', practicalImageCollection='slides')
+        with self.assertRaisesRegex(ValueError, 'Every practical image'):
+            approve(self.repo, 'batch')
+        note = {'title': 'Bronchiole', 'description': 'Epithelium surrounds a small airway.', 'altText': 'Small airway section', 'sourceUrls': ['https://example.com/reference']}
+        annotate(self.repo, 'batch', plan_id, self.item['id'], note)
+        plan = self.repo.read('material_inbox_batches/batch/plans', plan_id)
+        plan['batchId'] = 'batch'
+        item = self.repo.read('material_inbox_items', self.item['id'])
+        value = material_payload(plan, {'id': 'resp', 'year': 2}, self.repo.list('lessons'), [item], {item['id']: 'https://example.com/image.jpg'}, 'image-set')
+        self.assertEqual(value['practicalImageCollection'], 'slides')
+        self.assertEqual(value['documents'][0]['description'], note['description'])
+        approved = approve(self.repo, 'batch')
+        with self.assertRaisesRegex(ValueError, 'immutable'):
+            annotate(self.repo, 'batch', plan_id, self.item['id'], {**note, 'description': 'Changed'})
+        self.repo.write('material_inbox_batches/batch/plans', plan_id, {'imageAnnotations': {item['id']: {**note, 'description': 'Tampered'}}})
+        self.assertNotEqual(validate_plans(self.repo, 'batch')[2], approved['digest'])
+
+    def test_image_collections_reject_nonimages_and_nonpractical_lessons(self):
+        self.create_plan(category='practical', practicalImageCollection='gross')
+        with self.assertRaisesRegex(ValueError, 'Practical Revision'):
+            approve(self.repo, 'batch')
+        self.repo.write('lessons', 'resp-lesson', {'revisionType': 'practical'})
+        with self.assertRaisesRegex(ValueError, 'image files'):
+            approve(self.repo, 'batch')
+
+    def test_selected_playlist_tracks_exclude_other_module_and_external_recordings_keep_fallback(self):
+        base = {'title': 'Respiratory tracks', 'category': 'lectures', 'batchId': 'batch', 'lessonIds': ['resp-lesson']}
+        source = {'id': 'source', 'kind': 'playlist', 'storage': 'external', 'sourceUrl': 'https://t.me/example/1', 'url': 'https://youtube.com/playlist?list=test',
+                  'videos': [{'id': 'nose', 'youtubeId': 'nose', 'title': 'Nose'}, {'id': 'blood', 'youtubeId': 'blood', 'title': 'Spleen'}]}
+        value = material_payload({**base, 'selectedVideoIds': ['nose']}, {'id': 'resp', 'year': 2}, self.repo.list('lessons'), [source], {'source': source['url']}, 'selected')
+        self.assertEqual([v['id'] for v in value['videos']], ['nose'])
+        source.update(kind='link', url='https://medasuedu.sharepoint.com/:v:/recording')
+        value = material_payload({**base, 'forceRecording': True, 'author': 'ASU Faculty Staff'}, {'id': 'resp', 'year': 2}, self.repo.list('lessons'), [source], {'source': source['url']}, 'recording')
+        self.assertEqual(value['type'], 'playlist')
+        self.assertEqual(value['videos'][0]['sourceType'], 'external')
+        self.assertEqual(value['author'], 'ASU Faculty Staff')
 
     def apply(self):
         with patch('telegram_materials.inbox_publication.verify_source', new=AsyncMock(return_value=object())), \

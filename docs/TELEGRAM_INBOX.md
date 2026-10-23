@@ -111,3 +111,5 @@ A Firestore lease and the existing account lock prevent concurrent workers; leas
 Five private collections hold the queue: `material_inbox_sources`, `material_inbox`, `material_inbox_items`, `material_inbox_batches` (with `plans`), and `material_asset_index`. Source messages have `revisions` subcollections. Repository rules restrict them to admins; Firebase Admin scripts use service account authorization. Deploy rules before using a new environment. `firebase/firestore.indexes.json` excludes large evidence/maps from indexing; all routine queue queries use built-in single-field indexes. Use the repository's Firebase deployment commands for rules/indexes. Website deployment follows the normal Git push workflow.
 
 Verification: `pnpm test:telegram-materials`, `pnpm test`, `pnpm astro check`, `pnpm build`. Tests use synthetic Telegram sources, real local archive/PDF/audio validation and transactional in-memory Firestore; they never publish live materials.
+
+Practical image collections, English study descriptions, annotation commands and viewer behavior: [Practical image uploads](./PRACTICAL_IMAGES.md).

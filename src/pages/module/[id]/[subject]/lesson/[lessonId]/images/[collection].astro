@@ -1,0 +1,21 @@
+---
+import Layout from '../../../../../../../layouts/Layout.astro';
+import PageHeading from '../../../../../../../components/common/PageHeading.astro';
+import { loadLessonPage } from '../../../../../../../data/lessons';
+import { lessonPath } from '../../../../../../../utils/lessons';
+const { id, subject, lessonId, collection } = Astro.params;
+if (collection !== 'slides' && collection !== 'gross') return Astro.redirect('/404');
+const context = await loadLessonPage(id || '', subject || '', lessonId || '');
+if (!context) return Astro.redirect('/404');
+const title = collection === 'slides' ? 'Slides Collection' : 'Gross Collection';
+const sets = context.materials.filter(item => item.practicalImageCollection === collection);
+---
+<Layout title={`${title} - ASU Med`} backHref={lessonPath(context.lesson)}>
+  <PageHeading title={title} />
+  <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+    {sets.map(set => <a href={`/viewer/${encodeURIComponent(set.id)}`} class="overflow-hidden rounded-xl border border-zinc-200 dark:border-zinc-800 hover:border-emerald-500">
+      <img src={set.documents?.[0]?.url || set.url} alt={set.documents?.[0]?.altText || set.title} loading="lazy" class="w-full h-48 object-contain bg-white" />
+      <div class="p-4"><h2 class="font-semibold">{set.title}</h2>{set.author && <p class="text-sm text-zinc-500">{Array.isArray(set.author) ? set.author.join(', ') : set.author}</p>}</div>
+    </a>)}
+  </div>
+</Layout>

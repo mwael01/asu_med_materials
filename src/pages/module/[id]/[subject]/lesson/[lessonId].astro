@@ -75,14 +75,22 @@ const crumbs: NavCrumb[] = [
 
 const backHref = `/module/${module.id}/${subjectSlug}`;
 
+const imageSets = materials.filter(item => item.practicalImageCollection);
+const remainingMaterials = materials.filter(item => !item.practicalImageCollection);
 const flashcards = materials.filter(isFlashcards);
-const doctors = lessonDoctors(materials.filter(item => !isFlashcards(item)));
+const doctors = lessonDoctors(remainingMaterials.filter(item => !isFlashcards(item)));
 const doctorMaterials = new Set(doctors.flatMap(doctor => doctor.items.map(item => item.id)));
-const general = materials.filter(item => !isFlashcards(item) && !doctorMaterials.has(item.id));
+const general = remainingMaterials.filter(item => !isFlashcards(item) && !doctorMaterials.has(item.id));
 ---
 
 <Layout title={`${lesson.title} - ASU Med`} crumbs={crumbs} backHref={backHref}>
   <PageHeading title={lesson.title} />
+
+  {(['slides', 'gross'] as const).filter(kind => imageSets.some(item => item.practicalImageCollection === kind)).map(kind => (
+    <a class="block my-3 rounded-xl border border-zinc-200 dark:border-zinc-800 p-4 font-semibold hover:border-emerald-500" href={`${lessonPath(lesson)}/images/${kind}`}>
+      {kind === 'slides' ? 'Slides Collection' : 'Gross Collection'}
+    </a>
+  ))}
 
   <!-- Doctors Section (Sky Blue accent with Doctor Icon) -->
   {doctors.length > 0 && (

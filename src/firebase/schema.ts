@@ -64,6 +64,7 @@ export interface MaterialDocument {
   createdAt?: string;
   playlistId?: string;
   videos?: PlaylistItem[];
+  practicalImageCollection?: 'slides' | 'gross';
   documents?: DocumentItem[];
   semester?: 1 | 2;
   bookmarksCount?: number;
@@ -215,6 +216,7 @@ export const materialConverter: FirestoreDataConverter<MaterialItem> = {
       createdAt: material.createdAt || new Date().toISOString(),
       playlistId: material.playlistId || null,
       videos: Array.isArray(material.videos) ? material.videos : null,
+      practicalImageCollection: material.practicalImageCollection || null,
       documents: Array.isArray(material.documents) ? material.documents : null,
       semester: material.semester || null,
       bookmarksCount: typeof material.bookmarksCount === 'number' ? material.bookmarksCount : 0,
@@ -251,6 +253,7 @@ export const materialConverter: FirestoreDataConverter<MaterialItem> = {
       createdAt: data.createdAt || undefined,
       playlistId: data.playlistId || undefined,
       videos: Array.isArray(data.videos) ? data.videos : undefined,
+      practicalImageCollection: data.practicalImageCollection === 'slides' || data.practicalImageCollection === 'gross' ? data.practicalImageCollection : undefined,
       documents: Array.isArray(data.documents) ? data.documents : undefined,
       semester: data.semester || undefined,
       bookmarksCount: typeof data.bookmarksCount === 'number' ? data.bookmarksCount : 0,
