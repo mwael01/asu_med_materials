@@ -135,7 +135,7 @@ async def analyze(repo, client, limit=50, module_ids=()):
                     repo.refresh_message_status(item['messageId'])
                     continue
                 try:
-                    item['evidence'] = pdf_evidence(item)
+                    item['evidence'] = item.get('htmlEvidence') or pdf_evidence(item)
                 except Exception as exc:
                     item['evidence'] = {'error': str(exc)[:300]}
             duplicate_matches = matches(repo, item)

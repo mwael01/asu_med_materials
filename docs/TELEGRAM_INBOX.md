@@ -113,3 +113,5 @@ Five private collections hold the queue: `material_inbox_sources`, `material_inb
 Verification: `pnpm test:telegram-materials`, `pnpm test`, `pnpm astro check`, `pnpm build`. Tests use synthetic Telegram sources, real local archive/PDF/audio validation and transactional in-memory Firestore; they never publish live materials.
 
 Practical image collections, English study descriptions, annotation commands and viewer behavior: [Practical image uploads](./PRACTICAL_IMAGES.md).
+
+Standalone HTML embeds and Clinical PDF lessons: [Interactive materials](./INTERACTIVE_MATERIALS.md).

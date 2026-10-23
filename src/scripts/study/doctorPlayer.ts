@@ -4,7 +4,7 @@ import { getStoredBookmarkIds, getStoredStudiedIds, saveStudiedIds } from '../..
 import { setMaterialBookmarked } from '../../utils/bookmarks';
 import { syncStudiedToggle } from '../../utils/userSync';
 import { entryProgressStorage, parseProgress } from '../../utils/studyProgress';
-import { getDocumentDownloadUrl, isPdfDocument } from '../../utils/documentViewer';
+import { getDocumentDownloadUrl, isPdfDocument, isHostedHtmlDocument } from '../../utils/documentViewer';
 import { isMaterialInLocalFolder } from '../../utils/localFolderManager';
 
 export function initDoctorPlayer(): void {
@@ -15,6 +15,7 @@ export function initDoctorPlayer(): void {
   if (!entries.length) return;
   const get = <T extends HTMLElement>(selector: string) => root.querySelector<T>(selector)!;
   const frame = get<HTMLIFrameElement>('[data-study-frame]');
+  const interactive = root.querySelector<HTMLIFrameElement>('[data-interactive-document]');
   const video = get<HTMLVideoElement>('[data-study-video]');
   const audio = root.querySelector<HTMLAudioElement>('[data-study-audio]');
   const image = root.querySelector<HTMLImageElement>('[data-study-image]');
@@ -71,11 +72,16 @@ export function initDoctorPlayer(): void {
     const isPdf = entry.tab === 'pdfs' && isPdfDocument(entry.url);
     const isImage = entry.embedType === 'image';
     const isVideo = entry.embedType === 'video';
-    const isIframe = !isPdf && entry.embedType === 'iframe';
+    const isHtml = isHostedHtmlDocument(entry.url);
+    const isIframe = !isPdf && !isHtml && entry.embedType === 'iframe';
     const isNone = entry.embedType === 'none' && !isPdf;
 
     // Removing inactive sources stops media and avoids retaining hidden embeds.
     frame.removeAttribute('src');
+    if (interactive) {
+      interactive.removeAttribute('src'); interactive.hidden = !isHtml;
+      if (isHtml) { interactive.src = entry.url; interactive.title = entry.title; }
+    }
     video.pause(); video.removeAttribute('src'); video.load();
     if (audio) {
       audio.pause(); audio.removeAttribute('src'); audio.load();
@@ -130,7 +136,7 @@ export function initDoctorPlayer(): void {
     });
     const reader = root!.querySelector<HTMLAnchorElement>('[data-study-reader]');
     if (reader) {
-      reader.hidden = entry.tab !== 'pdfs';
+      reader.hidden = entry.tab !== 'pdfs' && entry.tab !== 'interactive';
       reader.href = `/viewer/${encodeURIComponent(entry.materialId)}?document=${encodeURIComponent(entry.itemId)}`;
     }
     get('[data-study-status]').textContent = '';

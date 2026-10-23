@@ -1,6 +1,6 @@
 import type { MaterialItem, VideoSourceType } from '../types/materials';
 import type { DiscoveryType, Lesson, StudyEntry } from '../types/lessons';
-import { getDocumentEmbedUrl, isEmbeddableDocument, isImageDocument } from './documentViewer';
+import { getDocumentEmbedUrl, isEmbeddableDocument, isImageDocument, isHostedHtmlDocument } from './documentViewer';
 import { parseVideoSource } from './videoSources';
 import { lessonDoctors, lessonPath } from './lessons';
 import { isHttpUrl } from './materialLinks';
@@ -70,13 +70,13 @@ export function studyEntries(materials: MaterialItem[]): StudyEntry[] {
         }
         const embed = getDocumentEmbedUrl(document.url);
         result.push({ ...base, key: JSON.stringify([material.id, 'documents', document.id]), itemId: document.id,
-          title: document.title, description: document.description, altText: document.altText, sourceUrls: document.sourceUrls, tab: embed || document.mimeType === 'application/pdf' || document.mimeType?.startsWith('image/') ? 'pdfs' : 'links', url: document.url,
+          title: document.title, description: document.description, altText: document.altText, sourceUrls: document.sourceUrls, tab: isHostedHtmlDocument(document.url) ? 'interactive' : embed || document.mimeType === 'application/pdf' || document.mimeType?.startsWith('image/') ? 'pdfs' : 'links', url: document.url,
           embedUrl: embed, embedType: isImageDocument(document.url) ? 'image' : embed ? 'iframe' : 'none', playlistProgress: false });
       }
     } else if (!isVideoMaterial(material) && isHttpUrl(material.url)) {
       const embed = getDocumentEmbedUrl(material.url);
       result.push({ ...base, key: JSON.stringify([material.id, embed ? 'pdfs' : 'links', material.id]), itemId: material.id,
-        title: base.bundleTitle, tab: embed ? 'pdfs' : 'links', url: material.url,
+        title: base.bundleTitle, tab: isHostedHtmlDocument(material.url) ? 'interactive' : embed ? 'pdfs' : 'links', url: material.url,
         embedUrl: embed, embedType: isImageDocument(material.url) ? 'image' : embed ? 'iframe' : 'none', playlistProgress: false });
     }
   }

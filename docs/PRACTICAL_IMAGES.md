@@ -8,7 +8,7 @@ Firestore remains the only catalogue and review store. Local `tmp/telegram-inbox
 
 Start with the setup and sync/analyze commands in [TELEGRAM_INBOX.md](./TELEGRAM_INBOX.md). Inspect every image at readable resolution, its source caption and any numbered labels. Distinguish study images from advertisements and chat screenshots. Do not put theory summaries in practical collections merely because they are images.
 
-Use English descriptions: identify the specimen or model and describe visible distinguishing features. Translate supplied labels accurately; do not invent magnification, stains, diagnoses or numbered structures. Use authoritative references for added medical explanations and save their URLs. Hold images whose identification or curriculum destination remains uncertain.
+Use English descriptions: identify the specimen or model and describe visible distinguishing features. Translate supplied labels accurately; do not invent magnification, stains, diagnoses or numbered structures. Use authoritative references for added medical explanations and save their URLs. Hold uncertain curriculum destinations. If the user explicitly requests unanswered identification images, publish them with neutral titles and alternative text, omit identification descriptions, and use `--allow-unlabelled-images` on the create decision. Never infer the answer.
 
 Read live Firestore lessons for the identified module. Select the subject's active lesson with `revisionType: practical`. Create a missing Practical Revision lesson only after confirming the subject and curriculum. Group related images in source order, splitting mixed albums between slides/gross; do not combine unrelated sets or recordings with images.
 
@@ -19,7 +19,7 @@ pnpm materials:telegram inbox decide --batch BATCH_ID \
   --title 'Nasal cavity models' --category practical --image-collection gross \
   --reason 'Reviewed model images and numbered source labels'
 
-# Repeat for EVERY image in this plan. Source can be repeated.
+# Repeat for EVERY image in this plan. With --allow-unlabelled-images, omit --description. Source can be repeated.
 pnpm materials:telegram inbox annotate --batch BATCH_ID --plan PLAN_ID \
   --item FIRST_IMAGE_ID --title 'Nasal septum model' \
   --description 'Medial wall: identify the septal cartilage, vomer and perpendicular plate of the ethmoid using the supplied labels.' \
@@ -32,7 +32,7 @@ pnpm materials:telegram inbox publish --batch BATCH_ID --apply
 pnpm materials:telegram inbox status
 ```
 
-Preview decisions before approval and apply only within the user's authorized publication scope. Approval requires every practical image to have a title, description and alternative text; the plan must contain hosted images only and target Practical Revision. Descriptions and reference URLs are bound into the approval digest. Approved/published plans cannot be annotated; source edits require new review. Existing reuse decisions preserve editorial metadata and add lesson coverage; they do not silently rewrite existing image sets.
+Preview decisions before approval and apply only within the user's authorized publication scope. Approval requires every practical image to have a title and alternative text, plus a description unless the reviewed plan explicitly uses `--allow-unlabelled-images`; the plan must contain hosted images only and target Practical Revision. Descriptions and reference URLs are bound into the approval digest. Approved/published plans cannot be annotated; source edits require new review. Existing reuse decisions preserve editorial metadata and add lesson coverage; they do not silently rewrite existing image sets.
 
 For a playlist mixing modules, repeat `--video-id YOUTUBE_ID` on its create decision to publish only verified tracks belonging to the selected module. Use `--recording` for a verified external recording link (such as an official SharePoint Stream recording) so it becomes a playlist track with an Open original fallback. Source order is retained, and selection is bound into approval.
 

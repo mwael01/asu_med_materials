@@ -1,13 +1,14 @@
 ---
 import type { StudyEntry, StudyTab } from '../../types/lessons';
 import type { MaterialItem } from '../../types/materials';
+import InteractiveDocument from './InteractiveDocument.astro';
 import PracticalImage from './PracticalImage.astro';
 import DocumentImage from './DocumentImage.astro';
 import PdfViewer from './PdfViewer.astro';
 interface Props { entries: StudyEntry[]; materials: MaterialItem[] }
 const { entries, materials } = Astro.props;
-const labels: Record<StudyTab, string> = { videos: 'Videos', audio: 'Audio', pdfs: 'PDFs', links: 'Links' };
-const tabs = (['videos', 'audio', 'pdfs', 'links'] as const).filter(tab => entries.some(entry => entry.tab === tab));
+const labels: Record<StudyTab, string> = { videos: 'Videos', audio: 'Audio', pdfs: 'PDFs', interactive: 'Interactive', links: 'Links' };
+const tabs = (['videos', 'audio', 'pdfs', 'interactive', 'links'] as const).filter(tab => entries.some(entry => entry.tab === tab));
 ---
 <div data-doctor-player>
   <script type="application/json" data-study-entries set:html={JSON.stringify(entries).replace(/</g, '\\u003c')} />
@@ -16,6 +17,7 @@ const tabs = (['videos', 'audio', 'pdfs', 'links'] as const).filter(tab => entri
       <section aria-label="Study viewer" class="min-w-0">
         <div data-study-viewport class="rounded-xl overflow-hidden border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 relative">
           <iframe data-study-frame title="Study material" class="w-full aspect-video" hidden allow="autoplay; fullscreen; picture-in-picture" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe>
+          <InteractiveDocument />
           <video data-study-video class="w-full aspect-video" controls playsinline hidden></video>
           <audio data-study-audio class="w-full my-6" controls preload="metadata" hidden></audio>
           <DocumentImage data-study-image alt="Study material" hidden />

@@ -11,7 +11,7 @@ export interface Lesson {
   revisionType?: 'practical' | 'assessment' | 'final';
 }
 
-export type StudyTab = 'videos' | 'audio' | 'pdfs' | 'links';
+export type StudyTab = 'videos' | 'audio' | 'pdfs' | 'interactive' | 'links';
 export type DiscoveryType = 'videos' | 'pdfs' | 'flashcards';
 
 export interface StudyEntry {

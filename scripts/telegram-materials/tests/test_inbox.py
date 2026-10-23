@@ -156,6 +156,41 @@ class InboxTests(unittest.TestCase):
         self.assertEqual(value['videos'][0]['sourceType'], 'external')
         self.assertEqual(value['author'], 'ASU Faculty Staff')
 
+    def test_unlabelled_image_publication_requires_explicit_override_and_keeps_description_absent(self):
+        self.repo.write('lessons', 'resp-lesson', {'revisionType': 'practical'})
+        self.repo.write('material_inbox_items', self.item['id'], {'mime': 'image/jpeg', 'storage': 'r2', 'sha256': 'b' * 64, 'bytes': 100})
+        pid = self.create_plan(category='practical', practicalImageCollection='slides', allowUnlabelledImages=True)
+        annotate(self.repo, 'batch', pid, self.item['id'], {'title': 'Identification question', 'altText': 'Electron microscopy question sheet', 'sourceUrls': ['https://example.org/source']})
+        approve(self.repo, 'batch')
+        plan = self.repo.read('material_inbox_batches/batch/plans', pid)
+        plan['batchId'] = 'batch'
+        item = self.repo.read('material_inbox_items', self.item['id'])
+        material = material_payload(plan, {'id': 'resp', 'year': 2}, self.repo.list('lessons'), [item], {item['id']: 'https://example.org/image.jpg'}, 'questions')
+        self.assertNotIn('description', material['documents'][0])
+        self.assertEqual(material['documents'][0]['title'], 'Identification question')
+
+    def test_html_needs_explicit_source_review_before_approval(self):
+        self.repo.write('material_inbox_items', self.item['id'], {'mime': 'text/html', 'storage': 'r2', 'sha256': 'c' * 64, 'bytes': 100})
+        pid = self.create_plan()
+        with self.assertRaisesRegex(ValueError, 'reviewed-html'):
+            approve(self.repo, 'batch')
+        self.repo.write('material_inbox_batches/batch/plans', pid, {'htmlReviewed': True})
+        approve(self.repo, 'batch')
+
+    def test_clinical_pdf_creates_one_lesson_and_preserves_current_asset_index(self):
+        from telegram_materials.clinical import clinical_lesson
+        self.repo.write('material_inbox_items', self.item['id'], {'mime': 'application/pdf', 'sha256': 'd' * 64})
+        preview = clinical_lesson(self.repo, self.item['id'], 'resp', 'Clinical ENT')
+        self.assertEqual(preview['author'], 'ASU Faculty Staff')
+        self.assertEqual(len(self.repo.list('lessons')), 2)
+        first = clinical_lesson(self.repo, self.item['id'], 'resp', 'Clinical ENT', True)
+        second = clinical_lesson(self.repo, self.item['id'], 'resp', 'Clinical ENT', True)
+        self.assertEqual(first['lesson']['id'], second['lesson']['id'])
+        self.assertEqual(len(self.repo.list('lessons')), 3)
+        self.assertEqual(self.repo.read('modules', 'resp')['subjects'], ['Clinical'])
+        self.assertEqual(self.repo.read('materials_version', 'current')['version'], 1)
+        self.assertEqual(self.repo.read('material_asset_index', 'catalogue-state')['version'], 1)
+
     def apply(self):
         with patch('telegram_materials.inbox_publication.verify_source', new=AsyncMock(return_value=object())), \
              patch('telegram_materials.inbox_publication.put_r2') as upload:

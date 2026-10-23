@@ -1,0 +1,9 @@
+---
+import { isHostedHtmlDocument } from '../../utils/documentViewer';
+interface Props { id?: string; url?: string; title?: string }
+const { id, url, title = 'Interactive study material' } = Astro.props;
+const source = url && isHostedHtmlDocument(url) ? url : undefined;
+---
+<iframe id={id} data-interactive-document src={source} title={title} hidden={!source}
+  sandbox="allow-scripts" referrerpolicy="no-referrer" allow="fullscreen" allowfullscreen
+  class="w-full h-[76vh] min-h-[460px] border-0 bg-white dark:bg-zinc-900"></iframe>

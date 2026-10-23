@@ -384,3 +384,5 @@ Flashcard decks are integrated directly into module pages ([`src/pages/module/[i
 Public module/subject routes use these components instead of SubjectBar and FilterToolbar. Legacy grouping components remain available to existing consumers. See [Study flow](STUDY_FLOW.md) for data and route details.
 
 Practical image collections, English study descriptions, annotation commands and viewer behavior: [Practical image uploads](./PRACTICAL_IMAGES.md).
+
+Standalone HTML embeds and Clinical PDF lessons: [Interactive materials](./INTERACTIVE_MATERIALS.md).

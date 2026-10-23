@@ -30,6 +30,9 @@ def inspect_file(path: Path, kind: str) -> dict:
             raise ValueError('Archive signature does not match a supported format')
         result = {'extension': extension, 'mime': 'application/zip' if extension == '.zip' else 'application/x-rar-compressed' if extension == '.rar' else 'application/x-7z-compressed'}
     elif kind not in {'audio', 'video'}:
+        from .html_documents import is_html, inspect_html
+        if is_html(path):
+            return {'extension': '.html', 'mime': 'text/html', 'sha256': file_hash(path), 'bytes': size, 'htmlEvidence': inspect_html(path)}
         extension, mime = file_type(path)
         result = {'extension': extension, 'mime': mime}
     else:

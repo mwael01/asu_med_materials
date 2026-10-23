@@ -157,7 +157,8 @@ def validate_image_plan(plan, items, lessons):
         if not item.get('mime', '').startswith('image/') or item.get('storage') != 'r2':
             raise ValueError('Image collections require verified, directly hosted image files')
         note = notes.get(item['id'], {})
-        if any(not isinstance(note.get(key), str) or not note[key].strip() for key in ['title', 'description', 'altText']):
+        required = ['title', 'altText'] if plan.get('allowUnlabelledImages') else ['title', 'description', 'altText']
+        if any(not isinstance(note.get(key), str) or not note[key].strip() for key in required):
             raise ValueError('Every practical image requires a reviewed title, description and alternative text')
         if any(not isinstance(url, str) or urlsplit(url).scheme not in {'http', 'https'} or not urlsplit(url).netloc for url in note.get('sourceUrls', [])):
             raise ValueError('Image sources must be HTTP(S) URLs')

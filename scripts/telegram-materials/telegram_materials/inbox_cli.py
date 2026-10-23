@@ -16,6 +16,9 @@ def add_parser(commands):
     analyze.add_argument('--module', action='append', default=[], help='Load lesson suggestions only for these modules')
     index = sub.add_parser('index', help='Build/resume one bounded page of the Firestore duplicate index')
     index.add_argument('--limit', type=int, default=50); index.add_argument('--rebuild', action='store_true')
+    clinical = sub.add_parser('clinical-lesson', help='Prepare one Clinical lesson per verified PDF')
+    clinical.add_argument('--item', required=True); clinical.add_argument('--module', required=True)
+    clinical.add_argument('--title', required=True); clinical.add_argument('--apply', action='store_true')
     sub.add_parser('status')
     show = sub.add_parser('show'); show.add_argument('item', nargs='?'); show.add_argument('--batch'); show.add_argument('--full', action='store_true')
     decision = sub.add_parser('decide')
@@ -29,11 +32,13 @@ def add_parser(commands):
     decision.add_argument('--reason', required=True)
     decision.add_argument('--recording', action='store_true', help='Verified external recording link; publish as an ordered playlist track')
     decision.add_argument('--video-id', action='append', default=[], help='Publish only these reviewed YouTube IDs from a mixed playlist')
+    decision.add_argument('--reviewed-html', action='store_true', help='Confirm inspection of the HTML source and its dependencies')
+    decision.add_argument('--allow-unlabelled-images', action='store_true', help='Explicitly permit practical question images without identification descriptions')
     decision.add_argument('--image-collection', choices=['slides', 'gross'])
     annotation = sub.add_parser('annotate', help='Save reviewed image study notes on an unpublished plan')
     annotation.add_argument('--batch', required=True); annotation.add_argument('--plan', required=True)
     annotation.add_argument('--item', required=True); annotation.add_argument('--title', required=True)
-    annotation.add_argument('--description', required=True); annotation.add_argument('--alt-text', required=True)
+    annotation.add_argument('--description'); annotation.add_argument('--alt-text', required=True)
     annotation.add_argument('--source', action='append', default=[])
     approve = sub.add_parser('approve'); approve.add_argument('--batch', required=True)
     publish = sub.add_parser('publish'); publish.add_argument('--batch', required=True); publish.add_argument('--apply', action='store_true')
@@ -80,16 +85,19 @@ def run(args):
             elif command == 'index':
                 from .inbox_catalogue import index_catalogue
                 result = index_catalogue(repo, args.limit, args.rebuild)
+            elif command == 'clinical-lesson':
+                from .clinical import clinical_lesson
+                result = clinical_lesson(repo, args.item, args.module, args.title, args.apply)
             elif command == 'decide':
                 from .inbox_publication import decide
                 result = {'planId': decide(repo, args.batch, args.item, {'action': args.action, 'moduleId': args.module,
                     'lessonIds': list(dict.fromkeys(args.lesson)), 'title': args.title, 'author': args.author,
                     'existingMaterialId': args.existing_material, 'replaceLessonAssignments': args.replace_lessons,
-                    'category': args.category, 'selectedVideoIds': args.video_id, 'forceRecording': args.recording, 'practicalImageCollection': args.image_collection, 'reason': args.reason}, args.plan)}
+                    'category': args.category, 'selectedVideoIds': args.video_id, 'forceRecording': args.recording, 'practicalImageCollection': args.image_collection, 'htmlReviewed': args.reviewed_html, 'allowUnlabelledImages': args.allow_unlabelled_images, 'reason': args.reason}, args.plan)}
             elif command == 'annotate':
                 from .inbox_publication import annotate
                 result = annotate(repo, args.batch, args.plan, args.item, {
-                    'title': args.title, 'description': args.description, 'altText': args.alt_text, 'sourceUrls': args.source})
+                    'title': args.title, **({'description': args.description} if args.description else {}), 'altText': args.alt_text, 'sourceUrls': args.source})
             elif command == 'approve':
                 from .inbox_publication import approve
                 result = approve(repo, args.batch)

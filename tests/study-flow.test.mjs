@@ -66,7 +66,7 @@ function playerEntry(materialId, itemId, tab = 'videos') {
 async function playerHarness(entries, requested, unavailableStorage = false) {
   const state = browser(`https://example.org/lesson/doctor${requested ? `?${new URLSearchParams({ item: requested })}` : ''}`);
   const root = new Element(); state.document.selectors.set('[data-doctor-player]', root);
-  const selectors = ['[data-study-entries]', '[data-study-frame]', '[data-study-video]', '[data-study-audio]', '[data-study-image]', '[data-study-done]', '[data-study-save]', '[data-study-external]', '[data-study-title]', '[data-study-open]', '[data-study-download]', '[data-study-status]', '[data-study-share]'];
+  const selectors = ['[data-study-entries]', '[data-study-frame]', '[data-interactive-document]', '[data-study-video]', '[data-study-audio]', '[data-study-image]', '[data-study-done]', '[data-study-save]', '[data-study-external]', '[data-study-title]', '[data-study-open]', '[data-study-download]', '[data-study-status]', '[data-study-share]'];
   for (const selector of selectors) root.selectors.set(selector, new Element());
   root.querySelector('[data-study-entries]').textContent = JSON.stringify(entries);
   const tabs = [...new Set(entries.map(entry => entry.tab))].map(tab => { const element = new Element(); element.dataset.studyTab = tab; return element; });
@@ -281,4 +281,18 @@ test('image controls zoom, reset and initialize once', async () => {
   assert.equal(image.style.width, '100%');
   assert.equal(image.style.maxHeight, '80vh');
   assert.equal(panel.listeners.get('click').length, 1);
+});
+
+
+test('interactive HTML uses its isolated frame and releases it when changing resource', async () => {
+  const url = `https://asumed.eduvour.com/materials/sha256/${'d'.repeat(64)}.html`;
+  const quiz = { ...playerEntry('quiz', 'html', 'interactive'), url, embedUrl: url };
+  const { root, items } = await playerHarness([quiz, playerEntry('notes', 'pdf', 'pdfs')]);
+  const interactive = root.querySelector('[data-interactive-document]');
+  assert.equal(interactive.hidden, false);
+  assert.equal(interactive.src, url);
+  assert.equal(root.querySelector('[data-study-frame]').hidden, true);
+  items[1].dispatch('click');
+  assert.equal(interactive.hidden, true);
+  assert.equal(interactive.src, '');
 });

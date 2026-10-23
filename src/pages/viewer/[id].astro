@@ -3,6 +3,7 @@ import Layout from '../../layouts/Layout.astro';
 import type { NavCrumb } from '../../types/navigation';
 import TypeBadge from '../../components/materials/TypeBadge.astro';
 import ResourceCard from '../../components/materials/ResourceCard.astro';
+import InteractiveDocument from '../../components/study/InteractiveDocument.astro';
 import PracticalImage from '../../components/study/PracticalImage.astro';
 import DocumentImage from '../../components/study/DocumentImage.astro';
 import StudyFolderDrawer from '../../components/study/StudyFolderDrawer.astro';
@@ -18,6 +19,7 @@ import {
   resolveDocumentItems,
   isEmbeddableDocument,
   isImageDocument,
+  isHostedHtmlDocument,
   isPdfDocument,
   getDocumentDownloadUrl
 } from '../../utils/documentViewer';
@@ -58,6 +60,7 @@ const parsedDocuments = documents.map((doc, idx) => {
     externalUrl: getDocumentExternalUrl(doc.url),
     isEmbeddable: isEmbeddableDocument(doc.url),
     isPdf: isPdfDocument(doc.url),
+    isHtml: isHostedHtmlDocument(doc.url),
     isImage: isImageDocument(doc.url)
   };
 });
@@ -75,6 +78,7 @@ const initialDoc = parsedDocuments[initialDocIndex] || {
   externalUrl: getDocumentExternalUrl(material.url),
   isEmbeddable: isEmbeddableDocument(material.url),
   isPdf: isPdfDocument(material.url),
+  isHtml: isHostedHtmlDocument(material.url),
   isImage: isImageDocument(material.url)
 };
 
@@ -386,6 +390,7 @@ crumbs.push({
               data-description={doc.description}
               data-alt-text={doc.altText}
               data-source-urls={JSON.stringify(doc.sourceUrls || [])}
+              data-is-html={doc.isHtml ? 'true' : 'false'}
               data-is-image={doc.isImage ? 'true' : 'false'}
               data-is-pdf={doc.isPdf ? 'true' : 'false'}
               data-external-url={doc.externalUrl}
@@ -426,7 +431,7 @@ crumbs.push({
         id="viewer-skeleton"
         class:list={[
           'absolute inset-0 z-20 flex flex-col items-center justify-center bg-zinc-100 dark:bg-zinc-900 transition-opacity duration-300 pointer-events-none',
-          initialDoc.isPdf && 'hidden'
+          (initialDoc.isPdf || initialDoc.isHtml) && 'hidden'
         ]}
       >
         <div class="animate-pulse flex flex-col items-center gap-3 text-center p-6">
@@ -453,13 +458,14 @@ crumbs.push({
       <!-- Embedded Iframe (Google Drive, Docs, Slides, and web embeds) -->
       <iframe
         id="viewer-iframe"
-        src={!initialDoc.isImage && !initialDoc.isPdf ? embedUrl : undefined}
-        hidden={initialDoc.isImage || initialDoc.isPdf}
+        src={!initialDoc.isImage && !initialDoc.isPdf && !initialDoc.isHtml ? embedUrl : undefined}
+        hidden={initialDoc.isImage || initialDoc.isPdf || initialDoc.isHtml}
         class="w-full h-full border-0 rounded-2xl"
         allow="autoplay; fullscreen"
         loading="eager"
         title={initialDoc.title || titleEn}
       ></iframe>
+      <InteractiveDocument id="viewer-interactive" url={initialDoc.isHtml ? initialDoc.url : undefined} title={initialDoc.title} />
       <DocumentImage id="viewer-image" src={initialDoc.isImage ? initialDoc.url : undefined} alt={initialDoc.altText || initialDoc.title} hidden={!initialDoc.isImage} />
       <PracticalImage visible={initialDoc.isImage} description={initialDoc.isImage ? initialDoc.description : undefined} sourceUrls={initialDoc.sourceUrls} />
     </main>
@@ -536,6 +542,7 @@ crumbs.push({
 </style>
 
 <script>
+  import { isHostedHtmlDocument } from '../../utils/documentViewer';
   import { updatePracticalImage } from '../../scripts/study/practicalImage';
   import { initBookmarkButtons, renderBookmarkButtons } from '../../utils/bookmarks';
   import { initStudiedMaterials, updateStudiedCardUI } from '../../utils/studied';
@@ -560,6 +567,7 @@ crumbs.push({
     const container = document.getElementById('viewer-container');
     const pdfRoot = document.getElementById('viewer-pdf');
     const iframe = document.getElementById('viewer-iframe') as HTMLIFrameElement | null;
+    const interactive = document.getElementById('viewer-interactive') as HTMLIFrameElement | null;
     const image = document.getElementById('viewer-image') as HTMLImageElement | null;
     const skeleton = document.getElementById('viewer-skeleton');
     const fullscreenBtn = document.getElementById('viewer-fullscreen-btn');
@@ -586,6 +594,7 @@ crumbs.push({
 
     const openLocalDocument = (blobUrl: string, title?: string, path?: string) => {
       const isPdf = path ? path.toLowerCase().endsWith('.pdf') : true;
+      if (interactive) { interactive.hidden = true; interactive.removeAttribute('src'); }
       const notes = container?.querySelector<HTMLElement>('[data-practical-image]');
       if (notes) notes.hidden = true;
       if (isPdf && pdfRoot) {
@@ -847,8 +856,14 @@ crumbs.push({
       const downloadUrl = targetBtn.getAttribute('data-download-url') || null;
       const isImage = targetBtn.getAttribute('data-is-image') === 'true';
       const isPdf = targetBtn.getAttribute('data-is-pdf') === 'true';
+      const isHtml = targetBtn.getAttribute('data-is-html') === 'true';
       const docUrl = targetBtn.getAttribute('data-doc-url') || '';
 
+      if (interactive) {
+        interactive.hidden = !isHtml; interactive.removeAttribute('src');
+        if (isHtml && external && isHostedHtmlDocument(external)) { interactive.src = external; interactive.title = title; }
+      }
+      if (isHtml) skeleton?.classList.add('hidden');
       if (image) {
         image.hidden = !isImage; image.removeAttribute('src');
         if (isImage && external) { image.src = external; image.alt = title; }
@@ -870,8 +885,8 @@ crumbs.push({
         }
       }
       if (iframe) {
-        iframe.hidden = isImage || isPdf;
-        if (!isImage && !isPdf) {
+        iframe.hidden = isImage || isPdf || isHtml;
+        if (!isImage && !isPdf && !isHtml) {
           if (embed) {
             if (skeleton) {
               skeleton.classList.remove('hidden', 'opacity-0');

@@ -11,7 +11,7 @@ import {
   getDocumentDownloadUrl,
   resolveDocumentItems
 } from '../src/utils/documentViewer.ts';
-import { isHostedDocumentUrl, getDocumentDownloadPath } from '../src/utils/documentViewer.ts';
+import { isHostedDocumentUrl, isHostedHtmlDocument, getDocumentDownloadPath } from '../src/utils/documentViewer.ts';
 import { downloadHostedDocument } from '../src/utils/documentDownload.server.ts';
 
 test('hosted recordings have downloads without being treated as document iframes', () => {
@@ -253,4 +253,22 @@ test('practical descriptions and collection membership survive Firestore convers
   assert.equal(entry.altText, 'Club cell by TEM');
   assert.deepEqual(entry.sourceUrls, material.documents[0].sourceUrls);
   assert.equal(materialStudyPath(converted, [{ id: 'practical', moduleId: 'resp', subject: 'Histology', title: 'Practical', order: 90, active: true }]), '/viewer/slides');
+});
+
+
+test('only immutable hosted HTML embeds as an interactive document', async () => {
+  const url = `https://asumed.eduvour.com/materials/sha256/${'d'.repeat(64)}.html?v=${'d'.repeat(64)}`;
+  assert.equal(isHostedHtmlDocument(url), true);
+  assert.equal(getDocumentEmbedUrl(url), url);
+  assert.equal(getDocumentViewerType(url), 'iframe');
+  assert.equal(isEmbeddableDocument(url), true);
+  assert.match(getDocumentDownloadUrl(url, 'quiz', 'html'), /document=html/);
+  for (const other of ['https://example.org/quiz.html', url.replace('asumed.eduvour.com', 'asumed.eduvour.com.evil.test'), url + '&redirect=elsewhere']) {
+    assert.equal(isHostedHtmlDocument(other), false);
+    assert.equal(getDocumentEmbedUrl(other), null);
+  }
+  const { studyEntries } = await import('../src/utils/studyContent.ts');
+  const entries = studyEntries([{ id: 'quiz', title: 'Quiz', type: 'other', year: 2, tags: [], url, documents: [{ id: 'html', title: 'Quiz', url, mimeType: 'text/html' }] }]);
+  assert.equal(entries[0].tab, 'interactive');
+  assert.equal(entries[0].embedUrl, url);
 });

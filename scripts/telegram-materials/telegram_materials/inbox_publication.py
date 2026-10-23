@@ -103,7 +103,8 @@ def annotate(repo, batch_id, plan_id, item_id, note):
     item = repo.read('material_inbox_items', item_id)
     if not item or not item.get('mime', '').startswith('image/'):
         raise ValueError('Annotations require an image')
-    if any(not isinstance(note.get(key), str) or not note[key].strip() for key in ['title', 'description', 'altText']):
+    required = ['title', 'altText'] if plan.get('allowUnlabelledImages') else ['title', 'description', 'altText']
+    if any(not isinstance(note.get(key), str) or not note[key].strip() for key in required):
         raise ValueError('Title, description and alternative text are required')
     def commit(tx):
         repo.guard(tx)
@@ -129,6 +130,8 @@ def validate_plans(repo, batch_id):
         if len(plan['itemIds']) * 5 + len(plan['lessonIds']) + 6 > 450:
             raise ValueError('Publication group is too large for one transaction; split it before approval')
         validate_decision(plan, modules, lessons)
+        if any(repo.read('material_inbox_items', key).get('mime') == 'text/html' for key in plan['itemIds']) and not plan.get('htmlReviewed'):
+            raise ValueError('Inspect HTML source and dependencies before confirming --reviewed-html')
         if plan.get('forceRecording') and any(repo.read('material_inbox_items', key)['kind'] not in {'link', 'audio', 'video', 'playlist'} for key in plan['itemIds']):
             raise ValueError('Recording plans cannot contain documents or images')
         if plan.get('selectedVideoIds'):
@@ -239,6 +242,8 @@ async def publish(repo, client, batch_id, apply=False):
                 'imageAnnotations': p.get('imageAnnotations', {}),
                 'selectedVideoIds': p.get('selectedVideoIds', []),
                 'forceRecording': p.get('forceRecording', False),
+                'htmlReviewed': p.get('htmlReviewed', False),
+                'allowUnlabelledImages': p.get('allowUnlabelledImages', False),
                 'replaceLessonAssignments': bool(p.get('replaceLessonAssignments')),
                 'previousLessonIds': p.get('previousLessonIds', [])} for p in decisions]
     if not apply:
