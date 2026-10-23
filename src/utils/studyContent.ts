@@ -1,4 +1,4 @@
-import { practicalImagePath } from './practicalImages';
+import { practicalImagePath, isPracticalImageMaterial } from './practicalImages';
 import type { MaterialItem, VideoSourceType } from '../types/materials';
 import type { DiscoveryType, Lesson, StudyEntry } from '../types/lessons';
 import { getDocumentEmbedUrl, isEmbeddableDocument, isImageDocument, isHostedHtmlDocument } from './documentViewer';
@@ -29,7 +29,7 @@ export function isMcqMaterial(material: MaterialItem): boolean {
 }
 
 export function isPdfMaterial(material: MaterialItem): boolean {
-  if (isFlashcards(material) || isMcqMaterial(material)) return false;
+  if (isFlashcards(material) || isMcqMaterial(material) || isPracticalImageMaterial(material)) return false;
   if (isVideoMaterial(material) || material.category === 'lectures') return false;
   if (material.category === 'summaries' || material.category === 'references') return true;
   if (material.type === 'summary' || material.type === 'book') return true;
@@ -42,7 +42,7 @@ export function isPdfMaterial(material: MaterialItem): boolean {
 export function studyEntries(materials: MaterialItem[]): StudyEntry[] {
   const result: StudyEntry[] = [];
   for (const material of materials) {
-    if (isFlashcards(material)) continue;
+    if (isFlashcards(material) || isPracticalImageMaterial(material)) continue;
     const base = { materialId: material.id, bundleTitle: material.titleEn || material.title };
     const addVideo = (itemId: string, title: string, url: string, youtubeId?: string, sourceType?: VideoSourceType, origin = 'videos', mediaKind?: 'audio' | 'video') => {
       const source = parseVideoSource(url, youtubeId, sourceType, mediaKind);
@@ -128,7 +128,7 @@ export function getDoctorMaterialCounts(materials: MaterialItem[]): DoctorMateri
   let links = 0;
 
   for (const material of materials) {
-    if (isFlashcards(material)) continue;
+    if (isFlashcards(material) || isPracticalImageMaterial(material)) continue;
 
     // 1. MCQ materials (Exams, question banks, quiz files)
     if (isMcqMaterial(material)) {

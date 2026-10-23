@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { practicalFolderImages, practicalImagePath, parseImageFolders } from '../src/utils/practicalImages.ts';
 import { lessonConverter } from '../src/firebase/lessons.ts';
+import { matchesDiscoveryType } from '../src/utils/studyContent.ts';
 import { materialConverter } from '../src/firebase/schema.ts';
 const lesson = { id: 'practical', title: 'Practical Revision', moduleId: 'resp', subject: 'Histology', active: true, order: 90, revisionType: 'practical',
   practicalImageFolders: [{ id: 'real-lab', title: 'Real Lab Slides' }, { id: 'computer-lab', title: 'Computer Lab Slides' }] };
@@ -13,6 +14,7 @@ test('folders are configured per lesson and flatten source bundles and unanswere
   const question = material('question', [image('question', 'computer-lab')]);
   assert.deepEqual(practicalFolderImages([lab, question], lesson, 'computer-lab').map(item => item.id), ['tem', 'question']);
   assert.deepEqual(practicalFolderImages([lab, question], lesson, 'real-lab').map(item => item.id), ['real']);
+  assert.equal(matchesDiscoveryType(lab, 'pdfs'), false);
   assert.deepEqual(practicalFolderImages([lab], { ...lesson, moduleId: 'another' }, 'computer-lab'), []);
   assert.deepEqual(practicalFolderImages([lab], lesson, 'unconfigured'), []);
   const pathology = { ...lesson, subject: 'Pathology', practicalImageFolders: [{ id: 'jars', title: 'Jars' }] };

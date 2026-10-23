@@ -248,11 +248,15 @@ test('practical descriptions and collection membership survive Firestore convers
     documents: [{ id: 'club', title: 'Club cell', url: 'https://example.org/image.jpg', mimeType: 'image/jpeg', description: 'Apical secretory granules.', altText: 'Club cell by TEM', sourceUrls: ['https://example.org/reference'] }] };
   const converted = materialConverter.fromFirestore({ id: material.id, data: () => materialConverter.toFirestore(material) });
   assert.equal(converted.practicalImageCollection, 'slides');
-  const entry = studyEntries([converted])[0];
+  const { practicalFolderImages } = await import('../src/utils/practicalImages.ts');
+  const lesson = { id: 'practical', moduleId: 'resp', subject: 'Histology', title: 'Practical', order: 90, active: true, practicalImageFolders: [{ id: 'slides', title: 'Slides' }] };
+  converted.practicalImageFolderId = 'slides';
+  assert.equal(studyEntries([converted]).length, 0);
+  const entry = practicalFolderImages([converted], lesson, 'slides')[0];
   assert.equal(entry.description, material.documents[0].description);
   assert.equal(entry.altText, 'Club cell by TEM');
   assert.deepEqual(entry.sourceUrls, material.documents[0].sourceUrls);
-  assert.equal(materialStudyPath(converted, [{ id: 'practical', moduleId: 'resp', subject: 'Histology', title: 'Practical', order: 90, active: true }]), '/viewer/slides');
+  assert.match(materialStudyPath(converted, [lesson]), /^\/module\/resp\/histology\/lesson\/practical\/images\/slides\?image=/);
 });
 
 

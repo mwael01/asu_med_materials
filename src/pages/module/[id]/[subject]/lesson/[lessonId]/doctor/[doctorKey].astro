@@ -9,6 +9,7 @@ import { getPublicLessons } from '../../../../../../../data/catalogue.server';
 import { getMaterialsVersionFromFirestore } from '../../../../../../../firebase/firestore';
 import { lessonDoctors, lessonPath, lessonsForSubject } from '../../../../../../../utils/lessons';
 import { studyEntries, isFlashcards } from '../../../../../../../utils/studyContent';
+import { isPracticalImageMaterial, practicalImagePath } from '../../../../../../../utils/practicalImages';
 import { subjectToSlug } from '../../../../../../../utils/slug';
 
 const version = await getMaterialsVersionFromFirestore();
@@ -16,9 +17,21 @@ const context = await loadLessonPage(Astro.params.id || '', Astro.params.subject
 if (!context) return Astro.redirect('/404');
 const { module, lesson, materials } = context;
 
-const allDoctors = lessonDoctors(materials.filter(item => !isFlashcards(item)));
+const requestedImage = Astro.url.searchParams.get('item');
+const imageMaterial = materials.find(material => isPracticalImageMaterial(material) &&
+  material.documents?.some(document => JSON.stringify([material.id, 'documents', document.id]) === requestedImage));
+if (imageMaterial) {
+  const document = imageMaterial.documents!.find(document => JSON.stringify([imageMaterial.id, 'documents', document.id]) === requestedImage);
+  const path = practicalImagePath(imageMaterial, [lesson], document?.id);
+  if (path) return Astro.redirect(path, 302);
+}
+const allDoctors = lessonDoctors(materials.filter(item => !isFlashcards(item) && !isPracticalImageMaterial(item)));
 const doctor = allDoctors.find(item => item.key === Astro.params.doctorKey);
-if (!doctor) return Astro.redirect('/404');
+if (!doctor) {
+  const previous = lessonDoctors(materials).find(item => item.key === Astro.params.doctorKey);
+  const path = previous?.items[0] && practicalImagePath(previous.items[0], [lesson]);
+  return Astro.redirect(path || '/404', 302);
+}
 
 const [allModules, allLessons] = await Promise.all([
   getAllModules(version),
