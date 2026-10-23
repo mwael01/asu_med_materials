@@ -15,6 +15,7 @@ import {
 } from '../../utils/flashcards/review';
 import {
   loadFlashcardProgress,
+  loadLocalFlashcardProgress,
   saveFlashcardProgress,
   getCachedCards,
   cacheCardsPayload,
@@ -48,6 +49,9 @@ function initStudyPlayer() {
   if (!cardStage || !viewport) return;
   const lifetime = new AbortController();
   const listenerOptions = { signal: lifetime.signal };
+  const cardSkeleton = document.getElementById('card-loading-skeleton');
+  const controlsSkeleton = document.getElementById('controls-skeleton');
+  const questionContainer = document.getElementById('card-question-container');
   const questionBody = document.getElementById('card-question-body');
   const answerContainer = document.getElementById('card-answer-container');
   const answerBody = document.getElementById('card-answer-body');
@@ -208,6 +212,29 @@ function initStudyPlayer() {
     // Use the review engine's eligibility and deduplication rules everywhere.
     cards = createReviewState(cards).cards;
 
+    // Fast-path: check local IndexedDB progress first for instant (<10ms) rendering
+    const loadLocal =
+      typeof loadLocalFlashcardProgress === 'function'
+        ? loadLocalFlashcardProgress
+        : null;
+    let localProgress: FlashcardProgress | null = null;
+    if (loadLocal && deckData.id) {
+      try {
+        localProgress = await loadLocal(uid, deckData.id);
+      } catch {
+        // Fall back gracefully to remote load
+      }
+    }
+    if (lifetime.signal.aborted) return;
+
+    if (localProgress && cards.length > 0) {
+      currentProgress = localProgress;
+      reviewState = createReviewState(cards, currentProgress);
+      ready = true;
+      render();
+      updateControls();
+    }
+
     // On-demand caching: Cache deck metadata, cards payload into IndexedDB, and image assets into Cache Storage
     if (cards && cards.length > 0 && deckData.activeRevisionId) {
       cacheDeckMetadata(deckData).catch(() => {});
@@ -219,24 +246,34 @@ function initStudyPlayer() {
 
     const savedProgress = await loadFlashcardProgress(uid, deckData.id);
     if (lifetime.signal.aborted) return;
-    currentProgress = savedProgress || {
-      deckId: deckData.id,
-      revisionId: deckData.activeRevisionId || '',
-      checkpointIndex: 0,
-      resetVersion: 1,
-      updatedAt: Date.now(),
-      cards: {},
-    };
 
-    reviewState = createReviewState(cards, currentProgress);
-    currentProgress = {
-      ...currentProgress,
-      checkpointIndex: 0,
-      pendingCardIds: [...reviewState.queue],
-    };
-    ready = true;
-    render();
-    updateControls();
+    // If we haven't rendered yet (no local progress), or if remote progress is newer and user has not interacted
+    if (
+      !ready ||
+      (savedProgress &&
+        savedProgress.updatedAt > (currentProgress?.updatedAt || 0) &&
+        !reviewState.revealed &&
+        !reviewState.completed)
+    ) {
+      currentProgress = savedProgress || {
+        deckId: deckData.id,
+        revisionId: deckData.activeRevisionId || '',
+        checkpointIndex: 0,
+        resetVersion: 1,
+        updatedAt: Date.now(),
+        cards: {},
+      };
+
+      reviewState = createReviewState(cards, currentProgress);
+      currentProgress = {
+        ...currentProgress,
+        checkpointIndex: 0,
+        pendingCardIds: [...reviewState.queue],
+      };
+      ready = true;
+      render();
+      updateControls();
+    }
   }
 
   function render() {
@@ -253,8 +290,16 @@ function initStudyPlayer() {
     progressCounter.textContent = `${known} of ${total} completed`;
     if (progressPercent) progressPercent.textContent = `${percent}%`;
     if (progressBar) progressBar.style.width = `${percent}%`;
+
+    // Hide skeletons and reveal real card UI once player is ready
+    cardSkeleton?.classList.add('hidden');
+    controlsSkeleton?.classList.add('hidden');
+    questionContainer?.classList.remove('hidden');
+
     emptyScreen?.classList.toggle('hidden', total > 0);
     if (total === 0) {
+      cardSkeleton?.classList.add('hidden');
+      controlsSkeleton?.classList.add('hidden');
       viewport.classList.add('hidden');
       pausedScreen?.classList.add('hidden');
       completeScreen?.classList.add('hidden');

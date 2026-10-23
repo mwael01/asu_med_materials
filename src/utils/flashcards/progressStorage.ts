@@ -2,7 +2,7 @@ import type { FlashcardProgress, FlashcardProgressStorageAdapter } from '../../t
 import { selectProgress } from './progress';
 
 /** Serialize cache writes separately from cloud writes so offline sync cannot block study. */
-export function createProgressStorage(adapter: FlashcardProgressStorageAdapter, remoteReadTimeoutMs = 5000) {
+export function createProgressStorage(adapter: FlashcardProgressStorageAdapter, remoteReadTimeoutMs = 1500) {
   const localWrites = new Map<string, Promise<void>>();
   const remoteWrites = new Map<string, Promise<void>>();
   const keyFor = (uid: string | null, deckId: string) => `${uid || 'guest'}:${deckId}`;

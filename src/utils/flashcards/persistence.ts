@@ -107,6 +107,7 @@ const progressStorage = createProgressStorage({
 
 export const loadFlashcardProgress = progressStorage.load;
 export const saveFlashcardProgress = progressStorage.save;
+export const loadLocalFlashcardProgress = loadLocalProgress;
 
 export async function mergeGuestProgressOnLogin(uid: string, deckIds: string[]): Promise<void> {
   if (!uid || typeof indexedDB === 'undefined') return;

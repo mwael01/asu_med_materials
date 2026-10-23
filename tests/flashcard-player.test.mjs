@@ -276,3 +276,17 @@ test('occlusion cards hide the top overlay on reveal and toggle via button', asy
   assert.equal(overlayMock.style.display, 'none');
 });
 
+test('loading skeleton transitions smoothly to rendered question and hides on empty deck', async () => {
+  const h = playerHarness(sampleCards(2));
+  await tick();
+  assert.equal(h.element('card-loading-skeleton').classList.contains('hidden'), true);
+  assert.equal(h.element('controls-skeleton').classList.contains('hidden'), true);
+  assert.equal(h.element('card-question-container').classList.contains('hidden'), false);
+
+  const emptyH = playerHarness([]);
+  await tick();
+  assert.equal(emptyH.element('card-loading-skeleton').classList.contains('hidden'), true);
+  assert.equal(emptyH.element('controls-skeleton').classList.contains('hidden'), true);
+  assert.equal(emptyH.element('session-empty-screen').classList.contains('hidden'), false);
+});
+
