@@ -119,6 +119,7 @@ export function initDoctorPlayer(): void {
     const download = root!.querySelector<HTMLAnchorElement>('[data-study-download]');
     const downloadText = root!.querySelector<HTMLElement>('[data-study-download-text]');
     if (download) {
+      download.dataset.htmlDownload = isHtml ? entry.url : '';
       const dlUrl = getDocumentDownloadUrl(entry.url, entry.materialId, entry.itemId, entry.title);
       download.hidden = !dlUrl;
       if (dlUrl) {

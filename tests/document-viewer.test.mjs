@@ -262,7 +262,7 @@ test('only immutable hosted HTML embeds as an interactive document', async () =>
   assert.equal(getDocumentEmbedUrl(url), url);
   assert.equal(getDocumentViewerType(url), 'iframe');
   assert.equal(isEmbeddableDocument(url), true);
-  assert.match(getDocumentDownloadUrl(url, 'quiz', 'html'), /document=html/);
+  assert.equal(getDocumentDownloadUrl(url, 'quiz', 'html'), url);
   for (const other of ['https://example.org/quiz.html', url.replace('asumed.eduvour.com', 'asumed.eduvour.com.evil.test'), url + '&redirect=elsewhere']) {
     assert.equal(isHostedHtmlDocument(other), false);
     assert.equal(getDocumentEmbedUrl(other), null);
@@ -271,4 +271,17 @@ test('only immutable hosted HTML embeds as an interactive document', async () =>
   const entries = studyEntries([{ id: 'quiz', title: 'Quiz', type: 'other', year: 2, tags: [], url, documents: [{ id: 'html', title: 'Quiz', url, mimeType: 'text/html' }] }]);
   assert.equal(entries[0].tab, 'interactive');
   assert.equal(entries[0].embedUrl, url);
+});
+
+
+test('interactive downloads use the browser CORS path and reject non-HTML responses', async () => {
+  const { fetchInteractiveDocument } = await import('../src/scripts/study/interactiveDownload.ts');
+  const url = `https://asumed.eduvour.com/materials/sha256/${'e'.repeat(64)}.html`;
+  const blob = await fetchInteractiveDocument(url, async (request, options) => {
+    assert.equal(request, url); assert.equal(options.credentials, 'omit'); assert.equal(options.redirect, 'error');
+    return new Response('<html>Quiz</html>', { headers: { 'Content-Type': 'text/html' } });
+  });
+  assert.equal(await blob.text(), '<html>Quiz</html>');
+  await assert.rejects(fetchInteractiveDocument(url, async () => new Response('Challenge', { status: 403 })), /unavailable/);
+  await assert.rejects(fetchInteractiveDocument('https://example.org/file.html'), /Unsupported/);
 });

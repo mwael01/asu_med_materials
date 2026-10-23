@@ -57,6 +57,9 @@ export function getDocumentDownloadUrl(
   if (!url) return null;
   const clean = url.trim();
 
+  // HTML downloads run in the browser; the CDN challenges server HTML requests.
+  if (isHostedHtmlDocument(clean)) return clean;
+
   // 1. Hosted R2 document via internal streaming attachment endpoint
   if (isHostedDocumentUrl(clean)) {
     if (materialId && documentId) {

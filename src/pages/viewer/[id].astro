@@ -278,6 +278,7 @@ crumbs.push({
             data-title={initialDoc.title}
             data-url={initialDoc.url}
             data-download-url={initialDownloadUrl || ''}
+            data-html-download={initialDoc.isHtml ? initialDoc.url : undefined}
             data-download-name={initialDownloadFilename}
             hidden={!initialDownloadUrl}
             class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-semibold transition-all cursor-pointer shadow-2xs border-zinc-200/80 dark:border-zinc-800 bg-white dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 hover:border-emerald-500 hover:text-emerald-600 dark:hover:text-emerald-400"
@@ -933,6 +934,7 @@ crumbs.push({
         if (bottomDriveLink) bottomDriveLink.href = external;
       }
       if (downloadBtn) {
+        downloadBtn.dataset.htmlDownload = isHtml ? docUrl : '';
         downloadBtn.dataset.docId = docId;
         downloadBtn.dataset.title = title;
         const downloadName = targetBtn.getAttribute('data-download-name') || `${title.replace(/[/\\?%*:|"<>]/g, ' ').trim()}.pdf`;
