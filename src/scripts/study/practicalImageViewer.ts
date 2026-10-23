@@ -84,7 +84,7 @@ export function initPracticalImageViewers(): void {
     }, { signal: lifecycle.signal });
     window.addEventListener('resize', fit, { signal: lifecycle.signal });
     window.addEventListener('keydown', event => {
-      if (event.altKey || event.ctrlKey || event.metaKey || (event.target instanceof HTMLElement && event.target.closest('input, textarea, select, button, a, [contenteditable]'))) return;
+      if (event.altKey || event.ctrlKey || event.metaKey || (event.target instanceof HTMLElement && (event.target.closest('input, textarea, select, [contenteditable]') || (!root.contains(event.target) && event.target !== document.body)))) return;
       const index = event.key === 'ArrowRight' ? selected + 1 : event.key === 'ArrowLeft' ? selected - 1 : event.key === 'Home' ? 0 : event.key === 'End' ? images.length - 1 : null;
       if (index !== null) { event.preventDefault(); void select(index); }
     }, { signal: lifecycle.signal });

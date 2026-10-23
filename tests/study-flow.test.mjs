@@ -265,7 +265,8 @@ async function imageGalleryHarness(images, requested) {
   sources.replaceChildren = (...children) => { sources.children = children; };
   caption.selectors.set('[data-image-description]', text); caption.selectors.set('[data-image-sources]', sources);
   root.selectors.set('[data-image-caption]', caption);
-  const buttons = images.map(image => { const button = new Element(); button.dataset.imageKey = image.key; button.scrollIntoView = () => {}; return button; });
+  const buttons = images.map(image => { const button = new Element(); button.dataset.imageKey = image.key; button.scrollIntoView = () => {}; button.closest = () => null; return button; });
+  root.contains = node => buttons.includes(node) || [...root.selectors.values()].includes(node);
   root.lists.set('[data-image-key]', buttons); root.lists.set('[data-image-zoom]', []);
   state.document.lists.set('[data-practical-viewer]', [root]);
   const pending = [];
@@ -297,6 +298,8 @@ test('practical player mixes questions with other images, preserves deep links a
   assert.equal(text.textContent, '');
   assert.equal(buttons[1].getAttribute('aria-current'), 'true');
   assert.equal(root.querySelector('[data-image-next]').listeners.get('click').length, 1);
+  state.window.dispatch('keydown', { key: 'ArrowRight', target: buttons[1] });
+  assert.equal(state.location.searchParams.get('image'), images[2].key);
 });
 
 test('rapid image navigation cannot display a stale decode or prefetch the wrong image', async () => {
