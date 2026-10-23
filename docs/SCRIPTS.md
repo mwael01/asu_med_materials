@@ -112,9 +112,10 @@ uv run --project scripts/flashcards flashcards link-images
 
 ## Instructions for AI Agents
 - **Single Source of Truth**: All study materials, curriculum modules, user profiles, and contributors live directly in Cloud Firestore. Never store or look for local JSON or static data files for materials.
+- **Minimize Firebase Reads & Writes (Free-Tier Quota)**: Strictly minimize direct Firestore reads and updates. Query specific document IDs or narrow filters instead of scanning entire collections, compare existing fields before writing to skip no-op updates, group mutations into a `WriteBatch`, and increment `materials_version/current` only once after a batch finishes.
 - When adding new YouTube playlists, use YouTube fetch helpers to populate the `videos` array with accurate chapter titles and IDs directly in Cloud Firestore.
 - Maintain error handling and rate-limiting timeouts between YouTube fetches to prevent network bans.
-- Always run `pnpm run schema:sync` after adding or modifying Firestore documents to keep `firebase/schema.json` synchronized.
+- Only run `pnpm run schema:sync` when introducing new collections or changing document schema fields (avoid running it after routine content updates to save Firestore read quota).
 - **Flashcards Direct Upload**: When uploading or updating flashcard decks and card documents, read [`docs/AI_FLASHCARDS_GUIDE.md`](file:///home/mwael/work/asu_med_materials/docs/AI_FLASHCARDS_GUIDE.md) for complete instructions on Anki package processing, R2 media hosting (sponsored by eduvour.com), sanitization invariants, and batch writes to Cloud Firestore.
 - Always run static validation (`pnpm astro check && pnpm build`) after code edits to ensure build and SSR integrity.
 
