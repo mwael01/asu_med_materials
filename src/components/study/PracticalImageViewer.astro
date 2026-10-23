@@ -1,0 +1,55 @@
+---
+import type { PracticalGalleryImage } from '../../types/practicalImages';
+import ImageCaption from './ImageCaption.astro';
+import { getDocumentDownloadUrl } from '../../utils/documentViewer';
+interface Props { images: PracticalGalleryImage[] }
+const { images } = Astro.props;
+const selected = Math.max(0, images.findIndex(image => image.key === Astro.url.searchParams.get('image')));
+const current = images[selected];
+---
+{current ? <div data-practical-viewer class="space-y-3">
+  <script type="application/json" data-practical-images set:html={JSON.stringify(images).replace(/</g, '\\u003c')} />
+  <div class="flex flex-wrap items-center justify-between gap-2 text-sm">
+    <div class="flex gap-2">
+      <button type="button" data-image-prev disabled={selected === 0}>Previous</button>
+      <button type="button" data-image-next disabled={selected === images.length - 1}>Next</button>
+    </div>
+    <div class="flex flex-wrap gap-2">
+      <button type="button" data-image-zoom="1.25" aria-label="Zoom in">+</button>
+      <button type="button" data-image-zoom="0.8" aria-label="Zoom out">−</button>
+      <button type="button" data-image-reset>Fit</button>
+      <button type="button" data-image-fullscreen>Fullscreen</button>
+      <a data-image-download href={getDocumentDownloadUrl(current.url, current.materialId, current.id) || current.url} download>Download</a>
+    </div>
+  </div>
+  <div data-image-workspace class="grid lg:grid-cols-[minmax(0,1fr)_minmax(16rem,22rem)] gap-4 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-3">
+    <div data-image-stage class="relative h-[36dvh] min-h-48 lg:h-[65dvh] overflow-auto flex items-center justify-center bg-zinc-100 dark:bg-zinc-950 rounded-lg" aria-busy="false">
+      <img data-practical-image src={current.url} alt={current.altText || current.title} width="1200" height="900" fetchpriority="high" decoding="async" class="max-w-full max-h-full object-contain" />
+      <p data-image-status hidden role="status" class="absolute inset-0 flex items-center justify-center bg-zinc-100 dark:bg-zinc-950 text-sm"></p>
+    </div>
+    <aside class="min-w-0 lg:max-h-[65dvh] overflow-y-auto">
+      <h2 data-image-title class="font-semibold text-base mb-2">{current.title}</h2>
+      <p data-image-author hidden={!current.author} class="text-xs text-zinc-500 mb-3">{current.author}</p>
+      <ImageCaption visible description={current.description} sourceUrls={current.sourceUrls} />
+    </aside>
+  </div>
+  <div data-image-thumbnails aria-label="Choose practical image" class="flex gap-2 overflow-x-auto py-2">
+    {images.map((image, index) => <button type="button" data-image-key={image.key} aria-label={image.title} aria-current={index === selected ? 'true' : 'false'} class="shrink-0 p-1 border-2 border-transparent rounded-lg aria-[current=true]:border-emerald-500">
+      <img src={image.thumbnailUrl || image.url} alt="" loading="lazy" decoding="async" width="96" height="72" class="w-24 h-18 object-contain bg-white rounded" />
+    </button>)}
+  </div>
+</div> : <p class="text-sm text-zinc-500 py-6">No images yet.</p>}
+<script>
+  import { initPracticalImageViewers } from '../../scripts/study/practicalImageViewer';
+  initPracticalImageViewers();
+  document.addEventListener('astro:page-load', initPracticalImageViewers);
+</script>
+<style>
+  button:not([data-image-key]), [data-image-download] { padding: .3rem .65rem; border: 1px solid #a1a1aa; border-radius: .5rem; }
+  button:disabled { opacity: .4; }
+  button, a { touch-action: manipulation; }
+  button:focus-visible, a:focus-visible { outline: 2px solid #059669; outline-offset: 2px; }
+  [data-practical-viewer]:fullscreen { background: #18181b; color: white; padding: 1rem; overflow: auto; }
+  [data-practical-viewer]:fullscreen [data-image-stage] { height: 60dvh; }
+  [data-image-status][hidden] { display: none; }
+</style>

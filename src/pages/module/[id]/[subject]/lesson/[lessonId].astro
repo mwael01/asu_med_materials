@@ -1,6 +1,8 @@
 ---
 import Layout from '../../../../../layouts/Layout.astro';
 import PageHeading from '../../../../../components/common/PageHeading.astro';
+import PracticalImageFolders from '../../../../../components/study/PracticalImageFolders.astro';
+import { isPracticalImageMaterial } from '../../../../../utils/practicalImages';
 import DoctorCards from '../../../../../components/study/DoctorCards.astro';
 import ResourceGrid from '../../../../../components/materials/ResourceGrid.astro';
 import type { NavCrumb } from '../../../../../types/navigation';
@@ -75,8 +77,7 @@ const crumbs: NavCrumb[] = [
 
 const backHref = `/module/${module.id}/${subjectSlug}`;
 
-const imageSets = materials.filter(item => item.practicalImageCollection);
-const remainingMaterials = materials.filter(item => !item.practicalImageCollection);
+const remainingMaterials = materials.filter(item => !isPracticalImageMaterial(item));
 const flashcards = materials.filter(isFlashcards);
 const doctors = lessonDoctors(remainingMaterials.filter(item => !isFlashcards(item)));
 const doctorMaterials = new Set(doctors.flatMap(doctor => doctor.items.map(item => item.id)));
@@ -86,11 +87,7 @@ const general = remainingMaterials.filter(item => !isFlashcards(item) && !doctor
 <Layout title={`${lesson.title} - ASU Med`} crumbs={crumbs} backHref={backHref}>
   <PageHeading title={lesson.title} />
 
-  {(['slides', 'gross'] as const).filter(kind => imageSets.some(item => item.practicalImageCollection === kind)).map(kind => (
-    <a class="block my-3 rounded-xl border border-zinc-200 dark:border-zinc-800 p-4 font-semibold hover:border-emerald-500" href={`${lessonPath(lesson)}/images/${kind}`}>
-      {kind === 'slides' ? 'Slides Collection' : 'Gross Collection'}
-    </a>
-  ))}
+  <PracticalImageFolders lesson={lesson} materials={materials} />
 
   <!-- Doctors Section (Sky Blue accent with Doctor Icon) -->
   {doctors.length > 0 && (

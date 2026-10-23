@@ -6,7 +6,7 @@ import { materialMatchesLesson, validateLesson } from '../utils/lessons';
 import type { MaterialItem } from '../types/materials';
 
 export const lessonConverter: FirestoreDataConverter<Lesson> = {
-  toFirestore: (lesson: Lesson) => ({ ...lesson }),
+  toFirestore: (lesson: Lesson) => Object.fromEntries(Object.entries(lesson).filter(([, value]) => value !== undefined)),
   fromFirestore(snapshot, options) {
     const data = snapshot.data(options);
     return {
@@ -17,7 +17,8 @@ export const lessonConverter: FirestoreDataConverter<Lesson> = {
       order: typeof data.order === 'number' ? data.order : 0,
       active: data.active !== false,
       isRevision: Boolean(data.isRevision),
-      revisionType: data.revisionType || undefined
+      revisionType: data.revisionType || undefined,
+      practicalImageFolders: Array.isArray(data.practicalImageFolders) ? data.practicalImageFolders : undefined
     };
   },
 };
@@ -42,6 +43,16 @@ export async function saveLessonToFirestore(lesson: Lesson): Promise<void> {
   const existing = await getDoc(doc(db, 'lessons', lesson.id));
   if (!linked.empty && existing.exists() && (existing.data().moduleId !== lesson.moduleId || existing.data().subject !== lesson.subject)) {
     throw new Error('Unassign shared materials before moving this lesson to another module or subject.');
+  }
+  const assignedIds = new Set([...assigned.docs.map(item => item.id), ...linked.docs.map(item => item.data().materialId as string)]);
+  const removedFolders = (existing.data()?.practicalImageFolders || []).filter((folder: { id: string }) => !lesson.practicalImageFolders?.some(current => current.id === folder.id));
+  if (removedFolders.length) {
+    const snapshots = await Promise.all([...assignedIds].map(id => getDoc(doc(db, 'materials', id))));
+    const removedIds = new Set(removedFolders.map((folder: { id: string }) => folder.id));
+    if (snapshots.some(snapshot => {
+      const material = snapshot.data() as MaterialItem | undefined;
+      return material && (material.documents?.length ? material.documents.some(document => removedIds.has(document.practicalImageFolderId || material.practicalImageFolderId)) : removedIds.has(material.practicalImageFolderId));
+    })) throw new Error('Move the images before removing their folder.');
   }
   await setDoc(doc(db, 'lessons', lesson.id).withConverter(lessonConverter), { ...lesson, title: lesson.title.trim() });
   await incrementMaterialsVersionInFirestore();

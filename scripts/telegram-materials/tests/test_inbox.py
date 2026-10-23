@@ -191,6 +191,19 @@ class InboxTests(unittest.TestCase):
         self.assertEqual(self.repo.read('materials_version', 'current')['version'], 1)
         self.assertEqual(self.repo.read('material_asset_index', 'catalogue-state')['version'], 1)
 
+    def test_image_folder_configuration_is_lesson_scoped_and_imports_require_known_folder(self):
+        from telegram_materials.image_folders import configure_folders
+        self.repo.write('lessons', 'resp-lesson', {'revisionType': 'practical'})
+        configure_folders(self.repo, 'resp-lesson', [{'id': 'computer-lab', 'title': 'Computer Lab Slides'}], True)
+        self.assertNotIn('practicalImageFolders', self.repo.read('lessons', 'other-lesson'))
+        self.repo.write('material_inbox_items', self.item['id'], {'mime': 'image/jpeg', 'storage': 'r2', 'sha256': 'e' * 64, 'bytes': 100})
+        pid = self.create_plan(category='practical', practicalImageFolderId='unknown', allowUnlabelledImages=True)
+        annotate(self.repo, 'batch', pid, self.item['id'], {'title': 'Question', 'altText': 'Question sheet'})
+        with self.assertRaisesRegex(ValueError, 'configured image folder'):
+            approve(self.repo, 'batch')
+        self.repo.write('material_inbox_batches/batch/plans', pid, {'practicalImageFolderId': 'computer-lab'})
+        approve(self.repo, 'batch')
+
     def apply(self):
         with patch('telegram_materials.inbox_publication.verify_source', new=AsyncMock(return_value=object())), \
              patch('telegram_materials.inbox_publication.put_r2') as upload:

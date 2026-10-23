@@ -2,7 +2,7 @@
 import type { StudyEntry, StudyTab } from '../../types/lessons';
 import type { MaterialItem } from '../../types/materials';
 import InteractiveDocument from './InteractiveDocument.astro';
-import PracticalImage from './PracticalImage.astro';
+import ImageCaption from './ImageCaption.astro';
 import DocumentImage from './DocumentImage.astro';
 import PdfViewer from './PdfViewer.astro';
 interface Props { entries: StudyEntry[]; materials: MaterialItem[] }
@@ -21,7 +21,7 @@ const tabs = (['videos', 'audio', 'pdfs', 'interactive', 'links'] as const).filt
           <video data-study-video class="w-full aspect-video" controls playsinline hidden></video>
           <audio data-study-audio class="w-full my-6" controls preload="metadata" hidden></audio>
           <DocumentImage data-study-image alt="Study material" hidden />
-          <PracticalImage />
+          <ImageCaption />
           <PdfViewer id="doctor-pdf-viewer" class="w-full h-[70vh] min-h-[460px]" hidden />
           <div data-study-external class="p-8 text-sm text-zinc-500" hidden>Open this resource using the link below.</div>
         </div>

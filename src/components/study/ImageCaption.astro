@@ -1,0 +1,8 @@
+---
+interface Props { description?: string; sourceUrls?: string[]; visible?: boolean }
+const { description, sourceUrls = [], visible = false } = Astro.props;
+---
+<section data-image-caption hidden={!visible} class="space-y-3 text-sm leading-relaxed">
+  <p data-image-description class="whitespace-pre-wrap" hidden={!description}>{description}</p>
+  <div data-image-sources class="flex flex-wrap gap-3 text-xs">{sourceUrls.filter(url => /^https?:\/\//i.test(url)).map((url, i) => <a class="underline" href={url} target="_blank" rel="noopener noreferrer">Source {i + 1}</a>)}</div>
+</section>

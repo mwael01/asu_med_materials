@@ -34,6 +34,8 @@ export interface DocumentItem {
   url: string;
   type?: ResourceType;
   mimeType?: string;
+  thumbnailUrl?: string;
+  practicalImageFolderId?: string;
   description?: string;
   altText?: string;
   sourceUrls?: string[];
@@ -93,7 +95,9 @@ export interface MaterialItem {
   playlistId?: string; // YouTube playlist ID if applicable
   flashcardDeckId?: string;
   videos?: PlaylistItem[]; // Individual videos for multi-part video series
+  /** Legacy import marker; folder navigation uses lesson configuration. */
   practicalImageCollection?: 'slides' | 'gross';
+  practicalImageFolderId?: string;
   documents?: DocumentItem[]; // Individual documents for multi-file study bundles
   bookmarksCount?: number; // Total number of students who bookmarked/loved this material
 }

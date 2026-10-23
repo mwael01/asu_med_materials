@@ -4,7 +4,9 @@ import type { NavCrumb } from '../../types/navigation';
 import TypeBadge from '../../components/materials/TypeBadge.astro';
 import ResourceCard from '../../components/materials/ResourceCard.astro';
 import InteractiveDocument from '../../components/study/InteractiveDocument.astro';
-import PracticalImage from '../../components/study/PracticalImage.astro';
+import ImageCaption from '../../components/study/ImageCaption.astro';
+import { getPublicLessons } from '../../data/catalogue.server';
+import { practicalImagePath } from '../../utils/practicalImages';
 import DocumentImage from '../../components/study/DocumentImage.astro';
 import StudyFolderDrawer from '../../components/study/StudyFolderDrawer.astro';
 import PdfViewer from '../../components/study/PdfViewer.astro';
@@ -34,6 +36,9 @@ const material = await getMaterialById(id, version);
 if (!material) {
   return Astro.redirect('/404');
 }
+
+const practicalPath = practicalImagePath(material, await getPublicLessons(version), Astro.url.searchParams.get('document') || undefined);
+if (practicalPath) return Astro.redirect(practicalPath, 302);
 
 // Redirect playlists to the dedicated playlist player
 if (material.type === 'playlist' || material.playlistId || (material.videos && material.videos.length > 0)) {
@@ -468,7 +473,7 @@ crumbs.push({
       ></iframe>
       <InteractiveDocument id="viewer-interactive" url={initialDoc.isHtml ? initialDoc.url : undefined} title={initialDoc.title} />
       <DocumentImage id="viewer-image" src={initialDoc.isImage ? initialDoc.url : undefined} alt={initialDoc.altText || initialDoc.title} hidden={!initialDoc.isImage} />
-      <PracticalImage visible={initialDoc.isImage} description={initialDoc.isImage ? initialDoc.description : undefined} sourceUrls={initialDoc.sourceUrls} />
+      <ImageCaption visible={initialDoc.isImage} description={initialDoc.isImage ? initialDoc.description : undefined} sourceUrls={initialDoc.sourceUrls} />
     </main>
 
     <!-- Bottom Helper Note -->
@@ -544,7 +549,7 @@ crumbs.push({
 
 <script>
   import { isHostedHtmlDocument } from '../../utils/documentViewer';
-  import { updatePracticalImage } from '../../scripts/study/practicalImage';
+  import { updateImageCaption } from '../../scripts/study/imageCaption';
   import { initBookmarkButtons, renderBookmarkButtons } from '../../utils/bookmarks';
   import { initStudiedMaterials, updateStudiedCardUI } from '../../utils/studied';
   import {
@@ -596,7 +601,7 @@ crumbs.push({
     const openLocalDocument = (blobUrl: string, title?: string, path?: string) => {
       const isPdf = path ? path.toLowerCase().endsWith('.pdf') : true;
       if (interactive) { interactive.hidden = true; interactive.removeAttribute('src'); }
-      const notes = container?.querySelector<HTMLElement>('[data-practical-image]');
+      const notes = container?.querySelector<HTMLElement>('[data-image-caption]');
       if (notes) notes.hidden = true;
       if (isPdf && pdfRoot) {
         if (image) image.hidden = true;
@@ -869,7 +874,10 @@ crumbs.push({
         image.hidden = !isImage; image.removeAttribute('src');
         if (isImage && external) { image.src = external; image.alt = title; }
       }
-      if (image) updatePracticalImage(image.parentElement!, image, targetBtn.dataset.description, targetBtn.dataset.altText, JSON.parse(targetBtn.dataset.sourceUrls || '[]'));
+      if (image) {
+        image.alt = targetBtn.dataset.altText || title;
+        updateImageCaption(image.parentElement!, !image.hidden, targetBtn.dataset.description, JSON.parse(targetBtn.dataset.sourceUrls || '[]'));
+      }
       const selectedUrl = new URL(location.href); selectedUrl.searchParams.set('document', docId); history.replaceState(null, '', selectedUrl);
       if (pdfRoot) {
         pdfRoot.hidden = !isPdf;

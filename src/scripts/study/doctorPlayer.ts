@@ -1,4 +1,4 @@
-import { updatePracticalImage } from './practicalImage';
+import { updateImageCaption } from './imageCaption';
 import type { StudyEntry, StudyTab } from '../../types/lessons';
 import { getStoredBookmarkIds, getStoredStudiedIds, saveStudiedIds } from '../../utils/storage';
 import { setMaterialBookmarked } from '../../utils/bookmarks';
@@ -94,7 +94,10 @@ export function initDoctorPlayer(): void {
       image.hidden = !isImage; image.removeAttribute('src');
       if (isImage && entry.embedUrl) { image.src = entry.embedUrl; image.alt = entry.title; }
     }
-    if (image) updatePracticalImage(root!, image, entry.description, entry.altText, entry.sourceUrls);
+    if (image) {
+      image.alt = entry.altText || entry.title;
+      updateImageCaption(root!, !image.hidden, entry.description, entry.sourceUrls);
+    }
     if (pdfRoot) {
       pdfRoot.hidden = !isPdf;
       if (isPdf && entry.url) {

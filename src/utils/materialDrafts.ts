@@ -58,6 +58,7 @@ export function serializeDraft(draft: MaterialDraft, modules: ModuleInfo[]): Mat
     contributorUsername: draft.contributorUsername,
     playlistId: draft.type === 'playlist' ? new URL(draft.url).searchParams.get('list') || draft.playlistId : undefined,
     videos: draft.type === 'playlist' ? draft.videos : undefined,
+    practicalImageFolderId: draft.practicalImageFolderId,
     practicalImageCollection: draft.practicalImageCollection,
     documents: draft.documents && draft.documents.length > 0 ? draft.documents : undefined,
     createdAt: new Date().toISOString(),

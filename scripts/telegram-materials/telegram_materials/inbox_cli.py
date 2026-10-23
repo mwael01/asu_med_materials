@@ -19,6 +19,9 @@ def add_parser(commands):
     clinical = sub.add_parser('clinical-lesson', help='Prepare one Clinical lesson per verified PDF')
     clinical.add_argument('--item', required=True); clinical.add_argument('--module', required=True)
     clinical.add_argument('--title', required=True); clinical.add_argument('--apply', action='store_true')
+    folders = sub.add_parser('image-folders', help='Configure folders for one Practical Revision lesson')
+    folders.add_argument('--lesson', required=True); folders.add_argument('--folder', action='append', required=True, help='folder-id:Folder title')
+    folders.add_argument('--apply', action='store_true')
     sub.add_parser('status')
     show = sub.add_parser('show'); show.add_argument('item', nargs='?'); show.add_argument('--batch'); show.add_argument('--full', action='store_true')
     decision = sub.add_parser('decide')
@@ -34,11 +37,13 @@ def add_parser(commands):
     decision.add_argument('--video-id', action='append', default=[], help='Publish only these reviewed YouTube IDs from a mixed playlist')
     decision.add_argument('--reviewed-html', action='store_true', help='Confirm inspection of the HTML source and its dependencies')
     decision.add_argument('--allow-unlabelled-images', action='store_true', help='Explicitly permit practical question images without identification descriptions')
+    decision.add_argument('--image-folder', help='Folder ID configured on the destination Practical Revision lesson')
     decision.add_argument('--image-collection', choices=['slides', 'gross'])
     annotation = sub.add_parser('annotate', help='Save reviewed image study notes on an unpublished plan')
     annotation.add_argument('--batch', required=True); annotation.add_argument('--plan', required=True)
     annotation.add_argument('--item', required=True); annotation.add_argument('--title', required=True)
     annotation.add_argument('--description'); annotation.add_argument('--alt-text', required=True)
+    annotation.add_argument('--image-folder', help='Override the plan folder for this image')
     annotation.add_argument('--source', action='append', default=[])
     approve = sub.add_parser('approve'); approve.add_argument('--batch', required=True)
     publish = sub.add_parser('publish'); publish.add_argument('--batch', required=True); publish.add_argument('--apply', action='store_true')
@@ -85,6 +90,10 @@ def run(args):
             elif command == 'index':
                 from .inbox_catalogue import index_catalogue
                 result = index_catalogue(repo, args.limit, args.rebuild)
+            elif command == 'image-folders':
+                from .image_folders import configure_folders
+                parsed = [{'id': value.partition(':')[0].strip(), 'title': value.partition(':')[2].strip()} for value in args.folder]
+                result = configure_folders(repo, args.lesson, parsed, args.apply)
             elif command == 'clinical-lesson':
                 from .clinical import clinical_lesson
                 result = clinical_lesson(repo, args.item, args.module, args.title, args.apply)
@@ -93,11 +102,11 @@ def run(args):
                 result = {'planId': decide(repo, args.batch, args.item, {'action': args.action, 'moduleId': args.module,
                     'lessonIds': list(dict.fromkeys(args.lesson)), 'title': args.title, 'author': args.author,
                     'existingMaterialId': args.existing_material, 'replaceLessonAssignments': args.replace_lessons,
-                    'category': args.category, 'selectedVideoIds': args.video_id, 'forceRecording': args.recording, 'practicalImageCollection': args.image_collection, 'htmlReviewed': args.reviewed_html, 'allowUnlabelledImages': args.allow_unlabelled_images, 'reason': args.reason}, args.plan)}
+                    'category': args.category, 'selectedVideoIds': args.video_id, 'forceRecording': args.recording, 'practicalImageCollection': args.image_collection, 'practicalImageFolderId': args.image_folder, 'htmlReviewed': args.reviewed_html, 'allowUnlabelledImages': args.allow_unlabelled_images, 'reason': args.reason}, args.plan)}
             elif command == 'annotate':
                 from .inbox_publication import annotate
                 result = annotate(repo, args.batch, args.plan, args.item, {
-                    'title': args.title, **({'description': args.description} if args.description else {}), 'altText': args.alt_text, 'sourceUrls': args.source})
+                    'title': args.title, **({'description': args.description} if args.description else {}), 'altText': args.alt_text, 'sourceUrls': args.source, **({'practicalImageFolderId': args.image_folder} if args.image_folder else {})})
             elif command == 'approve':
                 from .inbox_publication import approve
                 result = approve(repo, args.batch)

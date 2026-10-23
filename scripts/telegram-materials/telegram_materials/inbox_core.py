@@ -142,10 +142,11 @@ def validate_decision(decision: dict, modules: list[dict], lessons: list[dict]) 
 
 
 def validate_image_plan(plan, items, lessons):
-    kind = plan.get('practicalImageCollection')
+    folder_id = plan.get('practicalImageFolderId')
+    kind = folder_id or plan.get('practicalImageCollection')
     if not kind:
         return
-    if kind not in {'slides', 'gross'} or plan.get('category') != 'practical':
+    if (not folder_id and kind not in {'slides', 'gross'}) or plan.get('category') != 'practical':
         raise ValueError('Image collections require slides/gross and category practical')
     if plan.get('action') != 'create':
         raise ValueError('Use create for a new image set; existing sets retain their metadata on reuse')
@@ -153,6 +154,11 @@ def validate_image_plan(plan, items, lessons):
     if not selected or any(lesson.get('revisionType') != 'practical' for lesson in selected):
         raise ValueError('Image collections must belong to Practical Revision lessons')
     notes = plan.get('imageAnnotations', {})
+    if folder_id:
+        for item in items:
+            target = notes.get(item['id'], {}).get('practicalImageFolderId') or folder_id
+            if any(target not in {f['id'] for f in lesson.get('practicalImageFolders', [])} for lesson in selected):
+                raise ValueError('Choose a configured image folder in each destination lesson')
     for item in items:
         if not item.get('mime', '').startswith('image/') or item.get('storage') != 'r2':
             raise ValueError('Image collections require verified, directly hosted image files')

@@ -9,7 +9,7 @@ from .core import link_id, video_link_type
 from .inbox_core import SOURCE_ID, MAX_R2_BYTES, TERMINAL, asset_key, fingerprint, item_keys, message_key, now, resource_keys, validate_decision, validate_image_plan
 from .inbox_analysis import matches
 from .inbox_catalogue import INDEX_ID, index_state, version
-from .inbox_media import cache_path, ensure_cache, inspect_file
+from .inbox_media import cache_path, ensure_cache, inspect_file, image_thumbnail
 from .inbox_sync import verify_source
 from .store import put_r2
 
@@ -200,6 +200,8 @@ def material_payload(plan, module, lessons, members, urls, material_id):
         value.update(subject=next(iter(subjects)), lessonId=plan['lessonIds'][0])
     if plan.get('author'):
         value['author'] = plan['author']
+    if plan.get('practicalImageFolderId'):
+        value['practicalImageFolderId'] = plan['practicalImageFolderId']
     if plan.get('practicalImageCollection'):
         value['practicalImageCollection'] = plan['practicalImageCollection']
     recordings, documents = [], []
@@ -215,6 +217,8 @@ def material_payload(plan, module, lessons, members, urls, material_id):
                                'sourceType': source_type, 'mediaKind': 'audio' if kind == 'audio' else 'video'})
         else:
             doc = {'id': member['id'][:32], 'title': title, 'url': url}
+            if member.get('thumbnailUrl'):
+                doc['thumbnailUrl'] = member['thumbnailUrl']
             if member.get('mime'):
                 doc['mimeType'] = member['mime']
             if member['id'] in plan.get('imageAnnotations', {}):
@@ -239,6 +243,7 @@ async def publish(repo, client, batch_id, apply=False):
     summary = [{'planId': p['id'], 'title': p['title'], 'action': p['action'], 'moduleId': p['moduleId'],
                 'lessonIds': p['lessonIds'], 'items': p['itemIds'],
                 'practicalImageCollection': p.get('practicalImageCollection'),
+                'practicalImageFolderId': p.get('practicalImageFolderId'),
                 'imageAnnotations': p.get('imageAnnotations', {}),
                 'selectedVideoIds': p.get('selectedVideoIds', []),
                 'forceRecording': p.get('forceRecording', False),
@@ -279,7 +284,12 @@ async def publish(repo, client, batch_id, apply=False):
                     raise ValueError('Cached file was modified after review')
                 # The shared uploader verifies existing bytes before reuse.
                 url = put_r2(cache_path(member), member)
-                repo.write('material_inbox_items', member['id'], {'uploadedUrl': url})
+                updates = {'uploadedUrl': url}
+                if member.get('mime', '').startswith('image/') and (plan.get('practicalImageFolderId') or plan.get('practicalImageCollection')):
+                    thumbnail, metadata = image_thumbnail(member)
+                    member['thumbnailUrl'] = put_r2(thumbnail, metadata)
+                    updates['thumbnailUrl'] = member['thumbnailUrl']
+                repo.write('material_inbox_items', member['id'], updates)
             urls[member['id']] = url
         mid = plan.get('existingMaterialId') or 'inbox-' + fingerprint({'batch': batch_id, 'plan': plan['id']})[:32]
         module = next(m for m in modules if m['id'] == plan['moduleId'])
@@ -310,6 +320,7 @@ async def publish(repo, client, batch_id, apply=False):
             if current_batch.get('approvedDigest') != digest or not live_module or live_module.get('active') is False:
                 raise ValueError('Approval or module visibility changed')
             validate_decision(plan, [live_module], [l for l in assigned if l])
+            validate_image_plan(plan, members, [l for l in assigned if l])
             if any(not source or source['fingerprint'] != item['revision'] or source.get('sourceMissing') for source, item in zip(sources, members)):
                 raise ValueError('Source changed during publication')
             if material and plan['action'] == 'create':

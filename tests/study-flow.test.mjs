@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import { runInNewContext } from 'node:vm';
 import ts from 'typescript';
-import * as practicalImages from '../src/scripts/study/practicalImage.ts';
+import * as imageCaptions from '../src/scripts/study/imageCaption.ts';
 import * as progressHelpers from '../src/utils/studyProgress.ts';
 import * as searchHelpers from '../src/utils/search.ts';
 import * as documentHelpers from '../src/utils/documentViewer.ts';
@@ -77,7 +77,7 @@ async function playerHarness(entries, requested, unavailableStorage = false) {
   const storage = { getStoredBookmarkIds: () => state.bookmarks, getStoredStudiedIds: () => state.studied,
     saveStudiedIds(ids) { state.studied = Array.from(ids); state.window.dispatch('studied-updated'); } };
   const exports = await loadClient('scripts/study/doctorPlayer.ts', {
-    './practicalImage': practicalImages,
+    './imageCaption': imageCaptions,
     '../../utils/storage': storage,
     '../../utils/bookmarks': { setMaterialBookmarked(id, added) { state.bookmarks = added ? [...state.bookmarks,id] : state.bookmarks.filter(item => item !== id); state.window.dispatch('bookmarks-updated'); } },
     '../../utils/userSync': { syncStudiedToggle: async (id, done) => state.changes.push([id, done]) },
@@ -241,49 +241,6 @@ test('doctor progress remains in memory when browser storage is unavailable', as
 });
 
 
-test('practical image notes switch safely and reset zoom without rendering markup', () => {
-  const root = new Element(), panel = new Element(), text = new Element(), sources = new Element(), image = new Element();
-  root.selectors.set('[data-practical-image]', panel);
-  panel.selectors.set('[data-image-description]', text);
-  panel.selectors.set('[data-image-sources]', sources);
-  sources.replaceChildren = (...children) => { sources.children = children; };
-  practicalImages.updatePracticalImage(root, image, '<script>not HTML</script>', 'Bronchiole micrograph', []);
-  assert.equal(text.textContent, '<script>not HTML</script>');
-  assert.equal(image.alt, 'Bronchiole micrograph');
-  assert.equal(panel.hidden, false);
-  image.dataset.zoom = '3';
-  practicalImages.updatePracticalImage(root, image, 'Second image', 'Lung section', []);
-  assert.equal(text.textContent, 'Second image');
-  assert.equal(image.dataset.zoom, '1');
-  image.hidden = true;
-  practicalImages.updatePracticalImage(root, image);
-  assert.equal(panel.hidden, true);
-  assert.equal(text.textContent, '');
-});
-
-
-test('image controls zoom, reset and initialize once', async () => {
-  const state = browser(), panel = new Element(), container = new Element(), image = new Element();
-  panel.parentElement = container; image.parentElement = container;
-  container.selectors.set('img', image);
-  state.document.lists.set('[data-practical-image]', [panel]);
-  const controller = await loadClient('scripts/study/practicalImage.ts', {}, state.globals());
-  controller.initPracticalImages(); controller.initPracticalImages();
-  const zoom = { dataset: { imageZoom: '1.25' }, hasAttribute: () => false };
-  panel.dispatch('click', { target: { closest: () => zoom } });
-  assert.equal(image.dataset.zoom, '1.25');
-  assert.equal(image.style.width, '125%');
-  assert.equal(image.style.maxWidth, 'none');
-  assert.equal(image.style.maxHeight, 'none');
-  const reset = { dataset: {}, hasAttribute: key => key === 'data-image-reset' };
-  panel.dispatch('click', { target: { closest: () => reset } });
-  assert.equal(image.dataset.zoom, '1');
-  assert.equal(image.style.width, '100%');
-  assert.equal(image.style.maxHeight, '80vh');
-  assert.equal(panel.listeners.get('click').length, 1);
-});
-
-
 test('interactive HTML uses its isolated frame and releases it when changing resource', async () => {
   const url = `https://asumed.eduvour.com/materials/sha256/${'d'.repeat(64)}.html`;
   const quiz = { ...playerEntry('quiz', 'html', 'interactive'), url, embedUrl: url };
@@ -295,4 +252,62 @@ test('interactive HTML uses its isolated frame and releases it when changing res
   items[1].dispatch('click');
   assert.equal(interactive.hidden, true);
   assert.equal(interactive.src, '');
+});
+
+
+async function imageGalleryHarness(images, requested) {
+  const state = browser(`https://example.org/module/m/histology/lesson/practical/images/computer-lab${requested ? `?${new URLSearchParams({ image: requested })}` : ''}`);
+  const root = new Element();
+  const fields = ['[data-practical-images]', '[data-practical-image]', '[data-image-stage]', '[data-image-status]', '[data-image-prev]', '[data-image-next]', '[data-image-title]', '[data-image-author]', '[data-image-download]', '[data-image-reset]', '[data-image-fullscreen]', '[data-image-workspace]'];
+  for (const selector of fields) root.selectors.set(selector, new Element());
+  root.querySelector('[data-practical-images]').textContent = JSON.stringify(images);
+  const caption = new Element(), text = new Element(), sources = new Element();
+  sources.replaceChildren = (...children) => { sources.children = children; };
+  caption.selectors.set('[data-image-description]', text); caption.selectors.set('[data-image-sources]', sources);
+  root.selectors.set('[data-image-caption]', caption);
+  const buttons = images.map(image => { const button = new Element(); button.dataset.imageKey = image.key; button.scrollIntoView = () => {}; return button; });
+  root.lists.set('[data-image-key]', buttons); root.lists.set('[data-image-zoom]', []);
+  state.document.lists.set('[data-practical-viewer]', [root]);
+  const pending = [];
+  root.querySelector('[data-practical-image]').decode = () => new Promise((resolve, reject) => pending.push({ resolve, reject }));
+  const preloads = [];
+  const controller = await loadClient('scripts/study/practicalImageViewer.ts', {
+    './imageCaption': imageCaptions, '../../utils/documentViewer': documentHelpers,
+  }, { ...state.globals(), HTMLElement: Element, Image: class { set src(url) { preloads.push(url); } } });
+  controller.initPracticalImageViewers(); controller.initPracticalImageViewers();
+  return { root, state, buttons, text, pending, preloads };
+}
+const galleryImage = (id, description) => ({ key: JSON.stringify(['source', id]), id, materialId: 'source', folderId: 'computer-lab', title: id, description, url: `https://example.org/${id}.jpg`, sourceUrls: [] });
+
+test('practical player mixes questions with other images, preserves deep links and updates visible captions', async () => {
+  const images = [galleryImage('slide', 'Slide description'), galleryImage('question'), galleryImage('another', '<b>plain text</b>')];
+  const { root, state, buttons, text, pending, preloads } = await imageGalleryHarness(images, images[1].key);
+  assert.equal(root.querySelector('[data-image-prev]').disabled, false);
+  root.querySelector('[data-image-next]').dispatch('click');
+  assert.equal(text.textContent, '<b>plain text</b>');
+  assert.equal(text.hidden, false);
+  assert.equal(state.location.searchParams.get('image'), images[2].key);
+  assert.equal(root.querySelector('[data-image-next]').disabled, true);
+  assert.equal(root.querySelector('[data-practical-image]').style.visibility, 'hidden');
+  pending[0].resolve(); await new Promise(resolve => setImmediate(resolve));
+  assert.equal(root.querySelector('[data-practical-image]').style.visibility, '');
+  assert.ok(preloads.length <= 2);
+  buttons[1].dispatch('click');
+  assert.equal(text.hidden, true);
+  assert.equal(text.textContent, '');
+  assert.equal(buttons[1].getAttribute('aria-current'), 'true');
+  assert.equal(root.querySelector('[data-image-next]').listeners.get('click').length, 1);
+});
+
+test('rapid image navigation cannot display a stale decode or prefetch the wrong image', async () => {
+  const { root, buttons, pending } = await imageGalleryHarness([galleryImage('a'), galleryImage('b'), galleryImage('c')]);
+  buttons[1].dispatch('click'); buttons[2].dispatch('click');
+  pending[0].resolve(); await new Promise(resolve => setImmediate(resolve));
+  assert.equal(root.querySelector('[data-practical-image]').style.visibility, 'hidden');
+  assert.equal(root.querySelector('[data-image-title]').textContent, 'c');
+  pending[1].reject(new Error('Network')); await new Promise(resolve => setImmediate(resolve));
+  assert.match(root.querySelector('[data-image-status]').textContent, /could not load/);
+  buttons[2].dispatch('click');
+  pending[2].resolve(); await new Promise(resolve => setImmediate(resolve));
+  assert.equal(root.querySelector('[data-practical-image]').style.visibility, '');
 });

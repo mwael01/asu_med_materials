@@ -1,3 +1,4 @@
+import { practicalImagePath } from './practicalImages';
 import type { MaterialItem, VideoSourceType } from '../types/materials';
 import type { DiscoveryType, Lesson, StudyEntry } from '../types/lessons';
 import { getDocumentEmbedUrl, isEmbeddableDocument, isImageDocument, isHostedHtmlDocument } from './documentViewer';
@@ -100,6 +101,8 @@ export function materialStudyPath(material: MaterialItem, lessons: Lesson[], typ
   if (isFlashcards(material)) return legacyMaterialPath(material);
   const lesson = assignedLessons(material, lessons).sort((a, b) => a.order - b.order || a.id.localeCompare(b.id))[0];
   if (!lesson) return legacyMaterialPath(material);
+  const imagePath = practicalImagePath(material, lessons);
+  if (imagePath) return imagePath;
   if (material.practicalImageCollection) return `/viewer/${encodeURIComponent(material.id)}`;
   const doctor = lessonDoctors([material])[0];
   if (!doctor) return lessonPath(lesson);

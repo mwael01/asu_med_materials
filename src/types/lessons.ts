@@ -1,3 +1,4 @@
+import type { PracticalImageFolder } from './practicalImages';
 import type { MaterialItem } from './materials';
 
 export interface Lesson {
@@ -9,6 +10,7 @@ export interface Lesson {
   active: boolean;
   isRevision?: boolean;
   revisionType?: 'practical' | 'assessment' | 'final';
+  practicalImageFolders?: PracticalImageFolder[];
 }
 
 export type StudyTab = 'videos' | 'audio' | 'pdfs' | 'interactive' | 'links';

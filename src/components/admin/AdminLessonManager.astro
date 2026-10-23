@@ -14,6 +14,10 @@
       <label class="text-sm">Order<input name="order" type="number" value="0" step="1" required class="study-input mt-1" /></label>
     </div>
     <label class="flex items-center gap-2 text-sm"><input name="active" type="checkbox" checked class="accent-emerald-600" />Active</label>
+    <label data-image-folders-field hidden class="block text-sm">Practical image folders
+      <textarea name="imageFolders" rows="3" class="study-input mt-1" placeholder="real-lab: Real Lab Slides&#10;computer-lab: Computer Lab Slides"></textarea>
+      <span class="block mt-1 text-xs text-zinc-500">One folder per line: stable-id: Folder title</span>
+    </label>
     <button type="submit" class="rounded-lg px-4 py-2 bg-emerald-600 text-white text-sm disabled:opacity-50">Save lesson</button>
   </form>
   <section>

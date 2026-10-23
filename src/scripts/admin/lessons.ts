@@ -5,6 +5,7 @@ import { fetchMaterialsFromFirestore, fetchModulesFromFirestore } from '../../fi
 import { getCachedUserProfile } from '../../firebase/auth';
 import type { Lesson } from '../../types/lessons';
 import type { MaterialItem, ModuleInfo } from '../../types/materials';
+import { parseImageFolders } from '../../utils/practicalImages';
 import { subjectToSlug } from '../../utils/slug';
 
 export function initAdminLessons(): void {
@@ -23,7 +24,7 @@ export function initAdminLessons(): void {
     subjectToSlug(lesson.subject) === subjectToSlug(subjectSelect.value))
     .sort((a,b) => a.order - b.order || a.title.localeCompare(b.title));
   function report(error: unknown) { status.textContent = error instanceof Error ? error.message : 'Unable to save. Try again.'; }
-  function resetForm() { form.reset(); editSelect.value = ''; }
+  function resetForm() { form.reset(); editSelect.value = ''; root!.querySelector<HTMLElement>('[data-image-folders-field]')!.hidden = true; }
   function renderAssignments() {
     assignments.replaceChildren();
     const items = materials.filter(item => item.moduleId === moduleSelect.value);
@@ -91,15 +92,19 @@ export function initAdminLessons(): void {
     form.querySelector<HTMLInputElement>('[name=title]')!.value = lesson?.title || '';
     form.querySelector<HTMLInputElement>('[name=order]')!.value = String(lesson?.order || 0);
     form.querySelector<HTMLInputElement>('[name=active]')!.checked = lesson?.active !== false;
+    root!.querySelector<HTMLElement>('[data-image-folders-field]')!.hidden = lesson?.revisionType !== 'practical';
+    form.querySelector<HTMLTextAreaElement>('[name=imageFolders]')!.value = (lesson?.practicalImageFolders || []).map(folder => `${folder.id}: ${folder.title}`).join('\n');
   });
   form.addEventListener('submit', async event => {
     event.preventDefault();
     if (!loaded) return;
     const button = form.querySelector<HTMLButtonElement>('[type=submit]')!; button.disabled = true;
-    const lesson: Lesson = { id: editSelect.value || crypto.randomUUID(), moduleId: moduleSelect.value, subject: subjectSelect.value,
+    const original = lessons.find(item => item.id === editSelect.value);
+    const lesson: Lesson = { ...original, id: editSelect.value || crypto.randomUUID(), moduleId: moduleSelect.value, subject: subjectSelect.value,
       title: form.querySelector<HTMLInputElement>('[name=title]')!.value.trim(),
       order: Number(form.querySelector<HTMLInputElement>('[name=order]')!.value), active: form.querySelector<HTMLInputElement>('[name=active]')!.checked };
     try {
+      if (lesson.revisionType === 'practical') lesson.practicalImageFolders = parseImageFolders(form.querySelector<HTMLTextAreaElement>('[name=imageFolders]')!.value);
       await saveLessonToFirestore(lesson);
       lessons = [...lessons.filter(item => item.id !== lesson.id), lesson];
       renderSubject(); status.textContent = 'Lesson saved.';

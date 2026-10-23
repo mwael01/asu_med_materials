@@ -194,3 +194,22 @@ async def ensure_cache(repo, client, fresh, item):
     if item.get('sha256') and metadata['sha256'] != item['sha256']:
         raise ValueError('Re-downloaded file differs from the reviewed content')
     return {**item, **metadata}
+
+
+def image_thumbnail(item: dict):
+    """Disposable thumbnail bytes; the published URL stays on the Firestore document."""
+    from PIL import Image, ImageOps
+    path = CACHE / 'thumbnails' / (item['sha256'] + '.jpg')
+    if not path.is_file():
+        path.parent.mkdir(parents=True, exist_ok=True)
+        with Image.open(cache_path(item)) as original:
+            preview = ImageOps.exif_transpose(original)
+            preview.thumbnail((240, 180))
+            if preview.mode == 'RGBA':
+                background = Image.new('RGB', preview.size, 'white')
+                background.paste(preview, mask=preview.getchannel('A'))
+                preview = background
+            else:
+                preview = preview.convert('RGB')
+            preview.save(path, 'JPEG', quality=75, optimize=True)
+    return path, inspect_file(path, 'file')

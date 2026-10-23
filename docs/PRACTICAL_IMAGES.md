@@ -1,45 +1,58 @@
-# Practical image uploads
+# Practical image folders and viewer
 
-Practical Revision contains **Slides Collection** (all microscopy, including computer-produced micrographs) and **Gross Collection** (models, organs, dissections, pathology jars and other non-microscopy practical images). Official and student images share these folders. Attribution stays on each image set; official faculty material uses `ASU Faculty Staff`.
+Each Practical Revision lesson owns its ordered `practicalImageFolders: { id, title }[]` in Firestore. Folder layouts vary by subject and module; the website has no global subject-to-folder mapping. Admin → Lessons edits these folders as `stable-id: Folder title`, one per line. Keep IDs stable when renaming a folder. Move assigned images before removing a folder.
 
-Firestore remains the only catalogue and review store. Local `tmp/telegram-inbox/` files are disposable media/previews, never material manifests. Images use the existing verified, hash-addressed R2 uploader and 25 MB per-file limit.
+The Respiratory module currently uses:
 
-## Review and upload
+| Subject | Folders |
+| --- | --- |
+| Histology | Real Lab Slides; Computer Lab Slides |
+| Anatomy | Computer Lab |
+| Pathology | Jars; Slides |
 
-Start with the setup and sync/analyze commands in [TELEGRAM_INBOX.md](./TELEGRAM_INBOX.md). Inspect every image at readable resolution, its source caption and any numbered labels. Distinguish study images from advertisements and chat screenshots. Do not put theory summaries in practical collections merely because they are images.
+A folder opens one flat image viewer. It never adds nested specimen, source-bundle or question collections. Questions appear alongside other images in the same folder. Original material/document IDs, attributions and source credits remain available for bookmarks and import audits; students navigate the combined folder rather than those source records.
 
-Use English descriptions: identify the specimen or model and describe visible distinguishing features. Translate supplied labels accurately; do not invent magnification, stains, diagnoses or numbered structures. Use authoritative references for added medical explanations and save their URLs. Hold uncertain curriculum destinations. If the user explicitly requests unanswered identification images, publish them with neutral titles and alternative text, omit identification descriptions, and use `--allow-unlabelled-images` on the create decision. Never infer the answer.
+## Configure and import
 
-Read live Firestore lessons for the identified module. Select the subject's active lesson with `revisionType: practical`. Create a missing Practical Revision lesson only after confirming the subject and curriculum. Group related images in source order, splitting mixed albums between slides/gross; do not combine unrelated sets or recordings with images.
+Set up the Telegram inbox using [TELEGRAM_INBOX.md](./TELEGRAM_INBOX.md). Inspect the actual images and captions, then read the destination lesson's live folder configuration. Do not infer lab type from a filename or apply another module's folder layout.
 
 ```bash
+# Preview; add --apply to save these lesson-specific definitions.
+pnpm materials:telegram inbox image-folders --lesson PRACTICAL_LESSON_ID \
+  --folder 'real-lab:Real Lab Slides' --folder 'computer-lab:Computer Lab Slides'
+
 pnpm materials:telegram inbox decide --batch BATCH_ID \
   --item FIRST_IMAGE_ID --item SECOND_IMAGE_ID \
   --action create --module MODULE_ID --lesson PRACTICAL_LESSON_ID \
-  --title 'Nasal cavity models' --category practical --image-collection gross \
-  --reason 'Reviewed model images and numbered source labels'
+  --title 'Respiratory practical images' --category practical --image-folder computer-lab \
+  --reason 'Reviewed images and confirmed the lesson folder'
 
-# Repeat for EVERY image in this plan. With --allow-unlabelled-images, omit --description. Source can be repeated.
+# Repeat for each image. --image-folder may override the plan default for a mixed album.
 pnpm materials:telegram inbox annotate --batch BATCH_ID --plan PLAN_ID \
   --item FIRST_IMAGE_ID --title 'Nasal septum model' \
-  --description 'Medial wall: identify the septal cartilage, vomer and perpendicular plate of the ethmoid using the supplied labels.' \
+  --description 'Identify the labelled septal cartilage, vomer and perpendicular plate of the ethmoid.' \
   --alt-text 'Photograph of a labelled nasal septum model' \
   --source 'https://t.me/asumedmaterials/POST_ID'
 
 pnpm materials:telegram inbox publish --batch BATCH_ID
 pnpm materials:telegram inbox approve --batch BATCH_ID
 pnpm materials:telegram inbox publish --batch BATCH_ID --apply
-pnpm materials:telegram inbox status
 ```
 
-Preview decisions before approval and apply only within the user's authorized publication scope. Approval requires every practical image to have a title and alternative text, plus a description unless the reviewed plan explicitly uses `--allow-unlabelled-images`; the plan must contain hosted images only and target Practical Revision. Descriptions and reference URLs are bound into the approval digest. Approved/published plans cannot be annotated; source edits require new review. Existing reuse decisions preserve editorial metadata and add lesson coverage; they do not silently rewrite existing image sets.
+`image-folders` upserts definitions on the selected lesson; it does not change other modules or subjects. Admin can remove an empty folder. Source grouping may remain in import records for provenance, but creates no extra student-facing collection level.
 
-For a playlist mixing modules, repeat `--video-id YOUTUBE_ID` on its create decision to publish only verified tracks belonging to the selected module. Use `--recording` for a verified external recording link (such as an official SharePoint Stream recording) so it becomes a playlist track with an Open original fallback. Source order is retained, and selection is bound into approval.
+Descriptions should explain verified visible features in English. Do not invent diagnoses, magnification, stains or numbered labels. Retain authoritative references for added medical explanations. When explicitly requested, unanswered questions may omit descriptions using `--allow-unlabelled-images`; still provide neutral titles, alternative text and source URLs. Never move them into a separate question folder unless specifically requested. Faculty resources retain `author: ASU Faculty Staff`.
 
-## Website and data contract
+Approval requires directly hosted images, a Practical Revision destination and a configured folder in every selected lesson. Folder selections and notes are bound into approval and revalidated on publication. The old `--image-collection slides|gross` option is retained only for historical compatibility; new imports use `--image-folder`.
 
-Image sets retain material `type: other`, `category: practical`, ordered `documents`, and optional `practicalImageCollection: slides | gross`. Each document supports optional `description`, `altText`, and `sourceUrls`. Older documents remain supported.
+## Data and viewer
 
-Folders use the existing lesson route followed by `/images/slides` or `/images/gross`. Image sets open `/viewer/MATERIAL_ID`; `?document=DOCUMENT_ID` selects one image. The same description component serves the standalone reader and doctor workspace. Text is rendered as text, with safe HTTP(S) source links. Zoom/reset and fullscreen controls operate on the selected image. Bookmarks and completion retain existing material/document IDs.
+Materials retain ordered `documents`, `type: other`, and `category: practical`. Folder assignment uses `practicalImageFolderId` on each document, with an optional material-level default. Documents may include `thumbnailUrl`, `description`, `altText`, and `sourceUrls`. All metadata lives directly in Firestore. Downloads and thumbnail files under `tmp/telegram-inbox/` are disposable media only.
 
-Verify collection visibility, source credits, descriptions while switching images, shared item links, image downloads, mobile scrolling and existing PDF/video behavior. Run `pnpm test:telegram-materials`, `pnpm test`, `pnpm astro check`, and `pnpm build`. Deploy viewer support before publishing dependent image sets. Publication retries retain IDs/checkpoints and reuse verified assets; failures stay visible in inbox status.
+The uploader creates bounded 240×180 JPEG thumbnails, publishes them through the existing checksum-verified R2 uploader, and preserves original full-resolution images. The viewer loads one full-size image and small lazy thumbnails; only adjacent images are prefetched after selection, and Save-Data disables prefetch. Rapid navigation discards stale decode results. Errors can be retried by selecting the image again.
+
+Routes are `/module/MODULE/SUBJECT/lesson/LESSON/images/FOLDER`, with `?image=` selecting the stable material/document key. Existing `/viewer/MATERIAL?document=DOCUMENT` bookmarks redirect to the correct image in its flat folder. Old generic folder links redirect to the lesson or its sole configured folder. No material/document IDs or original image bytes need to change.
+
+`PracticalImageViewer.astro` and its TypeScript controller provide previous/next, keyboard arrows/Home/End, touch swipes at fit zoom, thumbnails, zoom/fit, fullscreen and image download. Descriptions sit beside the image on desktop and immediately below its bounded-height viewport on mobile. Generic document players no longer contain the practical-image controls; ordinary document-image captions use the small shared `ImageCaption` component.
+
+Checks: `pnpm test:lessons`, `pnpm test:telegram-materials`, `pnpm test`, `pnpm astro check`, and `pnpm build`. Verify folder isolation across subjects/modules, question-image mixing, deep links, mobile captions, rapid navigation, failed-image retry, and old bookmarked links after deployment.

@@ -1,5 +1,6 @@
 import type { Lesson, LessonDoctor } from '../types/lessons';
 import type { MaterialItem, ModuleInfo } from '../types/materials';
+import { validateImageFolders } from './practicalImages';
 import { subjectToSlug } from './slug';
 import { groupMaterialsByTeacher } from './teacherGrouping';
 
@@ -33,6 +34,7 @@ export function materialMatchesLesson(material: Pick<MaterialItem, 'moduleId' | 
 }
 
 export function validateLesson(lesson: Lesson, modules: ModuleInfo[]): void {
+  if (lesson.practicalImageFolders) validateImageFolders(lesson.practicalImageFolders);
   const module = modules.find(item => item.id === lesson.moduleId);
   if (!lesson.id || lesson.id.includes('/') || !lesson.title.trim() || !Number.isFinite(lesson.order)) {
     throw new Error('A lesson needs an ID, title, and numeric order.');
