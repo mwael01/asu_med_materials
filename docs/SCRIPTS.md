@@ -1,5 +1,9 @@
 # Helper Scripts & Tooling
 
+## Material source review
+
+The [source review guide](./MATERIAL_REVIEW.md) covers verified sources, lesson corrections, doctor-name deduplication and resumable Firestore publication. Resume saved plans with `review-session` and use exact material IDs to avoid repeated catalog scans. Schema sync now uses count aggregations and accepts `--collections=materials,modules,lessons,material_lesson_links`.
+
 This document outlines automated helper scripts designed to assist AI agents and developers in maintaining, synchronizing, and expanding educational materials in the ASU Med Materials platform.
 
 ## ASU2Learn respiratory sync

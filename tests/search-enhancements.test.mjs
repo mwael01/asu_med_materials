@@ -11,6 +11,12 @@ import {
 } from '../src/utils/search.ts';
 import { getAliasesForToken } from '../src/utils/searchAliases.ts';
 
+test('reviewed historical doctor spellings remain searchable', () => {
+  const doc = createSearchDocument({ id: 'reviewed', title: 'Lecture', type: 'playlist', year: 2,
+    author: 'Dr. Canonical', authorAliases: { 'Dr. FormerSpelling': 'Dr. Canonical' }, tags: [], url: 'https://example.org/lecture' });
+  assert.deepEqual(searchDocuments([doc], { query: 'FormerSpelling' }).map(result => result.id), ['reviewed']);
+});
+
 test('Search Normalization & Arabic Prefix Stripping', () => {
   assert.equal(stripArabicPrefix('الباثولوجي'), 'باثولوجي');
   assert.equal(stripArabicPrefix('التشريح'), 'تشريح');

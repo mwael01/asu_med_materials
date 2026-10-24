@@ -4,13 +4,13 @@
   "version": "1.0.0",
   "projectId": "medmaterials",
   "database": "(default)",
-  "lastSyncedAt": "2026-10-10T19:50:41.377Z",
+  "lastSyncedAt": "2026-10-24T10:57:27.548Z",
   "collections": {
     "materials": {
       "collectionName": "materials",
       "description": "Comprehensive catalog of medical study materials, batch drives, playlists, exam papers, and textbooks across all five academic years.",
       "idField": "id",
-      "totalDocuments": 721,
+      "totalDocuments": 1121,
       "indexes": [
         {
           "fields": [
@@ -276,6 +276,11 @@
               "url"
             ]
           }
+        },
+        "authorAliases": {
+          "type": "object",
+          "required": false,
+          "description": "Reviewed historical author spelling to canonical name; supports shared doctor links and search."
         }
       }
     },
@@ -458,7 +463,7 @@
       "collectionName": "modules",
       "description": "Medical curriculum modules across all academic years including codes, subjects, and bilingual metadata.",
       "idField": "id",
-      "totalDocuments": 12,
+      "totalDocuments": 13,
       "fields": {
         "id": {
           "type": "string",
@@ -620,7 +625,8 @@
           "type": "boolean",
           "required": true
         }
-      }
+      },
+      "totalDocuments": 77
     },
     "material_lesson_links": {
       "collectionName": "material_lesson_links",
@@ -638,7 +644,8 @@
           "type": "string",
           "required": true
         }
-      }
+      },
+      "totalDocuments": 251
     },
     "material_imports": {
       "collectionName": "material_imports",
@@ -865,6 +872,10 @@
           "required": false
         }
       }
+    },
+    "material_audits": {
+      "collectionName": "material_audits",
+      "description": "Service-account-only source reviews. Subcollections retain source metadata, source listings, findings, reviewed before/after changes and original assignments. Completed publication checkpoints support targeted resumption without catalog rescans."
     }
   }
 }

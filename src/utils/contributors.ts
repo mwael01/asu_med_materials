@@ -1,8 +1,9 @@
 import { getAllMaterials } from '../data/materials';
 import type { ContributorStats } from '../types/contributors';
+import { preferredTeacherName, teacherIdentity, teacherNameResolver } from './teacherIdentity';
 
 function normalizeName(value: string): string {
-  return value.trim().toLowerCase().replace(/\s+/g, ' ');
+  return teacherIdentity(value);
 }
 
 function namesOf(value: string | string[] | undefined): string[] {
@@ -18,13 +19,22 @@ function namesOf(value: string | string[] | undefined): string[] {
 export async function getAllContributors(): Promise<ContributorStats[]> {
   const grouped = new Map<string, ContributorStats>();
   const subjectSets = new Map<string, Set<string>>();
+  const names = new Map<string, Set<string>>();
   const materials = await getAllMaterials();
+  const resolveName = teacherNameResolver(materials);
 
   for (const material of materials) {
+    const counted = new Set<string>();
     for (const authorName of namesOf(material.author)) {
-      const trimmed = authorName.trim();
+      const trimmed = resolveName(authorName.trim());
       if (!trimmed) continue;
       const key = normalizeName(trimmed);
+      if (!key) continue;
+      const variants = names.get(key) || new Set<string>();
+      variants.add(trimmed);
+      names.set(key, variants);
+      if (counted.has(key)) continue;
+      counted.add(key);
       let entry = grouped.get(key);
       if (!entry) {
         entry = {
@@ -49,6 +59,7 @@ export async function getAllContributors(): Promise<ContributorStats[]> {
   }
 
   for (const [key, entry] of grouped) {
+    entry.name = preferredTeacherName([...names.get(key)!]);
     entry.subjects = subjectSets.get(key)?.size ?? 0;
   }
 

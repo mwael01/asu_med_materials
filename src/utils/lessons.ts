@@ -3,6 +3,7 @@ import type { MaterialItem, ModuleInfo } from '../types/materials';
 import { validateImageFolders } from './practicalImages';
 import { subjectToSlug } from './slug';
 import { groupMaterialsByTeacher } from './teacherGrouping';
+import { teacherIdentity } from './teacherIdentity';
 
 export function lessonPath(lesson: Lesson): string {
   return `/module/${encodeURIComponent(lesson.moduleId)}/${subjectToSlug(lesson.subject)}/lesson/${encodeURIComponent(lesson.id)}`;
@@ -26,6 +27,18 @@ export function lessonDoctors(materials: MaterialItem[]): LessonDoctor[] {
     doctors.set(key, doctor);
   }
   return [...doctors.values()];
+}
+
+/** Resolve reviewed name changes without restoring a former, incorrect doctor credit. */
+export function findLessonDoctor(doctors: LessonDoctor[], key: string): LessonDoctor | undefined {
+  const exact = doctors.find(doctor => doctor.key === key);
+  if (exact) return exact;
+  return doctors.find(doctor => doctor.key !== 'department' && doctor.items.some(material => {
+    const names = Array.isArray(material.author) ? material.author : [material.author || ''];
+    return names.some(name => teacherIdentity(name) === teacherIdentity(doctor.name) && doctorKey(name) === key) ||
+      Object.entries(material.authorAliases || {}).some(([alias, canonical]) =>
+        teacherIdentity(canonical) === teacherIdentity(doctor.name) && doctorKey(alias) === key);
+  }));
 }
 
 export function materialMatchesLesson(material: Pick<MaterialItem, 'moduleId' | 'subject'>, lesson: Lesson): boolean {

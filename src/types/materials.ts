@@ -87,6 +87,8 @@ export interface MaterialItem {
   importRunId?: string;
   importReviewStatus?: 'pending' | 'reviewed';
   author?: string | string[]; // Creator / Doctor / Teacher who prepared the materials
+  /** Reviewed historical name → canonical name, used for search and shared doctor URLs. */
+  authorAliases?: Record<string, string>;
   contributorUid?: string; // Firebase Auth UID of the contributing user
   contributorUsername?: string; // Username handle of the contributing user
   creator_username?: string; // Username of the content creator (if they have a profile)

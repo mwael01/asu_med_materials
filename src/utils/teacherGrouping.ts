@@ -1,4 +1,5 @@
 import type { MaterialItem } from '../types/materials';
+import { preferredTeacherName, teacherIdentity, teacherNameResolver } from './teacherIdentity';
 
 export const DEPARTMENT_AUTHOR = 'ASU Faculty Staff';
 
@@ -42,8 +43,10 @@ export function isDepartmentMaterial(material: MaterialItem): boolean {
   return urls.some(value => {
     try {
       const url = new URL(value || '');
-      return ['http:', 'https:'].includes(url.protocol) &&
-        ['asu2learn.asu.edu.eg', 'moodle.asu.edu.eg'].includes(url.hostname);
+      return ['http:', 'https:'].includes(url.protocol) && (
+        ['asu2learn.asu.edu.eg', 'moodle.asu.edu.eg'].includes(url.hostname) ||
+        url.hostname === 'medasuedu-my.sharepoint.com' && /^\/:v:\/[grs]\/personal\/[^/]+_med_asu_edu_eg\//i.test(url.pathname)
+      );
     } catch {
       return false;
     }
@@ -55,7 +58,9 @@ export function isDepartmentMaterial(material: MaterialItem): boolean {
  * Ensures materials prepared by the same doctor are clustered together for fast access.
  */
 export function groupMaterialsByTeacher(materials: MaterialItem[]): TeacherGroup[] {
+  const resolveName = teacherNameResolver(materials);
   const doctorMap = new Map<string, MaterialItem[]>();
+  const doctorNames = new Map<string, Set<string>>();
   const departmentItems: MaterialItem[] = [];
   const generalItems: MaterialItem[] = [];
 
@@ -70,7 +75,7 @@ export function groupMaterialsByTeacher(materials: MaterialItem[]): TeacherGroup
         ? [material.author]
         : [];
 
-    const cleanedAuthors = rawAuthors.map((a) => a.trim()).filter(Boolean);
+    const cleanedAuthors = rawAuthors.map((a) => resolveName(a.trim())).filter(Boolean);
 
     if (cleanedAuthors.length === 0) {
       generalItems.push(material);
@@ -84,7 +89,11 @@ export function groupMaterialsByTeacher(materials: MaterialItem[]): TeacherGroup
         !/(asu|zone|batch|drive|anki|groups)/i.test(author)
       ) {
         // Individual Doctor or Teacher
-        const key = author;
+        const key = teacherIdentity(author);
+        if (!key) continue;
+        const names = doctorNames.get(key) || new Set<string>();
+        names.add(author);
+        doctorNames.set(key, names);
         let list = doctorMap.get(key);
         if (!list) {
           list = [];
@@ -106,13 +115,16 @@ export function groupMaterialsByTeacher(materials: MaterialItem[]): TeacherGroup
 
   // Convert doctor map to sorted groups (descending by item count)
   const doctorGroups: TeacherGroup[] = Array.from(doctorMap.entries())
-    .map(([name, items]) => ({
-      id: `teacher-${name.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`,
-      name,
-      isDoctor: true,
-      count: items.length,
-      items
-    }))
+    .map(([key, items]) => {
+      const name = preferredTeacherName([...doctorNames.get(key)!]);
+      return {
+        id: `teacher-${name.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`,
+        name,
+        isDoctor: true,
+        count: items.length,
+        items
+      };
+    })
     .sort((a, b) => b.count - a.count || a.name.localeCompare(b.name));
 
   const result: TeacherGroup[] = [...doctorGroups];

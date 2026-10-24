@@ -11,10 +11,11 @@
  */
 
 import { initializeApp } from 'firebase/app';
-import { getFirestore, collection, getDocs, getCountFromServer } from 'firebase/firestore';
+import { getFirestore, collection, getCountFromServer } from 'firebase/firestore';
 import { readFileSync, existsSync, writeFileSync } from 'fs';
 import { resolve, dirname } from 'path';
 import { fileURLToPath } from 'url';
+import { spawnSync } from 'node:child_process';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -44,123 +45,71 @@ const firebaseConfig = {
   appId: process.env.PUBLIC_FIREBASE_APP_ID,
 };
 
-if (!firebaseConfig.apiKey || !firebaseConfig.projectId) {
+const useAdmin = process.argv.includes('--admin') ||
+  (!firebaseConfig.apiKey && existsSync(resolve(__dirname, '../firebaseadmin.json')));
+if (!useAdmin && (!firebaseConfig.apiKey || !firebaseConfig.projectId)) {
   console.error('[Error] Firebase configuration missing in environment.');
   process.exit(1);
 }
 
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
+const db = useAdmin ? null : getFirestore(initializeApp(firebaseConfig));
 
 console.log('📡 Connecting to Cloud Firestore...');
 
 try {
-  // 1. Fetch materials
-  const materialsSnap = await getDocs(collection(db, 'materials'));
-  const materials = [];
-  materialsSnap.forEach((doc) => materials.push(doc.data()));
-
-  // 2. Fetch modules
-  const modulesSnap = await getDocs(collection(db, 'modules'));
-  const modules = [];
-  modulesSnap.forEach((doc) => modules.push(doc.data()));
-
-  // 3. Fetch contributors
-  const contribSnap = await getDocs(collection(db, 'contributors'));
-  const authors = [];
-  const contributorProfiles = [];
-  contribSnap.forEach((doc) => {
-    const data = doc.data();
-    if (data.kind === 'author') {
-      const { kind, ...authorData } = data;
-      authors.push(authorData);
-    } else {
-      const { kind, ...profileData } = data;
-      contributorProfiles.push(profileData);
-    }
-  });
-  authors.sort((a, b) => (a.order ?? 99) - (b.order ?? 99));
-
-  // 4. Fetch users count
-  let usersCount = 0;
-  try {
-    const usersSnap = await getDocs(collection(db, 'users'));
-    usersCount = usersSnap.size;
-  } catch {}
-
-  // 5. Fetch submissions count
-  let submissionsCount = 0;
-  try {
-    const subsSnap = await getDocs(collection(db, 'submissions'));
-    submissionsCount = subsSnap.size;
-  } catch {}
-
-  // 6. Fetch feedback count
-  let feedbackCount = 0;
-  try {
-    const fbSnap = await getDocs(collection(db, 'feedback'));
-    feedbackCount = fbSnap.size;
-  } catch {}
-
-  // 7. Fetch admin_logs count
-  let adminLogsCount = 0;
-  try {
-    const logsSnap = await getDocs(collection(db, 'admin_logs'));
-    adminLogsCount = logsSnap.size;
-  } catch {}
-
-  // Aggregate public assignment collections without downloading their records.
-  const assignmentCounts = {};
-  for (const name of ['lessons', 'material_lesson_links']) {
-    try {
-      assignmentCounts[name] = (await getCountFromServer(collection(db, name))).data().count;
-    } catch {
-      console.warn(`   - ${name}: count unavailable; retaining previous schema metadata`);
-    }
-  }
-
-  console.log(`📊 Remote Collections Status:`);
-  console.log(`   - materials:    ${materials.length} documents`);
-  console.log(`   - modules:      ${modules.length} documents`);
-  console.log(`   - contributors: ${contribSnap.size} documents (${authors.length} authors, ${contributorProfiles.length} profiles)`);
-  console.log(`   - users:        ${usersCount} documents`);
-  console.log(`   - submissions:  ${submissionsCount} documents`);
-  console.log(`   - feedback:     ${feedbackCount} documents`);
-  console.log(`   - admin_logs:   ${adminLogsCount} documents`);
-
-  // 8. Update firebase/schema.json
   const schemaPath = resolve(__dirname, '../firebase/schema.json');
-  if (existsSync(schemaPath)) {
-    const schema = JSON.parse(readFileSync(schemaPath, 'utf8'));
-    schema.lastSyncedAt = new Date().toISOString();
-    if (schema.collections?.materials) schema.collections.materials.totalDocuments = materials.length;
-    if (schema.collections?.modules) schema.collections.modules.totalDocuments = modules.length;
-    if (schema.collections?.contributors) schema.collections.contributors.totalDocuments = contribSnap.size;
-    if (schema.collections?.users) schema.collections.users.totalDocuments = usersCount;
-    if (schema.collections?.submissions) schema.collections.submissions.totalDocuments = submissionsCount;
-    if (schema.collections) {
-      for (const [name, count] of Object.entries(assignmentCounts)) {
-        if (schema.collections[name]) schema.collections[name].totalDocuments = count;
-      }
-      if (!schema.collections.feedback) {
-        schema.collections.feedback = { totalDocuments: feedbackCount };
-      } else {
-        schema.collections.feedback.totalDocuments = feedbackCount;
-      }
-      if (!schema.collections.admin_logs) {
-        schema.collections.admin_logs = { totalDocuments: adminLogsCount };
-      } else {
-        schema.collections.admin_logs.totalDocuments = adminLogsCount;
-      }
-    }
+  const schema = JSON.parse(readFileSync(schemaPath, 'utf8'));
+  const selected = process.argv.find(arg => arg.startsWith('--collections='))?.slice('--collections='.length).split(',');
+  const names = selected || Object.keys(schema.collections);
+  if (names.some(name => !schema.collections[name])) throw new Error('Unknown collection in --collections');
 
-    writeFileSync(schemaPath, JSON.stringify(schema, null, 2), 'utf8');
-    console.log(`✅ Updated firebase/schema.json with latest metadata.`);
+  // Aggregations return counts without downloading materials, profiles or users.
+  let results;
+  if (useAdmin) {
+    // Reuse the existing importer environment and Admin credential loader.
+    // Only aggregate counts are returned to Node; no credentials or documents.
+    const script = `import json, sys
+sys.path.insert(0, 'scripts/telegram-materials')
+from telegram_materials.store import get_db
+db = get_db()
+results = []
+for name in sys.argv[1:]:
+    try:
+        count = db.collection(name).count().get(retry=None, timeout=30)[0][0].value
+        results.append({'name': name, 'count': int(count)})
+    except Exception as exc:
+        results.append({'name': name, 'error': type(exc).__name__})
+print(json.dumps(results))
+`;
+    const processResult = spawnSync(resolve(__dirname, 'telegram-materials/.venv/bin/python'), ['-c', script, ...names],
+      { cwd: resolve(__dirname, '..'), encoding: 'utf8', timeout: 150_000 });
+    if (processResult.status !== 0) throw new Error('Admin count process failed; check importer environment and credentials');
+    results = JSON.parse(processResult.stdout).map(value => value.error
+      ? { status: 'rejected', reason: { code: value.error } }
+      : { status: 'fulfilled', value });
+  } else {
+    results = await Promise.allSettled(names.map(async name => ({
+      name, count: (await getCountFromServer(collection(db, name))).data().count
+    })));
   }
-
-  console.log('🎉 Schema synchronization completed successfully!');
+  let updated = 0;
+  for (let index = 0; index < results.length; index++) {
+    const result = results[index];
+    if (result.status === 'fulfilled') {
+      const { name, count } = result.value;
+      schema.collections[name].totalDocuments = count;
+      console.log(`   - ${name}: ${count} documents`);
+      updated++;
+    } else {
+      console.warn(`   - ${names[index]}: count unavailable; retaining previous metadata (${result.reason?.code || 'error'})`);
+    }
+  }
+  if (!updated) throw new Error('No collection counts were available; schema was not changed');
+  schema.lastSyncedAt = new Date().toISOString();
+  writeFileSync(schemaPath, JSON.stringify(schema, null, 2) + '\n', 'utf8');
+  console.log(`Updated firebase/schema.json using ${updated} count aggregations.`);
   process.exit(0);
 } catch (err) {
-  console.error('❌ Schema synchronization failed:', err.message);
+  console.error('Schema synchronization failed:', err.message);
   process.exit(1);
 }

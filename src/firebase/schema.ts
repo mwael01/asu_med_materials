@@ -57,6 +57,7 @@ export interface MaterialDocument {
   importRunId?: string;
   importReviewStatus?: 'pending' | 'reviewed';
   author?: string | string[];
+  authorAliases?: Record<string, string>;
   contributorUid?: string;
   contributorUsername?: string;
   creator_username?: string;
@@ -210,6 +211,7 @@ export const materialConverter: FirestoreDataConverter<MaterialItem> = {
       importRunId: material.importRunId || null,
       importReviewStatus: material.importReviewStatus || null,
       author: material.author || null,
+      authorAliases: material.authorAliases || null,
       contributorUid: material.contributorUid || null,
       contributorUsername: material.contributorUsername || null,
       creator_username: material.creator_username || null,
@@ -248,6 +250,7 @@ export const materialConverter: FirestoreDataConverter<MaterialItem> = {
       importRunId: data.importRunId || undefined,
       importReviewStatus: data.importReviewStatus === 'pending' || data.importReviewStatus === 'reviewed' ? data.importReviewStatus : undefined,
       author: data.author || undefined,
+      authorAliases: data.authorAliases || undefined,
       contributorUid: data.contributorUid || undefined,
       contributorUsername: data.contributorUsername || undefined,
       creator_username: data.creator_username || undefined,

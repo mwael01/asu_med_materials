@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { lessonDoctors, doctorKey, lessonPath, lessonsForSubject, materialMatchesLesson, validateLesson, isRevisionLesson } from '../src/utils/lessons.ts';
+import { findLessonDoctor, lessonDoctors, doctorKey, lessonPath, lessonsForSubject, materialMatchesLesson, validateLesson, isRevisionLesson } from '../src/utils/lessons.ts';
 import { studyEntries, matchesDiscoveryType, materialStudyPath, legacyMaterialPath, isFlashcards, isMcqMaterial, isPdfMaterial, isVideoMaterial, getDoctorMaterialCounts } from '../src/utils/studyContent.ts';
 import { entryProgressStorage, parseProgress } from '../src/utils/studyProgress.ts';
 import { materialConverter, submissionConverter } from '../src/firebase/schema.ts';
@@ -44,6 +44,21 @@ test('official source materials open the shared department workspace', () => {
   assert.deepEqual(doctors.find(group => group.key === doctorKey('Dr. Example')).items.map(item => item.id), ['independent']);
   const path = new URL(materialStudyPath(official, [lesson]), 'https://example.org');
   assert.equal(path.pathname, `${lessonPath(lesson)}/doctor/department`);
+});
+
+test('reviewed doctor aliases preserve shared links without reviving incorrect credits', () => {
+  const source = material({ author: 'Dr. Mohamed El-Shorbagy',
+    authorAliases: { 'Dr. Elshorbagy': 'Dr. Mohamed El-Shorbagy' } });
+  const stored = materialConverter.toFirestore(source);
+  const restored = materialConverter.fromFirestore({ id: source.id, data: () => stored });
+  assert.deepEqual(restored.authorAliases, source.authorAliases);
+  const doctors = lessonDoctors([restored]);
+  assert.equal(findLessonDoctor(doctors, doctorKey('Dr. Elshorbagy'))?.name, source.author);
+  assert.equal(findLessonDoctor(doctors, doctorKey('Dr. Another')), undefined);
+  const corrected = lessonDoctors([material({ author: 'Dr. Correct', authorAliases: source.authorAliases })]);
+  assert.equal(findLessonDoctor(corrected, doctorKey('Dr. Elshorbagy')), undefined);
+  const department = lessonDoctors([material({ author: 'ASU Faculty Staff', authorAliases: { 'Dr. Former': 'ASU Faculty Staff' } })]);
+  assert.equal(findLessonDoctor(department, doctorKey('Dr. Former')), undefined);
 });
 
 test('mixed video and PDF bundles retain order and item identity, excluding drive folders from PDFs', () => {

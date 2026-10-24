@@ -74,7 +74,7 @@ export function createSearchDocument(
   const rawAuthor = Array.isArray(material.author)
     ? material.author.join(' ')
     : (material.author || '');
-  const authorNorm = normalizeSearchText(rawAuthor);
+  const authorNorm = normalizeSearchText([rawAuthor, ...Object.keys(material.authorAliases || {})].join(' '));
 
   // Playlist video titles
   const rawVideos = material.videos && material.videos.length > 0

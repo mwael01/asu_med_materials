@@ -1,6 +1,38 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { groupMaterialsByTeacher, isDepartmentMaterial } from '../src/utils/teacherGrouping.ts';
+import { teacherIdentity } from '../src/utils/teacherIdentity.ts';
+
+test('teacher formatting variants share a deterministic group without duplicating joint credits', () => {
+  const materials = [
+    { id: 'a', title: 'Lecture', author: 'Dr. Mohamed Elshorbagy', type: 'youtube', year: 2 },
+    { id: 'b', title: 'Notes', author: 'Mohamed El-Shorbagy', type: 'summary', year: 2 },
+    { id: 'c', title: 'Revision', author: ['Dr. Mohamed El Shorbagy', 'Dr. Mohamed Elshorbagy'], type: 'playlist', year: 2 },
+    { id: 'd', title: 'Other doctor', author: 'Dr. Ahmed Elshorbagy', type: 'summary', year: 2 },
+  ];
+  const groups = groupMaterialsByTeacher(materials);
+  assert.equal(groups.length, 2);
+  assert.deepEqual(groups[0].items.map(item => item.id), ['a', 'b', 'c']);
+  assert.equal(groups[0].count, 3);
+  assert.deepEqual(groupMaterialsByTeacher([...materials].reverse()).map(g => [g.id, g.name, g.count]),
+    groups.map(g => [g.id, g.name, g.count]));
+  assert.notEqual(teacherIdentity('Dr. Mohamed Elshorbagy'), teacherIdentity('Dr. Ahmed Elshorbagy'));
+  assert.notEqual(teacherIdentity('Dr. A-B'), teacherIdentity('Dr. A B'));
+});
+
+test('reviewed aliases merge new imports while ambiguous or stale aliases cannot merge different doctors', () => {
+  const base = { title: 'Lecture', type: 'youtube', year: 2, url: 'https://example.org/lecture', tags: [] };
+  const canonical = { ...base, id: 'canonical', author: 'Dr. Mohamed El-Shorbagy',
+    authorAliases: { 'Dr. Elshorbagy': 'Dr. Mohamed El-Shorbagy' } };
+  const imported = { ...base, id: 'imported', author: 'Dr. Elshorbagy' };
+  assert.equal(groupMaterialsByTeacher([canonical, imported]).length, 1);
+  assert.equal(groupMaterialsByTeacher([canonical, imported])[0].count, 2);
+  const ambiguous = { ...base, id: 'different', author: 'Dr. Ahmed El-Shorbagy',
+    authorAliases: { 'Dr. Elshorbagy': 'Dr. Ahmed El-Shorbagy' } };
+  assert.equal(groupMaterialsByTeacher([canonical, imported, ambiguous]).length, 3);
+  const stale = { ...canonical, author: 'Dr. Corrected Attribution' };
+  assert.equal(groupMaterialsByTeacher([stale, imported]).length, 2);
+});
 
 test('official Moodle and ASU2Learn sources exclusively use the department folder', () => {
   const base = { title: 'Lecture', url: 'https://example.org/lecture', type: 'website', year: 2, tags: [], author: 'Dr. Example' };
@@ -110,4 +142,12 @@ test('official college staff mirrors and Arabic Moodle titles retain department 
     assert.equal(groups.length, 1);
     assert.equal(groups[0].isDepartment, true);
   }
+});
+
+test('faculty-account Stream recordings stay with staff while other SharePoint hosts remain independent', () => {
+  const material = { id: 'recording', title: 'Revision', author: 'Dr. Named Speaker', type: 'website', year: 1, tags: [] };
+  const path = '/:v:/g/personal/example_med_asu_edu_eg/recording';
+  assert.equal(isDepartmentMaterial({ ...material, url: 'https://medasuedu-my.sharepoint.com' + path }), true);
+  assert.equal(isDepartmentMaterial({ ...material, url: 'https://another.sharepoint.com' + path }), false);
+  assert.equal(isDepartmentMaterial({ ...material, url: 'https://medasuedu-my.sharepoint.com/:v:/g/personal/example_student/recording' }), false);
 });

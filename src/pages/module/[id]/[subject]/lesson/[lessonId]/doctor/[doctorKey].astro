@@ -7,7 +7,7 @@ import { loadLessonPage } from '../../../../../../../data/lessons';
 import { getAllModules } from '../../../../../../../data/modules';
 import { getPublicLessons } from '../../../../../../../data/catalogue.server';
 import { getMaterialsVersionFromFirestore } from '../../../../../../../firebase/firestore';
-import { lessonDoctors, lessonPath, lessonsForSubject } from '../../../../../../../utils/lessons';
+import { findLessonDoctor, lessonDoctors, lessonPath, lessonsForSubject } from '../../../../../../../utils/lessons';
 import { studyEntries, isFlashcards } from '../../../../../../../utils/studyContent';
 import { isPracticalImageMaterial, practicalImagePath } from '../../../../../../../utils/practicalImages';
 import { subjectToSlug } from '../../../../../../../utils/slug';
@@ -26,7 +26,10 @@ if (imageMaterial) {
   if (path) return Astro.redirect(path, 302);
 }
 const allDoctors = lessonDoctors(materials.filter(item => !isFlashcards(item) && !isPracticalImageMaterial(item)));
-const doctor = allDoctors.find(item => item.key === Astro.params.doctorKey);
+const doctor = findLessonDoctor(allDoctors, Astro.params.doctorKey || '');
+if (doctor && doctor.key !== Astro.params.doctorKey) {
+  return Astro.redirect(`${lessonPath(lesson)}/doctor/${doctor.key}${Astro.url.search}`, 302);
+}
 if (!doctor) {
   const previous = lessonDoctors(materials).find(item => item.key === Astro.params.doctorKey);
   const path = previous?.items[0] && practicalImagePath(previous.items[0], [lesson]);
