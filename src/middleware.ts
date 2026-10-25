@@ -18,6 +18,11 @@ const PUBLIC_API_ROUTES = new Set([
   '/api/version'
 ]);
 
+const PUBLIC_SEO_ROUTES = new Set([
+  '/robots.txt',
+  '/sitemap.xml'
+]);
+
 const isPublicPage = (path: string): boolean =>
   PUBLIC_STATIC_PAGES.has(path) ||
   /^\/(year|module|playlist|flashcards|user|collection|viewer)\//.test(path);
@@ -54,6 +59,18 @@ export const onRequest = defineMiddleware(async (context, next) => {
       response.headers.set(
         'Vercel-CDN-Cache-Control',
         `public, s-maxage=${sMaxAge}, stale-while-revalidate=86400`
+      );
+      return response;
+    }
+
+    if (PUBLIC_SEO_ROUTES.has(path)) {
+      response.headers.set(
+        'Cache-Control',
+        'public, max-age=300, s-maxage=3600, stale-while-revalidate=86400'
+      );
+      response.headers.set(
+        'Vercel-CDN-Cache-Control',
+        'public, s-maxage=3600, stale-while-revalidate=86400'
       );
       return response;
     }

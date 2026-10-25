@@ -23,7 +23,12 @@ const materials = rawMaterials.map(item => ({
 const hrefs = Object.fromEntries(materials.map(item => [item.id, materialStudyPath(item, lessons)]));
 const crumbs = [{ title: 'Search' }];
 ---
-<Layout title="Search - ASU Med" crumbs={crumbs} backHref="/">
+<Layout
+  title="Search Study Materials, Doctors & Lectures | ASU Med"
+  description="Search across all medical subjects, lessons, doctors, lecture playlists, PDFs, and flashcards for Ain Shams University Faculty of Medicine."
+  crumbs={crumbs}
+  backHref="/"
+>
   <PageHeading title="Search" />
   <section data-search-page>
     <script type="application/json" data-search-data set:html={JSON.stringify({ materials, modules }).replace(/</g, '\u003c')} />

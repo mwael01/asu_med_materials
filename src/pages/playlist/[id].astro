@@ -6,6 +6,7 @@ import { getPlaylistById } from '../../data/materials';
 import { getModuleById } from '../../data/modules';
 import { getMaterialsVersionFromFirestore } from '../../firebase/firestore';
 import { subjectToSlug } from '../../utils/slug';
+import { buildPlaylistSeo, buildPlaylistJsonLd, resolveSiteOrigin } from '../../utils/seo';
 import {
   parseVideoSource,
   determinePrimaryPlaylistSource,
@@ -119,11 +120,17 @@ if (playlist.subject && playlist.moduleId && moduleInfo) {
 crumbs.push({
   title: titleEn || playlist.title
 });
+
+const seo = buildPlaylistSeo(playlist, moduleInfo);
+const playlistJsonLd = buildPlaylistJsonLd(resolveSiteOrigin(import.meta.env.PUBLIC_SITE_URL), playlist, moduleInfo);
 ---
 
 <Layout
-  title={`${titleEn || playlist.title} - ASU Med`}
-  description={`Playlists and lecture series for ${titleEn || playlist.title}.`}
+  title={seo.title}
+  description={seo.description}
+  keywords={seo.keywords}
+  ogType="video.other"
+  jsonLd={playlistJsonLd}
   crumbs={crumbs}
   backHref={backHref}
 >

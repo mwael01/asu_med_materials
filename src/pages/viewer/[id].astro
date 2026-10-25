@@ -14,6 +14,7 @@ import { getMaterialById, getMaterialsByModule } from '../../data/materials';
 import { getModuleById } from '../../data/modules';
 import { getMaterialsVersionFromFirestore } from '../../firebase/firestore';
 import { subjectToSlug } from '../../utils/slug';
+import { buildViewerSeo, buildDocumentJsonLd, resolveSiteOrigin } from '../../utils/seo';
 import {
   getDocumentEmbedUrl,
   getDocumentExternalUrl,
@@ -161,11 +162,17 @@ if (material.subject && moduleInfo) {
 crumbs.push({
   title: titleEn
 });
+
+const seo = buildViewerSeo(material, moduleInfo, parsedDocuments.length);
+const documentJsonLd = buildDocumentJsonLd(resolveSiteOrigin(import.meta.env.PUBLIC_SITE_URL), material, moduleInfo);
 ---
 
 <Layout
-  title={`${titleEn} | Document Viewer | ASU Med`}
-  description={descEn || `Read and study ${titleEn} online on ASU Med.`}
+  title={seo.title}
+  description={seo.description}
+  keywords={seo.keywords}
+  ogType="article"
+  jsonLd={documentJsonLd}
   crumbs={crumbs}
   backHref={backFallbackUrl}
 >

@@ -4,10 +4,12 @@ import PageHeading from '../../components/common/PageHeading.astro';
 import ModuleDirectory from '../../components/materials/ModuleDirectory.astro';
 import type { NavCrumb } from '../../types/navigation';
 import { getModulesByYear } from '../../data/modules';
+import { buildYearSeo } from '../../utils/seo';
 
 const year = Number(Astro.params.year);
 if (![1, 2, 3, 4, 5].includes(year)) return Astro.redirect('/404');
 const modules = await getModulesByYear(year);
+const seo = buildYearSeo(year, modules);
 
 const yearMenu = ([1, 2, 3, 4, 5] as const).map(y => ({
   title: `Year ${y}`,
@@ -29,7 +31,7 @@ const crumbs: NavCrumb[] = [
   }
 ];
 ---
-<Layout title={`Year ${year} - ASU Med`} crumbs={crumbs} backHref="/">
+<Layout title={seo.title} description={seo.description} keywords={seo.keywords} crumbs={crumbs} backHref="/">
   <PageHeading title={`Year ${year}`} />
   <ModuleDirectory modules={modules} />
 </Layout>

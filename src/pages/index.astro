@@ -15,17 +15,17 @@ for (let y = 1; y <= 5; y++) {
 
 // Default fallback is Year 2 active module (Respiratory)
 const defaultActiveModuleId = activeModuleMap[2] || 'year2-respiratory';
+const visibleModules = modules.filter((m) => m.active !== false);
 
 ---
 
-<Layout title="ASU Med - All-in-one Medical Study Hub">
-  {shouldRedirect && (
-    <noscript>
-      <meta http-equiv="refresh" content={`0;url=/module/${defaultActiveModuleId}`} />
-    </noscript>
-  )}
-
+<Layout
+  title="ASU Med - Ain Shams University Faculty of Medicine Study Hub"
+  description="All-in-one medical study hub for Ain Shams University Faculty of Medicine (ASU Med). Access curriculum modules, doctor lectures, YouTube playlists, PDFs, flashcards, and practical images across Years 1 to 5."
+  keywords={['ASU Med', 'asumedmaterials', 'Ain Shams Medicine', 'Ain Shams University Faculty of Medicine', 'طب عين شمس', 'محاضرات طب عين شمس']}
+>
   <div class="py-16 text-center text-sm text-zinc-500">
+    <h1 class="sr-only">ASU Med - Ain Shams University Faculty of Medicine Study Materials &amp; Curriculum</h1>
     <p>{shouldRedirect ? 'Opening your active module...' : 'Select a module or return to the curriculum'}</p>
     <p class="mt-3">
       <a href={`/module/${defaultActiveModuleId}`} id="direct-active-link" class="text-emerald-500 hover:underline font-medium">
@@ -33,6 +33,25 @@ const defaultActiveModuleId = activeModuleMap[2] || 'year2-respiratory';
       </a>
     </p>
   </div>
+
+  <nav class="sr-only" aria-label="Curriculum directory">
+    <h2>Academic Years</h2>
+    <ul>
+      {[1, 2, 3, 4, 5].map((y) => (
+        <li><a href={`/year/${y}`}>Year {y} Medical Curriculum Modules</a></li>
+      ))}
+      <li><a href="/modules">All Modules</a></li>
+      <li><a href="/search">Search Study Materials</a></li>
+    </ul>
+    <h2>Modules</h2>
+    <ul>
+      {visibleModules.map((mod) => (
+        <li>
+          <a href={`/module/${mod.id}`}>{mod.title} (Year {mod.year})</a>
+        </li>
+      ))}
+    </ul>
+  </nav>
 
   <script is:inline define:vars={{ activeModuleMap, defaultActiveModuleId }}>
     function resolveAndOpenActiveModule() {

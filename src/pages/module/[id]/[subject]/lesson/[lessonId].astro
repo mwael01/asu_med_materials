@@ -13,6 +13,7 @@ import { getMaterialsVersionFromFirestore } from '../../../../../firebase/firest
 import { lessonDoctors, lessonPath, lessonsForSubject } from '../../../../../utils/lessons';
 import { isFlashcards } from '../../../../../utils/studyContent';
 import { subjectToSlug } from '../../../../../utils/slug';
+import { buildLessonSeo, buildLessonJsonLd, resolveSiteOrigin } from '../../../../../utils/seo';
 
 const version = await getMaterialsVersionFromFirestore();
 const context = await loadLessonPage(Astro.params.id || '', Astro.params.subject || '', Astro.params.lessonId || '', version);
@@ -82,9 +83,18 @@ const flashcards = materials.filter(isFlashcards);
 const doctors = lessonDoctors(remainingMaterials.filter(item => !isFlashcards(item)));
 const doctorMaterials = new Set(doctors.flatMap(doctor => doctor.items.map(item => item.id)));
 const general = remainingMaterials.filter(item => !isFlashcards(item) && !doctorMaterials.has(item.id));
+const seo = buildLessonSeo(module, lesson, doctors, materials);
+const lessonJsonLd = buildLessonJsonLd(resolveSiteOrigin(import.meta.env.PUBLIC_SITE_URL), module, lesson, doctors);
 ---
 
-<Layout title={`${lesson.title} - ASU Med`} crumbs={crumbs} backHref={backHref}>
+<Layout
+  title={seo.title}
+  description={seo.description}
+  keywords={seo.keywords}
+  jsonLd={lessonJsonLd}
+  crumbs={crumbs}
+  backHref={backHref}
+>
   <PageHeading title={lesson.title} />
 
   <PracticalImageFolders lesson={lesson} materials={materials} />

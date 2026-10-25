@@ -43,6 +43,12 @@ Existing semester-two hiding and inactive-module filtering remain in the data la
 - Google and email authentication, avatar uploads, profiles, contributions, feedback, collections, and admin management remain available.
 - Admin AI extraction produces reviewable typed drafts and publishes directly to Firestore. See [Admin AI](ADMIN_AI.md).
 
+## SEO and search discovery
+
+The canonical production origin is `https://asumedmaterials.vercel.app` (configured in `astro.config.mjs` and `src/utils/seo.ts`), with `https://asumed.vercel.app` linked via `sameAs` in `WebSite` structured data. `Layout.astro` emits canonical URLs (stripping transient UI query parameters such as `?item=`, `?document=`, and `?redirect=`), Open Graph/Twitter card tags, `BreadcrumbList` JSON-LD derived from navigation crumbs, and page-specific Schema.org JSON-LD (`Course`, `CollectionPage`, `LearningResource`, `VideoObject`, `Person`).
+
+`/robots.txt` (`src/pages/robots.txt.ts`) and `/sitemap.xml` (`src/pages/sitemap.xml.ts`) are dynamically generated from the versioned server catalogue cache (`getPublicModules`, `getPublicLessons`, `getPublicMaterials`, `getAllCollections`) and cached on the Vercel Edge CDN for 1 hour (`s-maxage=3600, stale-while-revalidate=86400`), exposing all academic years, modules, subjects, lessons, doctor pages (`/doctor/[doctorKey]`), practical image folders (`/images/[collection]`), playlists (`/playlist/[id]`), embeddable documents (`/viewer/[id]`), flashcard decks (`/flashcards/[id]`), and collections (`/collection/[id]`) with zero uncached Firestore reads.
+
 ## Validation
 
 Run `pnpm astro check`, `pnpm test`, and `pnpm build` after major changes. Keep UI responsive and components reusable. Document architectural changes here or in focused documents instead of expanding the README. Deploy rules before application features that require a new Firestore collection.

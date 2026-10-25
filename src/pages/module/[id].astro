@@ -10,6 +10,7 @@ import { getMaterialsVersionFromFirestore } from '../../firebase/firestore';
 import { getModuleAppearance } from '../../utils/subjectAppearance';
 import { subjectToSlug } from '../../utils/slug';
 import { lessonsForSubject } from '../../utils/lessons';
+import { buildModuleSeo, buildModuleJsonLd, resolveSiteOrigin } from '../../utils/seo';
 
 const version = await getMaterialsVersionFromFirestore();
 const module = await getModuleById(Astro.params.id || '', version);
@@ -56,9 +57,19 @@ const crumbs: NavCrumb[] = [
 ];
 
 const appearance = getModuleAppearance(module);
+const visibleSubjects = activeSubjects.length > 0 ? activeSubjects : module.subjects;
+const seo = buildModuleSeo(module, visibleSubjects);
+const moduleJsonLd = buildModuleJsonLd(resolveSiteOrigin(import.meta.env.PUBLIC_SITE_URL), module, visibleSubjects);
 ---
 
-<Layout title={`${module.title} - ASU Med`} crumbs={crumbs} backHref={`/year/${module.year}`}>
+<Layout
+  title={seo.title}
+  description={seo.description}
+  keywords={seo.keywords}
+  jsonLd={moduleJsonLd}
+  crumbs={crumbs}
+  backHref={`/year/${module.year}`}
+>
   <PageHeading title={module.title}>
     <div class="flex items-center gap-2">
       <a

@@ -7,7 +7,12 @@ import { getAllModules } from '../data/modules';
 const modules = await getAllModules();
 ---
 
-<Layout title="Modules - ASU Med">
+<Layout
+  title="All Medical Modules (Years 1–5) | ASU Med"
+  description="Browse all curriculum modules across Years 1 to 5 for Ain Shams University Faculty of Medicine (ASU Med), including lectures, PDFs, flashcards, and revisions."
+  crumbs={[{ title: 'Modules' }]}
+  backHref="/"
+>
   <section data-saved-year-scope>
     <div class="flex items-center justify-between gap-4 mb-6">
       <h1 class="text-xl font-bold">Modules <span data-year-label class="text-sm font-normal text-zinc-500 ml-2"></span></h1>

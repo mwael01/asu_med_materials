@@ -68,6 +68,17 @@ test('Middleware sets 5-minute Edge CDN cache for micro /api/version endpoint', 
   assert.equal(res.headers.get('vercel-cdn-cache-control'), 'public, s-maxage=300, stale-while-revalidate=86400');
 });
 
+test('Middleware sets 1-hour Edge CDN cache for /robots.txt and /sitemap.xml', async () => {
+  for (const seoPath of ['/robots.txt', '/sitemap.xml']) {
+    const ctx = createMockContext(seoPath);
+    const next = createMockNext();
+    const res = await onRequest(ctx, next);
+
+    assert.equal(res.headers.get('cache-control'), 'public, max-age=300, s-maxage=3600, stale-while-revalidate=86400');
+    assert.equal(res.headers.get('vercel-cdn-cache-control'), 'public, s-maxage=3600, stale-while-revalidate=86400');
+  }
+});
+
 test('Middleware marks authenticated requests and private routes as private, no-store', async () => {
   // Authenticated request to /modules
   const authCtx = createMockContext('/modules', { authorization: 'Bearer token' });

@@ -11,6 +11,7 @@ import { findLessonDoctor, lessonDoctors, lessonPath, lessonsForSubject } from '
 import { studyEntries, isFlashcards } from '../../../../../../../utils/studyContent';
 import { isPracticalImageMaterial, practicalImagePath } from '../../../../../../../utils/practicalImages';
 import { subjectToSlug } from '../../../../../../../utils/slug';
+import { buildDoctorSeo, buildDoctorJsonLd, resolveSiteOrigin } from '../../../../../../../utils/seo';
 
 const version = await getMaterialsVersionFromFirestore();
 const context = await loadLessonPage(Astro.params.id || '', Astro.params.subject || '', Astro.params.lessonId || '', version);
@@ -104,9 +105,18 @@ const crumbs: NavCrumb[] = [
 
 const backHref = lessonPath(lesson);
 const entries = studyEntries(doctor.items);
+const seo = buildDoctorSeo(module, lesson, doctor, entries);
+const doctorJsonLd = buildDoctorJsonLd(resolveSiteOrigin(import.meta.env.PUBLIC_SITE_URL), module, lesson, doctor, entries);
 ---
 
-<Layout title={`${doctor.name} - ${lesson.title} - ASU Med`} crumbs={crumbs} backHref={backHref}>
+<Layout
+  title={seo.title}
+  description={seo.description}
+  keywords={seo.keywords}
+  jsonLd={doctorJsonLd}
+  crumbs={crumbs}
+  backHref={backHref}
+>
   <PageHeading title={doctor.name} />
   <DoctorPlayer entries={entries} materials={doctor.items} />
 </Layout>

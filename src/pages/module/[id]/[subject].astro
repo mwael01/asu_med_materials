@@ -12,6 +12,7 @@ import { subjectToSlug } from '../../../utils/slug';
 import { lessonsForSubject, lessonPath, isRevisionLesson } from '../../../utils/lessons';
 import { studyEntries } from '../../../utils/studyContent';
 import { isMaterialAssignedToLesson } from '../../../utils/materialLessonLinks';
+import { buildSubjectSeo, buildSubjectJsonLd, resolveSiteOrigin } from '../../../utils/seo';
 
 const version = await getMaterialsVersionFromFirestore();
 const module = await getModuleById(Astro.params.id || '', version);
@@ -82,9 +83,19 @@ const isGeneralLink = (item: typeof materials[number]) => {
 };
 const links = unassigned.filter(isGeneralLink);
 const resources = unassigned.filter(item => !isGeneralLink(item));
+const visibleLessons = [...regularLessons, ...revisionLessons];
+const seo = buildSubjectSeo(module, subject, visibleLessons, materials.length);
+const subjectJsonLd = buildSubjectJsonLd(resolveSiteOrigin(import.meta.env.PUBLIC_SITE_URL), module, subject, visibleLessons);
 ---
 
-<Layout title={`${subject} - ${module.title} - ASU Med`} crumbs={crumbs} backHref={`/module/${module.id}`}>
+<Layout
+  title={seo.title}
+  description={seo.description}
+  keywords={seo.keywords}
+  jsonLd={subjectJsonLd}
+  crumbs={crumbs}
+  backHref={`/module/${module.id}`}
+>
   <PageHeading title={subject} />
 
   <!-- Regular Lessons (always shown, even if empty) -->

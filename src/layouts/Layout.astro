@@ -13,20 +13,59 @@ import { getAllModules } from '../data/modules';
 import { ClientRouter } from 'astro:transitions';
 
 import type { NavCrumb } from '../types/navigation';
+import type { OgType } from '../types/seo';
+import {
+  DEFAULT_OG_IMAGE,
+  SITE_NAME,
+  buildBreadcrumbJsonLd,
+  buildCanonicalUrl,
+  buildWebsiteJsonLd,
+  resolveSiteOrigin
+} from '../utils/seo';
 
 interface Props {
   title?: string;
   description?: string;
   crumbs?: NavCrumb[];
   backHref?: string;
+  canonicalPath?: string;
+  noindex?: boolean;
+  ogType?: OgType;
+  ogImage?: string;
+  keywords?: string[];
+  jsonLd?: Record<string, unknown> | Record<string, unknown>[];
 }
 
 const {
   title = 'ASU Med - All-in-one Medical Study Hub',
   description = 'Batch drives, Telegram channels, YouTube lectures, and study notes for Ain Shams University Faculty of Medicine.',
   crumbs,
-  backHref
+  backHref,
+  canonicalPath,
+  noindex = false,
+  ogType = 'website',
+  ogImage = DEFAULT_OG_IMAGE,
+  keywords,
+  jsonLd
 } = Astro.props;
+
+const siteOrigin = resolveSiteOrigin(import.meta.env.PUBLIC_SITE_URL);
+const canonicalUrl = buildCanonicalUrl(siteOrigin, canonicalPath || Astro.url.pathname);
+const ogImageUrl = ogImage.startsWith('http') ? ogImage : `${siteOrigin}${ogImage.startsWith('/') ? ogImage : `/${ogImage}`}`;
+const robotsContent = noindex
+  ? 'noindex, nofollow'
+  : 'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1';
+
+const breadcrumbJsonLd = !noindex ? buildBreadcrumbJsonLd(siteOrigin, crumbs, canonicalPath || Astro.url.pathname) : null;
+const websiteJsonLd = !noindex && (Astro.url.pathname === '/' || Astro.url.pathname === '/modules' || Astro.url.pathname === '/search')
+  ? buildWebsiteJsonLd(siteOrigin)
+  : null;
+const extraJsonLdList = jsonLd ? (Array.isArray(jsonLd) ? jsonLd : [jsonLd]) : [];
+const allJsonLd = [
+  ...(websiteJsonLd ? [websiteJsonLd] : []),
+  ...(breadcrumbJsonLd ? [breadcrumbJsonLd] : []),
+  ...extraJsonLdList
+];
 
 const catalogueVersion = await getMaterialsVersionFromFirestore();
 const allModules = await getAllModules(catalogueVersion);
@@ -50,6 +89,31 @@ const allModules = await getAllModules(catalogueVersion);
     <meta name="catalogue-version" content={String(catalogueVersion)} />
     <title>{title}</title>
     <meta name="description" content={description} />
+    <meta name="robots" content={robotsContent} />
+    <link rel="canonical" href={canonicalUrl} />
+    {keywords && keywords.length > 0 && (
+      <meta name="keywords" content={keywords.join(', ')} />
+    )}
+
+    <!-- Open Graph / Social Preview Metadata -->
+    <meta property="og:type" content={ogType} />
+    <meta property="og:site_name" content={SITE_NAME} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonicalUrl} />
+    <meta property="og:image" content={ogImageUrl} />
+    <meta property="og:locale" content="en_US" />
+
+    <!-- Twitter Card Metadata -->
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImageUrl} />
+
+    {allJsonLd.map((schemaObj) => (
+      <script type="application/ld+json" set:html={JSON.stringify(schemaObj).replace(/</g, '\\u003c')} />
+    ))}
+
     <ClientRouter />
 
     <!-- Permanent Dark Mode -->

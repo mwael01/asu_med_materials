@@ -2,9 +2,12 @@
 import Layout from '../../../../../../../layouts/Layout.astro';
 import PageHeading from '../../../../../../../components/common/PageHeading.astro';
 import PracticalImageViewer from '../../../../../../../components/study/PracticalImageViewer.astro';
+import type { NavCrumb } from '../../../../../../../types/navigation';
 import { loadLessonPage } from '../../../../../../../data/lessons';
 import { lessonPath } from '../../../../../../../utils/lessons';
 import { practicalFolderImages } from '../../../../../../../utils/practicalImages';
+import { subjectToSlug } from '../../../../../../../utils/slug';
+import { buildPracticalImagesSeo } from '../../../../../../../utils/seo';
 const { id, subject, lessonId, collection } = Astro.params;
 const context = await loadLessonPage(id || '', subject || '', lessonId || '');
 if (!context) return Astro.redirect('/404');
@@ -15,8 +18,23 @@ if (!folder) {
   return Astro.redirect('/404');
 }
 const images = practicalFolderImages(context.materials, context.lesson, folder.id);
+const subjectSlug = subjectToSlug(context.lesson.subject);
+const crumbs: NavCrumb[] = [
+  { title: `Year ${context.module.year}`, href: `/year/${context.module.year}`, isYear: true, year: context.module.year },
+  { title: context.module.title, href: `/module/${context.module.id}`, isModule: true, year: context.module.year },
+  { title: context.lesson.subject, href: `/module/${context.module.id}/${subjectSlug}` },
+  { title: context.lesson.title, href: lessonPath(context.lesson) },
+  { title: folder.title }
+];
+const seo = buildPracticalImagesSeo(context.module, context.lesson, folder, images.length);
 ---
-<Layout title={`${folder.title} - ASU Med`} backHref={lessonPath(context.lesson)}>
+<Layout
+  title={seo.title}
+  description={seo.description}
+  keywords={seo.keywords}
+  crumbs={crumbs}
+  backHref={lessonPath(context.lesson)}
+>
   <PageHeading title={folder.title} />
   <PracticalImageViewer images={images} />
 </Layout>
