@@ -26,7 +26,7 @@ export async function getAllModules(version?: number): Promise<ModuleInfo[]> {
 
 /**
  * Resolves the currently studied active module for an academic year.
- * If a module explicitly has active: true, it is selected; otherwise falls back to the first module in order.
+ * Selects a module explicitly marked active: true; returns null when none is active.
  */
 export async function getActiveModuleForYear(year: number, version?: number): Promise<ModuleInfo | null> {
   const modules = await getAllModules(version);

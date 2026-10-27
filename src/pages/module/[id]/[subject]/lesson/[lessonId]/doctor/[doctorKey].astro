@@ -41,7 +41,7 @@ const [allModules, allLessons] = await Promise.all([
   getAllModules(version),
   getPublicLessons(version)
 ]);
-const siblingModules = allModules.filter(item => item.year === module.year && item.active !== false);
+const siblingModules = allModules.filter(item => item.year === module.year);
 const siblingLessons = lessonsForSubject(allLessons, module.id, lesson.subject);
 
 const subjectSlug = subjectToSlug(lesson.subject);

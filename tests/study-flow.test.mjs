@@ -181,19 +181,96 @@ test('saved-year home scopes update immediately and reveal the empty-year state'
   year = 5; state.window.dispatch('storage'); assert.equal(empty.hidden, false);
 });
 
-test('first-visit year selection preserves a shared route and can reopen after dismissal', async () => {
+test('first-visit year prompt preserves the route on dismissal, then selection navigates to the chosen year', async () => {
   const state = browser('https://example.org/module/test/anatomy'), dialog = new Element(), close = new Element();
-  const button = new Element(); button.dataset.selectYear = '3';
+  const button = new Element(); button.dataset.selectYear = '3'; button.dataset.yearHref = '/year/3';
   const trigger = new Element(); let year = null;
+  const destinations = [];
   dialog.selectors.set('[data-close-year]', close); dialog.lists.set('[data-select-year]', [button]);
   state.document.selectors.set('#year-selector', dialog); state.document.lists.set('.trigger-multistage-selector', [trigger]);
-  const { initYearSelector } = await loadClient('scripts/navigation/yearSelector.ts', { '../../utils/storage': {
+  const { initYearSelector } = await loadClient('scripts/navigation/yearSelector.ts', {
+    'astro:transitions/client': { navigate: destination => destinations.push(destination) }, '../../utils/storage': {
     getUserStoredYear: () => year, setUserStoredYear(value) { year = value; },
   } }, state.globals());
   initYearSelector(); assert.equal(dialog.open, true);
-  close.dispatch('click'); trigger.dispatch('click'); assert.equal(dialog.open, true);
+  close.dispatch('click'); assert.equal(state.location.pathname, '/module/test/anatomy');
+  assert.deepEqual(destinations, []);
+  trigger.dispatch('click'); assert.equal(dialog.open, true);
   button.dispatch('click'); assert.equal(year, 3); assert.equal(dialog.open, false);
-  assert.equal(state.location.pathname, '/module/test/anatomy');
+  assert.deepEqual(destinations, ['/year/3']);
+  trigger.dispatch('click'); assert.equal(button.getAttribute('aria-pressed'), 'true'); assert.equal(button.focused, true);
+});
+
+test('homepage only redirects for valid saved years, uses their destinations, and respects redirect=false', async () => {
+  for (const [url, year, target, expected] of [
+    ['https://example.org/', null, null, null],
+    ['https://example.org/', 1, '/module/year1-introduction', '/module/year1-introduction'],
+    ['https://example.org/', 2, '/module/year2-respiratory', '/module/year2-respiratory'],
+    ['https://example.org/', 3, '/year/3', '/year/3'],
+    ['https://example.org/', 5, null, '/year/5'],
+    ['https://example.org/?redirect=false', 2, '/module/year2-respiratory', null],
+    ['https://example.org/module/shared', 2, '/module/year2-respiratory', null],
+  ]) {
+    const state = browser(url), root = new Element(), link = new Element(), choice = new Element();
+    root.dataset.autoRedirect = 'true'; choice.dataset.yearHref = target;
+    root.selectors.set('#direct-active-link', link);
+    state.document.selectors.set('[data-home-year-redirect]', root);
+    state.document.selectors.set(`#year-selector [data-select-year="${year}"]`, choice);
+    const destinations = [];
+    const { initHomeYearRedirect } = await loadClient('scripts/navigation/homeYearRedirect.ts', {
+      '../../utils/storage': { getUserStoredYear: () => year },
+      'astro:transitions/client': { navigate(destination, options) { destinations.push(destination); assert.equal(options.history, 'replace'); } },
+    }, state.globals());
+    initHomeYearRedirect(); initHomeYearRedirect();
+    assert.deepEqual(destinations, expected ? [expected] : [], `${url}, Year ${year}`);
+    if (year && state.location.pathname === '/') assert.equal(link.href, target || `/year/${year}`);
+    // Astro installs a fresh root on each visit: initialize that root as well.
+    const nextRoot = new Element(); nextRoot.dataset.autoRedirect = 'false';
+    state.document.selectors.set('[data-home-year-redirect]', nextRoot);
+    initHomeYearRedirect(); assert.equal(nextRoot.dataset.initialized, state.location.pathname === '/' ? 'true' : undefined);
+    assert.deepEqual(destinations, expected ? [expected] : []);
+  }
+});
+
+test('unavailable or malformed year storage never sends a fresh visitor to Respiratory', async () => {
+  for (const raw of [null, '2abc', '2.5', '6', 'unavailable']) {
+    const state = browser(), root = new Element(); root.dataset.autoRedirect = 'true';
+    state.document.selectors.set('[data-home-year-redirect]', root);
+    const globals = { ...state.globals(), localStorage: {
+      getItem() { if (raw === 'unavailable') throw new Error('Blocked'); return raw; },
+    } };
+    const storage = await loadClient('utils/storage.ts', {}, globals);
+    const { initHomeYearRedirect } = await loadClient('scripts/navigation/homeYearRedirect.ts', {
+      '../../utils/storage': storage,
+      'astro:transitions/client': { navigate() { assert.fail(`Unexpected redirect for ${raw}`); } },
+    }, globals);
+    initHomeYearRedirect();
+  }
+});
+
+test('module menu prioritizes page year, otherwise saved year, and year tabs do not save preferences', async () => {
+  for (const [pageYear, savedYear, expected] of [['2', 1, 2], ['', 2, 2], ['', null, null]]) {
+    const state = browser(), menu = new Element(), empty = new Element(); let year = savedYear;
+    menu.dataset.currentYear = pageYear;
+    const tabs = [1, 2, 3, 4, 5].map(value => { const tab = new Element(); tab.dataset.targetYear = String(value); return tab; });
+    const panels = [1, 2, 3, 4, 5].map(value => { const panel = new Element(); panel.dataset.panelYear = String(value); return panel; });
+    menu.lists.set('.nav-module-year-tab', tabs); menu.lists.set('.nav-module-year-panel', panels);
+    menu.selectors.set('[data-module-year-empty]', empty);
+    const { initModuleYearMenu } = await loadClient('scripts/navigation/moduleMenu.ts', {
+      '../../utils/storage': { getUserStoredYear: () => year },
+    }, state.globals());
+    initModuleYearMenu(menu); initModuleYearMenu(menu);
+    assert.equal(empty.hidden, expected !== null);
+    panels.forEach((panel, index) => assert.equal(panel.hidden, index + 1 !== expected));
+    if (expected) assert.equal(tabs[expected - 1].getAttribute('aria-pressed'), 'true');
+    tabs[3].dispatch('click', { stopPropagation() {} });
+    assert.equal(panels[3].hidden, false); assert.equal(year, savedYear);
+    year = 5; state.window.dispatch('user-preferences-updated');
+    assert.equal(panels[pageYear ? 1 : 4].hidden, false);
+    state.document.dispatch('astro:before-swap');
+    year = 3; state.window.dispatch('storage');
+    assert.equal(panels[2].hidden, true);
+  }
 });
 
 test('search scopes query results to the saved year and keeps explicit all-years URLs shareable', async () => {

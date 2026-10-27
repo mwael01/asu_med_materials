@@ -4,9 +4,9 @@ ASU Med Materials uses Astro SSR, TypeScript, Tailwind CSS, Firebase, and Vercel
 
 ## Student navigation
 
-The primary flow is saved year → modules → subjects → lessons → doctors → a tabbed study workspace. Home contains module cards and a year-change action. Videos, PDFs, and Flashcards have dedicated discovery pages; search lives only at `/search`. Public pages use compact titles and breadcrumbs without module descriptions or filter strips.
+The primary flow is saved year → modules → subjects → lessons → doctors → a tabbed study workspace. Home provides year selection and links to each year’s curriculum. First-time visitors choose their year before any automatic navigation. Videos, PDFs, and Flashcards have dedicated discovery pages; search lives only at `/search`. Public pages use compact titles and breadcrumbs without module descriptions or filter strips.
 
-Year selection uses `asumed_user_year` in localStorage and the `user-preferences-updated` event. Existing `asumed_user_module` values no longer drive public navigation. Shared destinations survive onboarding. Year scoping runs client-side on anonymous shared HTML; it never changes Firestore curriculum visibility.
+Year selection uses `asumed_user_year` in localStorage and the `user-preferences-updated` event. Existing `asumed_user_module` values no longer drive public navigation. Selecting or changing a year opens that year’s explicitly active curriculum module (`active: true`), or `/year/{year}` when none is active. Returning home uses the same destination only when a valid year is saved; `?redirect=false` suppresses automatic navigation. Blocked localStorage keeps the preference in memory across Astro page transitions. Year scoping runs client-side on anonymous shared HTML; it never changes Firestore curriculum visibility.
 
 See [Study flow and lesson curation](STUDY_FLOW.md) for route contracts, Firestore fields, admin assignment, player persistence, and deployment order.
 
@@ -32,7 +32,7 @@ Firebase's multi-tab IndexedDB persistence caches direct browser reads. The serv
 
 Client-side data access uses `warmupCatalogueCache()` to eagerly hydrate `localStorage` snapshots (`asumed_catalogue_snapshot`, `asumed_modules_snapshot`, `asumed_lessons_snapshot`) into in-memory window stores upon startup and view transitions, providing instant zero-wait access to materials, search documents, and bookmarks.
 
-Existing semester-two hiding and inactive-module filtering remain in the data layer. Reference modules keep their existing visibility behavior; saved-year discovery strictly isolates by material year.
+The navbar lists all modules in the relevant year, including modules with `active: false`; the page’s year takes precedence over the saved year, and browsing year tabs does not change the saved preference. Module active status determines automatic landing, independently of the viewed-module highlight. Existing material visibility and semester-two filtering remain in the data layer. Reference modules keep their existing visibility behavior; saved-year discovery strictly isolates by material year.
 
 ## Existing study features
 

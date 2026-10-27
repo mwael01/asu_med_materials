@@ -20,7 +20,7 @@ This document details all UI components, their props, intended reuse guidelines,
 
 #### `MultistageSelector.astro`
 
-A native dialog with five year choices and a Close action. The browser controller in `src/scripts/navigation/yearSelector.ts` opens it whenever a public visitor has no valid stored year. Selection saves the preference and updates the current page without redirecting shared URLs. Home's Change year button reopens it. There are no module previews, descriptions, welcome quotes, or active-module selection.
+A native, scrollable dialog with five year choices, a Close action, and the reusable CSS-animated `StudyIllustration.astro`. It accepts the cached `modules` catalogue to resolve year destinations without extra reads. The browser controller in `src/scripts/navigation/yearSelector.ts` opens it when a public visitor has no valid stored year; dismissing it leaves the current route intact. Selecting a year saves the preference and navigates to its explicitly active module, or its year directory when none is active. Year-selection triggers reopen it with the saved year highlighted and focused. Animation respects reduced-motion preferences.
 
 ---
 

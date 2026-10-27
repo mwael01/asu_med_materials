@@ -1,21 +1,9 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import { getAllModules } from '../data/modules';
-import { resolveActiveModule } from '../utils/moduleHelpers';
 
 const shouldRedirect = Astro.url.searchParams.get('redirect') !== 'false';
 const modules = await getAllModules();
-
-// Build map of academic year -> active module ID
-const activeModuleMap: Record<number, string> = {};
-for (let y = 1; y <= 5; y++) {
-  const active = resolveActiveModule(modules, y);
-  if (active) activeModuleMap[y] = active.id;
-}
-
-// Default fallback is Year 2 active module (Respiratory)
-const defaultActiveModuleId = activeModuleMap[2] || 'year2-respiratory';
-const visibleModules = modules.filter((m) => m.active !== false);
 
 ---
 
@@ -24,15 +12,18 @@ const visibleModules = modules.filter((m) => m.active !== false);
   description="All-in-one medical study hub for Ain Shams University Faculty of Medicine (ASU Med). Access curriculum modules, doctor lectures, YouTube playlists, PDFs, flashcards, and practical images across Years 1 to 5."
   keywords={['ASU Med', 'asumedmaterials', 'Ain Shams Medicine', 'Ain Shams University Faculty of Medicine', 'طب عين شمس', 'محاضرات طب عين شمس']}
 >
-  <div class="py-16 text-center text-sm text-zinc-500">
-    <h1 class="sr-only">ASU Med - Ain Shams University Faculty of Medicine Study Materials &amp; Curriculum</h1>
-    <p>{shouldRedirect ? 'Opening your active module...' : 'Select a module or return to the curriculum'}</p>
-    <p class="mt-3">
-      <a href={`/module/${defaultActiveModuleId}`} id="direct-active-link" class="text-emerald-500 hover:underline font-medium">
-        {shouldRedirect ? 'Click here if you are not redirected automatically \u2192' : 'Go to active module \u2192'}
+  <section data-home-year-redirect data-auto-redirect={String(shouldRedirect)} class="mx-auto max-w-sm py-10 text-center">
+    <h1 class="text-2xl font-bold tracking-tight">Your study materials</h1>
+    <button type="button" class="trigger-multistage-selector mt-5 rounded-xl bg-emerald-600 px-5 py-3 text-sm font-semibold text-white hover:bg-emerald-500 cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-500">Choose your year</button>
+    <nav aria-label="Browse academic years" class="mt-6 flex flex-wrap justify-center gap-x-5 gap-y-3 text-sm">
+      {[1, 2, 3, 4, 5].map(year => <a href={`/year/${year}`} class="text-zinc-600 dark:text-zinc-300 hover:text-emerald-600 dark:hover:text-emerald-400 hover:underline">Year {year}</a>)}
+    </nav>
+    <p class="mt-6 text-sm">
+      <a href="/modules" id="direct-active-link" class="text-emerald-600 dark:text-emerald-400 hover:underline font-medium">
+        Open my modules
       </a>
     </p>
-  </div>
+  </section>
 
   <nav class="sr-only" aria-label="Curriculum directory">
     <h2>Academic Years</h2>
@@ -45,7 +36,7 @@ const visibleModules = modules.filter((m) => m.active !== false);
     </ul>
     <h2>Modules</h2>
     <ul>
-      {visibleModules.map((mod) => (
+      {modules.map((mod) => (
         <li>
           <a href={`/module/${mod.id}`}>{mod.title} (Year {mod.year})</a>
         </li>
@@ -53,29 +44,9 @@ const visibleModules = modules.filter((m) => m.active !== false);
     </ul>
   </nav>
 
-  <script is:inline define:vars={{ activeModuleMap, defaultActiveModuleId }}>
-    function resolveAndOpenActiveModule() {
-      try {
-        var params = new URLSearchParams(window.location.search);
-        if (params.get('redirect') === 'false') {
-          return;
-        }
-        var raw = localStorage.getItem('asumed_user_year');
-        var year = (raw && !isNaN(raw)) ? parseInt(raw, 10) : 2;
-        var target = activeModuleMap[year] || defaultActiveModuleId;
-        var destination = '/module/' + target;
-        var directLink = document.getElementById('direct-active-link');
-        if (directLink) directLink.setAttribute('href', destination);
-        window.location.replace(destination);
-      } catch (e) {
-        window.location.replace('/module/' + defaultActiveModuleId);
-      }
-    }
-    resolveAndOpenActiveModule();
-    document.addEventListener('astro:page-load', function() {
-      if (window.location.pathname === '/') {
-        resolveAndOpenActiveModule();
-      }
-    });
+  <script>
+    import { initHomeYearRedirect } from '../scripts/navigation/homeYearRedirect';
+    initHomeYearRedirect();
+    document.addEventListener('astro:page-load', initHomeYearRedirect);
   </script>
 </Layout>

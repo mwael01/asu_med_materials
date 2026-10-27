@@ -4,6 +4,7 @@ import type { ModuleInfo } from '../../types/materials';
 import MobileMenu from './MobileMenu.astro';
 import { getAllModules } from '../../data/modules';
 import { getMaterialsVersionFromFirestore } from '../../firebase/firestore';
+import { getYearModules } from '../../utils/moduleHelpers';
 
 interface Props {
   crumbs?: NavCrumb[];
@@ -30,11 +31,11 @@ if (allModules.length === 0) {
 
 const years = [1, 2, 3, 4, 5] as const;
 const modulesByYear: Record<number, ModuleInfo[]> = {
-  1: allModules.filter((m) => m.year === 1 && m.active !== false),
-  2: allModules.filter((m) => m.year === 2 && m.active !== false),
-  3: allModules.filter((m) => m.year === 3 && m.active !== false),
-  4: allModules.filter((m) => m.year === 4 && m.active !== false),
-  5: allModules.filter((m) => m.year === 5 && m.active !== false)
+  1: getYearModules(allModules, 1),
+  2: getYearModules(allModules, 2),
+  3: getYearModules(allModules, 3),
+  4: getYearModules(allModules, 4),
+  5: getYearModules(allModules, 5)
 };
 ---
 
@@ -93,7 +94,7 @@ const modulesByYear: Record<number, ModuleInfo[]> = {
             allModules.some((m) => m.title.toLowerCase() === crumb.title.toLowerCase() || m.id === crumb.title)
           );
           const parentYearMatch = crumbs[0]?.title.match(/^Year\s*([1-5])$/i);
-          const activeYearForModule = crumb.year || crumbs[0]?.year || (parentYearMatch ? parseInt(parentYearMatch[1], 10) : 1);
+          const activeYearForModule = crumb.year || crumbs[0]?.year || (parentYearMatch ? parseInt(parentYearMatch[1], 10) : null);
 
           const hasMenu = isYearCrumb || isModuleCrumb || Boolean(crumb.menu && crumb.menu.length > 0);
 
@@ -168,6 +169,8 @@ const modulesByYear: Record<number, ModuleInfo[]> = {
                     </div>
                   ) : isModuleCrumb ? (
                     <div
+                      data-current-year={activeYearForModule || ''}
+                      data-module-year-menu
                       class="nav-crumb-dropdown hidden fixed z-50 p-2 min-w-[260px] sm:min-w-[300px] max-w-[340px] max-h-[70vh] overflow-y-auto overscroll-contain bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl shadow-2xl text-xs text-start"
                     >
                       <!-- Year Switcher Tabs -->
@@ -177,13 +180,9 @@ const modulesByYear: Record<number, ModuleInfo[]> = {
                           {years.map((y) => (
                             <button
                               type="button"
-                              class:list={[
-                                'nav-module-year-tab px-2 py-0.5 rounded-md text-[11px] font-bold transition-all cursor-pointer',
-                                y === activeYearForModule
-                                  ? 'bg-emerald-600 text-white shadow-2xs'
-                                  : 'text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800'
-                              ]}
+                              class="nav-module-year-tab px-2 py-1 rounded-md text-xs font-semibold transition-colors cursor-pointer text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 aria-pressed:bg-emerald-600 aria-pressed:text-white focus-visible:outline-2 focus-visible:outline-emerald-500"
                               data-target-year={String(y)}
+                              aria-pressed={y === activeYearForModule ? 'true' : 'false'}
                               title={`View Year ${y} modules`}
                             >
                               {y}
@@ -191,6 +190,8 @@ const modulesByYear: Record<number, ModuleInfo[]> = {
                           ))}
                         </div>
                       </div>
+
+                      <p data-module-year-empty hidden={activeYearForModule !== null} class="px-2.5 py-3 text-zinc-500">Choose your year</p>
 
                       <!-- Module Panels for Each Year -->
                       {years.map((y) => {
@@ -209,14 +210,15 @@ const modulesByYear: Record<number, ModuleInfo[]> = {
                                 return (
                                   <a
                                     href={`/module/${m.id}`}
+                                    aria-current={isModActive ? 'page' : undefined}
                                     class:list={[
-                                      'flex items-center justify-between px-2.5 py-1.5 rounded-lg transition-colors',
+                                      'flex items-center justify-between gap-2 px-3 py-2.5 rounded-lg transition-colors focus-visible:outline-2 focus-visible:outline-emerald-500',
                                       isModActive
                                         ? 'bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 font-bold'
                                         : 'text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800'
                                     ]}
                                   >
-                                    <span class="truncate">{m.title}</span>
+                                    <span>{m.title}</span>
                                     {isModActive && (
                                       <svg class="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 shrink-0 ml-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
@@ -371,6 +373,7 @@ const modulesByYear: Record<number, ModuleInfo[]> = {
 
 <script>
   import { onAuthChange, getCachedUserProfile } from '../../firebase/auth';
+  import { initModuleYearMenu } from '../../scripts/navigation/moduleMenu';
 
   let unsubscribeAuth: (() => void) | undefined;
 
@@ -410,14 +413,19 @@ const modulesByYear: Record<number, ModuleInfo[]> = {
   }
 
   function initNavCrumbDropdowns(): void {
+    const nav = document.querySelector('nav[aria-label="Directory navigation"]');
+    if (!nav || nav.getAttribute('data-initialized')) return;
+    nav.setAttribute('data-initialized', 'true');
     const isTouchDevice = () => window.matchMedia('(hover: none) and (pointer: coarse)').matches;
-    let hoverTimeout: any = null;
+    let hoverTimeout: ReturnType<typeof setTimeout> | null = null;
     let activeItem: HTMLElement | null = null;
 
     function positionDropdown(triggerGroup: HTMLElement, dropdown: HTMLElement): void {
       const rect = triggerGroup.getBoundingClientRect();
       const dropdownWidth = Math.min(320, window.innerWidth - 16);
       dropdown.style.width = `${dropdownWidth}px`;
+      dropdown.style.minWidth = '0';
+      dropdown.style.maxHeight = `${Math.max(100, window.innerHeight - rect.bottom - 12)}px`;
       dropdown.style.position = 'fixed';
       dropdown.style.top = `${rect.bottom + 4}px`;
 
@@ -441,7 +449,6 @@ const modulesByYear: Record<number, ModuleInfo[]> = {
       const dropdown = item.querySelector<HTMLElement>('.nav-crumb-dropdown');
       const arrow = item.querySelector<HTMLElement>('.nav-crumb-arrow-icon');
       const triggerGroup = item.querySelector<HTMLElement>('.nav-crumb-trigger-group');
-      const triggerBtn = item.querySelector<HTMLElement>('[aria-haspopup="true"]');
 
       if (!dropdown || !triggerGroup) return;
 
@@ -449,19 +456,18 @@ const modulesByYear: Record<number, ModuleInfo[]> = {
       dropdown.classList.remove('hidden');
       arrow?.classList.add('rotate-180');
       triggerGroup.classList.add('bg-zinc-100', 'dark:bg-zinc-800');
-      triggerBtn?.setAttribute('aria-expanded', 'true');
+      item.querySelectorAll('[aria-haspopup="true"]').forEach(trigger => trigger.setAttribute('aria-expanded', 'true'));
     }
 
     function closeItem(item: HTMLElement): void {
       const dropdown = item.querySelector<HTMLElement>('.nav-crumb-dropdown');
       const arrow = item.querySelector<HTMLElement>('.nav-crumb-arrow-icon');
       const triggerGroup = item.querySelector<HTMLElement>('.nav-crumb-trigger-group');
-      const triggerBtn = item.querySelector<HTMLElement>('[aria-haspopup="true"]');
 
       dropdown?.classList.add('hidden');
       arrow?.classList.remove('rotate-180');
       triggerGroup?.classList.remove('bg-zinc-100', 'dark:bg-zinc-800');
-      triggerBtn?.setAttribute('aria-expanded', 'false');
+      item.querySelectorAll('[aria-haspopup="true"]').forEach(trigger => trigger.setAttribute('aria-expanded', 'false'));
       if (activeItem === item) activeItem = null;
     }
 
@@ -520,38 +526,8 @@ const modulesByYear: Record<number, ModuleInfo[]> = {
         }
       });
 
-      // 4. Inside the dropdown: Year Switcher Tabs for Modules
-      const yearTabs = item.querySelectorAll<HTMLButtonElement>('.nav-module-year-tab');
-      const yearPanels = item.querySelectorAll<HTMLElement>('.nav-module-year-panel');
-
-      function switchYear(targetYear: string): void {
-        yearTabs.forEach((tab) => {
-          const isSelected = tab.getAttribute('data-target-year') === targetYear;
-          tab.classList.toggle('bg-emerald-600', isSelected);
-          tab.classList.toggle('text-white', isSelected);
-          tab.classList.toggle('shadow-2xs', isSelected);
-          tab.classList.toggle('text-zinc-600', !isSelected);
-          tab.classList.toggle('dark:text-zinc-400', !isSelected);
-        });
-        yearPanels.forEach((panel) => {
-          panel.hidden = panel.getAttribute('data-panel-year') !== targetYear;
-        });
-      }
-
-      yearTabs.forEach((tab) => {
-        tab.addEventListener('click', (e) => {
-          e.preventDefault();
-          e.stopPropagation();
-          const y = tab.getAttribute('data-target-year');
-          if (y) switchYear(y);
-        });
-        tab.addEventListener('mouseenter', () => {
-          if (!isTouchDevice()) {
-            const y = tab.getAttribute('data-target-year');
-            if (y) switchYear(y);
-          }
-        });
-      });
+      const moduleMenu = item.querySelector<HTMLElement>('[data-module-year-menu]');
+      if (moduleMenu) initModuleYearMenu(moduleMenu);
 
       // 5. Close when any link inside dropdown is clicked
       item.querySelectorAll<HTMLElement>('.nav-crumb-dropdown a').forEach((link) => {
@@ -561,23 +537,22 @@ const modulesByYear: Record<number, ModuleInfo[]> = {
       });
     });
 
-    // Global dismiss handlers
-    if (!(window as any)._navCrumbBound) {
-      (window as any)._navCrumbBound = true;
-      document.addEventListener('click', (e) => {
-        if (!(e.target as HTMLElement).closest('.nav-crumb-item')) {
-          closeAll();
-        }
-      });
-      document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape') {
-          closeAll();
-        }
-      });
-      window.addEventListener('resize', () => {
+    // Bind dismiss handlers to this page's menus and release them on navigation.
+    const lifecycle = new AbortController();
+    document.addEventListener('click', (e) => {
+      if (!(e.target as HTMLElement).closest('.nav-crumb-item')) closeAll();
+    }, { signal: lifecycle.signal });
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        activeItem?.querySelector<HTMLButtonElement>('.nav-crumb-arrow-btn')?.focus();
         closeAll();
-      });
-    }
+      }
+    }, { signal: lifecycle.signal });
+    window.addEventListener('resize', closeAll, { signal: lifecycle.signal });
+    document.addEventListener('astro:before-swap', () => {
+      closeAll();
+      lifecycle.abort();
+    }, { once: true });
   }
 
   function initAllNavbar(): void {

@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { resolveActiveModule } from '../src/utils/moduleHelpers.ts';
+import { resolveActiveModule, resolveYearDestination, getYearModules } from '../src/utils/moduleHelpers.ts';
 
 const mockModules = [
   // Year 1 Modules
@@ -99,11 +99,26 @@ test('resolveActiveModule returns the module with active: true for the student y
   assert.equal(activeYear1.id, 'year1-introduction');
 });
 
-test('resolveActiveModule falls back to lowest order when no module is marked active: true', () => {
-  // Year 3 has no active: true, falls back to order: 1
-  const activeYear3 = resolveActiveModule(mockModules, 3);
-  assert.ok(activeYear3);
-  assert.equal(activeYear3.id, 'year3-cns');
+test('resolveActiveModule returns null when no module is explicitly active', () => {
+  assert.equal(resolveActiveModule(mockModules, 3), null);
+  assert.equal(resolveActiveModule([{ ...mockModules[0], active: undefined }], 1), null);
+});
+
+test('year destinations never fall back to another year or to a reference module', () => {
+  assert.equal(resolveYearDestination(mockModules, 1), '/module/year1-introduction');
+  assert.equal(resolveYearDestination(mockModules, 2), '/module/year2-respiratory');
+  for (const year of [3, 4, 5]) assert.equal(resolveYearDestination(mockModules, year), `/year/${year}`);
+  assert.equal(resolveYearDestination([{ ...mockModules.at(-1), active: true }], 5), '/year/5');
+});
+
+test('year module menu includes inactive Blood, excludes other years, and preserves curriculum order', () => {
+  const modules = [...mockModules].reverse();
+  const original = [...modules];
+  assert.deepEqual(getYearModules(modules, 2).map(module => module.id), [
+    'year2-respiratory', 'year2-blood', 'year2-reference-books',
+  ]);
+  assert.deepEqual(modules, original);
+  assert.deepEqual(getYearModules(modules, 4), []);
 });
 
 test('resolveActiveModule filters out reference books and returns null for years without curriculum modules', () => {

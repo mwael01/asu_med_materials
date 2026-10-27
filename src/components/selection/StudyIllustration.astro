@@ -1,0 +1,44 @@
+<svg viewBox="0 0 260 160" fill="none" aria-hidden="true" class="study-illustration mx-auto h-36 w-60 max-w-full">
+  <ellipse cx="130" cy="140" rx="78" ry="8" fill="currentColor" opacity="0.08" class="text-emerald-600 dark:text-emerald-300" />
+  <circle cx="130" cy="75" r="63" fill="currentColor" opacity="0.07" class="text-emerald-600 dark:text-emerald-300" />
+  <circle cx="130" cy="75" r="49" stroke="currentColor" stroke-dasharray="3 7" opacity="0.2" class="text-emerald-600 dark:text-emerald-300" />
+  <g class="study-books">
+    <path d="M57 114H191L205 126L72 129L57 121V114Z" fill="#0f766e" />
+    <path d="M70 114H192L201 122H73L70 114Z" fill="#ccfbf1" />
+    <path d="M57 114L70 121H201M70 121V127" stroke="#5eead4" stroke-width="2" stroke-linejoin="round" />
+    <path d="M70 99H191V113H70C61 113 61 99 70 99Z" fill="#059669" />
+    <path d="M73 102H188V110H73C68 110 68 102 73 102Z" fill="#ecfdf5" />
+    <path d="M130 56C111 45 88 46 70 54V99C90 93 109 95 130 106C151 95 170 93 190 99V54C172 46 149 45 130 56Z" fill="#10b981" />
+    <path d="M130 53C113 42 90 43 75 50V94C92 89 112 92 130 101C148 92 168 89 185 94V50C170 43 147 42 130 53Z" fill="#ecfdf5" stroke="#6ee7b7" stroke-width="2" stroke-linejoin="round" />
+    <path d="M130 54V99" stroke="#6ee7b7" stroke-width="2" />
+    <path d="M85 61C95 58 107 59 118 63M85 71C95 68 107 69 118 73M85 81C95 78 107 79 118 83" stroke="#99d8c0" stroke-width="2.5" stroke-linecap="round" />
+    <path d="M140 76H150L155 64L162 84L168 73H176" stroke="#059669" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
+    <path d="M166 46V65L172 61L178 64V47" fill="#0d9488" />
+  </g>
+  <g class="study-emblem">
+    <rect x="172" y="16" width="40" height="40" rx="13" fill="#064e3b" stroke="#34d399" stroke-width="1.5" />
+    <path d="M189 25H195V33H203V39H195V47H189V39H181V33H189V25Z" fill="#6ee7b7" />
+  </g>
+  <g class="study-sparkle" stroke="#34d399" stroke-width="2" stroke-linecap="round">
+    <path d="M50 49V61M44 55H56M216 89V97M212 93H220" />
+    <circle cx="83" cy="25" r="2" fill="#34d399" stroke="none" />
+    <circle cx="205" cy="116" r="2" fill="#5eead4" stroke="none" />
+  </g>
+</svg>
+
+<style>
+  .study-books { animation: study-float 4s ease-in-out infinite; }
+  .study-emblem { animation: study-float 3.2s ease-in-out infinite reverse; }
+  .study-sparkle { animation: study-glow 3s ease-in-out infinite; }
+  @keyframes study-float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-5px); }
+  }
+  @keyframes study-glow {
+    0%, 100% { opacity: 0.45; }
+    50% { opacity: 1; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .study-books, .study-emblem, .study-sparkle { animation: none; }
+  }
+</style>

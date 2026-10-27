@@ -32,9 +32,11 @@ test('Material and Playlist viewers redirect non-existent resources to /404', ()
 
 test('Index page respects redirect=false query parameter', () => {
   const indexContent = fs.readFileSync(path.join(projectRoot, 'src/pages/index.astro'), 'utf-8');
+  const controller = fs.readFileSync(path.join(projectRoot, 'src/scripts/navigation/homeYearRedirect.ts'), 'utf-8');
 
   assert.match(indexContent, /Astro\.url\.searchParams\.get\('redirect'\) !== 'false'/, 'SSR must check redirect=false');
-  assert.match(indexContent, /params\.get\('redirect'\) === 'false'/, 'Client script must check redirect=false');
+  assert.match(controller, /params\.get\('redirect'\) === 'false'/, 'Client script must check redirect=false');
+  assert.doesNotMatch(indexContent, /year2-respiratory|defaultActiveModuleId/, 'Home must not hardcode a Year 2 fallback');
 });
 
 test('Layout.astro includes global navigation loading indicator', () => {

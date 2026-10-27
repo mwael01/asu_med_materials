@@ -26,7 +26,7 @@ const activeSubjects = module.subjects.filter(subject => {
   return lessonsForSubject(allLessons, module.id, subject).length > 0;
 });
 
-const siblingModules = allModules.filter(m => m.year === module.year && m.active !== false);
+const siblingModules = allModules.filter(m => m.year === module.year);
 
 const yearMenu = ([1, 2, 3, 4, 5] as const).map(y => ({
   title: `Year ${y}`,
