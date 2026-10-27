@@ -6,9 +6,9 @@ from urllib.parse import urlsplit
 from firebase_admin import firestore
 
 from .core import link_id, video_link_type
-from .inbox_core import SOURCE_ID, MAX_R2_BYTES, TERMINAL, asset_key, fingerprint, item_keys, message_key, now, resource_keys, validate_decision, validate_image_plan
+from .inbox_core import SOURCE_ID, MAX_R2_BYTES, TERMINAL, fingerprint, item_keys, message_key, now, resource_keys, validate_decision, validate_image_plan
 from .inbox_analysis import matches
-from .inbox_catalogue import INDEX_ID, index_state, version
+from .inbox_catalogue import index_id, index_asset_key, index_state, version
 from .inbox_media import cache_path, ensure_cache, inspect_file, image_thumbnail
 from .inbox_sync import verify_source
 from .store import put_r2
@@ -26,8 +26,14 @@ def assignment_fingerprint(material, links):
         'links': sorted((link['id'], link.get('lessonId'), link.get('moduleId')) for link in links)})
 
 
-def decide(repo, batch_id, ids, decision, plan_id=None):
-    batch, previous = plans(repo, batch_id)
+def validate_item_titles(plan, item_ids):
+    titles = plan.get('itemTitles', {})
+    if not isinstance(titles, dict) or any(key not in item_ids or not isinstance(title, str) or not title.strip() for key, title in titles.items()):
+        raise ValueError('Track/document titles must be nonempty and belong to selected items')
+
+
+def decide(repo, batch_id, ids, decision, plan_id=None, *, review_context=None):
+    batch, previous = review_context if review_context is not None else plans(repo, batch_id)
     if batch['status'] in {'approved', 'publishing', 'published'}:
         raise ValueError('Approved batches are immutable; analyze or retry in a new batch')
     if not ids or not set(ids).issubset(batch['itemIds']):
@@ -39,6 +45,7 @@ def decide(repo, batch_id, ids, decision, plan_id=None):
             raise ValueError('Amend an unpublished plan with the same items, or create a new batch')
     modules, lessons = repo.destinations([decision['moduleId']], decision.get('lessonIds', [])) if decision.get('moduleId') else ([], [])
     validate_decision(decision, modules, lessons)
+    validate_item_titles(decision, ids)
     for old in previous:
         if old['id'] != plan_id and old['action'] in {'create', 'reuse'} and old.get('moduleId') == decision.get('moduleId') and set(old['itemIds']) & set(ids):
             raise ValueError('Overlapping decisions in the same destination are not allowed; use a new batch')
@@ -47,7 +54,7 @@ def decide(repo, batch_id, ids, decision, plan_id=None):
         current = repo.read('material_inbox', message_key(item['messageId']))
         if not current or current['fingerprint'] != item['revision'] or current.get('sourceMissing'):
             raise ValueError('Item source revision is stale or missing')
-        if decision['action'] == 'duplicate' and not matches(repo, item):
+        if decision['action'] == 'duplicate' and not matches(repo, item, decision.get('moduleId')):
             raise ValueError('Duplicate decisions require an exact existing asset match')
         if decision['action'] in {'hold', 'ignore', 'duplicate'} and any(t['status'] != 'published' for k, t in item.get('targetPlans', {}).items() if k != plan_id):
             raise ValueError('Resolve pending destination plans before ignoring or holding this item')
@@ -60,7 +67,7 @@ def decide(repo, batch_id, ids, decision, plan_id=None):
         target = repo.read('materials', decision['existingMaterialId'])
         if not target or target.get('moduleId') != decision['moduleId']:
             raise ValueError('Existing material must belong to the selected module')
-        if any(decision['existingMaterialId'] not in matches(repo, item) for item in items):
+        if any(decision['existingMaterialId'] not in matches(repo, item, decision['moduleId']) for item in items):
             raise ValueError('Reuse requires verified identity matches for every selected item')
         if decision.get('replaceLessonAssignments'):
             links = repo.lesson_links(target['id'])
@@ -95,6 +102,18 @@ def decide(repo, batch_id, ids, decision, plan_id=None):
     return plan_id
 
 
+def decide_many(repo, batch_id, entries):
+    """Share the reviewed plan list; each decision still verifies live sources atomically."""
+    batch, previous = plans(repo, batch_id)
+    saved = []
+    for entry in entries:
+        plan_id = decide(repo, batch_id, entry['itemIds'], entry['decision'], entry.get('planId'), review_context=(batch, previous))
+        previous = [plan for plan in previous if plan['id'] != plan_id]
+        previous.append(repo.read(f'material_inbox_batches/{batch_id}/plans', plan_id))
+        saved.append(plan_id)
+    return saved
+
+
 def annotate(repo, batch_id, plan_id, item_id, note):
     batch, decisions = plans(repo, batch_id)
     plan = next((p for p in decisions if p['id'] == plan_id), None)
@@ -125,11 +144,13 @@ def validate_plans(repo, batch_id):
     destinations = {}
     if not actionable:
         raise ValueError('No create/reuse decisions are ready for approval')
-    index_state(repo, required=True)
+    for module_id in sorted({p['moduleId'] for p in actionable}):
+        index_state(repo, module_id, required=True)
     for plan in actionable:
         if len(plan['itemIds']) * 5 + len(plan['lessonIds']) + 6 > 450:
             raise ValueError('Publication group is too large for one transaction; split it before approval')
         validate_decision(plan, modules, lessons)
+        validate_item_titles(plan, plan['itemIds'])
         if any(repo.read('material_inbox_items', key).get('mime') == 'text/html' for key in plan['itemIds']) and not plan.get('htmlReviewed'):
             raise ValueError('Inspect HTML source and dependencies before confirming --reviewed-html')
         if plan.get('forceRecording') and any(repo.read('material_inbox_items', key)['kind'] not in {'link', 'audio', 'video', 'playlist'} for key in plan['itemIds']):
@@ -159,7 +180,7 @@ def validate_plans(repo, batch_id):
                 if previous and previous != (plan['id'], item_id):
                     raise ValueError('Selected items repeat the same asset in one module; consolidate them')
                 destinations[destination] = (plan['id'], item_id)
-            existing = matches(repo, item)
+            existing = matches(repo, item, plan['moduleId'])
             same_module = [mid for mid, module_id in existing.items() if module_id == plan['moduleId']]
             own_id = 'inbox-' + fingerprint({'batch': batch_id, 'plan': plan['id']})[:32]
             if plan['action'] == 'create' and any(mid != own_id for mid in same_module):
@@ -209,7 +230,7 @@ def material_payload(plan, module, lessons, members, urls, material_id):
         url = urls[member['id']]
         kind = member['kind']
         source_type = 'direct' if member['storage'] == 'r2' else video_link_type(url) or ('telegram' if member['storage'] == 'telegram' else 'external')
-        title = member.get('reviewedTitle') or (plan['title'] if len(members) == 1 else member['title'])
+        title = plan.get('itemTitles', {}).get(member['id']) or member.get('reviewedTitle') or (plan['title'] if len(members) == 1 else member['title'])
         if kind == 'playlist':
             recordings.extend(v for v in member['videos'] if not plan.get('selectedVideoIds') or (v.get('youtubeId') or v['id']) in plan['selectedVideoIds'])
         elif kind in {'audio', 'video'} or video_link_type(url) or plan.get('forceRecording'):
@@ -264,7 +285,9 @@ async def publish(repo, client, batch_id, apply=False):
             item = repo.read('material_inbox_items', key)
             if key not in fresh:
                 fresh[key] = await verify_source(repo, client, item)
-    repo.write('material_inbox_batches', batch_id, {'status': 'publishing'})
+    if batch.get('status') != 'publishing' and any(plan['status'] != 'published' for plan in decisions):
+        repo.write('material_inbox_batches', batch_id, {'status': 'publishing'})
+    indexes = {p['moduleId']: index_state(repo, p['moduleId'], required=True) for p in decisions}
     for plan in decisions:
         if plan['status'] == 'published':
             continue
@@ -296,19 +319,21 @@ async def publish(repo, client, batch_id, apply=False):
         payload = material_payload({**plan, 'batchId': batch_id}, module, lessons, members, urls, mid)
         identities = {key for member in members for key in item_keys(member)}
         indexed_keys = identities | resource_keys(payload)
+        scope = indexes[module['id']].get('moduleId')
+        checkpoint_id = index_id(scope)
 
         def commit(tx):
             repo.guard(tx)
             current_plan = repo.read(f'material_inbox_batches/{batch_id}/plans', plan['id'], tx)
             current_batch = repo.read('material_inbox_batches', batch_id, tx)
-            live_index = repo.read('material_asset_index', INDEX_ID, tx) or {}
+            live_index = repo.read('material_asset_index', checkpoint_id, tx) or {}
             live_version = version(repo, tx)
             material = repo.read('materials', mid, tx)
             live_module = repo.read('modules', module['id'], tx)
             assigned = [repo.read('lessons', lid, tx) for lid in plan['lessonIds']]
             sources = [repo.read('material_inbox', message_key(i['messageId']), tx) for i in members]
             live_items = [repo.read('material_inbox_items', i['id'], tx) for i in members]
-            asset_records = {key: repo.read('material_asset_index', asset_key(key), tx) or {} for key in indexed_keys}
+            asset_records = {key: repo.read('material_asset_index', index_asset_key(key, scope), tx) or {} for key in indexed_keys}
             old_links = repo.lesson_links(mid, tx) if plan.get('replaceLessonAssignments') else []
             if current_plan.get('status') == 'published':
                 return
@@ -358,14 +383,31 @@ async def publish(repo, client, batch_id, apply=False):
             for key, old in asset_records.items():
                 associations = old.get('materials', {}) if old.get('generation') == live_index['generation'] else {}
                 record = {'key': key, 'generation': live_index['generation'], 'materials': {**associations, mid: module['id']}, 'updatedAt': now()}
-                repo.write('material_asset_index', asset_key(key), record, tx, merge=False)
+                repo.write('material_asset_index', index_asset_key(key, scope), record, tx, merge=False)
             repo.write(f'material_inbox_batches/{batch_id}/plans', plan['id'], {'status': 'published', 'materialId': mid,
                 'publishedAt': now(), 'reviewStatus': 'pending'}, tx)
-            repo.write('materials_version', 'current', {'version': firestore.Increment(1), 'updatedAt': now()}, tx)
-            repo.write('material_asset_index', INDEX_ID, {'version': live_version + 1, 'updatedAt': now()}, tx)
+            # Keep the cached catalogue stable until every destination is committed.
+            # This marker survives interruption, so resuming also invalidates once.
+            repo.write('material_inbox_batches', batch_id, {'catalogueUpdatePending': True}, tx)
         repo.atomic(commit)
         for message_id in {member['messageId'] for member in members}:
             repo.refresh_message_status(message_id)
     unresolved = [repo.read('material_inbox_items', key)['status'] for key in batch['itemIds']]
-    repo.write('material_inbox_batches', batch_id, {'status': 'published' if all(s in TERMINAL for s in unresolved) else 'needs_review', 'updatedAt': now()})
+    final_status = 'published' if all(s in TERMINAL for s in unresolved) else 'needs_review'
+    def finalize(tx):
+        repo.guard(tx)
+        current_batch = repo.read('material_inbox_batches', batch_id, tx)
+        if current_batch.get('catalogueUpdatePending'):
+            checkpoint_ids = {index_id(state.get('moduleId')) for state in indexes.values()}
+            live_indexes = repo.read_many('material_asset_index', sorted(checkpoint_ids), tx)
+            live_version = version(repo, tx)
+            if any(not state or not state.get('complete') or state.get('version') != live_version for state in live_indexes.values()):
+                raise ValueError('Catalogue changed; refresh the duplicate index before finalizing publication')
+            repo.write('materials_version', 'current', {'version': firestore.Increment(1), 'updatedAt': now()}, tx)
+            for checkpoint_id in checkpoint_ids:
+                repo.write('material_asset_index', checkpoint_id, {'version': live_version + 1, 'updatedAt': now()}, tx)
+            repo.write('material_inbox_batches', batch_id, {'catalogueUpdatePending': False, 'status': final_status, 'updatedAt': now()}, tx)
+        elif current_batch.get('status') != final_status:
+            repo.write('material_inbox_batches', batch_id, {'status': final_status, 'updatedAt': now()}, tx)
+    repo.atomic(finalize)
     return summary

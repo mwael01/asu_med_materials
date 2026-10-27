@@ -119,6 +119,13 @@ class ReadEfficiencyTests(unittest.TestCase):
         self.assertEqual(self.db.reads, 3)
         self.assertEqual(self.db.queries, [])
 
+    def test_module_material_query_does_not_read_other_modules(self):
+        for n in range(10000):
+            self.db.rows['materials', str(n)] = {'moduleId': 'other'}
+        self.db.rows['materials', 'resp-1'] = {'moduleId': 'resp'}
+        self.assertEqual(len(self.repo.list('materials', module_id='resp', limit=50)), 1)
+        self.assertEqual(self.db.reads, 1)
+
     def test_cache_copies_values_invalidates_writes_and_transactions_stay_live(self):
         self.db.rows['modules', 'resp'] = {'year': 2}
         value = self.repo.read('modules', 'resp'); value['year'] = 5
@@ -217,6 +224,19 @@ class CatalogueIndexTests(unittest.TestCase):
         with patch.object(self.repo, 'list', side_effect=AssertionError('No collection scan expected')):
             self.assertEqual(index_catalogue(self.repo, 2)['materialsRead'], 0)
         self.assertEqual(matches(self.repo, {'url': 'https://other.org/file', 'sha256': '3' * 64}), {'3': 'resp'})
+
+    def test_scoped_indexes_are_independent_and_leave_the_global_index_untouched(self):
+        self.repo.write('modules', 'resp', {'year': 2})
+        self.repo.write('modules', 'other', {'year': 3})
+        self.repo.write('materials', 'other-notes', {'moduleId': 'other', 'url': 'https://example.org/3'})
+        for module_id in ['resp', 'other']:
+            result = index_catalogue(self.repo, 10, module_id=module_id)
+            self.assertTrue(result['complete'])
+            self.assertEqual(result['materialsRead'], 5 if module_id == 'resp' else 1)
+        self.assertIsNone(self.repo.read('material_asset_index', INDEX_ID))
+        self.assertEqual(matches(self.repo, {'url': 'https://example.org/3'}, 'resp'), {'3': 'resp'})
+        self.assertEqual(matches(self.repo, {'url': 'https://example.org/3'}, 'other'), {'other-notes': 'other'})
+        self.assertEqual(index_catalogue(self.repo, 10, module_id='resp')['materialsRead'], 0)
 
     def test_catalogue_edit_invalidates_index_and_rebuild_drops_deleted_associations(self):
         index_catalogue(self.repo, 10)

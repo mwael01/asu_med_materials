@@ -80,12 +80,14 @@ class InboxRepository:
                 self._transaction.reads = None
         return firestore.transactional(attempt)(self.db.transaction())
 
-    def list(self, collection, statuses=None, *, message_id=None, limit=None, after=None, order='__name__', descending=False):
-        identity = (collection, tuple(sorted(statuses or [])), message_id, limit, after, order, descending)
+    def list(self, collection, statuses=None, *, message_id=None, module_id=None, limit=None, after=None, order='__name__', descending=False):
+        identity = (collection, tuple(sorted(statuses or [])), message_id, module_id, limit, after, order, descending)
         if identity in self._queries:
             return deepcopy(self._queries[identity])
         query = self.db.collection(collection)
-        if message_id is not None:
+        if module_id is not None:
+            query = query.where(filter=FieldFilter('moduleId', '==', module_id))
+        elif message_id is not None:
             query = query.where(filter=FieldFilter('messageId', '==', message_id))
         elif statuses:
             query = query.where(filter=FieldFilter('status', 'in', list(statuses)))

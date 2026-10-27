@@ -15,7 +15,7 @@ from telegram_materials.inbox_repository import InboxRepository
 from telegram_materials.inbox_sync import ingest, mark_missing, sync
 from telegram_materials.inbox_analysis import analyze, seed_assets
 from telegram_materials.inbox_media import cache_path, expand_archive, inspect_file
-from telegram_materials.inbox_publication import approve, decide, publish, annotate, validate_plans, material_payload
+from telegram_materials.inbox_publication import approve, decide, decide_many, publish, annotate, validate_plans, material_payload
 
 
 class MemoryRepo(InboxRepository):
@@ -46,10 +46,11 @@ class MemoryRepo(InboxRepository):
     def lesson_links(self, material_id, tx=None):
         return [link for link in self.list('material_lesson_links') if link['materialId'] == material_id]
 
-    def list(self, collection, statuses=None, *, message_id=None, limit=None, after=None, order='__name__', descending=False):
+    def list(self, collection, statuses=None, *, message_id=None, module_id=None, limit=None, after=None, order='__name__', descending=False):
         values = [{**copy.deepcopy(value), 'id': key} for (c, key), value in self.records.items()
                 if c == collection and (not statuses or value.get('status') in statuses)
-                and (message_id is None or value.get('messageId') == message_id)]
+                and (message_id is None or value.get('messageId') == message_id)
+                and (module_id is None or value.get('moduleId') == module_id)]
         key = 'id' if order == '__name__' else order
         values.sort(key=lambda v: v.get(key, ''), reverse=descending)
         if after is not None:
@@ -292,6 +293,77 @@ class InboxTests(unittest.TestCase):
         self.assertEqual(len(self.repo.list('materials')), 2)
         self.assertEqual(len(self.repo.list('material_lesson_links')), 2)
         self.assertEqual(self.repo.read('material_inbox_items', self.item['id'])['status'], 'published')
+        self.assertEqual(self.repo.read('materials_version', 'current')['version'], 1)
+        self.assertEqual(self.repo.read('material_asset_index', 'catalogue-state')['version'], 1)
+        self.apply()
+        self.assertEqual(self.repo.read('materials_version', 'current')['version'], 1)
+
+    def test_interrupted_batch_resumes_with_one_catalogue_invalidation(self):
+        self.create_plan()
+        decide(self.repo, 'batch', [self.item['id']], self.decision(module='other'))
+        approve(self.repo, 'batch')
+        original = self.repo.atomic
+        commits = 0
+        def interrupt_second_destination(callback):
+            nonlocal commits
+            commits += 1
+            if commits == 2:
+                raise ConnectionError('Interrupted after first destination')
+            return original(callback)
+        with patch.object(self.repo, 'atomic', side_effect=interrupt_second_destination):
+            with self.assertRaises(ConnectionError):
+                self.apply()
+        self.assertEqual(len(self.repo.list('materials')), 1)
+        self.assertIsNone(self.repo.read('materials_version', 'current'))
+        self.assertTrue(self.repo.read('material_inbox_batches', 'batch')['catalogueUpdatePending'])
+        self.apply()
+        self.assertEqual(len(self.repo.list('materials')), 2)
+        self.assertEqual(self.repo.read('materials_version', 'current')['version'], 1)
+        self.assertFalse(self.repo.read('material_inbox_batches', 'batch')['catalogueUpdatePending'])
+
+    def test_finalization_failure_is_resumable_without_republishing_materials(self):
+        self.create_plan(); approve(self.repo, 'batch')
+        original = self.repo.atomic
+        def fail_finalize(callback):
+            if callback.__name__ == 'finalize':
+                raise ConnectionError('Interrupted before catalogue invalidation')
+            return original(callback)
+        with patch.object(self.repo, 'atomic', side_effect=fail_finalize):
+            with self.assertRaises(ConnectionError):
+                self.apply()
+        self.assertEqual(len(self.repo.list('materials')), 1)
+        self.assertIsNone(self.repo.read('materials_version', 'current'))
+        self.apply(); self.apply()
+        self.assertEqual(len(self.repo.list('materials')), 1)
+        self.assertEqual(self.repo.read('materials_version', 'current')['version'], 1)
+
+    def test_scoped_publication_keeps_its_index_current_without_marking_global_ready(self):
+        from telegram_materials.inbox_catalogue import index_catalogue, index_id
+        self.repo.write('material_asset_index', 'catalogue-state', {'version': -1})
+        index_catalogue(self.repo, 10, module_id='resp')
+        self.create_plan(); approve(self.repo, 'batch')
+        self.apply(); self.apply()
+        self.assertEqual(self.repo.read('materials_version', 'current')['version'], 1)
+        self.assertEqual(self.repo.read('material_asset_index', index_id('resp'))['version'], 1)
+        self.assertEqual(self.repo.read('material_asset_index', 'catalogue-state')['version'], -1)
+
+    def test_reviewed_member_titles_are_bound_to_approval_and_used_in_payload(self):
+        plan_id = self.create_plan(itemTitles={self.item['id']: 'Readable document title'})
+        approve(self.repo, 'batch'); self.apply()
+        self.assertEqual(self.repo.list('materials')[0]['documents'][0]['title'], 'Readable document title')
+        self.repo.write('material_inbox_batches/batch/plans', plan_id, {'itemTitles': {self.item['id']: 'Changed title'}})
+        self.assertNotEqual(validate_plans(self.repo, 'batch')[2], self.repo.read('material_inbox_batches', 'batch')['approvedDigest'])
+
+    def test_bulk_decisions_share_one_plan_list_and_keep_overlap_validation(self):
+        with patch.object(self.repo, 'list', wraps=self.repo.list) as listing:
+            ids = decide_many(self.repo, 'batch', [
+                {'itemIds': [self.item['id']], 'decision': self.decision()},
+                {'itemIds': [self.item['id']], 'decision': self.decision(module='other')},
+            ])
+        self.assertEqual(len(ids), 2)
+        self.assertEqual(sum(call.args[0] == 'material_inbox_batches/batch/plans' for call in listing.call_args_list), 1)
+        with self.assertRaisesRegex(ValueError, 'Overlapping'):
+            decide_many(self.repo, 'batch', [{'itemIds': [self.item['id']], 'decision': self.decision()}])
 
     def test_exact_duplicate_reuse_preserves_title_and_bookmarks(self):
         self.repo.write('materials', 'existing', {'moduleId': 'resp', 'title': 'Editorial title', 'url': self.item['url'], 'bookmarksCount': 7})

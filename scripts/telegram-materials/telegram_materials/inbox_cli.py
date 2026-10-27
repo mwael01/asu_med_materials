@@ -16,6 +16,7 @@ def add_parser(commands):
     analyze.add_argument('--module', action='append', default=[], help='Load lesson suggestions only for these modules')
     index = sub.add_parser('index', help='Build/resume one bounded page of the Firestore duplicate index')
     index.add_argument('--limit', type=int, default=50); index.add_argument('--rebuild', action='store_true')
+    index.add_argument('--module', help='Index only materials belonging to this module')
     clinical = sub.add_parser('clinical-lesson', help='Prepare one Clinical lesson per verified PDF')
     clinical.add_argument('--item', required=True); clinical.add_argument('--module', required=True)
     clinical.add_argument('--title', required=True); clinical.add_argument('--apply', action='store_true')
@@ -30,9 +31,12 @@ def add_parser(commands):
     decision.add_argument('--action', choices=['create', 'reuse', 'hold', 'ignore', 'duplicate'], required=True)
     decision.add_argument('--module'); decision.add_argument('--lesson', action='append', default=[])
     decision.add_argument('--title'); decision.add_argument('--author'); decision.add_argument('--existing-material')
+    decision.add_argument('--item-title', action='append', default=[], help='Reviewed track/document title as ITEM_ID=Title')
     decision.add_argument('--replace-lessons', action='store_true', help='Explicitly replace existing lesson assignments on a reused material')
     decision.add_argument('--category', default='summaries', choices=['central', 'lectures', 'practical', 'summaries', 'exams', 'references'])
     decision.add_argument('--reason', required=True)
+    bulk = sub.add_parser('decide-batch', help='Save reviewed decisions with shared in-command reads; approval remains separate')
+    bulk.add_argument('--batch', required=True); bulk.add_argument('--file', required=True)
     decision.add_argument('--recording', action='store_true', help='Verified external recording link; publish as an ordered playlist track')
     decision.add_argument('--video-id', action='append', default=[], help='Publish only these reviewed YouTube IDs from a mixed playlist')
     decision.add_argument('--reviewed-html', action='store_true', help='Confirm inspection of the HTML source and its dependencies')
@@ -89,7 +93,7 @@ def run(args):
                 result = asyncio.run(telegram_operation(args, repo))
             elif command == 'index':
                 from .inbox_catalogue import index_catalogue
-                result = index_catalogue(repo, args.limit, args.rebuild)
+                result = index_catalogue(repo, args.limit, args.rebuild, args.module)
             elif command == 'image-folders':
                 from .image_folders import configure_folders
                 parsed = [{'id': value.partition(':')[0].strip(), 'title': value.partition(':')[2].strip()} for value in args.folder]
@@ -97,12 +101,19 @@ def run(args):
             elif command == 'clinical-lesson':
                 from .clinical import clinical_lesson
                 result = clinical_lesson(repo, args.item, args.module, args.title, args.apply)
+            elif command == 'decide-batch':
+                from pathlib import Path
+                from .inbox_publication import decide_many
+                data = json.loads(Path(args.file).read_text(encoding='utf8'))
+                if data.get('batchId') != args.batch or not isinstance(data.get('plans'), list):
+                    raise ValueError('Review file must contain the selected batchId and a plans list')
+                result = {'planIds': decide_many(repo, args.batch, data['plans'])}
             elif command == 'decide':
                 from .inbox_publication import decide
                 result = {'planId': decide(repo, args.batch, args.item, {'action': args.action, 'moduleId': args.module,
                     'lessonIds': list(dict.fromkeys(args.lesson)), 'title': args.title, 'author': args.author,
                     'existingMaterialId': args.existing_material, 'replaceLessonAssignments': args.replace_lessons,
-                    'category': args.category, 'selectedVideoIds': args.video_id, 'forceRecording': args.recording, 'practicalImageCollection': args.image_collection, 'practicalImageFolderId': args.image_folder, 'htmlReviewed': args.reviewed_html, 'allowUnlabelledImages': args.allow_unlabelled_images, 'reason': args.reason}, args.plan)}
+                    'category': args.category, 'itemTitles': dict(value.split('=', 1) for value in args.item_title), 'selectedVideoIds': args.video_id, 'forceRecording': args.recording, 'practicalImageCollection': args.image_collection, 'practicalImageFolderId': args.image_folder, 'htmlReviewed': args.reviewed_html, 'allowUnlabelledImages': args.allow_unlabelled_images, 'reason': args.reason}, args.plan)}
             elif command == 'annotate':
                 from .inbox_publication import annotate
                 result = annotate(repo, args.batch, args.plan, args.item, {

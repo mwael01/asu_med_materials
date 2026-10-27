@@ -8,7 +8,7 @@ from datetime import datetime, timezone
 from .inbox_core import SOURCE_ID, TERMINAL, asset_key, item_keys, now, resource_keys
 from .inbox_media import cache_path, ensure_cache, expand_archive, pdf_evidence
 from .inbox_sync import verify_source
-from .inbox_catalogue import INDEX_ID, index_state
+from .inbox_catalogue import INDEX_ID, index_state, index_asset_key
 
 
 def seed_assets(repo, materials, keys=None):
@@ -36,11 +36,11 @@ def seed_assets(repo, materials, keys=None):
             repo.write('material_asset_index', asset_key(key), {**value, 'updatedAt': now()}, merge=False)
 
 
-def matches(repo, item):
+def matches(repo, item, module_id=None):
     found = {}
-    state = index_state(repo)
+    state = index_state(repo, module_id)
     for key in item_keys(item):
-        asset = repo.read('material_asset_index', asset_key(key)) or {}
+        asset = repo.read('material_asset_index', index_asset_key(key, state.get('moduleId') if state else None)) or {}
         if key.startswith('telegram:'):
             live = repo.read_many('materials', asset.get('materials', {}))
             found.update({mid: material.get('moduleId') for mid, material in live.items() if material})
